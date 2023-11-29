@@ -30,7 +30,8 @@ def google_translate(text: str, client, target_language_code: str = "zh-CN"):
     if text is None or text == "":
         return text  # type: ignore
 
-    parent = f"projects/{project}/locations/{location}"
+    # Must be 'us-central1' or 'global'.
+    parent = f"projects/{project}/locations/global"
 
     # Detail on supported types can be found here:
     # https://cloud.google.com/translate/docs/supported-formats
