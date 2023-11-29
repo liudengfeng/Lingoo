@@ -737,9 +737,10 @@ def translate_pos(pos: str, target_language_code):
 
 def translate_doc(doc, target_language_code):
     doc[target_language_code] = {}
-    for k, v in doc.items():
-        if k in ["word", "uk_written", "us_written"]:
-            continue
+    doc[target_language_code]["translation"] = translate_text(
+        doc["word"], target_language_code
+    )
+    for k, v in doc["en-US"].items():
         doc[target_language_code][k] = translate_pos(v, target_language_code)
 
 
@@ -752,9 +753,6 @@ def init_word_db():
             cambridge_dict = json.load(f)
             for doc in cambridge_dict:
                 doc[target_language_code] = translate_doc(doc, target_language_code)
-                doc[target_language_code]["translation"] = translate_text(
-                    doc["word"], target_language_code
-                )
                 st.session_state.auth.words.insert_one(doc)
                 added += (doc["word"],)
                 # 临时测试
