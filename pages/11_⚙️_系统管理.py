@@ -630,65 +630,64 @@ with tabs[items.index("处理反馈")]:
 
     feedbacks = get_feedbacks()
     # st.write(f"{feedbacks=}")
-    if len(feedbacks) == 0:
-        st.warning("没有反馈")
-        st.stop()
+    if len(feedbacks):
+        # 将反馈字典转换为一个DataFrame
+        feedbacks_df = pd.DataFrame(feedbacks.values())
+        feedbacks_df.columns = ["文件文件", "视频文件", "删除", "显示"]
 
-    # 将反馈字典转换为一个DataFrame
-    feedbacks_df = pd.DataFrame(feedbacks.values())
-    feedbacks_df.columns = ["文件文件", "视频文件", "删除", "显示"]
+        feedbacks_edited_df = st.data_editor(
+            feedbacks_df, hide_index=True, key="feedbacks"
+        )
 
-    feedbacks_edited_df = st.data_editor(feedbacks_df, hide_index=True, key="feedbacks")
-
-    cols = st.columns(2)
-    # 添加一个按钮来删除反馈
-    if cols[0].button("删除", help="删除选中的反馈"):
-        # 获取要删除的反馈
-        edited_rows = st.session_state["feedbacks"]["edited_rows"]
-        for idx, vs in edited_rows.items():
-            if vs.get("删除", False):
-                try:
-                    txt = feedbacks_df.iloc[idx]["文件文件"]
-                    webm = feedbacks_df.iloc[idx]["视频文件"]
-                    if txt is not None:
-                        container_client.delete_blob(txt)
-                        feedbacks_df.iloc[idx]["删除"] = True
-                        st.toast(f"从blob中删除：{txt}", icon="🎉")
-                    if webm is not None:
-                        container_client.delete_blob(webm)
-                        st.toast(f"从blob中删除：{webm}", icon="🎉")
-                except Exception as e:
-                    pass
-
-    if cols[1].button("显示", help="显示选中的反馈"):
-        # 显示反馈
-        edited_rows = st.session_state["feedbacks"]["edited_rows"]
-        for idx, vs in edited_rows.items():
-            if vs.get("显示", False):
-                deleted = feedbacks_df.iloc[idx]["删除"]
-                if not deleted:
+        cols = st.columns(2)
+        # 添加一个按钮来删除反馈
+        if cols[0].button("删除", help="删除选中的反馈"):
+            # 获取要删除的反馈
+            edited_rows = st.session_state["feedbacks"]["edited_rows"]
+            for idx, vs in edited_rows.items():
+                if vs.get("删除", False):
                     try:
-                        st.divider()
                         txt = feedbacks_df.iloc[idx]["文件文件"]
-                        if txt is not None:
-                            text_blob_client = blob_service_client.get_blob_client(
-                                container_name, txt
-                            )
-                            text_data = (
-                                text_blob_client.download_blob()
-                                .readall()
-                                .decode("utf-8")
-                            )
-                            st.text(f"{text_data}")
                         webm = feedbacks_df.iloc[idx]["视频文件"]
+                        if txt is not None:
+                            container_client.delete_blob(txt)
+                            feedbacks_df.iloc[idx]["删除"] = True
+                            st.toast(f"从blob中删除：{txt}", icon="🎉")
                         if webm is not None:
-                            video_blob_client = blob_service_client.get_blob_client(
-                                container_name, webm
-                            )
-                            video_data = video_blob_client.download_blob().readall()
-                            st.video(video_data)
+                            container_client.delete_blob(webm)
+                            st.toast(f"从blob中删除：{webm}", icon="🎉")
                     except Exception as e:
                         pass
+
+        if cols[1].button("显示", help="显示选中的反馈"):
+            # 显示反馈
+            edited_rows = st.session_state["feedbacks"]["edited_rows"]
+            for idx, vs in edited_rows.items():
+                if vs.get("显示", False):
+                    deleted = feedbacks_df.iloc[idx]["删除"]
+                    if not deleted:
+                        try:
+                            st.divider()
+                            txt = feedbacks_df.iloc[idx]["文件文件"]
+                            if txt is not None:
+                                text_blob_client = blob_service_client.get_blob_client(
+                                    container_name, txt
+                                )
+                                text_data = (
+                                    text_blob_client.download_blob()
+                                    .readall()
+                                    .decode("utf-8")
+                                )
+                                st.text(f"{text_data}")
+                            webm = feedbacks_df.iloc[idx]["视频文件"]
+                            if webm is not None:
+                                video_blob_client = blob_service_client.get_blob_client(
+                                    container_name, webm
+                                )
+                                video_data = video_blob_client.download_blob().readall()
+                                st.video(video_data)
+                        except Exception as e:
+                            pass
 
 # endregion
 
