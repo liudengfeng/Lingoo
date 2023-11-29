@@ -752,7 +752,7 @@ def init_word_db():
         with open(fp, "r", encoding="utf-8") as f:
             cambridge_dict = json.load(f)
             for doc in cambridge_dict:
-                doc[target_language_code] = translate_doc(doc, target_language_code)
+                translate_doc(doc, target_language_code)
                 st.session_state.auth.words.insert_one(doc)
                 added += (doc["word"],)
                 # 临时测试
