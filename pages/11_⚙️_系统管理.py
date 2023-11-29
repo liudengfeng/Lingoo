@@ -719,7 +719,8 @@ def translate_text(text: str, target_language_code):
 
 def translate_dict(d, target_language_code):
     res = {}
-    res["definition"] = translate_text(d["definition"], target_language_code)
+    if d.get("definition", None):
+        res["definition"] = translate_text(d["definition"], target_language_code)
     examples = []
     for e in d["examples"]:
         examples.append(translate_text(e, target_language_code))
@@ -729,8 +730,8 @@ def translate_dict(d, target_language_code):
 
 def translate_pos(pos: str, target_language_code):
     res = []
-    for p in pos:
-        res.append(translate_dict(p, target_language_code))
+    for d in pos:
+        res.append(translate_dict(d, target_language_code))
     return res
 
 
