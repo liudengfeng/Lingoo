@@ -25,7 +25,7 @@ def get_translation_client(secrets):
     return translate.TranslationServiceClient(credentials=credentials)
 
 
-def google_translate(text: str, client):
+def google_translate(text: str, client, target_language_code: str = "zh-CN"):
     """Translating Text."""
     if text is None or text == "":
         return text  # type: ignore
@@ -40,7 +40,7 @@ def google_translate(text: str, client):
             "contents": [text],
             "mime_type": "text/plain",  # mime types: text/plain, text/html
             "source_language_code": "en-US",
-            "target_language_code": "zh",
+            "target_language_code": target_language_code,
         }
     )
 

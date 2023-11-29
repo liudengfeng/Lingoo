@@ -1,6 +1,8 @@
+import json
+import logging
 import os
 from datetime import date, datetime, time, timedelta
-from enum import Enum
+from pathlib import Path
 
 import pandas as pd
 import streamlit as st
@@ -11,6 +13,20 @@ from pymongo.errors import DuplicateKeyError
 # from mypylib.auth_utils import generate_unique_code
 from mypylib.authenticate import PRICES, Authenticator
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, User, UserRole
+from mypylib.google_api import get_translation_client, google_translate
+
+# region 配置
+
+# 创建或获取logger对象
+logger = logging.getLogger("streamlit")
+# 设置日志级别
+logger.setLevel(logging.DEBUG)
+
+current_cwd: Path = Path(__file__).parent.parent
+
+if "google_translation_client" not in st.session_state:
+    st.session_state["google_translation_client"] = get_translation_client(st.secrets)
+# endregion
 
 # region 常量配置
 
@@ -677,11 +693,93 @@ with tabs[items.index("处理反馈")]:
 # endregion
 
 # region 创建词典管理页面
-# 短语直接翻译，不提供示例？
-# 拷贝词库在云端建立数据库
-# 限制数量
-# 手动：可逐个添加【手动】
-# 简化：单词分级只限定词本身，与词性无关
+
+# 基础词库
+# 剑桥词典
+# 翻译
+# 添加单词
+
+
+def get_words():
+    words = []
+    fp = current_cwd / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
+    with open(fp, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    for d in data.values():
+        words.extend(d)
+    words = set([w for w in words if w])
+    logger.info(f"共有{len(words)}个单词")
+    return words
+
+
+def translate_text(text: str, target_language_code):
+    return google_translate(
+        text, st.session_state.auth.translation_client, target_language_code
+    )
+
+
+def translate_dict(d, target_language_code):
+    res = {}
+    res["definition"] = translate_text(d["definition"], target_language_code)
+    examples = []
+    for e in d["examples"]:
+        examples.append(translate_text(e, target_language_code))
+    res["examples"] = examples
+    return res
+
+
+def translate_pos(pos: str, target_language_code):
+    res = []
+    for p in pos:
+        res.append(translate_dict(p, target_language_code))
+    return res
+
+
+def translate_doc(doc, target_language_code):
+    doc[target_language_code] = {}
+    for k, v in doc.items():
+        if k in ["word", "uk_written", "us_written"]:
+            continue
+        doc[target_language_code][k] = translate_pos(v, target_language_code)
+
+
+def init_word_db():
+    added = ()
+    target_language_code = "zh-CN"
+    if st.session_state.auth.words.count_documents({}) == 0:
+        fp = current_cwd / "resource" / "cambridge.json"
+        with open(fp, "r", encoding="utf-8") as f:
+            cambridge_dict = json.load(f)
+            for doc in cambridge_dict:
+                doc[target_language_code] = translate_doc(doc, target_language_code)
+                doc[target_language_code]["translation"] = translate_text(
+                    doc["word"], target_language_code
+                )
+                st.session_state.auth.words.insert_one(doc)
+                added += (doc["word"],)
+                # 临时测试
+                break
+
+        words = get_words()
+        for w in words:
+            if w not in added:
+                st.session_state.auth.words.insert_one(
+                    {
+                        "word": w,
+                        target_language_code: {
+                            "translation": translate_text(w, target_language_code)
+                        },
+                    }
+                )
+                # 临时测试
+                break
+
+
+with tabs[items.index("词典管理")]:
+    st.subheader("词典管理")
+    if st.button("初始化词典"):
+        init_word_db()
+
 # endregion
 
 # region 创建统计分析页面

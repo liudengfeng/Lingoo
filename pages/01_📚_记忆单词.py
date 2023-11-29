@@ -304,12 +304,16 @@ with tabs[items.index("记忆闪卡")]:
 
     if add_btn:
         word = st.session_state.words_to_memorize[st.session_state.word_idx]
-        st.session_state.auth.add_word(st.session_state["user_id"], word)
+        st.session_state.auth.add_to_personal_dictionary(
+            st.session_state["user_id"], word
+        )
         st.toast(f"已添加单词：{word}到个人词库。")
 
     if del_btn:
         word = st.session_state.words_to_memorize[st.session_state.word_idx]
-        st.session_state.auth.remove_word(st.session_state["user_id"], word)
+        st.session_state.auth.remove_from_personal_dictionary(
+            st.session_state["user_id"], word
+        )
         st.toast(f"已从个人词库中删除单词：{word}。")
 
 # endregion

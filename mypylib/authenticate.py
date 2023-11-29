@@ -266,16 +266,24 @@ class Authenticator:
                     return True
         return False
 
-    def find_word(self, word):
-        word_data = self.words.find_one({"word": word})
-        return word_data
+    # region 个人词库管理
 
-    def add_word(self, phone_number, word):
+    def add_to_personal_dictionary(self, phone_number, word):
         self.users.update_one(
             {"phone_number": phone_number}, {"$push": {"personal_words": word}}
         )
 
-    def remove_word(self, phone_number, word):
+    def remove_from_personal_dictionary(self, phone_number, word):
         self.users.update_one(
             {"phone_number": phone_number}, {"$pull": {"personal_words": word}}
         )
+
+    # endregion
+
+    # region 词库管理
+
+    def find_word(self, word):
+        word_data = self.words.find_one({"word": word})
+        return word_data
+
+    # endregion
