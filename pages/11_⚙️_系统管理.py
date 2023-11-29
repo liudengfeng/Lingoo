@@ -755,8 +755,7 @@ def init_word_db():
                 translate_doc(doc, target_language_code)
                 st.session_state.auth.words.insert_one(doc)
                 added += (doc["word"],)
-                # 临时测试
-                break
+                logger.info(f"添加单词：{doc['word']}")
 
         words = get_words()
         for w in words:
@@ -769,8 +768,7 @@ def init_word_db():
                         },
                     }
                 )
-                # 临时测试
-                break
+                logger.info(f"添加单词：{w}")
 
 
 with tabs[items.index("词典管理")]:
