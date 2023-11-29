@@ -774,7 +774,8 @@ def init_word_db():
                 # 临时测试
                 break
 
-st.write(items.index("词典管理"))
+
+st.write("词典管理", items.index("词典管理"))
 with tabs[items.index("词典管理")]:
     st.subheader("词典管理")
     if st.button("初始化词典"):
