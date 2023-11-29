@@ -11,7 +11,7 @@ import streamlit.components.v1 as components
 
 from mypylib.authenticate import Authenticator
 from mypylib.azure_speech import synthesize_speech_to_file
-from mypylib.google_api import get_translation_client, translate_text
+from mypylib.google_api import get_translation_client, google_translate
 from mypylib.google_palm import (
     gen_vocabulary_comprehension_test,
     get_irregular_forms_of_a_word,

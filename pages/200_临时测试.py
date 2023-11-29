@@ -9,7 +9,7 @@ from vertexai.language_models import TextGenerationModel
 from mypylib.google_palm import (
     lookup,
 )
-from mypylib.google_api import get_translation_client, translate_text
+from mypylib.google_api import get_translation_client, google_translate
 from mypylib.google_api import init_vertex
 
 current_cwd: Path = Path(__file__).parent.parent  # type: ignore
@@ -68,7 +68,7 @@ st.text_input("输入", key="input", value="hello world")
 
 if st.button("执行"):
     word = st.session_state["input"]
-    cn = translate_text(word, st.session_state["google_tranlator"])
+    cn = google_translate(word, st.session_state["google_tranlator"])
     d = lookup(st.session_state["input"])
     st.write(cn)
     st.write(d)

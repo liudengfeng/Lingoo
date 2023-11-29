@@ -25,7 +25,7 @@ def get_translation_client(secrets):
     return translate.TranslationServiceClient(credentials=credentials)
 
 
-def translate_text(text: str, client):
+def google_translate(text: str, client):
     """Translating Text."""
     if text is None or text == "":
         return text  # type: ignore
