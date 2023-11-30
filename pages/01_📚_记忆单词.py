@@ -271,7 +271,7 @@ def _memory_tip(word):
     return generate_word_memory_tip(word)
 
 
-def view_word(container, word):
+def view_word(container, tip_placeholder, word):
     if word not in st.session_state.words:
         st.session_state.words[word] = get_word_info(word)
 
@@ -280,7 +280,7 @@ def view_word(container, word):
         st.error(f"没有该单词：“{word}”的信息。TODO：添加到单词库。")
         st.stop()
 
-    with st.expander("记忆提示"):
+    with tip_placeholder.expander("记忆提示"):
         # 生成记忆提示
         memory_tip = _memory_tip(word)
         st.markdown(memory_tip)
@@ -310,6 +310,7 @@ def view_word(container, word):
 with tabs[items.index("记忆闪卡")]:
     btn_cols = st.columns(12)
     word = st.session_state.words_to_memorize[st.session_state.word_idx]
+    tip_placeholder = st.empty()
     container = st.container()
 
     # placeholder = st.container()
@@ -347,22 +348,22 @@ with tabs[items.index("记忆闪卡")]:
             st.session_state.display_state = "中文"
         else:
             st.session_state.display_state = "全部"
-        view_word(container, word)
+        view_word(container, tip_placeholder, word)
 
     if prev_btn:
         # 点击后会重新随机选择，需要使用会话状态管理
-        view_word(container, word)
+        view_word(container, tip_placeholder, word)
 
     if next_btn:
         # 点击后会重新随机选择，需要使用会话状态管理
-        view_word(container, word)
+        view_word(container, tip_placeholder, word)
 
     if play_btn:
         word = st.session_state.words_to_memorize[st.session_state.word_idx]
         fp = gen_audio_fp(st.session_state.words_to_memorize[st.session_state.word_idx], voice_style[0])  # type: ignore
         # placeholder.text(fp)
         components.html(mp3_autoplay_elem(fp))
-        view_word(container, word)
+        view_word(container, tip_placeholder, word)
 
     if refresh_btn:
         gen_words_to_memorize()
