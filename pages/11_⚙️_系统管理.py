@@ -14,6 +14,7 @@ from pymongo.errors import DuplicateKeyError
 from mypylib.authenticate import PRICES, Authenticator
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, User, UserRole
 from mypylib.google_api import get_translation_client, google_translate
+from mypylib.word_utils import get_lowest_cefr_level
 
 # region 配置
 
@@ -754,6 +755,7 @@ def init_word_db():
     for doc in cambridge_dict:
         if st.session_state.auth.words.find_one({"word": doc["word"]}) is None:
             translate_doc(doc, target_language_code)
+            doc["level"] = get_lowest_cefr_level(doc["word"])
             try:
                 logger.info(f"添加单词：{doc['word']}")
                 st.session_state.auth.words.insert_one(doc)
@@ -772,6 +774,7 @@ def init_word_db():
                         target_language_code: {
                             "translation": translate_text(w, target_language_code)
                         },
+                        "level": get_lowest_cefr_level(w),
                     }
                 )
             except Exception as e:
