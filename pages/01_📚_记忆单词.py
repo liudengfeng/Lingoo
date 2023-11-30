@@ -49,8 +49,8 @@ if "user_id" not in st.session_state:
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface()
 
-if not st.session_state.dbi.is_vip_or_admin(st.session_state.user_id):
-    st.error("您不是VIP用户，无法使用该功能")
+if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
+    st.error("非付费用户，无法使用此功能。")
     st.stop()
 
 if "inited_vertex" not in st.session_state:
@@ -81,9 +81,6 @@ if "display_state" not in st.session_state:
 if "word_idx" not in st.session_state:
     st.session_state["word_idx"] = 0
 
-if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
-    st.error("非付费用户，无法使用此功能。")
-    st.stop()
 
 # endregion
 
