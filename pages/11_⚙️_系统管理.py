@@ -24,6 +24,16 @@ logger.setLevel(logging.DEBUG)
 
 current_cwd: Path = Path(__file__).parent.parent
 
+if "user_id" not in st.session_state:
+    st.session_state["user_id"] = None
+
+if not (
+    st.session_state.get("user_id")
+    and st.session_state.auth.is_admin(st.session_state.get("user_id"))
+):
+    st.error("对不起，您没有权限访问该页面。该页面仅限系统管理员使用。")
+    st.stop()
+
 if "google_translation_client" not in st.session_state:
     st.session_state["google_translation_client"] = get_translation_client(st.secrets)
 # endregion
@@ -315,18 +325,9 @@ def search(**kwargs):
 if st.session_state.get("search"):
     st.session_state["searched_data"] = []
 
-if "user_id" not in st.session_state:
-    st.session_state["user_id"] = None
 
 if "auth" not in st.session_state:
     st.session_state["auth"] = Authenticator()
-
-if not (
-    st.session_state.get("user_id")
-    and st.session_state.auth.is_admin(st.session_state.get("user_id"))
-):
-    st.error("对不起，您没有权限访问该页面。该页面仅限系统管理员使用。")
-    st.stop()
 
 # endregion
 
