@@ -752,9 +752,13 @@ def init_word_db():
     fp = current_cwd / "resource" / "cambridge.json"
     with open(fp, "r", encoding="utf-8") as f:
         cambridge_dict = json.load(f)
+
+    # 获取集合中的所有单词
+    existing_words = [doc["word"] for doc in st.session_state.auth.words.find()]
+
     for doc in cambridge_dict:
         logger.info(f"单词：{doc['word']}...")
-        if st.session_state.auth.words.find_one({"word": doc["word"]}) is None:
+        if doc["word"] not in existing_words:
             translate_doc(doc, target_language_code)
             doc["level"] = get_lowest_cefr_level(doc["word"])
             try:
@@ -767,7 +771,7 @@ def init_word_db():
     words = get_words()
     for w in words:
         logger.info(f"单词：{w}...")
-        if w not in added and st.session_state.auth.words.find_one({"word": w}) is None:
+        if w not in added and w not in existing_words:
             try:
                 logger.info(f"添加单词：{w}")
                 st.session_state.auth.words.insert_one(

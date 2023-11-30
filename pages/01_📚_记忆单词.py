@@ -117,9 +117,9 @@ def gen_audio_fp(word: str, style: str):
 
 @st.cache_data
 def get_word_info(word):
-    # 云端才可以使用 palm2
-    if st.secrets["env"] in ["streamlit", "azure"]:
-        word = lemmatize(word)
+    # # 云端才可以使用 vertex ai
+    # if st.secrets["env"] in ["streamlit", "azure"]:
+    #     word = lemmatize(word)
     return st.session_state.auth.find_word(word)
 
 
@@ -180,9 +180,10 @@ if len(st.session_state.words_to_memorize) == 0:
 
 template = """
 ##### 单词或短语：:rainbow[{word}]
-
-- 美语：{us_written}  
-- 英语：{uk_written}
+- CEFR：:green[{cefr}]
+- 翻译：{translation}
+- 美式音标：:blue[{us_written}]  
+- 英式音标：:violet[{uk_written}]
 """
 
 
@@ -191,6 +192,54 @@ def _rainbow_word(example: str, word: str):
         if w in example:
             return example.replace(w, f":rainbow[{w}]")
     return example
+
+
+def _view_detail(container, detail, t_detail, word):
+    num = 10
+    d1 = detail["definition"]
+    e1 = detail["examples"]
+    d2 = t_detail["definition"]
+    e2 = t_detail["examples"]
+    if st.session_state.display_state == "全部":
+        container.markdown(f"definition：**{d1}**")
+        container.markdown(f"定义：**{d2}**")
+        # container.markdown("-" * num)
+
+        content = ""
+        for e, t in zip(e1, e2):
+            content += f"- {_rainbow_word(e, word)}\n"
+            content += f"- {t}\n"
+        container.markdown(content)
+    elif st.session_state.display_state == "英文":
+        container.markdown(f"definition：**{d1}**")
+        # container.markdown("-" * num)
+
+        content = ""
+        for e in e1:
+            content += f"- {_rainbow_word(e, word)}\n"
+        container.markdown(content)
+    else:
+        # 只显示译文
+        container.markdown(f"定义：**{d2}**")
+        # container.markdown("-" * num)
+        content = ""
+        for e in e2:
+            content += f"- {e}\n"
+        container.markdown(content)
+
+
+def _view_pos(container, key, en, zh, word):
+    container.markdown(f"**{key}**")
+    for i in range(len(en)):
+        _view_detail(container, en[i], zh[i], word)
+
+
+def view_pos(container, word_info, word):
+    en = word_info["en-US"]
+    zh = word_info["zh-CN"]
+    for key in en.keys():
+        container.divider()
+        _view_pos(container, key, en[key], zh[key], word)
 
 
 def view_word(container, word):
@@ -203,44 +252,25 @@ def view_word(container, word):
         st.stop()
 
     v_word = word
+    t_word = ""
     if st.session_state.display_state == "中文":
         v_word = ""
+
+    if st.session_state.display_state != "英文":
+        t_word = word_info["zh-CN"].get("translation", "")
+
     md = template.format(
         word=v_word,
+        cefr=word_info.get("level", ""),
         us_written=word_info.get("us_written", ""),
         uk_written=word_info.get("uk_written", ""),
+        translation=t_word,
     )
+
     container.divider()
     container.markdown(md)
-    # container.divider()
-    # st.write(word_info.get("us_written", ""))
-    definition_examples = word_info.get("definition_examples", {})
-    # TODO:当没有数据时，需要补充处理
-    if definition_examples:
-        for pos, vs in definition_examples.items():
-            definitions = vs["definitions"]
-            examples = sample_examples(vs["examples"])
-            trans = f"- {pos.lower()}："
-            if st.session_state.display_state != "英文":
-                trans += "；".join(definitions)
-            container.markdown(trans)
 
-            # container.divider()
-            # container.markdown("##### 例句")
-            container.divider()
-            for e in examples:
-                en = e["en"]
-                en = _rainbow_word(en, word)
-                if st.session_state.display_state == "全部":
-                    container.markdown(f"英语：{en}")
-                    container.markdown(f"翻译：{e['cn']}")
-                elif st.session_state.display_state == "英文":
-                    container.markdown(f"英语：{en}")
-                    container.markdown("翻译：")
-                else:
-                    container.markdown("英语：")
-                    container.markdown(f"翻译：{e['cn']}")
-                container.divider()
+    view_pos(container, word_info, word)
 
 
 with tabs[items.index("记忆闪卡")]:
@@ -283,6 +313,7 @@ with tabs[items.index("记忆闪卡")]:
             st.session_state.display_state = "中文"
         else:
             st.session_state.display_state = "全部"
+        view_word(container, word)
 
     if prev_btn:
         # 点击后会重新随机选择，需要使用会话状态管理
