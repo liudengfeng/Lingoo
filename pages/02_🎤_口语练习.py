@@ -17,7 +17,8 @@ palm.configure(api_key=st.secrets["Google"]["PALM_API_KEY"])
 
 # region 常量
 current_cwd: Path = Path(__file__).parent.parent
-voices_fp = current_cwd / "static/voices.json"
+voices_fp = current_cwd / "resource/voices.json"
+# TODO:修正路径
 audio_dir = current_cwd / "audio_data"
 dialogue_dir = audio_dir / "dialogue"
 if not os.path.exists(dialogue_dir):

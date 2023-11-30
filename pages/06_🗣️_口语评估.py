@@ -33,7 +33,7 @@ hex_dig = hash_object.hexdigest()[:16]
 user_eh = f"h{hex_dig}"
 
 current_cwd: Path = Path(__file__).parent.parent
-voices_fp = current_cwd / "static/voices.json"
+voices_fp = current_cwd / "resource/voices.json"
 audio_dir = current_cwd / "audio_data"
 if not os.path.exists(audio_dir):
     os.makedirs(audio_dir, exist_ok=True)
@@ -536,11 +536,11 @@ with tab1:
     with st.expander("操作提示..."):
         # 录音提示
         st.markdown("录音提示👇")
-        record_tip = current_cwd / "static" / "audio" / "cn-record-tip.wav"
+        record_tip = current_cwd / "resource" / "audio" / "cn-record-tip.wav"
         st.audio(str(record_tip), format="audio/wav")
 
         st.markdown("合成提示👇")
-        lst_tip = current_cwd / "static" / "audio" / "cn-synthesis-tip.wav"
+        lst_tip = current_cwd / "resource" / "audio" / "cn-synthesis-tip.wav"
         st.audio(str(lst_tip), format="audio/wav")
 # endregion
 
@@ -596,7 +596,7 @@ with tab2:
     audio_col_1.markdown("🎙️ 👇回放录音", help="点击下方按钮，回放麦克风录音")
     replay_placeholder = audio_col_1.empty()
     if not os.path.exists(replay_fp):
-        record_tip = current_cwd / "static" / "audio" / "cn_replay.wav"
+        record_tip = current_cwd / "resource" / "audio" / "cn_replay.wav"
         replay_placeholder.audio(str(record_tip), format="audio/wav")
     else:
         replay_placeholder.audio(replay_fp, format="audio/wav")
