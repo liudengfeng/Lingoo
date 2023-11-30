@@ -105,7 +105,8 @@ def generate_word_memory_tip(word):
     response = model.predict(
         f"""您是一名英语单词记忆专家，擅长根据单词特点指导记忆方法。请您为以下单词提供记忆提示，
 备注：
-不要单独再显示单词、词性、释义。
+1. 不要单独再显示单词、词性、释义；
+2. 有必要时，请使用换行符；
 
 输出"markdown"格式。
 
