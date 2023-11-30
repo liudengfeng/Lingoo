@@ -11,7 +11,11 @@ import streamlit.components.v1 as components
 
 from mypylib.authenticate import DbInterface
 from mypylib.azure_speech import synthesize_speech_to_file
-from mypylib.google_api import get_translation_client, google_translate
+from mypylib.google_api import (
+    get_translation_client,
+    google_translate,
+    generate_word_memory_tip,
+)
 from mypylib.google_palm import (
     gen_vocabulary_comprehension_test,
     get_irregular_forms_of_a_word,
@@ -275,6 +279,8 @@ def view_word(container, word):
 
     container.divider()
     container.markdown(md)
+
+    container.markdown(generate_word_memory_tip(word))
 
     view_pos(container, word_info, word)
 

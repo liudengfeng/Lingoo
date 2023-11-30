@@ -3,6 +3,7 @@ import json
 import vertexai
 from google.cloud import aiplatform, translate
 from google.oauth2.service_account import Credentials
+from vertexai.language_models import TextGenerationModel
 
 project = "lingo-406201"
 location = "asia-northeast1"
@@ -81,3 +82,30 @@ def init_vertex(secrets):
         experiment_description="云端使用vertex ai",
     )
     vertexai.init(project=project, location=location)
+
+
+def generate_word_memory_tip(word):
+    """
+    生成单词记忆提示的函数。
+
+    参数：
+    word (str)：需要生成记忆提示的单词。
+
+    返回值：
+    str：生成的记忆提示文本。
+    """
+    parameters = {
+        "candidate_count": 1,
+        "max_output_tokens": 200,
+        "temperature": 0.6,
+        "top_p": 0.8,
+        "top_k": 40,
+    }
+    model = TextGenerationModel.from_pretrained("text-bison")
+    response = model.predict(
+        f"""您是一名优秀的英语教师，精通记忆单词，如联想记忆、形象记忆、音韵记忆等。请根据单词特点，从中选择一种合适的记忆方式，为学生提供记忆提示。
+    单词：{word}
+    """,
+        **parameters,
+    )
+    return response.text
