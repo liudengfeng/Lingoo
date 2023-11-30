@@ -188,9 +188,14 @@ template = """
 
 
 def _rainbow_word(example: str, word: str):
-    for w in [word, word.capitalize()]:
-        if w in example:
-            return example.replace(w, f":rainbow[{w}]")
+    pattern = r"\b" + word + r"\b"
+    match = re.search(pattern, example)
+    if match:
+        return re.sub(pattern, f":rainbow[{word}]", example)
+    pattern = r"\b" + word.capitalize() + r"\b"
+    match = re.search(pattern, example)
+    if match:
+        return re.sub(pattern, f":rainbow[{word.capitalize()}]", example)
     return example
 
 
@@ -350,6 +355,7 @@ with tabs[items.index("记忆闪卡")]:
 # endregion
 
 # region 浏览单词
+
 # endregion
 
 # region 单词拼图
