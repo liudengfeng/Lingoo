@@ -185,7 +185,7 @@ st.sidebar.slider(
 # endregion
 
 # region 页面
-items = ["记忆闪卡", "浏览单词", "单词拼图", "图片测词", "单词测验", "统计"]
+items = ["📖 闪卡记忆", "单词拼图", "图片测词", "单词测验", "统计"]
 tabs = st.tabs(items)
 # endregion
 
@@ -304,7 +304,7 @@ def view_word(container, tip_placeholder, word):
     view_pos(container, word_info, word)
 
 
-with tabs[items.index("记忆闪卡")]:
+with tabs[items.index("📖 闪卡记忆")]:
     btn_cols = st.columns(12)
     word = st.session_state.words_to_memorize[st.session_state.word_idx]
     tip_placeholder = st.empty()
@@ -381,9 +381,6 @@ with tabs[items.index("记忆闪卡")]:
 
 # endregion
 
-# region 浏览单词
-
-# endregion
 
 # region 单词拼图
 # endregion
