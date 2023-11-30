@@ -88,6 +88,7 @@ def gen_words_to_memorize():
     st.session_state.words_to_memorize = random.sample(words, num_words)
     # 恢复初始显示状态
     st.session_state.display_state = "全部"
+    st.session_state["word_idx"] = 0
     # st.write("临时测试：单词数量", len(st.session_state.words_to_memorize))
 
 
