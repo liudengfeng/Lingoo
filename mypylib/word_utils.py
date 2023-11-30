@@ -71,7 +71,7 @@ def get_lowest_cefr_level(word):
     Returns:
     str or None: The lowest CEFR level of the word, or None if the word is not found in the CEFR dictionary.
     """
-    fp = os.path.join(current_cwd, "static", "dictionary", "cefr.json")
+    fp = os.path.join(current_cwd, "resource", "dictionary", "cefr.json")
     levels = ["A1", "A2", "B1", "B2", "C1"]
     with open(fp, "r") as f:
         cefr = json.load(f)
@@ -94,7 +94,7 @@ def sample_words(level, n):
     """
     levels = ["A1", "A2", "B1", "B2", "C1"]
     assert level in levels, f"level must be one of {levels}"
-    fp = os.path.join(current_cwd, "static", "dictionary", "cefr.json")
+    fp = os.path.join(current_cwd, "resource", "dictionary", "cefr.json")
     with open(fp, "r") as f:
         cefr = json.load(f)
     return random.sample(cefr[level], n)

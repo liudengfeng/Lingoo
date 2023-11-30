@@ -17,6 +17,7 @@ streamlit-elements
 streamlit-mic-recorder
 werkzeug
 faker
+bs4
 google-generativeai
 google-cloud-translate
 google-cloud-aiplatform

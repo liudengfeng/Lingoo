@@ -64,7 +64,7 @@ if "word_idx" not in st.session_state:
     st.session_state["word_idx"] = 0
 
 if not st.session_state.auth.is_service_active(st.session_state["user_id"]):
-    st.error("您尚未付费，无法使用此功能。")
+    st.error("非付费用户，无法使用此功能。")
     st.stop()
 
 # endregion
