@@ -35,7 +35,7 @@ class Payment(BaseModel):
     payment_time: datetime = Field(default_factory=datetime.utcnow)
     receivable: float = Field(gt=0.0, le=100000.0)
     discount_rate: float = Field(0.0, ge=0.0)  # 新增折扣率字段
-    payment_amount: float = Field(gt=0.0, le=100000.0)
+    payment_amount: float = Field(ge=0.0, le=100000.0)
     purchase_type: PurchaseType = Field(default=PurchaseType.DAILY)
     payment_method: str = Field("")  # 新增支付方式字段
     status: PaymentStatus = Field(default=PaymentStatus.PENDING)
