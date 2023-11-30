@@ -103,9 +103,12 @@ def generate_word_memory_tip(word):
     }
     model = TextGenerationModel.from_pretrained("text-bison")
     response = model.predict(
-        f"""您是一名优秀的英语教师，精通记忆单词，如联想记忆、形象记忆、音韵记忆等。请根据单词特点，从中选择一种合适的记忆方式，为学生提供记忆提示。
-    单词：{word}
-    """,
+        f"""您是一名优秀的英语教师，精通记忆单词，如联想记忆、形象记忆、音韵记忆等等。
+请根据单词特点，推荐一种最合适的记忆方式，为学生提供提示。
+不要单独再显示单词、词性、释义。
+以markdown格式输出。
+单词：{word}
+""",
         **parameters,
     )
     return response.text
