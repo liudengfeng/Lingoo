@@ -747,19 +747,24 @@ def translate_doc(doc, target_language_code):
 def init_word_db():
     added = ()
     target_language_code = "zh-CN"
-    if st.session_state.auth.words.count_documents({}) == 0:
-        fp = current_cwd / "resource" / "cambridge.json"
-        with open(fp, "r", encoding="utf-8") as f:
-            cambridge_dict = json.load(f)
-            for doc in cambridge_dict:
-                translate_doc(doc, target_language_code)
+    fp = current_cwd / "resource" / "cambridge.json"
+    with open(fp, "r", encoding="utf-8") as f:
+        cambridge_dict = json.load(f)
+    for doc in cambridge_dict:
+        if st.session_state.auth.words.find_one({"word": doc["word"]}) is None:
+            translate_doc(doc, target_language_code)
+            try:
+                logger.info(f"添加单词：{doc['word']}")
                 st.session_state.auth.words.insert_one(doc)
                 added += (doc["word"],)
-                logger.info(f"添加单词：{doc['word']}")
+            except Exception as e:
+                logger.error(f"插入单词 {doc['word']} 时出现错误: {e}")
 
-        words = get_words()
-        for w in words:
-            if w not in added:
+    words = get_words()
+    for w in words:
+        if w not in added and st.session_state.auth.words.find_one({"word": w}) is None:
+            try:
+                logger.info(f"添加单词：{w}")
                 st.session_state.auth.words.insert_one(
                     {
                         "word": w,
@@ -768,7 +773,8 @@ def init_word_db():
                         },
                     }
                 )
-                logger.info(f"添加单词：{w}")
+            except Exception as e:
+                logger.error(f"插入单词 {w} 时出现错误: {e}")
 
 
 with tabs[items.index("词典管理")]:
