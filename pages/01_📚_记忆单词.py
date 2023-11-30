@@ -17,6 +17,7 @@ from mypylib.google_api import (
     google_translate,
     init_vertex,
 )
+
 # 使用 vertex ai
 from mypylib.google_palm import (
     gen_vocabulary_comprehension_test,
@@ -265,6 +266,11 @@ def view_pos(container, word_info, word):
         _view_pos(container, key, en[key], zh[key], word)
 
 
+@st.cache_data(ttl=60 * 60 * 2, show_spinner="获取 Ai 提示...")
+def _memory_tip(word):
+    return generate_word_memory_tip(word)
+
+
 def view_word(container, word):
     if word not in st.session_state.words:
         st.session_state.words[word] = get_word_info(word)
@@ -273,6 +279,11 @@ def view_word(container, word):
     if word_info is None:
         st.error(f"没有该单词：“{word}”的信息。TODO：添加到单词库。")
         st.stop()
+
+    with st.expander("记忆提示"):
+        # 生成记忆提示
+        memory_tip = _memory_tip(word)
+        st.markdown(memory_tip)
 
     v_word = word
     t_word = ""
@@ -292,8 +303,6 @@ def view_word(container, word):
 
     container.divider()
     container.markdown(md)
-
-    container.markdown(generate_word_memory_tip(word))
 
     view_pos(container, word_info, word)
 
