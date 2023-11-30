@@ -8,7 +8,7 @@ import streamlit as st
 from PIL import Image
 
 from mypylib.auth_utils import is_valid_email, is_valid_phone_number
-from mypylib.authenticate import Authenticator
+from mypylib.authenticate import DbInterface
 from mypylib.azure_speech import speech_synthesis_get_available_voices
 from mypylib.constants import LANGUAGES
 
@@ -21,8 +21,8 @@ if "user_id" not in st.session_state:
     st.session_state["user_id"] = None
 if "is_login" not in st.session_state:
     st.session_state["is_login"] = False
-if "auth" not in st.session_state:
-    st.session_state["auth"] = Authenticator()
+if "dbi" not in st.session_state:
+    st.session_state["dbi"] = DbInterface()
 
 st.set_page_config(
     page_title="主页",
@@ -85,7 +85,7 @@ if not st.session_state["is_login"]:
             placeholder="个人登录密码",
         )
         sub_btn = st.form_submit_button(label="确定")
-        if st.session_state.user_id and st.session_state.auth.cache.get(
+        if st.session_state.user_id and st.session_state.dbi.cache.get(
             st.session_state.user_id
         ):
             status.success(f"您已登录，{st.session_state.user_id} 您好！")
@@ -98,7 +98,7 @@ if not st.session_state["is_login"]:
                 else:
                     status.error("请输入有效的手机号码")
                     st.stop()
-                msg = st.session_state.auth.login(
+                msg = st.session_state.dbi.login(
                     phone_number=phone_number, password=password
                 )
                 if msg == "Login successful":
@@ -175,7 +175,7 @@ LinGo，让你学好英语，so easy！
 
 
 if logout_btn:
-    st.session_state.auth.logout(st.session_state.user_id)
+    st.session_state.dbi.logout(st.session_state.user_id)
     st.session_state["is_login"] = False
     st.session_state["user_id"] = None
     status.success("已退出登录")

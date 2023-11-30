@@ -2,7 +2,7 @@ import time
 import streamlit as st
 from vertexai.language_models import ChatModel, InputOutputTextPair
 
-from mypylib.authenticate import Authenticator
+from mypylib.authenticate import DbInterface
 from mypylib.google_api import init_vertex
 
 # region 认证及初始化
@@ -10,10 +10,10 @@ from mypylib.google_api import init_vertex
 if "user_id" not in st.session_state:
     st.session_state["user_id"] = None
 
-if "auth" not in st.session_state:
-    st.session_state["auth"] = Authenticator()
+if "dbi" not in st.session_state:
+    st.session_state["dbi"] = DbInterface()
 
-if not st.session_state.auth.is_vip_or_admin(st.session_state.user_id):
+if not st.session_state.dbi.is_vip_or_admin(st.session_state.user_id):
     st.error("您不是VIP用户，无法使用该功能")
     st.stop()
 
@@ -28,7 +28,7 @@ if "messages" not in st.session_state:
 
 # region 常量
 
-AVATAR_MAPS = {"user": "🧑‍💻", "assistant":"🤖"}
+AVATAR_MAPS = {"user": "🧑‍💻", "assistant ":"🤖"}
 
 # endregion
 

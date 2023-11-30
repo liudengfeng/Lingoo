@@ -10,7 +10,7 @@ from PIL import Image
 from pymongo.errors import DuplicateKeyError
 
 from mypylib.auth_utils import is_valid_email, is_valid_phone_number
-from mypylib.authenticate import Authenticator
+from mypylib.authenticate import DbInterface
 from mypylib.constants import FAKE_EMAIL_DOMAIN
 from mypylib.db_model import User
 
@@ -29,8 +29,8 @@ st.set_page_config(
 
 if "user_id" not in st.session_state:
     st.session_state["user_id"] = None
-if "auth" not in st.session_state:
-    st.session_state["auth"] = Authenticator()
+if "dbi" not in st.session_state:
+    st.session_state["dbi"] = DbInterface()
 
 items = ["用户注册", "选择套餐", "更新信息", "重置密码", "统计报表", "问题反馈"]
 tabs = st.tabs(items)
@@ -106,7 +106,7 @@ with tabs[items.index("用户注册")]:
             )  # type: ignore
 
             try:
-                st.session_state.auth.register_user(user)
+                st.session_state.dbi.register_user(user)
             except DuplicateKeyError:
                 st.markdown(
                     """您输入的手机号码或邮箱已被注册。如果您已经付费，请使用以下方式直接登录：
@@ -211,11 +211,11 @@ with tabs[items.index("选择套餐")]:
 
 with tabs[items.index("更新信息")]:
     st.subheader("更新个人信息")
-    if not st.session_state.auth.is_service_active(st.session_state["user_id"]):
+    if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
         st.error("您尚未登录，无法更新个人信息。")
         st.stop()
 
-    user = st.session_state.auth.find_user(st.session_state["user_id"])
+    user = st.session_state.dbi.find_user(st.session_state["user_id"])
     with st.form(key="update_form"):
         st.text_input(
             "手机号码",
@@ -234,7 +234,7 @@ with tabs[items.index("更新信息")]:
         status = st.empty()
         if st.form_submit_button(label="确认"):
             try:
-                st.session_state.auth.update_user(
+                st.session_state.dbi.update_user(
                     st.session_state["user_id"],
                     {
                         "email": email,
@@ -263,7 +263,7 @@ with tabs[items.index("更新信息")]:
     #             password=password_reg,
     #             phone_number=phone_number,
     #         )  # type: ignore
-    #         auth.register_user(user)
+    #         dbi.register_user(user)
     #         st.success("Registration successful")
 
 # endregion
@@ -272,10 +272,10 @@ with tabs[items.index("更新信息")]:
 
 with tabs[items.index("重置密码")]:
     st.subheader("重置密码")
-    if not st.session_state.auth.is_service_active(st.session_state["user_id"]):
+    if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
         st.error("您尚未付费，无法使用此功能。")
         st.stop()
-    user = User(**st.session_state.auth.find_user(st.session_state["user_id"]))
+    user = User(**st.session_state.dbi.find_user(st.session_state["user_id"]))
     with st.form(key="secret_form", clear_on_submit=True):
         password_reg = st.text_input(
             "密码", type="password", key="password_reg-4", help="密码长度至少为8位"
@@ -290,14 +290,14 @@ with tabs[items.index("重置密码")]:
                 st.stop()
             user.password = password_reg
             user.hash_password()
-            st.session_state.auth.update_user(
+            st.session_state.dbi.update_user(
                 st.session_state["user_id"],
                 {
                     "password": user.password,
                 },
             )
             st.success("成功重置密码")
-            st.session_state.auth.logout(phone_number=user.phone_number)
+            st.session_state.dbi.logout(phone_number=user.phone_number)
 
 # endregion
 
@@ -305,7 +305,7 @@ with tabs[items.index("重置密码")]:
 
 with tabs[items.index("统计报表")]:
     st.subheader("统计报表")
-    if not st.session_state.auth.is_service_active(st.session_state["user_id"]):
+    if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
         st.error("您尚未登录，无法查阅统计报表。")
         st.stop()
 # endregion

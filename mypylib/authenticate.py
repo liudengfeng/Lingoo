@@ -34,7 +34,7 @@ def get_mongodb_uri():
         raise ValueError(f"Invalid environment: {env}")
 
 
-class Authenticator:
+class DbInterface:
     def __init__(self):
         mongodb_uri = get_mongodb_uri()
         self.faker = Faker("zh_CN")

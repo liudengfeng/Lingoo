@@ -11,7 +11,7 @@ from pandas import Timedelta
 from pymongo.errors import DuplicateKeyError
 
 # from mypylib.auth_utils import generate_unique_code
-from mypylib.authenticate import PRICES, Authenticator
+from mypylib.authenticate import PRICES, DbInterface
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, User, UserRole
 from mypylib.google_api import get_translation_client, google_translate
 from mypylib.word_utils import get_lowest_cefr_level
@@ -30,7 +30,7 @@ if "user_id" not in st.session_state:
 
 if not (
     st.session_state.get("user_id")
-    and st.session_state.auth.is_admin(st.session_state.get("user_id"))
+    and st.session_state.dbi.is_admin(st.session_state.get("user_id"))
 ):
     st.error("对不起，您没有权限访问该页面。该页面仅限系统管理员使用。")
     st.stop()
@@ -314,7 +314,7 @@ def search(**kwargs):
     # pprint(pipeline)
     # pprint("=" * 60)
     # 执行聚合查询
-    result = list(st.session_state.auth.users.aggregate(pipeline))
+    result = list(st.session_state.dbi.users.aggregate(pipeline))
 
     return result
 
@@ -327,8 +327,8 @@ if st.session_state.get("search"):
     st.session_state["searched_data"] = []
 
 
-if "auth" not in st.session_state:
-    st.session_state["auth"] = Authenticator()
+if "dbi" not in st.session_state:
+    st.session_state["dbi"] = DbInterface()
 
 # endregion
 
@@ -376,10 +376,10 @@ with tabs[items.index("订阅登记")]:
             "实收金额", key="payment_amount", help="请输入实际收款金额", value=0.0
         )
         remark = st.text_input("备注", key="remark", help="请输入备注信息", value="")
-        user = st.session_state.auth.find_user(phone_number=phone_number)
+        user = st.session_state.dbi.find_user(phone_number=phone_number)
         if st.form_submit_button(label="登记"):
             order_id = str(
-                st.session_state.auth.payments.count_documents({}) + 1
+                st.session_state.dbi.payments.count_documents({}) + 1
             ).zfill(10)
             receivable = PRICES[purchase_type]  # type: ignore
             payment = Payment(
@@ -395,7 +395,7 @@ with tabs[items.index("订阅登记")]:
                 remark=remark,
             )
             try:
-                st.session_state.auth.add_payment(payment)
+                st.session_state.dbi.add_payment(payment)
                 st.toast(f"成功登记，订单号:{order_id}", icon="🎉")
             except DuplicateKeyError:
                 st.error("付款编号已存在，请勿重复登记")
@@ -581,10 +581,10 @@ with tabs[items.index("用户管理")]:
             order_id = df.iloc[idx]["order_id"]  # type: ignore
             # 修改权限
             if d.get("permission", None):
-                st.session_state.auth.update_user(phone_number, {"permission": d["permission"]})  # type: ignore
+                st.session_state.dbi.update_user(phone_number, {"permission": d["permission"]})  # type: ignore
             # 批准
             if d.get("is_approved", False):
-                st.session_state.auth.enable_service(
+                st.session_state.dbi.enable_service(
                     phone_number, order_id, purchase_type
                 )
                 st.toast(f"批准用户：{phone_number} {order_id}", icon="🎉")
@@ -754,7 +754,7 @@ def init_word_db():
         cambridge_dict = json.load(f)
 
     # 获取集合中的所有单词
-    existing_words = [doc["word"] for doc in st.session_state.auth.words.find()]
+    existing_words = [doc["word"] for doc in st.session_state.dbi.words.find()]
 
     for doc in cambridge_dict:
         logger.info(f"单词：{doc['word']}...")
@@ -763,7 +763,7 @@ def init_word_db():
             doc["level"] = get_lowest_cefr_level(doc["word"])
             try:
                 logger.info(f"添加单词：{doc['word']}")
-                st.session_state.auth.words.insert_one(doc)
+                st.session_state.dbi.words.insert_one(doc)
                 added += (doc["word"],)
             except Exception as e:
                 logger.error(f"插入单词 {doc['word']} 时出现错误: {e}")
@@ -774,7 +774,7 @@ def init_word_db():
         if w not in added and w not in existing_words:
             try:
                 logger.info(f"添加单词：{w}")
-                st.session_state.auth.words.insert_one(
+                st.session_state.dbi.words.insert_one(
                     {
                         "word": w,
                         target_language_code: {

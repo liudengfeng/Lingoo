@@ -9,7 +9,7 @@ import google.generativeai as palm
 import streamlit as st
 import streamlit.components.v1 as components
 
-from mypylib.authenticate import Authenticator
+from mypylib.authenticate import DbInterface
 from mypylib.azure_speech import synthesize_speech_to_file
 from mypylib.google_api import get_translation_client, google_translate
 from mypylib.google_palm import (
@@ -47,8 +47,8 @@ st.set_page_config(
 if "user_id" not in st.session_state:
     st.session_state["user_id"] = None
 
-if "auth" not in st.session_state:
-    st.session_state["auth"] = Authenticator()
+if "dbi" not in st.session_state:
+    st.session_state["dbi"] = DbInterface()
 
 if "words_to_memorize" not in st.session_state:
     st.session_state["words_to_memorize"] = []
@@ -63,7 +63,7 @@ if "display_state" not in st.session_state:
 if "word_idx" not in st.session_state:
     st.session_state["word_idx"] = 0
 
-if not st.session_state.auth.is_service_active(st.session_state["user_id"]):
+if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
     st.error("非付费用户，无法使用此功能。")
     st.stop()
 
@@ -120,7 +120,7 @@ def get_word_info(word):
     # # 云端才可以使用 vertex ai
     # if st.secrets["env"] in ["streamlit", "azure"]:
     #     word = lemmatize(word)
-    return st.session_state.auth.find_word(word)
+    return st.session_state.dbi.find_word(word)
 
 
 @st.cache_data
@@ -340,14 +340,14 @@ with tabs[items.index("记忆闪卡")]:
 
     if add_btn:
         word = st.session_state.words_to_memorize[st.session_state.word_idx]
-        st.session_state.auth.add_to_personal_dictionary(
+        st.session_state.dbi.add_to_personal_dictionary(
             st.session_state["user_id"], word
         )
         st.toast(f"已添加单词：{word}到个人词库。")
 
     if del_btn:
         word = st.session_state.words_to_memorize[st.session_state.word_idx]
-        st.session_state.auth.remove_from_personal_dictionary(
+        st.session_state.dbi.remove_from_personal_dictionary(
             st.session_state["user_id"], word
         )
         st.toast(f"已从个人词库中删除单词：{word}。")

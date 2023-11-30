@@ -15,7 +15,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 from streamlit_mic_recorder import mic_recorder
 
-from mypylib.authenticate import Authenticator
+from mypylib.authenticate import DbInterface
 from mypylib.azure_speech import (
     pronunciation_assessment_from_wavfile,
     synthesize_speech_to_file,
@@ -100,8 +100,8 @@ if "assessment_tb2" not in st.session_state:
 if "user_id" not in st.session_state:
     st.session_state["user_id"] = None
 
-if "auth" not in st.session_state:
-    st.session_state["auth"] = Authenticator()
+if "dbi" not in st.session_state:
+    st.session_state["dbi"] = DbInterface()
 
 # endregion
 
@@ -358,7 +358,7 @@ st.set_page_config(
     initial_sidebar_state="auto",
 )
 
-if not st.session_state.auth.is_service_active(st.session_state["user_id"]):
+if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
     st.error("您尚未付费，无法使用此功能。")
     st.stop()
 

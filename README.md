@@ -14,7 +14,7 @@ Lingoo 是一个利用`AI` 技术和游戏化元素的英语学习app，旨在�
 ### `streamlit`
 
 + `on_click` 先执行
-+ 认证部分参考：https://github.com/mkhorasani/Streamlit-Authenticator
++ 认证部分参考：https://github.com/mkhorasani/Streamlit-DbInterface
 
 ### WSL2
 
