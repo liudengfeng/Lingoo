@@ -12,10 +12,12 @@ import streamlit.components.v1 as components
 from mypylib.authenticate import DbInterface
 from mypylib.azure_speech import synthesize_speech_to_file
 from mypylib.google_api import (
+    generate_word_memory_tip,
     get_translation_client,
     google_translate,
-    generate_word_memory_tip,
+    init_vertex,
 )
+# 使用 vertex ai
 from mypylib.google_palm import (
     gen_vocabulary_comprehension_test,
     get_irregular_forms_of_a_word,
@@ -32,12 +34,29 @@ logger.setLevel(logging.DEBUG)
 
 # region 常量
 # streamlit中各页都是相对当前根目录
-palm.configure(api_key=st.secrets["Google"]["PALM_API_KEY"])
+# palm.configure(api_key=st.secrets["Google"]["PALM_API_KEY"])
 current_cwd: Path = Path(__file__).parent.parent
 DICT_DIR = current_cwd / "resource/dictionary"
 
 # endregion
 
+# region 认证及初始化
+
+if "user_id" not in st.session_state:
+    st.session_state["user_id"] = None
+
+if "dbi" not in st.session_state:
+    st.session_state["dbi"] = DbInterface()
+
+if not st.session_state.dbi.is_vip_or_admin(st.session_state.user_id):
+    st.error("您不是VIP用户，无法使用该功能")
+    st.stop()
+
+if "inited_vertex" not in st.session_state:
+    init_vertex(st.secrets)
+    st.session_state["inited_vertex"] = True
+
+# endregion
 
 # region 会话状态
 
@@ -47,12 +66,6 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="auto",
 )
-
-if "user_id" not in st.session_state:
-    st.session_state["user_id"] = None
-
-if "dbi" not in st.session_state:
-    st.session_state["dbi"] = DbInterface()
 
 if "words_to_memorize" not in st.session_state:
     st.session_state["words_to_memorize"] = []
