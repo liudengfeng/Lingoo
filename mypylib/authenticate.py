@@ -61,7 +61,7 @@ class Authenticator:
         # 检查集合是否存在
         if "words" in self.db.list_collection_names():
             # 集合不存在，创建集合和索引
-            self.db.words.create_index([("word", ASCENDING)], unique=True)
+            self.words.create_index([("word", ASCENDING)], unique=True)
 
     def register_user(self, user: User):
         user.hash_password()

@@ -745,6 +745,11 @@ def translate_doc(doc, target_language_code):
 
 
 def init_word_db():
+    # TODO:删除临时处理
+    from pymongo import ASCENDING
+
+    st.session_state.auth.words.create_index([("word", ASCENDING)], unique=True)
+    
     added = ()
     target_language_code = "zh-CN"
     fp = current_cwd / "resource" / "cambridge.json"
