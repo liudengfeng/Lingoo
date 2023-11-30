@@ -59,7 +59,7 @@ class Authenticator:
             )
 
         # 检查集合是否存在
-        if "words" in self.db.list_collection_names():
+        if "words" not in self.db.list_collection_names():
             # 集合不存在，创建集合和索引
             self.words.create_index([("word", ASCENDING)], unique=True)
 
