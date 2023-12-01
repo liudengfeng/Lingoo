@@ -53,9 +53,10 @@ if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
     st.error("非付费用户，无法使用此功能。")
     st.stop()
 
-if "inited_vertex" not in st.session_state:
-    init_vertex(st.secrets)
-    st.session_state["inited_vertex"] = True
+if st.secrets["env"] in ["streamlit", "azure"]:
+    if "inited_vertex" not in st.session_state:
+        init_vertex(st.secrets)
+        st.session_state["inited_vertex"] = True
 
 # endregion
 
@@ -79,7 +80,7 @@ if "display_state" not in st.session_state:
 
 # 初始化单词的索引
 if "word_idx" not in st.session_state:
-    st.session_state["word_idx"] = 0
+    st.session_state["word_idx"] = -1
 
 
 # endregion
@@ -101,9 +102,10 @@ def gen_words_to_memorize():
     num_words = st.session_state["num_words_key"]
     # 随机选择单词
     st.session_state.words_to_memorize = random.sample(words, num_words)
+    st.write("单词:", st.session_state.words_to_memorize)
     # 恢复初始显示状态
     st.session_state.display_state = "全部"
-    st.session_state["word_idx"] = 0
+    st.session_state["word_idx"] = -1
     # st.write("临时测试：单词数量", len(st.session_state.words_to_memorize))
 
 
@@ -137,15 +139,6 @@ def get_word_info(word):
     # if st.secrets["env"] in ["streamlit", "azure"]:
     #     word = lemmatize(word)
     return st.session_state.dbi.find_word(word)
-
-
-@st.cache_data
-def sample_examples(examples):
-    n = len(examples)
-    if n == 0:
-        return []
-    res = []
-    return random.sample(examples, min(5, n))
 
 
 # endregion
@@ -185,7 +178,7 @@ st.sidebar.slider(
 # endregion
 
 # region 页面
-items = ["📖 闪卡记忆", "单词拼图", "图片测词", "单词测验", "统计"]
+items = ["📖 闪卡记忆", "🧩 单词拼图", "图片测词", "单词测验", "统计"]
 tabs = st.tabs(items)
 # endregion
 
@@ -383,6 +376,10 @@ with tabs[items.index("📖 闪卡记忆")]:
 
 
 # region 单词拼图
+
+with tabs[items.index("🧩 单词拼图")]:
+    pass
+
 # endregion
 
 # region 图片测词
@@ -392,7 +389,7 @@ with tabs[items.index("📖 闪卡记忆")]:
 
 
 if "test_idx" not in st.session_state:
-    st.session_state["test_idx"] = 0
+    st.session_state["test_idx"] = -1
 
 
 if "tests" not in st.session_state:
