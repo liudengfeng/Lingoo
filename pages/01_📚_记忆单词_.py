@@ -177,7 +177,7 @@ st.sidebar.slider(
 # endregion
 
 # region 页面
-tab_items = ["📖 记忆闪卡", "🧩 单词拼图", "🖼️ 图片测词","📚 自建词库","📝 单词测验", "统计"]
+tab_items = ["📖 记忆闪卡", "🧩 单词拼图", "🖼️ 图片测词","📚 个人词库","📝 单词测验", "统计"]
 tabs = st.tabs(tab_items)
 # endregion
 
@@ -297,7 +297,7 @@ def view_word(container, tip_placeholder, word):
     view_pos(container, word_info, word)
 
 
-with tabs[tab_items.index("📖 闪卡记忆")]:
+with tabs[tab_items.index("📖 记忆闪卡")]:
     btn_cols = st.columns(12)
     word = st.session_state.words_to_memorize[st.session_state.word_idx]
     tip_placeholder = st.empty()
@@ -749,16 +749,20 @@ EDITABLE_COLS: list[str] = [
 
 # endregion
 
-# region 自建词库
+# region 个人词库
 
-with tabs[tab_items.index("📚 自建词库")]:
+with tabs[tab_items.index("📚 个人词库")]:
     lib_cols = st.columns(2)
     lib_cols[0].markdown("#### 基础词库")
     placeholder = lib_cols[0].empty()
-    lib_cols[1].markdown("#### 自建词库")
+    lib_cols[1].markdown("#### 个人词库")
     mywords_placeholder = lib_cols[1].empty()
-    add_lib_btn = lib_cols[0].button("➕", key="add-lib-btn", help="点击按钮，添加到个人词库。")
-    del_lib_btn = lib_cols[1].button("➖", key="del-lib-btn", help="点击按钮，从个人词库中删除。")
+    add_lib_btn = lib_cols[0].button(
+        "➕", key="add-lib-btn", help="点击按钮，将'基础词库'中已选单词添加到个人词库。"
+    )
+    del_lib_btn = lib_cols[1].button(
+        "➖", key="del-lib-btn", help="点击按钮，将已选单词从'个人词库'中删除。"
+    )
     df = gen_word_lib()
     edited_df = placeholder.data_editor(
         df,
@@ -773,7 +777,7 @@ with tabs[tab_items.index("📚 自建词库")]:
         for idx, d in edited_rows.items():
             word = df.iloc[idx]["单词"]  # type: ignore
             if d["添加"]:
-                st.session_state.dbi.add_to_personal_dictionary(
+                st.session_state.dbi.add_word_to_personal_dictionary(
                     st.session_state["user_id"], word
                 )
                 st.toast(f"已添加到个人词库中：{word}。")
@@ -794,7 +798,7 @@ with tabs[tab_items.index("📚 自建词库")]:
         for idx, d in my_word_edited_rows.items():
             word = my_word_df.iloc[idx]["单词"]  # type: ignore
             if d["删除"]:
-                st.session_state.dbi.remove_from_personal_dictionary(
+                st.session_state.dbi.remove_word_from_personal_dictionary(
                     st.session_state["user_id"], word
                 )
                 st.toast(f"已从个人词库中删除：{word}。")
@@ -915,7 +919,7 @@ def view_question(test_container):
     test_container.divider()
 
 
-with tabs[tab_items.index("单词测验")]:
+with tabs[tab_items.index("📝 单词测验")]:
     st.info("试题词汇来源于【记忆闪卡】生成的单词列表。")
     cols = st.columns(6)
     level = cols[0].selectbox("单词级别", ("A1", "A2", "B1", "B2", "C1", "C2"))
