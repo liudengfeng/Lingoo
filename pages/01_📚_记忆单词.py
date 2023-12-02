@@ -102,7 +102,7 @@ def gen_words_to_memorize():
     num_words = st.session_state["num_words_key"]
     # 随机选择单词
     st.session_state.words_to_memorize = random.sample(words, num_words)
-    st.write("单词:", st.session_state.words_to_memorize)
+    # st.write("单词:", st.session_state.words_to_memorize)
     # 恢复初始显示状态
     st.session_state.display_state = "全部"
     st.session_state["word_idx"] = -1
@@ -135,9 +135,6 @@ def gen_audio_fp(word: str, style: str):
 
 @st.cache_data
 def get_word_info(word):
-    # # 云端才可以使用 vertex ai
-    # if st.secrets["env"] in ["streamlit", "azure"]:
-    #     word = lemmatize(word)
     return st.session_state.dbi.find_word(word)
 
 
@@ -249,8 +246,8 @@ def _view_pos(container, key, en, zh, word):
 
 
 def view_pos(container, word_info, word):
-    en = word_info["en-US"]
-    zh = word_info["zh-CN"]
+    en = word_info.get("en-US", {})
+    zh = word_info.get("zh-CN", {})
     for key in en.keys():
         container.divider()
         _view_pos(container, key, en[key], zh[key], word)
@@ -270,10 +267,11 @@ def view_word(container, tip_placeholder, word):
         st.error(f"没有该单词：“{word}”的信息。TODO：添加到单词库。")
         st.stop()
 
-    with tip_placeholder.expander("记忆提示"):
-        # 生成记忆提示
-        memory_tip = _memory_tip(word)
-        st.markdown(memory_tip)
+    if st.secrets.get("dev", "") in ["streamlit", "azure"]:
+        with tip_placeholder.expander("记忆提示"):
+            # 生成记忆提示
+            memory_tip = _memory_tip(word)
+            st.markdown(memory_tip)
 
     v_word = word
     t_word = ""
@@ -377,8 +375,137 @@ with tabs[items.index("📖 闪卡记忆")]:
 
 # region 单词拼图
 
+if "puzzle_idx" not in st.session_state:
+    st.session_state["puzzle_idx"] = -1
+
+if "words_to_puzzle" not in st.session_state:
+    st.session_state["words_to_puzzle"] = []
+
+if "puzzle_view_word" not in st.session_state:
+    st.session_state["puzzle_view_word"] = []
+
+if "clicked_character" not in st.session_state:
+    st.session_state["clicked_character"] = []
+
+
+def gen_words_to_puzzle():
+    # 获取选中的单词列表
+    words = word_lists[selected_list]
+    num_words = st.session_state["num_words_key"]
+    # 随机选择单词
+    st.session_state.words_to_puzzle = random.sample(words, num_words)
+    # 恢复初始显示状态
+    st.session_state.puzzle_idx = -1
+    st.session_state["puzzle_view_word"] = []
+
+
+def get_word_definition(word):
+    word_info = get_word_info(word)
+    definition = ""
+    en = word_info["en-US"]
+    for k, v in en.items():
+        definition += f"\n{k}\n"
+        for d in v:
+            definition += f'- {d["definition"]}\n'
+    return definition
+
+
+def init_puzzle():
+    word = st.session_state.words_to_puzzle[st.session_state.puzzle_idx]
+    ws = [w for w in word]
+    random.shuffle(ws)
+    st.session_state.puzzle_view_word = ws
+    st.session_state.clicked_character = [False] * len(ws)
+    st.session_state.puzzle_answer = ""
+
+
+def view_puzzle_word():
+    if len(st.session_state.puzzle_view_word) == 0:
+        init_puzzle()
+
+    ws = st.session_state["puzzle_view_word"]
+    n = len(ws)
+    cols = st.columns(n + 8)
+    button_placeholders = [cols[i].empty() for i in range(n)]
+    for i in range(n):
+        if button_placeholders[i].button(
+            ws[i],
+            key=f"btn_{i}",
+            disabled=st.session_state.clicked_character[i],
+            help="点击按钮，选择单词拼图中的字母。",
+            type="primary",
+        ):
+            st.session_state.puzzle_answer += ws[i]
+            st.session_state.clicked_character[i] = True
+
+
+def view_definition(progress_placeholder):
+    if len(st.session_state.puzzle_view_word) == 0:
+        gen_words_to_puzzle()
+    n = len(st.session_state.words_to_puzzle)
+    progress_placeholder.progress(
+        (st.session_state.puzzle_idx + 1) / n, text="🧩 单词拼图进度"
+    )
+    word = st.session_state.words_to_puzzle[st.session_state.puzzle_idx]
+    definition = get_word_definition(word)
+    st.write("单词释义：")
+    st.markdown(definition)
+
+
+def on_prev_puzzle_btn_click():
+    st.session_state["puzzle_idx"] -= 1
+
+
+def on_next_puzzle_btn_click():
+    st.session_state["puzzle_idx"] += 1
+
+
 with tabs[items.index("🧩 单词拼图")]:
-    pass
+    p_progress_text = "进度"
+    n = st.session_state["num_words_key"]
+    progress_placeholder = st.empty()
+    p_btns = st.columns(4)
+    prev_p_btn = p_btns[1].button(
+        "↩️",
+        key="prev-puzzle",
+        help="点击按钮，切换到上一单词拼图。",
+        on_click=on_prev_puzzle_btn_click,
+        disabled=st.session_state.puzzle_idx <= 0,
+    )
+    next_test_btn = p_btns[2].button(
+        "↪️",
+        key="next-puzzle",
+        help="点击按钮，切换到下一单词拼图。",
+        on_click=on_next_puzzle_btn_click,
+        disabled=st.session_state.puzzle_idx == n - 1,
+    )
+
+    refresh_btn = p_btns[3].button("🔄", key="refresh-puzzle", help="重新生成单词列表")
+
+    if prev_p_btn:
+        init_puzzle()
+
+    if next_test_btn:
+        init_puzzle()
+
+    if refresh_btn:
+        gen_words_to_puzzle()
+
+    view_definition(progress_placeholder)
+    view_puzzle_word()
+    user_input = st.text_input("点击字符按钮或输入您的答案", key="puzzle_answer")
+
+    if st.button("检查", help="点击按钮，检查您的答案。"):
+        word = st.session_state.words_to_puzzle[st.session_state.puzzle_idx]
+        if word not in st.session_state.words:
+            st.session_state.words[word] = get_word_info(word)
+
+        if user_input == word:
+            st.balloons()
+        else:
+            st.write(
+                f'对不起，您回答错误。正确的单词应该为：{word}，翻译：{st.session_state.words[word]["zh-CN"]["translation"]}'
+            )
 
 # endregion
 
