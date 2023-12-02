@@ -8,6 +8,7 @@ from pathlib import Path
 import google.generativeai as palm
 import streamlit as st
 import streamlit.components.v1 as components
+from PIL import Image
 
 from mypylib.authenticate import DbInterface
 from mypylib.azure_speech import synthesize_speech_to_file
@@ -175,7 +176,7 @@ st.sidebar.slider(
 # endregion
 
 # region 页面
-items = ["📖 闪卡记忆", "🧩 单词拼图", "图片测词", "单词测验", "统计"]
+items = ["📖 闪卡记忆", "🧩 单词拼图", "🖼️ 图片测词", "📚 自建 词库","单词测验", "统计"]
 tabs = st.tabs(items)
 # endregion
 
@@ -212,8 +213,8 @@ def _view_detail(container, detail, t_detail, word):
     d2 = t_detail["definition"]
     e2 = t_detail["examples"]
     if st.session_state.display_state == "全部":
-        container.markdown(f"definition：**{d1}**")
-        container.markdown(f"定义：**{d2}**")
+        container.markdown(f"definition：**{d1[:-1]}**")
+        container.markdown(f"定义：**{d2[:-1]}**")
         # container.markdown("-" * num)
 
         content = ""
@@ -222,7 +223,7 @@ def _view_detail(container, detail, t_detail, word):
             content += f"- {t}\n"
         container.markdown(content)
     elif st.session_state.display_state == "英文":
-        container.markdown(f"definition：**{d1}**")
+        container.markdown(f"definition：**{d1[:-1]}**")
         # container.markdown("-" * num)
 
         content = ""
@@ -231,7 +232,7 @@ def _view_detail(container, detail, t_detail, word):
         container.markdown(content)
     else:
         # 只显示译文
-        container.markdown(f"定义：**{d2}**")
+        container.markdown(f"定义：**{d2[:-1]}**")
         # container.markdown("-" * num)
         content = ""
         for e in e2:
@@ -372,7 +373,6 @@ with tabs[items.index("📖 闪卡记忆")]:
 
 # endregion
 
-
 # region 单词拼图
 
 if "puzzle_idx" not in st.session_state:
@@ -461,6 +461,9 @@ def on_next_puzzle_btn_click():
 
 
 with tabs[items.index("🧩 单词拼图")]:
+    st.markdown(
+        "单词拼图是一种记忆单词的游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
+    )
     p_progress_text = "进度"
     n = st.session_state["num_words_key"]
     progress_placeholder = st.empty()
@@ -510,10 +513,189 @@ with tabs[items.index("🧩 单词拼图")]:
 # endregion
 
 # region 图片测词
+
+if "pic_idx" not in st.session_state:
+    st.session_state["pic_idx"] = -1
+
+
+if "pic_tests" not in st.session_state:
+    st.session_state["pic_tests"] = []
+
+if "user_pic_answer" not in st.session_state:
+    st.session_state["user_pic_answer"] = {}
+
+
+def on_prev_pic_btn_click():
+    st.session_state["pic_idx"] -= 1
+
+
+def on_next_pic_btn_click():
+    st.session_state["pic_idx"] += 1
+
+
+pic_dir = current_cwd / "resource/quiz/images"
+pic_categories = sorted([d.name for d in pic_dir.iterdir() if d.is_dir()])
+
+
+def gen_pic_qa(category, num):
+    pic_qa_path = current_cwd / "resource/quiz/quiz_image_qa.json"
+    pic_qa = {}
+    with open(pic_qa_path, "r", encoding="utf-8") as f:
+        pic_qa = json.load(f)
+    qa_filtered = [v for v in pic_qa if v["category"].startswith(category)]
+    random.shuffle(qa_filtered)
+    # 重置
+    data = qa_filtered[:num]
+    for d in data:
+        random.shuffle(d["options"])
+    st.session_state["pic_tests"] = data
+    st.session_state.user_pic_answer = {}
+    st.session_state["pic_idx"] = -1
+
+
+def on_pic_radio_change(idx):
+    # 保存用户答案
+    st.session_state.user_pic_answer[idx] = st.session_state["pic_options"]
+
+
+def view_pic_question(container):
+    progress_text = "答题进度"
+    tests = st.session_state.pic_tests
+    n = len(tests)
+    idx = st.session_state.pic_idx
+
+    question = tests[idx]["question"]
+    o_options = tests[idx]["options"]
+    options = []
+    for f, o in zip("ABC", o_options):
+        options.append(f"{f}. {o}")
+
+    image = Image.open(tests[idx]["image_fp"])  # type: ignore
+
+    user_answer = st.session_state.user_pic_answer.get(idx, options[0])
+    user_answer_idx = options.index(user_answer)
+
+    cols = container.columns(3)
+    my_bar = cols[0].progress(0, text=progress_text)
+    container.divider()
+    container.markdown(question)
+    container.image(image, caption=tests[idx]["iamge_label"], width=400)  # type: ignore
+
+    container.radio(
+        "选项",
+        options,
+        # horizontal=True,
+        index=user_answer_idx,
+        label_visibility="collapsed",
+        # key=f"test_options_{idx}",
+        on_change=on_pic_radio_change,
+        args=(idx,),
+        key="pic_options",
+    )
+    # 保存用户答案
+    st.session_state.user_pic_answer[idx] = st.session_state["pic_options"]
+    # container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_answer}>")
+    my_bar.progress((idx + 1) / n, text=progress_text)
+    container.divider()
+
+
+def check_pic_answer(container):
+    if len(st.session_state.user_pic_answer) == 0:
+        st.warning("您尚未答题。")
+        st.stop()
+
+    score = 0
+    tests = st.session_state.pic_tests
+    n = len(tests)
+    for idx in range(n):
+        question = tests[idx]["question"]
+        o_options = tests[idx]["options"]
+        options = []
+        for f, o in zip("ABC", o_options):
+            options.append(f"{f}. {o}")
+        answer = tests[idx]["answer"]
+        image = Image.open(tests[idx]["image_fp"])  # type: ignore
+
+        user_answer = st.session_state.user_pic_answer.get(idx, options[0])
+        user_answer_idx = options.index(user_answer)
+        container.divider()
+        container.markdown(question)
+        container.image(image, caption=tests[idx]["iamge_label"], width=400)  # type: ignore
+        container.radio(
+            "选项",
+            options,
+            # horizontal=True,
+            index=user_answer_idx,
+            disabled=True,
+            label_visibility="collapsed",
+            key=f"pic_options_{idx}",
+        )
+        msg = ""
+        # container.write(f"显示 idx: {idx} 用户答案：{user_answer.split('.')[1]} 正确答案：{answer}")
+        if user_answer.split(".")[1].strip() == answer.strip():
+            score += 1
+            msg = f"正确答案：{answer} ✅"
+        else:
+            msg = f"正确答案：{answer} ❌"
+        container.markdown(msg)
+    percentage = score / n * 100
+    if percentage >= 75:
+        st.balloons()
+    container.divider()
+    container.text(f"得分：{percentage:.0f}%")
+    container.divider()
+
+
+with tabs[items.index("🖼️ 图片测词")]:
+    st.markdown(
+        "🖼️ 图片测词是一种记忆单词的游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
+    )
+    pic_cols = st.columns(5)
+    category = pic_cols[0].selectbox("请选择图片类别", pic_categories)
+    pic_num = pic_cols[1].number_input("请选择图片测词考题数量", 1, 20, value=10, step=1)
+
+    pic_qa_cols = st.columns(6)
+    pic_idx = st.session_state.get("pic_idx", 0)  # 获取当前问题的索引
+
+    # 创建按钮
+    pic_qa_cols[1].button(
+        "↩️", help="点击按钮，切换到上一题。", on_click=on_prev_pic_btn_click, disabled=pic_idx <= 0
+    )
+
+    pic_qa_cols[2].button(
+        "↪️",
+        help="点击按钮，切换到下一题。",
+        on_click=on_next_pic_btn_click,
+        disabled=pic_idx == pic_num - 1,
+    )
+    # 答题即可提交检查
+    sumbit_pic_btn = pic_qa_cols[3].button(
+        "🔍",
+        key="submit-pic",
+        disabled=len(st.session_state.pic_tests) == 0
+        or len(st.session_state.user_pic_answer) == 0,
+        help="至少完成一道测试题后，才可点击按钮，显示测验得分。",
+    )
+
+    if pic_qa_cols[4].button("🔄", key="refresh-pic", help="点击按钮，重新生成考题。"):
+        gen_pic_qa(category, pic_num)
+
+    if len(st.session_state.pic_tests) == 0:
+        gen_pic_qa(category, pic_num)
+
+    pic_qa_container = st.container()
+
+    if sumbit_pic_btn:
+        if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
+            st.toast("您尚未完成测试。")
+        check_pic_answer(pic_qa_container)
+    else:
+        view_pic_question(pic_qa_container)
+
+
 # endregion
 
 # region 单词测验
-
 
 if "test_idx" not in st.session_state:
     st.session_state["test_idx"] = -1
@@ -526,11 +708,11 @@ if "user_answer" not in st.session_state:
     st.session_state["user_answer"] = {}
 
 
-def on_prev_test_btn_click(test_container):
+def on_prev_test_btn_click():
     st.session_state["test_idx"] -= 1
 
 
-def on_next_test_btn_click(test_container):
+def on_next_test_btn_click():
     st.session_state["test_idx"] += 1
 
 
@@ -571,7 +753,7 @@ def check_answer(test_container):
         # 用户答案是选项，而提供的标准答案是A、B、C、D
         if user_answer.split(".")[0] == answer:
             score += 1
-            msg = f"正确答案：{answer} ➕"
+            msg = f"正确答案：{answer} ✅"
         else:
             msg = f"正确答案：{answer} ❌"
         test_container.markdown(msg)
@@ -584,7 +766,7 @@ def check_answer(test_container):
     test_container.divider()
 
 
-def on_radio_change(test_container, idx):
+def on_radio_change(idx):
     # 保存用户答案
     st.session_state.user_answer[idx] = st.session_state["test_options"]
 
