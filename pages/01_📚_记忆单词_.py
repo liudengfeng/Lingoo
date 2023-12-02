@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 
 import google.generativeai as palm
+import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
@@ -176,8 +177,8 @@ st.sidebar.slider(
 # endregion
 
 # region 页面
-items = ["📖 闪卡记忆", "🧩 单词拼图", "🖼️ 图片测词", "📚 自建 词库","单词测验", "统计"]
-tabs = st.tabs(items)
+tab_items = ["📖 记忆闪卡", "🧩 单词拼图", "🖼️ 图片测词","📚 自建词库","📝 单词测验", "统计"]
+tabs = st.tabs(tab_items)
 # endregion
 
 # region 记忆闪卡
@@ -296,7 +297,7 @@ def view_word(container, tip_placeholder, word):
     view_pos(container, word_info, word)
 
 
-with tabs[items.index("📖 闪卡记忆")]:
+with tabs[tab_items.index("📖 闪卡记忆")]:
     btn_cols = st.columns(12)
     word = st.session_state.words_to_memorize[st.session_state.word_idx]
     tip_placeholder = st.empty()
@@ -460,7 +461,7 @@ def on_next_puzzle_btn_click():
     st.session_state["puzzle_idx"] += 1
 
 
-with tabs[items.index("🧩 单词拼图")]:
+with tabs[tab_items.index("🧩 单词拼图")]:
     st.markdown(
         "单词拼图是一种记忆单词的游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
@@ -512,7 +513,7 @@ with tabs[items.index("🧩 单词拼图")]:
 
 # endregion
 
-# region 图片测词
+# region 图片测词辅助
 
 if "pic_idx" not in st.session_state:
     st.session_state["pic_idx"] = -1
@@ -646,7 +647,11 @@ def check_pic_answer(container):
     container.divider()
 
 
-with tabs[items.index("🖼️ 图片测词")]:
+# endregion
+
+# region 图片测词
+
+with tabs[tab_items.index("🖼️ 图片测词")]:
     st.markdown(
         "🖼️ 图片测词是一种记忆单词的游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
@@ -692,6 +697,108 @@ with tabs[items.index("🖼️ 图片测词")]:
     else:
         view_pic_question(pic_qa_container)
 
+
+# endregion
+
+# region 自建词库辅助
+
+
+def gen_word_lib():
+    words = word_lists[selected_list]
+    for word in words:
+        if word not in st.session_state.words:
+            st.session_state.words[word] = get_word_info(word)
+    data = []
+    for w in words:
+        data.append(
+            {
+                "单词": w,
+                "CEFR最低分级": st.session_state.words[w].get("level", ""),
+                "翻译": st.session_state.words[w]["zh-CN"].get("translation", ""),
+                "添加": False,
+            }
+        )
+    return pd.DataFrame.from_records(data)
+
+
+def gen_my_word_lib():
+    my_words = st.session_state.dbi.find_personal_dictionary(
+        st.session_state["user_id"]
+    )
+    # st.write("个人词库：", my_words)
+    for word in my_words:
+        if word not in st.session_state.words:
+            st.session_state.words[word] = get_word_info(word)
+    data = []
+    for w in my_words:
+        data.append(
+            {
+                "单词": w,
+                "CEFR最低分级": st.session_state.words[w].get("level", ""),
+                "翻译": st.session_state.words[w]["zh-CN"].get("translation", ""),
+                "删除": False,
+            }
+        )
+    return pd.DataFrame.from_records(data)
+
+
+EDITABLE_COLS: list[str] = [
+    "删除",
+    "添加",
+]
+
+# endregion
+
+# region 自建词库
+
+with tabs[tab_items.index("📚 自建词库")]:
+    lib_cols = st.columns(2)
+    lib_cols[0].markdown("#### 基础词库")
+    placeholder = lib_cols[0].empty()
+    lib_cols[1].markdown("#### 自建词库")
+    mywords_placeholder = lib_cols[1].empty()
+    add_lib_btn = lib_cols[0].button("➕", key="add-lib-btn", help="点击按钮，添加到个人词库。")
+    del_lib_btn = lib_cols[1].button("➖", key="del-lib-btn", help="点击按钮，从个人词库中删除。")
+    df = gen_word_lib()
+    edited_df = placeholder.data_editor(
+        df,
+        key="word_lib",
+        hide_index=True,
+        disabled=[col for col in df.columns if col not in EDITABLE_COLS],
+    )
+    if add_lib_btn and st.session_state.get("word_lib", None):
+        word_lib = st.session_state["word_lib"]
+        edited_rows = word_lib["edited_rows"]
+        # st.write("编辑的行：", edited_rows)
+        for idx, d in edited_rows.items():
+            word = df.iloc[idx]["单词"]  # type: ignore
+            if d["添加"]:
+                st.session_state.dbi.add_to_personal_dictionary(
+                    st.session_state["user_id"], word
+                )
+                st.toast(f"已添加到个人词库中：{word}。")
+
+        word_lib["edited_rows"] = {}
+
+    my_word_df = gen_my_word_lib()
+    mywords_placeholder.data_editor(
+        my_word_df,
+        key="my_word_lib",
+        hide_index=True,
+        disabled=[col for col in df.columns if col not in EDITABLE_COLS],
+    )
+    if del_lib_btn and st.session_state.get("my_word_lib", None):
+        my_word_lib = st.session_state["my_word_lib"]
+        my_word_edited_rows = my_word_lib["edited_rows"]
+        # st.write("编辑的行：", edited_rows)
+        for idx, d in my_word_edited_rows.items():
+            word = my_word_df.iloc[idx]["单词"]  # type: ignore
+            if d["删除"]:
+                st.session_state.dbi.remove_from_personal_dictionary(
+                    st.session_state["user_id"], word
+                )
+                st.toast(f"已从个人词库中删除：{word}。")
+        my_word_lib["edited_rows"] = {}
 
 # endregion
 
@@ -808,7 +915,7 @@ def view_question(test_container):
     test_container.divider()
 
 
-with tabs[items.index("单词测验")]:
+with tabs[tab_items.index("单词测验")]:
     st.info("试题词汇来源于【记忆闪卡】生成的单词列表。")
     cols = st.columns(6)
     level = cols[0].selectbox("单词级别", ("A1", "A2", "B1", "B2", "C1", "C2"))

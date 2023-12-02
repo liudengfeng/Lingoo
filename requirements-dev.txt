@@ -9,6 +9,7 @@ azure-cognitiveservices-speech
 pymongo
 python-dotenv
 azure-identity
+azure-storage-blob
 matplotlib
 pytest
 black

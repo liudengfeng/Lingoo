@@ -268,12 +268,23 @@ class DbInterface:
 
     # region 个人词库管理
 
-    def add_to_personal_dictionary(self, phone_number, word):
-        self.users.update_one(
-            {"phone_number": phone_number}, {"$push": {"personal_words": word}}
-        )
+    def find_personal_dictionary(self, phone_number):
+        user_data = self.users.find_one({"phone_number": phone_number})
+        if user_data:
+            return user_data.get("personal_words", [])
+        else:
+            return []
 
-    def remove_from_personal_dictionary(self, phone_number, word):
+    def add_word_to_personal_dictionary(self, phone_number, word):
+        user_data = self.users.find_one({"phone_number": phone_number})
+        if user_data:
+            personal_words = user_data.get("personal_words", [])
+            if word not in personal_words:
+                self.users.update_one(
+                    {"phone_number": phone_number}, {"$push": {"personal_words": word}}
+                )
+
+    def remove_word_from_personal_dictionary(self, phone_number, word):
         self.users.update_one(
             {"phone_number": phone_number}, {"$pull": {"personal_words": word}}
         )

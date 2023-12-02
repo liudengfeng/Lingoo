@@ -695,12 +695,6 @@ with tabs[items.index("处理反馈")]:
 
 # region 创建词典管理页面
 
-# 基础词库
-# 剑桥词典
-# 翻译
-# 添加单词
-
-
 def get_words():
     words = []
     fp = current_cwd / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
