@@ -148,8 +148,9 @@ log_cols = st.columns(5)
 welcome_image = Image.open(logo_dir / "welcome-1.jpg")
 
 with log_cols[1]:
-    st.markdown("""<a href="用户管理" target="_self">点击注册</a>""", unsafe_allow_html=True)
-    st.markdown("""<a href="用户管理" target="_self">点击付费</a>""", unsafe_allow_html=True)
+    st.markdown("""<a href="用户管理" target="_self">step 1 用户注册</a>""", unsafe_allow_html=True)
+    st.markdown("""<a href="用户管理" target="_self">step 2 订阅付费</a>""", unsafe_allow_html=True)
+    st.markdown("""<a href="" target="_self">step 3 登录使用</a>""", unsafe_allow_html=True)
 
 with log_cols[2]:
     st.image(welcome_image, width=200)
@@ -161,7 +162,7 @@ st.markdown(
 
 **LinGoo**是一款功能强大的英语学习app，它使用最新AI技术和微软发音评估技术，可以帮助你快速提升英语水平。
 
-LinGo，让你学好英语，so easy！
+LinGoo，让你学好英语，so easy！
 """,
     unsafe_allow_html=True,
 )
