@@ -332,7 +332,7 @@ def view_flash_word(container, tip_placeholder):
 
 # endregion
 
-# region 📖 记忆闪卡
+# region 记忆闪卡
 
 with tabs[tab_items.index("📖 记忆闪卡")]:
     btn_cols = st.columns(9)
@@ -767,6 +767,24 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
 
 # region 个人词库辅助
 
+add_my_word_lib_column_config = {
+    "添加": st.column_config.CheckboxColumn(
+        "添加",
+        help="点击复选框，选中单词添加到个人词库",
+        width="small",
+        required=True,
+    )
+}
+
+del_my_word_lib_column_config = {
+    "删除": st.column_config.CheckboxColumn(
+        "删除",
+        help="点击复选框，从个人词库中删除该单词",
+        width="small",
+        required=True,
+    )
+}
+
 
 def gen_word_lib():
     words = word_lists[selected_list]
@@ -837,6 +855,7 @@ with tabs[tab_items.index("📚 个人词库")]:
         df,
         key="word_lib",
         hide_index=True,
+        column_config=add_my_word_lib_column_config,
         height=500,
         disabled=[col for col in df.columns if col not in EDITABLE_COLS],
     )
@@ -859,9 +878,11 @@ with tabs[tab_items.index("📚 个人词库")]:
         my_word_df,
         key="my_word_lib",
         hide_index=True,
+        column_config=del_my_word_lib_column_config,
         height=500,
         disabled=[col for col in df.columns if col not in EDITABLE_COLS],
     )
+
     if del_lib_btn and st.session_state.get("my_word_lib", None):
         my_word_lib = st.session_state["my_word_lib"]
         my_word_edited_rows = my_word_lib["edited_rows"]
@@ -873,7 +894,7 @@ with tabs[tab_items.index("📚 个人词库")]:
                     st.session_state["user_id"], word
                 )
                 st.toast(f"已从个人词库中删除：{word}。")
-        my_word_lib["edited_rows"] = {}
+        st.rerun()
 
 # endregion
 

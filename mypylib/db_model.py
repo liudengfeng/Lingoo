@@ -57,6 +57,7 @@ class User(BaseModel):
     name: str = Field("")
     username: str = Field("", max_length=20)
     password: str = Field("", min_length=8)
+    province: str = Field("")
     permission: UserRole = Field(default=UserRole.USER)
     registration_time: datetime = Field(default_factory=datetime.utcnow)  # 新增注册时间字段
     memo: str = Field("")  # 新增备注字段

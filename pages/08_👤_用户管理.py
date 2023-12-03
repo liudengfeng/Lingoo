@@ -13,6 +13,7 @@ from mypylib.auth_utils import is_valid_email, is_valid_phone_number
 from mypylib.authenticate import DbInterface
 from mypylib.constants import FAKE_EMAIL_DOMAIN
 from mypylib.db_model import User
+from mypylib.constants import PROVINCES
 
 current_cwd: Path = Path(__file__).parent.parent
 wxskm_dir = current_cwd / "resource" / "wxskm"
@@ -60,6 +61,7 @@ with tabs[items.index("用户注册")]:
         username_reg = st.text_input(
             "用户名称", key="username_reg", help="登录显示名称", placeholder="必须。请输入您希望使用的用户名"
         )
+        province = st.selectbox("省份", PROVINCES, index=0, key="province")
         password_reg = st.text_input(
             "密码",
             type="password",
@@ -101,6 +103,7 @@ with tabs[items.index("用户注册")]:
                 name=name,
                 username=username_reg,
                 password=password_reg,
+                province=province,
                 phone_number=phone_number,
                 registration_time=datetime.utcnow(),
             )  # type: ignore
@@ -317,7 +320,7 @@ with tabs[items.index("问题反馈")]:
     with st.form(key="feedback_form"):
         title = st.text_input("标题", key="title", help="请输入标题")
         content = st.text_area("问题描述", key="content", help="请输入内容")
-        uploaded_file = st.file_uploader("📁 上传截屏视频", type=["webm"])
+        uploaded_file = st.file_uploader("📁 上传截屏视频", type=["webm"] ,help="请按“如何录制截屏视频”指引，录制视频反馈给管理员。")
         if st.form_submit_button(label="提交"):
             container_name = "feedback"
             connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
