@@ -1,10 +1,10 @@
 # models.py
-from pydantic import BaseModel, Field
-from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
-from typing import List, Optional
-
 from enum import Enum
+from typing import List, Optional, Type, Union
+
+from pydantic import BaseModel, Field
+from werkzeug.security import check_password_hash, generate_password_hash
 
 
 class PurchaseType(str, Enum):
@@ -26,6 +26,13 @@ class PaymentStatus(str, Enum):
     RETURNED = "返还"
     IN_SERVICE = "服务中"
     COMPLETED = "完成"
+
+
+def str_to_enum(s: str, enum_type: Type[Enum]) -> Union[Enum, str]:
+    for t in enum_type:
+        if t.value == s:
+            return t
+    return None  # type: ignore
 
 
 class Payment(BaseModel):

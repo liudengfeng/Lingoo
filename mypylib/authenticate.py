@@ -1,4 +1,5 @@
 # from twilio.rest import Client
+import logging
 import random
 import string
 from datetime import datetime, timedelta
@@ -8,8 +9,13 @@ from cachetools import TTLCache
 from faker import Faker
 from pymongo import ASCENDING, IndexModel, MongoClient
 
-from .db_model import Payment, PaymentStatus, User, PurchaseType, UserRole
 from .constants import FAKE_EMAIL_DOMAIN
+from .db_model import Payment, PaymentStatus, PurchaseType, User, UserRole, str_to_enum
+
+# 创建或获取logger对象
+logger = logging.getLogger("streamlit")
+# 设置日志级别
+logger.setLevel(logging.DEBUG)
 
 PRICES = {
     PurchaseType.ANNUAL: 6570,
@@ -76,7 +82,6 @@ class DbInterface:
         return user
 
     def update_payment(self, phone_number, order_id, update_fields: dict):
-        # print(f"Updating user with identifier {identifier} and fields {update_fields}")
         result = self.payments.update_one(
             {"phone_number": phone_number, "order_id": order_id},
             {"$set": update_fields},
@@ -109,14 +114,25 @@ class DbInterface:
         # 如果没有找到符合条件的记录，返回False
         return False
 
-    def enable_service(self, phone_number, order_id, purchase_type):
-        expiry_time = datetime.utcnow() + self.calculate_expiry(purchase_type)
+    def enable_service(self, phone_number: str, order_id: str, purchase_type: str):
+        # 查询用户的最后一个订阅记录
+        last_subscription = self.payments.find_one(
+            {"phone_number": phone_number, "status": PaymentStatus.IN_SERVICE},
+            sort=[("expiry_time", -1)],
+        )
+        # 如果存在未过期的订阅，以其到期时间为基准
+        if last_subscription and last_subscription["expiry_time"] > datetime.utcnow():
+            base_time = last_subscription["expiry_time"]
+        else:
+            base_time = datetime.utcnow()
+        # 将字符串转换为 PurchaseType 枚举
+        purchase_type = str_to_enum(purchase_type, PurchaseType)  # type: ignore
+        expiry_time = base_time + self.calculate_expiry(purchase_type)  # type: ignore
         # Update the user info with approval status and expiration date
         update_fields = {}
         update_fields["is_approved"] = True
         update_fields["expiry_time"] = expiry_time
         update_fields["status"] = PaymentStatus.IN_SERVICE
-        # print(update_fields)
         self.update_payment(phone_number, order_id, update_fields)
 
     def calculate_expiry(self, purchase_type: PurchaseType):
