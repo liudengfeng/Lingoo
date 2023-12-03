@@ -102,6 +102,7 @@ def gen_words_to_memorize():
     # 获取选中的单词列表
     words = word_lists[selected_list]
     num_words = st.session_state["num_words_key"]
+    st.write("单词数量：", num_words, "单词：", words)
     # 随机选择单词
     st.session_state.words_to_memorize = random.sample(words, num_words)
     # st.write("单词:", st.session_state.words_to_memorize)
@@ -153,7 +154,8 @@ if st.session_state["user_id"] is not None:
     personal_word_list = st.session_state.dbi.find_personal_dictionary(
         st.session_state["user_id"]
     )
-    word_lists["0-个人词库"] = personal_word_list
+    if len(personal_word_list) > 0:
+        word_lists["0-个人词库"] = personal_word_list
 
 with open(current_cwd / "resource/voices.json", "r", encoding="utf-8") as f:
     voice_style_options = json.load(f)
@@ -750,7 +752,7 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
 
 # endregion
 
-# region 自建词库辅助
+# region 个人词库辅助
 
 
 def gen_word_lib():
@@ -760,11 +762,12 @@ def gen_word_lib():
             st.session_state.words[word] = get_word_info(word)
     data = []
     for w in words:
+        info = st.session_state.words[w]
         data.append(
             {
                 "单词": w,
-                "CEFR最低分级": st.session_state.words[w].get("level", ""),
-                "翻译": st.session_state.words[w]["zh-CN"].get("translation", ""),
+                "CEFR最低分级": info.get("level", "") if info else "",
+                "翻译": info["zh-CN"].get("translation", "") if info else "",
                 "添加": False,
             }
         )
@@ -803,7 +806,10 @@ EDITABLE_COLS: list[str] = [
 
 with tabs[tab_items.index("📚 个人词库")]:
     lib_cols = st.columns(2)
-    lib_cols[0].markdown(f"#### 基础词库({selected_list})")
+    view_selected_list = ""
+    if selected_list is not None:
+        view_selected_list = selected_list.split("-", maxsplit=1)[1]
+    lib_cols[0].markdown(f"#### 基础词库({view_selected_list})")
     placeholder = lib_cols[0].empty()
     lib_cols[1].markdown("#### 个人词库")
     mywords_placeholder = lib_cols[1].empty()

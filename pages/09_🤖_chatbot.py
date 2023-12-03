@@ -212,6 +212,7 @@ if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、�
     st.session_state["examples_pair"] = []
     # 删除对象
     del st.session_state["messages"]
+    init_chat()
 
 
 # 主页面
