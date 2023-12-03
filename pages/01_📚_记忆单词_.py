@@ -144,8 +144,16 @@ def get_word_info(word):
 # region 侧边栏
 
 # 加载单词列表
+
 with open(DICT_DIR / "word_lists_by_edition_grade.json", "r", encoding="utf-8") as f:
     word_lists = json.load(f)
+
+# 从集合中提取个人词库，添加到word_lists中
+if st.session_state["user_id"] is not None:
+    personal_word_list = st.session_state.dbi.find_personal_dictionary(
+        st.session_state["user_id"]
+    )
+    word_lists["0-个人词库"] = personal_word_list
 
 with open(current_cwd / "resource/voices.json", "r", encoding="utf-8") as f:
     voice_style_options = json.load(f)
@@ -165,12 +173,20 @@ st.sidebar.info(f"语音风格是：{voice_style[0]}({voice_style[1]})")
 
 # 在侧边栏添加一个选项卡让用户选择一个单词列表
 selected_list = st.sidebar.selectbox(
-    "请选择一个单词列表", sorted(list(word_lists.keys())), on_change=gen_words_to_memorize
+    "请选择单词列表",
+    sorted(list(word_lists.keys())),
+    # on_change=gen_words_to_memorize,
+    format_func=lambda x: x.split("-", maxsplit=1)[1],
 )
 
 # 在侧边栏添加一个滑块让用户选择记忆的单词数量
 st.sidebar.slider(
-    "请选择计划记忆的单词数量", 10, 50, step=5, key="num_words_key", on_change=gen_words_to_memorize
+    "请选择计划记忆的单词数量",
+    10,
+    50,
+    step=5,
+    key="num_words_key",
+    # on_change=gen_words_to_memorize
 )
 
 # endregion
@@ -787,7 +803,7 @@ EDITABLE_COLS: list[str] = [
 
 with tabs[tab_items.index("📚 个人词库")]:
     lib_cols = st.columns(2)
-    lib_cols[0].markdown("#### 基础词库")
+    lib_cols[0].markdown(f"#### 基础词库({selected_list})")
     placeholder = lib_cols[0].empty()
     lib_cols[1].markdown("#### 个人词库")
     mywords_placeholder = lib_cols[1].empty()

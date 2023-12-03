@@ -28,7 +28,7 @@ if "messages" not in st.session_state:
 
 # region 常量
 
-AVATAR_MAPS = {"user": "🧑‍💻", "assistant ":"🤖"}
+AVATAR_MAPS = {"user": "🧑‍💻", "assistant":"🤖"}
 
 # endregion
 
