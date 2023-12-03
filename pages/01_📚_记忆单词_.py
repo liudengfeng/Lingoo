@@ -177,7 +177,7 @@ style = "en-US" if pronunciation == "美式" else "en-GB"
 
 # 固定语音风格
 voice_style = voice_style_options[style][0]
-st.sidebar.info(f"语音风格是：{voice_style[0]}({voice_style[1]})")
+st.sidebar.info(f"语音风格：{voice_style[0]}({voice_style[1]})")
 
 # 在侧边栏添加一个选项卡让用户选择一个单词列表
 selected_list = st.sidebar.selectbox(
