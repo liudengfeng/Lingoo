@@ -110,9 +110,9 @@ def gen_words_to_memorize():
     # 获取选中的单词列表
     words = st.session_state.current_word_lib
     num_words = st.session_state["num_words_key"]
-    # st.write("单词数量：", num_words, "单词：", words)
+    n = min(num_words, len(words))
     # 随机选择单词
-    st.session_state.words_to_memorize = random.sample(words, num_words)
+    st.session_state.words_to_memorize = random.sample(words, n)
     # st.write("单词:", st.session_state.words_to_memorize)
     # 恢复初始显示状态
     st.session_state.display_state = "全部"
