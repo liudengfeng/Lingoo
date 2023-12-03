@@ -108,7 +108,6 @@ def gen_words_to_memorize():
     # 恢复初始显示状态
     st.session_state.display_state = "全部"
     st.session_state["word_idx"] = -1
-    # st.write("临时测试：单词数量", len(st.session_state.words_to_memorize))
 
 
 def gen_audio_fp(word: str, style: str):
@@ -176,12 +175,15 @@ st.sidebar.slider(
 
 # endregion
 
-# region 页面
-tab_items = ["📖 记忆闪卡", "🧩 单词拼图", "🖼️ 图片测词","📚 个人词库","📝 单词测验", "统计"]
+# region tabs
+# 将二者分离，避免格式经常被重置
+tab_names = ["记忆闪卡", "单词拼图", "图片测词", "个人词库", "单词测验", "个人统计"]
+tab_emoji = ["📖", "🧩", "🖼️", "📚", "📝", "📊"]
+tab_items = [e + " " + n for e, n in zip(tab_emoji, tab_names)]
 tabs = st.tabs(tab_items)
 # endregion
 
-# region 记忆闪卡
+# region 记忆闪卡辅助
 
 if len(st.session_state.words_to_memorize) == 0:
     gen_words_to_memorize()
@@ -260,7 +262,8 @@ def _memory_tip(word):
     return generate_word_memory_tip(word)
 
 
-def view_word(container, tip_placeholder, word):
+def view_flash_word(container, tip_placeholder):
+    word = st.session_state.words_to_memorize[st.session_state.word_idx]
     if word not in st.session_state.words:
         st.session_state.words[word] = get_word_info(word)
 
@@ -297,9 +300,13 @@ def view_word(container, tip_placeholder, word):
     view_pos(container, word_info, word)
 
 
+# endregion
+
+# region 📖 记忆闪卡
+
 with tabs[tab_items.index("📖 记忆闪卡")]:
     btn_cols = st.columns(12)
-    word = st.session_state.words_to_memorize[st.session_state.word_idx]
+    # word = st.session_state.words_to_memorize[st.session_state.word_idx]
     tip_placeholder = st.empty()
     container = st.container()
 
@@ -323,6 +330,7 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         disabled=st.session_state.word_idx
         == len(st.session_state.words_to_memorize) - 1,
     )
+
     play_btn = btn_cols[3].button("🔊", key="play", help="聆听单词发音")
     add_btn = btn_cols[4].button("➕", key="add", help="添加到个人词库")
     del_btn = btn_cols[5].button("➖", key="del", help="从个人词库中删除")
@@ -338,43 +346,37 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
             st.session_state.display_state = "中文"
         else:
             st.session_state.display_state = "全部"
-        view_word(container, tip_placeholder, word)
-
-    if prev_btn:
-        # 点击后会重新随机选择，需要使用会话状态管理
-        view_word(container, tip_placeholder, word)
-
-    if next_btn:
-        # 点击后会重新随机选择，需要使用会话状态管理
-        view_word(container, tip_placeholder, word)
 
     if play_btn:
         word = st.session_state.words_to_memorize[st.session_state.word_idx]
         fp = gen_audio_fp(st.session_state.words_to_memorize[st.session_state.word_idx], voice_style[0])  # type: ignore
         # placeholder.text(fp)
         components.html(mp3_autoplay_elem(fp))
-        view_word(container, tip_placeholder, word)
+        # view_flash_word(container, tip_placeholder)
 
     if refresh_btn:
         gen_words_to_memorize()
 
     if add_btn:
         word = st.session_state.words_to_memorize[st.session_state.word_idx]
-        st.session_state.dbi.add_to_personal_dictionary(
+        st.session_state.dbi.add_word_to_personal_dictionary(
             st.session_state["user_id"], word
         )
         st.toast(f"已添加单词：{word}到个人词库。")
 
     if del_btn:
         word = st.session_state.words_to_memorize[st.session_state.word_idx]
-        st.session_state.dbi.remove_from_personal_dictionary(
+        st.session_state.dbi.remove_word_from_personal_dictionary(
             st.session_state["user_id"], word
         )
         st.toast(f"已从个人词库中删除单词：{word}。")
 
+    # st.write("单词：", st.session_state.words_to_memorize)
+    view_flash_word(container, tip_placeholder)
+
 # endregion
 
-# region 单词拼图
+# region 单词拼图辅助
 
 if "puzzle_idx" not in st.session_state:
     st.session_state["puzzle_idx"] = -1
@@ -382,11 +384,17 @@ if "puzzle_idx" not in st.session_state:
 if "words_to_puzzle" not in st.session_state:
     st.session_state["words_to_puzzle"] = []
 
+if "puzzle_answer_value" not in st.session_state:
+    st.session_state["puzzle_answer_value"] = ""
+
 if "puzzle_view_word" not in st.session_state:
     st.session_state["puzzle_view_word"] = []
 
 if "clicked_character" not in st.session_state:
     st.session_state["clicked_character"] = []
+
+if "puzzle_test_score" not in st.session_state:
+    st.session_state["puzzle_test_score"] = {}
 
 
 def gen_words_to_puzzle():
@@ -396,14 +404,14 @@ def gen_words_to_puzzle():
     # 随机选择单词
     st.session_state.words_to_puzzle = random.sample(words, num_words)
     # 恢复初始显示状态
-    st.session_state.puzzle_idx = -1
+    st.session_state.puzzle_idx = 0
     st.session_state["puzzle_view_word"] = []
 
 
 def get_word_definition(word):
     word_info = get_word_info(word)
     definition = ""
-    en = word_info["en-US"]
+    en = word_info.get("en-US", {})
     for k, v in en.items():
         definition += f"\n{k}\n"
         for d in v:
@@ -417,7 +425,7 @@ def init_puzzle():
     random.shuffle(ws)
     st.session_state.puzzle_view_word = ws
     st.session_state.clicked_character = [False] * len(ws)
-    st.session_state.puzzle_answer = ""
+    st.session_state.puzzle_answer_value = ""
 
 
 def view_puzzle_word():
@@ -436,20 +444,21 @@ def view_puzzle_word():
             help="点击按钮，选择单词拼图中的字母。",
             type="primary",
         ):
-            st.session_state.puzzle_answer += ws[i]
+            st.session_state.puzzle_answer_value += ws[i]
             st.session_state.clicked_character[i] = True
+            st.rerun()
 
 
-def view_definition(progress_placeholder):
+def view_definition(progress_word):
     if len(st.session_state.puzzle_view_word) == 0:
         gen_words_to_puzzle()
     n = len(st.session_state.words_to_puzzle)
-    progress_placeholder.progress(
-        (st.session_state.puzzle_idx + 1) / n, text="🧩 单词拼图进度"
-    )
+    progress = 1.0 * (st.session_state.puzzle_idx + 1) / n
+    # st.write("进度：", progress, "idx", st.session_state.puzzle_idx)
+    progress_word.progress(progress, text="🧩 单词拼图进度")
     word = st.session_state.words_to_puzzle[st.session_state.puzzle_idx]
     definition = get_word_definition(word)
-    st.write("单词释义：")
+    st.write("参考信息：")
     st.markdown(definition)
 
 
@@ -461,13 +470,17 @@ def on_next_puzzle_btn_click():
     st.session_state["puzzle_idx"] += 1
 
 
+# endregion
+
+# region 单词拼图
+
 with tabs[tab_items.index("🧩 单词拼图")]:
     st.markdown(
         "单词拼图是一种记忆单词的游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
     p_progress_text = "进度"
     n = st.session_state["num_words_key"]
-    progress_placeholder = st.empty()
+    progress_word = st.empty()
     p_btns = st.columns(4)
     prev_p_btn = p_btns[1].button(
         "↩️",
@@ -495,21 +508,41 @@ with tabs[tab_items.index("🧩 单词拼图")]:
     if refresh_btn:
         gen_words_to_puzzle()
 
-    view_definition(progress_placeholder)
+    view_definition(progress_word)
     view_puzzle_word()
-    user_input = st.text_input("点击字符按钮或输入您的答案", key="puzzle_answer")
 
-    if st.button("检查", help="点击按钮，检查您的答案。"):
+    user_input = st.text_input(
+        "点击字符按钮或输入您的答案",
+        placeholder="点击字符按钮或输入您的答案",
+        value=st.session_state.puzzle_answer_value,
+        key="puzzle_answer",
+        label_visibility="collapsed",
+    )
+    puzzle_score = st.empty()
+    sumbit_cols = st.columns(6)
+    if sumbit_cols[0].button("重试", help="恢复初始状态，重新开始。"):
+        init_puzzle()
+        st.rerun()
+
+    if sumbit_cols[1].button("检查", help="点击按钮，检查您的答案是否正确。"):
         word = st.session_state.words_to_puzzle[st.session_state.puzzle_idx]
         if word not in st.session_state.words:
             st.session_state.words[word] = get_word_info(word)
 
         if user_input == word:
             st.balloons()
+            st.session_state.puzzle_test_score[word] = True
         else:
             st.write(
                 f'对不起，您回答错误。正确的单词应该为：{word}，翻译：{st.session_state.words[word]["zh-CN"]["translation"]}'
             )
+            st.session_state.puzzle_test_score[word] = False
+
+        if st.session_state.puzzle_idx == n - 1:
+            score = sum(st.session_state.puzzle_test_score.values()) / n * 100
+            msg = f":red[您的得分：{score:.0f}%]"
+            puzzle_score.markdown(msg)
+
 
 # endregion
 
@@ -560,7 +593,7 @@ def on_pic_radio_change(idx):
 
 
 def view_pic_question(container):
-    progress_text = "答题进度"
+    # progress_text = "答题进度"
     tests = st.session_state.pic_tests
     n = len(tests)
     idx = st.session_state.pic_idx
@@ -577,7 +610,7 @@ def view_pic_question(container):
     user_answer_idx = options.index(user_answer)
 
     cols = container.columns(3)
-    my_bar = cols[0].progress(0, text=progress_text)
+    # my_bar = cols[0].progress(0, text=progress_text)
     container.divider()
     container.markdown(question)
     container.image(image, caption=tests[idx]["iamge_label"], width=400)  # type: ignore
@@ -596,7 +629,7 @@ def view_pic_question(container):
     # 保存用户答案
     st.session_state.user_pic_answer[idx] = st.session_state["pic_options"]
     # container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_answer}>")
-    my_bar.progress((idx + 1) / n, text=progress_text)
+    # my_bar.progress((idx + 1) / n, text=progress_text)
     container.divider()
 
 
@@ -652,13 +685,14 @@ def check_pic_answer(container):
 # region 图片测词
 
 with tabs[tab_items.index("🖼️ 图片测词")]:
+    progress_text = "图片测词进度"
     st.markdown(
         "🖼️ 图片测词是一种记忆单词的游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
     pic_cols = st.columns(5)
     category = pic_cols[0].selectbox("请选择图片类别", pic_categories)
     pic_num = pic_cols[1].number_input("请选择图片测词考题数量", 1, 20, value=10, step=1)
-
+    my_bar = st.progress((st.session_state["pic_idx"] + 1) / n, text=progress_text)
     pic_qa_cols = st.columns(6)
     pic_idx = st.session_state.get("pic_idx", 0)  # 获取当前问题的索引
 
