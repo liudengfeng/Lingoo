@@ -152,8 +152,6 @@ def get_word_info(word):
 
 # region 侧边栏
 
-# 加载单词列表
-
 with open(DICT_DIR / "word_lists_by_edition_grade.json", "r", encoding="utf-8") as f:
     word_lists = json.load(f)
 
@@ -337,24 +335,24 @@ def view_flash_word(container, tip_placeholder):
 # region 📖 记忆闪卡
 
 with tabs[tab_items.index("📖 记忆闪卡")]:
-    btn_cols = st.columns(12)
+    btn_cols = st.columns(9)
     # word = st.session_state.words_to_memorize[st.session_state.word_idx]
     tip_placeholder = st.empty()
     container = st.container()
 
     # placeholder = st.container()
     # 创建前后选择的按钮
-    mask_btn = btn_cols[0].button(
+    mask_btn = btn_cols[1].button(
         "♻️", key="mask", help="点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。"
     )
-    prev_btn = btn_cols[1].button(
+    prev_btn = btn_cols[2].button(
         "↩️",
         key="prev",
         help="点击按钮，切换到上一个单词。",
         on_click=on_prev_btn_click,
         disabled=st.session_state.word_idx <= 0,
     )
-    next_btn = btn_cols[2].button(
+    next_btn = btn_cols[3].button(
         "↪️",
         key="next",
         help="点击按钮，切换到下一个单词。",
@@ -363,10 +361,10 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         == len(st.session_state.words_to_memorize) - 1,
     )
 
-    play_btn = btn_cols[3].button("🔊", key="play", help="聆听单词发音")
-    add_btn = btn_cols[4].button("➕", key="add", help="添加到个人词库")
-    del_btn = btn_cols[5].button("➖", key="del", help="从个人词库中删除")
-    refresh_btn = btn_cols[6].button("🔄", key="refresh", help="重新生成单词列表")
+    play_btn = btn_cols[4].button("🔊", key="play", help="聆听单词发音")
+    add_btn = btn_cols[5].button("➕", key="add", help="添加到个人词库")
+    del_btn = btn_cols[6].button("➖", key="del", help="从个人词库中删除")
+    refresh_btn = btn_cols[7].button("🔄", key="refresh", help="重新生成单词列表")
 
     placeholder = st.empty()
 
@@ -433,8 +431,9 @@ def gen_words_to_puzzle():
     # 获取选中的单词列表
     words = word_lists[selected_list]
     num_words = st.session_state["num_words_key"]
+    n = min(num_words, len(words))
     # 随机选择单词
-    st.session_state.words_to_puzzle = random.sample(words, num_words)
+    st.session_state.words_to_puzzle = random.sample(words, n)
     # 恢复初始显示状态
     st.session_state.puzzle_idx = 0
     st.session_state["puzzle_view_word"] = []
@@ -721,7 +720,7 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
     st.markdown(
         "🖼️ 图片测词是一种记忆单词的游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
-    pic_cols = st.columns(5)
+    pic_cols = st.columns(4)
     category = pic_cols[0].selectbox("请选择图片类别", pic_categories)
     pic_num = pic_cols[1].number_input("请选择图片测词考题数量", 1, 20, value=10, step=1)
     my_bar = st.progress((st.session_state["pic_idx"] + 1) / n, text=progress_text)
@@ -878,7 +877,7 @@ with tabs[tab_items.index("📚 个人词库")]:
 
 # endregion
 
-# region 单词测验
+# region 单词测验辅助
 
 if "test_idx" not in st.session_state:
     st.session_state["test_idx"] = -1
@@ -991,18 +990,22 @@ def view_question(test_container):
     test_container.divider()
 
 
+# endregion
+
+# region 单词测验
+
 with tabs[tab_items.index("📝 单词测验")]:
     st.info("试题词汇来源于【记忆闪卡】生成的单词列表。")
-    cols = st.columns(6)
+    cols = st.columns(4)
     level = cols[0].selectbox("单词级别", ("A1", "A2", "B1", "B2", "C1", "C2"))
 
     test_num = cols[1].number_input("试题数量", 1, 20, value=10, step=1)
 
     test_container = st.container()
 
-    test_btns = st.columns(8)
-    gen_test_btn = test_btns[0].button("🔄", key="gen-test", help="点击按钮，生成单词理解测试题。")
-    prev_test_btn = test_btns[1].button(
+    test_btns = st.columns(6)
+    gen_test_btn = test_btns[1].button("🔄", key="gen-test", help="点击按钮，生成单词理解测试题。")
+    prev_test_btn = test_btns[2].button(
         "↩️",
         key="prev-test",
         help="点击按钮，切换到上一题。",
@@ -1010,7 +1013,7 @@ with tabs[tab_items.index("📝 单词测验")]:
         args=(test_container,),
         disabled=st.session_state.test_idx <= 0,
     )
-    next_test_btn = test_btns[2].button(
+    next_test_btn = test_btns[3].button(
         "↪️",
         key="next-test",
         help="点击按钮，切换到下一题。",
@@ -1019,7 +1022,7 @@ with tabs[tab_items.index("📝 单词测验")]:
         disabled=st.session_state.test_idx == test_num - 1,
     )
     # 答题即可提交检查
-    sumbit_test_btn = test_btns[3].button(
+    sumbit_test_btn = test_btns[4].button(
         "🔍",
         key="submit-test",
         disabled=len(st.session_state.tests) == 0
