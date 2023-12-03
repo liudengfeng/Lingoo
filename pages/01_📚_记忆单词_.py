@@ -27,7 +27,7 @@ from mypylib.google_palm import (
     lemmatize,
     lookup,
 )
-from mypylib.word_utils import hash_word, mp3_autoplay_elem
+from mypylib.word_utils import hash_word, audio_autoplay_elem
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
@@ -381,7 +381,7 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         word = st.session_state.words_to_memorize[st.session_state.word_idx]
         fp = gen_audio_fp(st.session_state.words_to_memorize[st.session_state.word_idx], voice_style[0])  # type: ignore
         # placeholder.text(fp)
-        components.html(mp3_autoplay_elem(fp))
+        components.html(audio_autoplay_elem(fp))
         # view_flash_word(container, tip_placeholder)
 
     if refresh_btn:

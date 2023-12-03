@@ -1,7 +1,6 @@
 import hashlib
 import json
 import os
-import queue
 import time
 import wave
 
@@ -24,6 +23,22 @@ from mypylib.azure_translator import language_detect
 from mypylib.constants import LAN_MAPS, LANGUAGES
 from mypylib.html_constants import CSS, JS, SCRIPT, STYLE
 from mypylib.nivo_charts import gen_radar
+from mypylib.word_utils import audio_autoplay_elem
+
+
+# region 认证及初始化
+
+if "user_id" not in st.session_state:
+    st.session_state["user_id"] = None
+
+if "dbi" not in st.session_state:
+    st.session_state["dbi"] = DbInterface()
+
+if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
+    st.error("非付费用户，无法使用此功能。")
+    st.stop()
+
+# endregion
 
 # region 常量
 
@@ -34,7 +49,8 @@ user_eh = f"h{hex_dig}"
 
 current_cwd: Path = Path(__file__).parent.parent
 voices_fp = current_cwd / "resource/voices.json"
-audio_dir = current_cwd / "audio_data"
+audio_dir = current_cwd / "resource" / "audio_data"
+
 if not os.path.exists(audio_dir):
     os.makedirs(audio_dir, exist_ok=True)
 
@@ -53,6 +69,8 @@ BADGE_MAPS = OrderedDict(
         "Monotone": ("dull", "primary", "单调", "这些单词正以平淡且不兴奋的语调阅读，没有任何节奏或表达"),
     }
 )
+
+# region templates
 
 WORD_TOOLTIP_TEMPLATE = """
 <table>
@@ -83,9 +101,7 @@ BTN_TEMPLATE = """
 </button>
 """
 
-
-recording_queue = queue.Queue()
-rec_status = ""
+# endregion
 
 # endregion
 
@@ -96,12 +112,6 @@ if "assessment_tb1" not in st.session_state:
 
 if "assessment_tb2" not in st.session_state:
     st.session_state["assessment_tb2"] = {}
-
-if "user_id" not in st.session_state:
-    st.session_state["user_id"] = None
-
-if "dbi" not in st.session_state:
-    st.session_state["dbi"] = DbInterface()
 
 # endregion
 
@@ -120,7 +130,6 @@ def get_synthesize_speech(text, voice):
     )
 
 
-# TODO:在会话中保存音频数据
 def update_mav(audio):
     # audio is the variable containing the audio data
     with wave.open(replay_fp, "w") as wav_file:
@@ -368,7 +377,7 @@ tab1, tab2 = st.tabs(["🎙️ 发音评估", "🗣️ 对话能力"])
 # region 边栏
 
 language: str = st.sidebar.selectbox(
-    "选择目标语言", options=LANGUAGES, format_func=lambda x: LAN_MAPS[x.lower().split("-")[0]]
+    "选择目标语言", options=LANGUAGES, format_func=lambda x: LAN_MAPS[x]
 )  # type: ignore
 
 with open(voices_fp, "r", encoding="utf-8") as f:
@@ -378,7 +387,6 @@ voice_style: Any = st.sidebar.selectbox(
 )
 
 # endregion
-
 
 # region 事件
 
@@ -432,23 +440,32 @@ def on_ass_btn_tb1_click(text_to_be_evaluated_tb1, status_placeholder):
     st.session_state["record_ready"] = False
 
 
-def on_syn_btn_tb1_click(text_to_be_evaluated_tb1, voice_style, status_placeholder):
+def _get_cn_name(lan):
+    for k, v in LAN_MAPS.items():
+        if k.startswith(lan):
+            return v
+
+
+def on_syn_btn_tb1_click(text_to_be_evaluated_tb1, voice_style, placeholder):
     lan = language_detect(
         text_to_be_evaluated_tb1,
         st.secrets["Microsoft"]["TRANSLATOR_TEXT_SUBSCRIPTION_KEY"],
         st.secrets["Microsoft"]["TRANSLATOR_TEXT_REGION"],
     )
+    # actual='zh-Hans' expected='en-US-JennyMultilingualNeural'
     actual = lan[0]["language"].split("-")[0].lower()
     expected = voice_style[0].split("-")[0].lower()
     if actual != expected:
-        status_placeholder.warning(
-            f'您希望合成"{LAN_MAPS[expected]}"语音，但系统检测到您输入的文本是"{LAN_MAPS[actual]}"。'
+        e_name = _get_cn_name(expected)
+        a_name = _get_cn_name(actual)
+        placeholder.warning(
+            f'您希望合成"{e_name}"语音，但系统检测到您输入的文本是"{a_name}"。在左侧菜单栏中，点击“口语评估”菜单重新开始。'
         )
         st.stop()
     try:
         get_synthesize_speech(text_to_be_evaluated_tb1, voice_style[0])
     except Exception as e:
-        status_placeholder.error(e)
+        placeholder.error(e)
         st.stop()
 
 
@@ -456,14 +473,19 @@ def on_syn_btn_tb1_click(text_to_be_evaluated_tb1, voice_style, status_placehold
 
 # region 发音评估
 
-
 with tab1:
     st.session_state["tab_flag"] = "tb1"
     page_emoji = "🎙️"
     st.markdown(
         f"""#### {page_emoji} 发音评估
-- 输入要评估的文本
-- 光标移出文本区域后，激活语音"合成"按钮
+英语发音评估是帮助学习者了解自己的发音水平，并针对性地进行练习的重要工具。本产品基于`Azure`语音服务，提供发音评估和语音合成功能。
+使用方法如下：
+1. 在文本框内输入要评估的英语文本。
+2. 点击“录音”按钮，大声朗读文本框内文本，开始录音。
+3. 说完后，点击“停止”按钮，停止录音。
+4. 点击“评估”按钮，查看发音评估报告。报告将包括音素准确性、完整性、流畅性、韵律等方面的评分。
+5. 点击“合成”按钮，合成选定风格的语音。只有文本框内有文本时，才激活“合成”按钮。
+6. 点击“重置”按钮，重置发音评估文本。
 """
     )
 
@@ -474,55 +496,67 @@ with tab1:
         height=120,
         label_visibility="collapsed",
         on_change=on_tb1_text_changed,
-        # help="输入要评估的文本。光标移出文本区域后，激活录音按钮。",
+        placeholder="输入要评估的英语文本。",
+        help="输入要评估的文本。",
     )
-    status_placeholder = st.empty()
-    btn_num = 6
+    message_placeholder = st.empty()
+    btn_num = 8
     btn_cols = st.columns(btn_num)
-    audio_cols = st.columns([1, 2, 1, 1, 2, 1])
+    status_placeholder = st.empty()
 
     with btn_cols[1]:
         audio = mic_recorder(start_prompt="录音[🔴]", stop_prompt="停止[⏹️]", key="recorder")
 
-    ass_btn = btn_cols[2].button(
+    rep_btn = btn_cols[2].button(
+        "回放[🎧]",
+        key="rep_btn_tb1",
+        disabled=not st.session_state.get("record_ready", False),
+        help="点击按钮，回放麦克风录音。",
+    )
+
+    ass_btn = btn_cols[3].button(
         "评估[🔍]",
         key="ass_btn_tb1",
-        help="生成发音评估报告",
+        help="生成发音评估报告。",
         on_click=on_ass_btn_tb1_click,
         args=(text_to_be_evaluated_tb1, status_placeholder),
     )
-    syn_btn = btn_cols[3].button(
+    syn_btn = btn_cols[4].button(
         "合成[🔊]",
         key="syn_btn_tb1",
         on_click=on_syn_btn_tb1_click,
-        args=(text_to_be_evaluated_tb1, voice_style, status_placeholder),
+        args=(text_to_be_evaluated_tb1, voice_style, message_placeholder),
         disabled=len(text_to_be_evaluated_tb1) == 0,
-        help="点击合成按钮，合成选定风格的语音。只有文本或语音风格变化后，才从 Azure 语音库合成语音。",
+        help="点击合成按钮，合成选定风格的语音。",
     )
-    cls_btn = btn_cols[4].button(
+    lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
+    cls_btn = btn_cols[6].button(
         "重置[🔄]",
         key="cls_btn_tb1",
-        help="重置发音评估文本",
+        help="重置发音评估文本。",
         on_click=reset_tb1,
     )
-
-    # 回放录音
-    audio_cols[0].markdown("录音👉")
-    replay_placeholder = audio_cols[1].empty()
 
     if audio:
         # 保存wav文件
         update_mav(audio)
         st.session_state["record_ready"] = True
 
-    if os.path.exists(replay_fp):
-        replay_placeholder.audio(replay_fp)
+    # if os.path.exists(replay_fp):
+    #     replay_placeholder.audio(replay_fp)
 
-    # 合成
-    audio_cols[3].markdown("合成👉")
-    listen_placeholder = audio_cols[4].empty()
-    if os.path.exists(listen_fp):
-        listen_placeholder.audio(listen_fp, format="audio/wav")
+    if rep_btn:
+        if not os.path.exists(replay_fp):
+            message_placeholder.warning("尚未录制音频，无法回放")
+            st.stop()
+
+        components.html(audio_autoplay_elem(replay_fp, fmt="mav"))
+
+    if lst_btn:
+        if not os.path.exists(listen_fp):
+            message_placeholder.warning("尚未合成音频，无法聆听")
+            st.stop()
+        components.html(audio_autoplay_elem(listen_fp))
 
     st.markdown("#### :trophy: 评估结果")
 
@@ -534,13 +568,17 @@ with tab1:
     view_score_legend(progress_cols, True)
 
     with st.expander("操作提示..."):
-        # 录音提示
-        st.markdown("录音提示👇")
-        record_tip = current_cwd / "resource" / "audio" / "cn-record-tip.wav"
+        st.markdown("如何进行发音评估👇")
+        record_tip = (
+            current_cwd
+            / "resource"
+            / "audio_tip"
+            / "cn-pronunciation-assessment-tip.wav"
+        )
         st.audio(str(record_tip), format="audio/wav")
 
-        st.markdown("合成提示👇")
-        lst_tip = current_cwd / "resource" / "audio" / "cn-synthesis-tip.wav"
+        st.markdown("如何聆听发音示例👇")
+        lst_tip = current_cwd / "resource" / "audio_tip" / "cn-synthesis-tip.wav"
         st.audio(str(lst_tip), format="audio/wav")
 # endregion
 

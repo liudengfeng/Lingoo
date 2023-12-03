@@ -31,22 +31,41 @@ def get_word_cefr_map(name, fp):
         return json.load(f)
 
 
-def mp3_autoplay_elem(mp3_fp: str, controls: bool = False):
-    with open(mp3_fp, "rb") as f:
+def audio_autoplay_elem(fp: str, controls: bool = False, fmt="mp3"):
+    audio_type = "audio/mp3" if fmt == "mp3" else "audio/wav"
+    with open(fp, "rb") as f:
         data = f.read()
         b64 = base64.b64encode(data).decode()
         if controls:
             return f"""\
                 <audio controls autoplay>
-                    <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+                    <source src="data:{audio_type};base64,{b64}" type="{audio_type}">
                 </audio>
                 """
         else:
             return f"""\
                 <audio autoplay>
-                    <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+                    <source src="data:{audio_type};base64,{b64}" type="{audio_type}">
                 </audio>
                 """
+
+
+# def wav_autoplay_elem(wav_fp: str, controls: bool = False):
+#     with open(wav_fp, "rb") as f:
+#         data = f.read()
+#         b64 = base64.b64encode(data).decode()
+#         if controls:
+#             return f"""\
+#                 <audio controls autoplay>
+#                     <source src="data:audio/wav;base64,{b64}" type="audio/wav">
+#                 </audio>
+#                 """
+#         else:
+#             return f"""\
+#                 <audio autoplay>
+#                     <source src="data:audio/wav;base64,{b64}" type="audio/wav">
+#                 </audio>
+#                 """
 
 
 def gtts_autoplay_elem(text: str, lang: str, tld: str):

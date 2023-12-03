@@ -1,10 +1,11 @@
 LANGUAGES = ["en-US", "zh-CN", "fr-FR", "ja-JP", "en-GB"]
 
 LAN_MAPS = {
-    "en": "英语",
-    "zh": "中文",
-    "ja": "日语",
-    "fr": "法语",
+    "en-US": "美式英语",
+    "en-GB": "英式英语",
+    "zh-CN": "简体中文",
+    "ja-JP": "日语",
+    "fr-FR": "法语",
 }
 
 FAKE_EMAIL_DOMAIN = "example.com"
