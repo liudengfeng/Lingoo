@@ -177,8 +177,8 @@ st.sidebar.slider(
 
 # region tabs
 # 将二者分离，避免格式经常被重置
-tab_names = ["记忆闪卡", "单词拼图", "图片测词", "个人词库", "单词测验", "个人统计"]
-tab_emoji = ["📖", "🧩", "🖼️", "📚", "📝", "📊"]
+tab_names = ["记忆闪卡", "单词拼图", "图片测词", "单词测验", "个人词库", "个人统计"]
+tab_emoji = ["📖", "🧩", "🖼️", "📝", "📚", "📊"]
 tab_items = [e + " " + n for e, n in zip(tab_emoji, tab_names)]
 tabs = st.tabs(tab_items)
 # endregion
@@ -676,7 +676,7 @@ def check_pic_answer(container):
     if percentage >= 75:
         st.balloons()
     container.divider()
-    container.text(f"得分：{percentage:.0f}%")
+    container.markdown(f":red[得分：{percentage:.0f}%]")
     container.divider()
 
 
@@ -802,6 +802,7 @@ with tabs[tab_items.index("📚 个人词库")]:
         df,
         key="word_lib",
         hide_index=True,
+        height=500,
         disabled=[col for col in df.columns if col not in EDITABLE_COLS],
     )
     if add_lib_btn and st.session_state.get("word_lib", None):
@@ -823,6 +824,7 @@ with tabs[tab_items.index("📚 个人词库")]:
         my_word_df,
         key="my_word_lib",
         hide_index=True,
+        height=500,
         disabled=[col for col in df.columns if col not in EDITABLE_COLS],
     )
     if del_lib_btn and st.session_state.get("my_word_lib", None):
@@ -907,7 +909,7 @@ def check_answer(test_container):
     if percentage >= 75:
         st.balloons()
     test_container.divider()
-    test_container.text(f"得分：{percentage:.0f}%")
+    test_container.markdown(f":red[得分：{percentage:.0f}%]")
     test_container.divider()
 
 
