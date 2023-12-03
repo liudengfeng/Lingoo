@@ -71,6 +71,9 @@ st.set_page_config(
     initial_sidebar_state="auto",
 )
 
+if "current_word_lib" not in st.session_state:
+    st.session_state["current_word_lib"] = []
+
 if "words_to_memorize" not in st.session_state:
     st.session_state["words_to_memorize"] = []
 
@@ -98,9 +101,14 @@ def on_next_btn_click():
     st.session_state["word_idx"] += 1
 
 
+def on_word_lib_changed(word_lists):
+    word_lib_name = st.session_state["word_lib_key"]
+    st.session_state.current_word_lib = word_lists[word_lib_name]
+
+
 def gen_words_to_memorize():
     # 获取选中的单词列表
-    words = word_lists[selected_list]
+    words = st.session_state.current_word_lib
     num_words = st.session_state["num_words_key"]
     # st.write("单词数量：", num_words, "单词：", words)
     # 随机选择单词
@@ -177,9 +185,15 @@ st.sidebar.info(f"语音风格是：{voice_style[0]}({voice_style[1]})")
 selected_list = st.sidebar.selectbox(
     "请选择单词列表",
     sorted(list(word_lists.keys())),
-    # on_change=gen_words_to_memorize,
+    key="word_lib_key",
+    on_change=on_word_lib_changed,
+    args=(word_lists,),
     format_func=lambda x: x.split("-", maxsplit=1)[1],
 )
+
+# 初始化当前词库
+if len(st.session_state.current_word_lib) == 0:
+    on_word_lib_changed(word_lists)
 
 # 在侧边栏添加一个滑块让用户选择记忆的单词数量
 st.sidebar.slider(
