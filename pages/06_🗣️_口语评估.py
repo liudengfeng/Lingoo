@@ -171,11 +171,11 @@ def generate_score_legend():
     """
     return """\
 <div style="display: flex; align-items: center;">\
-    <div style="width: 12px; height: 12px; background-color: #c02a2a; margin-right: 5px; margin-left: 5px;"></div>\
+    <div style="width: 12px; height: 12px; background-color: #c02a2a; margin-right: 6px; margin-left: 6px;"></div>\
     <span>0 ~ 59</span>\
-    <div style="width: 12px; height: 12px; background-color: yellow; margin-right: 5px;margin-left: 5px;"></div>\
+    <div style="width: 12px; height: 12px; background-color: yellow; margin-right: 6px;margin-left: 6px;"></div>\
     <span>60 ~ 79</span>\
-    <div style="width: 12px; height: 12px; background-color: green; margin-right: 5px;margin-left: 5px;"></div>\
+    <div style="width: 12px; height: 12px; background-color: green; margin-right: 6px;margin-left: 6px;"></div>\
     <span>80 ~ 100</span>\
 </div>\
 """
@@ -299,13 +299,15 @@ def view_progress(value: int):
 
 
 def view_report_tb1(assessment_placeholder, add_spinner=False):
-    name = "assessment_{}".format(st.session_state["tab_flag"])
+    name = "assessment_tb1"
+    # 显示音素得分
     assessment = st.session_state[name]
     badges = generate_badges(assessment)
     html = "".join(badges)
     html += generate_paragraph(assessment)
     if len(badges) > 0:
         html = "<hr>" + html + "<hr>"
+
     # 雷达图
     item_maps_tab1 = {
         "pronunciation_score": "发音总评分",
@@ -320,7 +322,7 @@ def view_report_tb1(assessment_placeholder, add_spinner=False):
     }
 
     with assessment_placeholder:
-        components.html(CSS + JS + STYLE + html + SCRIPT, height=200, scrolling=True)
+        components.html(CSS + JS + STYLE + html + SCRIPT, scrolling=True)
         gen_radar(data_tb1, item_maps_tab1, 320)
 
 
@@ -351,8 +353,8 @@ def view_score_legend(progress_cols, add_spinner=False):
             help="给定语音的韵律。韵律指示给定语音的性质，包括重音、语调、语速和节奏。",
         )
     score_legend = generate_score_legend()
-    if add_spinner:
-        score_legend += "<hr>"
+    # if add_spinner:
+    #     score_legend += "<hr>"
     components.html(CSS + JS + STYLE + score_legend + SCRIPT)
 
 
@@ -417,9 +419,8 @@ def on_cls_btn_click_tb2():
         os.remove(replay_fp)
 
 
-def fpronunciation_assessmentunc(text_to_be_evaluated_tb1, status_placeholder):
+def pronunciation_assessment_func(text_to_be_evaluated_tb1):
     st.toast("正在评估对话...", icon="💯")
-    status_placeholder.info("💯 正在评估对话...")
     try:
         assessment = pronunciation_assessment_from_wavfile(
             replay_fp,
@@ -429,14 +430,14 @@ def fpronunciation_assessmentunc(text_to_be_evaluated_tb1, status_placeholder):
             st.secrets["Microsoft"]["SPEECH_SERVICE_REGION"],
         )
         st.session_state["assessment_tb1"] = assessment
-        status_placeholder.info("🎈 完成评估")
+        st.toast("🎈 完成评估")
     except Exception as e:
-        status_placeholder.error(e)
+        st.toast(e)
         st.stop()
 
 
-def on_ass_btn_tb1_click(text_to_be_evaluated_tb1, status_placeholder):
-    fpronunciation_assessmentunc(text_to_be_evaluated_tb1, status_placeholder)
+def on_ass_btn_tb1_click(text_to_be_evaluated_tb1):
+    pronunciation_assessment_func(text_to_be_evaluated_tb1)
     st.session_state["record_ready"] = False
 
 
@@ -496,13 +497,12 @@ with tab1:
         height=120,
         label_visibility="collapsed",
         on_change=on_tb1_text_changed,
-        placeholder="输入要评估的英语文本。",
+        placeholder="请在文本框中输入要评估的文本。请注意，您的文本要与左侧下拉列表中的“目标语言”一致。",
         help="输入要评估的文本。",
     )
     message_placeholder = st.empty()
     btn_num = 8
     btn_cols = st.columns(btn_num)
-    status_placeholder = st.empty()
 
     with btn_cols[1]:
         audio = mic_recorder(start_prompt="录音[🔴]", stop_prompt="停止[⏹️]", key="recorder")
@@ -519,7 +519,7 @@ with tab1:
         key="ass_btn_tb1",
         help="生成发音评估报告。",
         on_click=on_ass_btn_tb1_click,
-        args=(text_to_be_evaluated_tb1, status_placeholder),
+        args=(text_to_be_evaluated_tb1,),
     )
     syn_btn = btn_cols[4].button(
         "合成[🔊]",
@@ -542,30 +542,25 @@ with tab1:
         update_mav(audio)
         st.session_state["record_ready"] = True
 
-    # if os.path.exists(replay_fp):
-    #     replay_placeholder.audio(replay_fp)
-
     if rep_btn:
         if not os.path.exists(replay_fp):
-            message_placeholder.warning("尚未录制音频，无法回放")
+            message_placeholder.warning("抱歉，您尚未录制音频，无法回放。")
             st.stop()
-
         components.html(audio_autoplay_elem(replay_fp, fmt="mav"))
 
     if lst_btn:
         if not os.path.exists(listen_fp):
-            message_placeholder.warning("尚未合成音频，无法聆听")
+            message_placeholder.warning("抱歉，您尚未合成音频，无法聆听。")
             st.stop()
         components.html(audio_autoplay_elem(listen_fp))
 
     st.markdown("#### :trophy: 评估结果")
-
     assessment_placeholder = st.container()
     view_report_tb1(assessment_placeholder)
-
-    progress_cols = st.columns(5)
-
-    view_score_legend(progress_cols, True)
+    # 显示图标
+    # st.divider()
+    # progress_cols = st.columns(5)
+    # view_score_legend(progress_cols, True)
 
     with st.expander("操作提示..."):
         st.markdown("如何进行发音评估👇")
@@ -626,7 +621,7 @@ with tab2:
         on_click=on_cls_btn_click_tb2,
     )
 
-    status_placeholder = st.empty()
+    # status_placeholder = st.empty()
 
     audio_col_1, audio_col_2 = st.columns(2)
 
