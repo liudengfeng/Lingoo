@@ -115,3 +115,31 @@ def generate_word_memory_tip(word):
         **parameters,
     )
     return response.text
+
+
+def generate_english_topics(target, category, level, n=5):
+    parameters = {
+        "candidate_count": 1,
+        "max_output_tokens": 512,
+        "temperature": 0.7,
+        "top_p": 0.8,
+        "top_k": 40,
+    }
+    model = TextGenerationModel.from_pretrained("text-bison")
+    response = model.predict(
+        f"""在指定领域内，生成{n}个话题。
+学生当前英语水平：CEFR 分级 {level}
+领域：{category}
+目标：{target}
+要求：
+1. 话题要广泛；
+2. 话题要贴近学生的实际生活，让学生有话可说；
+3. 话题要有一定的开放性，让学生有充分的发挥空间；
+4. 避免过于简单或复杂的话题；
+5. 避免过于敏感或有争议的话题；
+6. 话题的用词要根据学生的英语水平进行选择，以确保学生能够理解。
+""",
+        **parameters,
+    )
+    # 输出列表
+    return response.text.splitlines()

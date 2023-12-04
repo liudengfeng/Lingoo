@@ -12,7 +12,6 @@ st.set_page_config(
     page_title="听力练习",
     page_icon="🎧",
     layout="wide",
-    initial_sidebar_state="auto",
 )
 
 st.markdown("# 敬请期待......")

@@ -37,7 +37,7 @@ logger = logging.getLogger("streamlit")
 
 # region 常量
 # streamlit中各页都是相对当前根目录
-# palm.configure(api_key=st.secrets["Google"]["PALM_API_KEY"])
+
 current_cwd: Path = Path(__file__).parent.parent
 DICT_DIR = current_cwd / "resource/dictionary"
 
@@ -59,6 +59,12 @@ if st.secrets["env"] in ["streamlit", "azure"]:
     if "inited_vertex" not in st.session_state:
         init_vertex(st.secrets)
         st.session_state["inited_vertex"] = True
+else:
+    st.error("非云端环境，无法使用 Vertex AI")
+    st.stop()
+
+if "chat_messages" not in st.session_state:
+    st.session_state["chat_messages"] = []
 
 # endregion
 
@@ -68,7 +74,6 @@ st.set_page_config(
     page_title="记忆单词",
     page_icon="📚",
     layout="wide",
-    initial_sidebar_state="auto",
 )
 
 if "current_word_lib" not in st.session_state:

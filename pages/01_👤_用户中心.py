@@ -25,7 +25,6 @@ st.set_page_config(
     page_title="用户管理",
     page_icon="👤",
     layout="wide",
-    initial_sidebar_state="auto",
 )
 
 if "user_id" not in st.session_state:
@@ -320,7 +319,8 @@ with tabs[items.index("问题反馈")]:
     with st.form(key="feedback_form"):
         title = st.text_input("标题", key="title", help="请输入标题")
         content = st.text_area("问题描述", key="content", help="请输入内容")
-        uploaded_file = st.file_uploader("📁 上传截屏视频", type=["webm"] ,help="请按“如何录制截屏视频”指引，录制视频反馈给管理员。")
+        uploaded_file = st.file_uploader(
+            "📁 上传截屏视频", type=["webm"],help="请按'如何录制截屏视频'指引，录制视频反馈给管理员。")
         if st.form_submit_button(label="提交"):
             container_name = "feedback"
             connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]

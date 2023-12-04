@@ -10,7 +10,7 @@ import streamlit as st
 
 from mypylib.azure_speech import synthesize_speech_to_file
 from mypylib.azure_translator import translate
-from mypylib.constants import NAMES, TOPICS
+from mypylib.constants import NAMES, TOPICS, CEFR_LEVEL_MAPS
 from mypylib.google_palm import generate_text
 
 palm.configure(api_key=st.secrets["Google"]["PALM_API_KEY"])
@@ -33,14 +33,9 @@ user_eh = f"h{hex_dig}"
 
 model = "models/text-bison-001"
 language = "American English"
+
 AVATAR_MAPS = {"0": ("user", "👦"), "1": ("assistant", "👧")}
-LAN_LEVEL_MAPS = {
-    "初级": "Elementary",
-    "中级": "Intermediate",
-    "中高级": "Upper Intermediate",
-    "高级": "Advanced",
-    "精通级": "Proficiency",
-}
+
 # endregion
 
 
@@ -101,7 +96,6 @@ st.set_page_config(
     page_title="口语练习",
     page_icon="🎤",
     layout="wide",
-    initial_sidebar_state="expanded",
 )
 
 if "dialogue_context" not in st.session_state:
@@ -169,7 +163,7 @@ fm_voice_style: Tuple = sidebar_cols[1].selectbox(
 
 level = st.sidebar.selectbox(
     "语言熟练程度",
-    LAN_LEVEL_MAPS.keys(),
+    CEFR_LEVEL_MAPS.keys(),
     on_change=reset_session,
     key="dialogue_level",
     help="根据选择的语言熟练程度,系统会生成匹配的不同难度对话场景进行练习",
@@ -182,7 +176,7 @@ topic = st.sidebar.selectbox(
     help="选择对话主题,系统会生成匹配的对话场景进行练习",
 )
 
-en_level = LAN_LEVEL_MAPS.get(level, "Elementary")  # type: ignore
+en_level = CEFR_LEVEL_MAPS.get(level, "中高级")  # type: ignore
 en_topic = TOPICS["en-US"][TOPICS["zh-CN"].index(topic)]  # type: ignore
 # st.sidebar.info(f"Selected: {en_topic}")
 

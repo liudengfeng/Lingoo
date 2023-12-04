@@ -8,6 +8,15 @@ LAN_MAPS = {
     "fr-FR": "法语",
 }
 
+CEFR_LEVEL_MAPS = {
+    "A1": "入门级",
+    "A2": "初级",
+    "B1": "中级",
+    "B2": "中高级",
+    "C1": "高级",
+    "C2": "母语级",
+}
+
 FAKE_EMAIL_DOMAIN = "example.com"
 
 

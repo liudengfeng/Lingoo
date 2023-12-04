@@ -7,7 +7,6 @@ st.set_page_config(
     page_title="写作练习",
     page_icon="✍️",
     layout="wide",
-    initial_sidebar_state="auto",
 )
 
 st.markdown("# 敬请期待......")

@@ -4,7 +4,6 @@ import os
 import time
 import wave
 
-# from st_circular_progress import CircularProgress
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any
@@ -83,12 +82,6 @@ BADGE_TEMPLATE = """
 </button>
 """
 
-# BTN_TEMPLATE = """
-# <button type="button" class="btn {btn_class}"
-#         data-tippy-content="{title}">
-#   {label}
-# </button>
-# """
 BTN_TEMPLATE = """
 <button type="button" class="btn {btn_class}" data-bs-placement="top"
         data-tippy-content="{title}">
@@ -104,9 +97,6 @@ BTN_TEMPLATE = """
 
 if "assessment_tb1" not in st.session_state:
     st.session_state["assessment_tb1"] = {}
-
-if "assessment_tb2" not in st.session_state:
-    st.session_state["assessment_tb2"] = {}
 
 # endregion
 

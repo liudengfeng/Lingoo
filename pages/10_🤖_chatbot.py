@@ -17,18 +17,22 @@ if not st.session_state.dbi.is_vip_or_admin(st.session_state.user_id):
     st.error("您不是VIP用户，无法使用该功能")
     st.stop()
 
-if "inited_vertex" not in st.session_state:
-    init_vertex(st.secrets)
-    st.session_state["inited_vertex"] = True
+if st.secrets["env"] in ["streamlit", "azure"]:
+    if "inited_vertex" not in st.session_state:
+        init_vertex(st.secrets)
+        st.session_state["inited_vertex"] = True
+else:
+    st.error("非云端环境，无法使用 Vertex AI")
+    st.stop()
 
-if "messages" not in st.session_state:
-    st.session_state["messages"] = []
+if "chat_messages" not in st.session_state:
+    st.session_state["chat_messages"] = []
 
 # endregion
 
 # region 常量
 
-AVATAR_MAPS = {"user": "🧑‍💻", "assistant":"🤖"}
+AVATAR_MAPS = {"user": "🧑‍💻", "assistant     ":"🤖"}
 
 # endregion
 
@@ -78,7 +82,6 @@ st.set_page_config(
     page_title="聊天机器人",
     page_icon="🤖",
     layout="wide",
-    initial_sidebar_state="auto",
 )
 
 if "examples_pair" not in st.session_state:
@@ -211,7 +214,7 @@ sidebar_col3.button(
 if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、示例，开始新的对话"):
     st.session_state["examples_pair"] = []
     # 删除对象
-    del st.session_state["messages"]
+    del st.session_state["chat_messages"]
     init_chat()
 
 
@@ -219,8 +222,8 @@ if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、�
 st.title("🤖 聊天机器人")
 info_container = st.empty()
 
-if "messages" in st.session_state and st.session_state.messages:
-    for msg in st.session_state.messages:
+if "chat_messages" in st.session_state and st.session_state.chat_messages:
+    for msg in st.session_state.chat_messages:
         with st.chat_message(msg["role"], avatar=AVATAR_MAPS[msg["role"]]):
             st.markdown(msg["content"])
 
@@ -231,7 +234,7 @@ if "chat" not in st.session_state:
 if prompt := st.chat_input("您的输入"):
     with st.chat_message("user", avatar=AVATAR_MAPS["user"]):
         st.markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
+    st.session_state.chat_messages.append({"role": "user", "content": prompt})
     parameters = {
         # 流式不支持
         "candidate_count": st.session_state[
@@ -254,6 +257,8 @@ if prompt := st.chat_input("您的输入"):
     response = st.session_state.chat.send_message(message=prompt, **parameters)
     with st.chat_message("user", avatar=AVATAR_MAPS["assistant"]):
         st.markdown(response.text)
-    st.session_state.messages.append({"role": "assistant", "content": response.text})
+    st.session_state.chat_messages.append(
+        {"role": "assistant", "content": response.text}
+    )
 
 # endregion

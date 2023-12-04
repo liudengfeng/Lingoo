@@ -3,8 +3,6 @@ import json
 import os
 import time
 import wave
-
-# from st_circular_progress import CircularProgress
 from collections import OrderedDict
 from pathlib import Path
 from typing import Any
@@ -16,15 +14,15 @@ from streamlit_mic_recorder import mic_recorder
 
 from mypylib.authenticate import DbInterface
 from mypylib.azure_speech import (
-    pronunciation_assessment_from_wavfile,
+    pronunciation_assessment_with_content_assessment,
     synthesize_speech_to_file,
 )
 from mypylib.azure_translator import language_detect
-from mypylib.constants import LAN_MAPS, LANGUAGES
+from mypylib.constants import CEFR_LEVEL_MAPS, LAN_MAPS, TOPICS
+from mypylib.google_api import init_vertex, generate_english_topics
 from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
 from mypylib.word_utils import audio_autoplay_elem
-
 
 # region 认证及初始化
 
@@ -37,6 +35,14 @@ if "dbi" not in st.session_state:
 if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
     st.error("非付费用户，无法使用此功能。")
     st.stop()
+
+# if st.secrets["env"] in ["streamlit", "azure"]:
+#     if "inited_vertex" not in st.session_state:
+#         init_vertex(st.secrets)
+#         st.session_state["inited_vertex"] = True
+# else:
+#     st.error("非云端环境，无法使用 Vertex AI")
+#     st.stop()
 
 # endregion
 
@@ -55,21 +61,8 @@ if not os.path.exists(audio_dir):
     os.makedirs(audio_dir, exist_ok=True)
 
 # 使用临时文件
-replay_fp = os.path.join(audio_dir, f"{user_eh}-replay.wav")
-listen_fp = os.path.join(audio_dir, f"{user_eh}-listen.wav")
-
-BADGE_MAPS = OrderedDict(
-    {
-        "None": ("none", "primary", "发音优秀", "发音优秀的字词"),
-        "Mispronunciation": ("misp", "primary", "发音错误", "说得不正确的字词"),
-        "Omission": ("omis", "primary", "遗漏", "脚本中提供的但未说出的字词"),
-        "Insertion": ("inse", "primary", "插入内容", "不在脚本中但在录制中检测到的字词"),
-        "UnexpectedBreak": ("inte", "primary", "意外中断", "同一句子中的单词之间未正确暂停"),
-        "MissingBreak": ("paus", "primary", "缺少停顿", "当两个单词之间存在标点符号时，词之间缺少暂停"),
-        "Monotone": ("dull", "primary", "单调", "这些单词正以平淡且不兴奋的语调阅读，没有任何节奏或表达"),
-    }
-)
-
+replay_fp = os.path.join(audio_dir, f"{user_eh}-tab2-replay.wav")
+listen_fp = os.path.join(audio_dir, f"{user_eh}-tab2-listen.wav")
 
 # region templates
 
@@ -114,15 +107,23 @@ BTN_TEMPLATE = """
 
 # region 会话状态
 
-if "assessment_tb1" not in st.session_state:
-    st.session_state["assessment_tb1"] = {}
-
 if "assessment_tb2" not in st.session_state:
     st.session_state["assessment_tb2"] = {}
 
 # endregion
 
 # region 函数
+
+
+def reset_session():
+    st.session_state["dialogue_context"] = []
+    st.session_state["dialogue_idx"] = -1
+    st.session_state["dialogue_tgt"] = {}
+    st.session_state["audio_fp"] = {}
+    files = dialogue_dir.glob(f"{user_eh}-*.mp3")
+    for f in files:
+        # print(f)
+        os.remove(f)
 
 
 # @st.cache_data(show_spinner="从 Azure 语音库合成语音...")
@@ -212,40 +213,14 @@ def generate_word_tooltip(word: dict) -> str:
     return res
 
 
-def generate_badges(assessment):
-    """
-    Generates a list of badges based on the error counts in the given assessment.
-
-    Args:
-        assessment (dict): A dictionary containing error counts for different types of errors.
-
-    Returns:
-        list: A list of HTML badge strings, each representing a type of error and its count.
-    """
-    badges = []
-    error_counts = assessment.get("error_counts", {})
-    for t in BADGE_MAPS.keys():
-        if t in error_counts.keys():
-            badges.append(
-                BADGE_TEMPLATE.format(
-                    btn_class=BADGE_MAPS[t][0],
-                    color=BADGE_MAPS[t][1],
-                    label=BADGE_MAPS[t][2],
-                    title=BADGE_MAPS[t][3],
-                    num=error_counts[t],
-                )
-            )
-    return badges
-
-
 # region 标头
 
 MD_BADGE_MAPS = OrderedDict(
     {
         "None": ("green", "发音优秀", "发音优秀的字词", "success"),
         "Mispronunciation": ("orange", "发音错误", "说得不正确的字词", "warning"),
-        "Omission": ("grey", "遗漏字词", "脚本中已提供，但未说出的字词", "secondary"),
-        "Insertion": ("red", "插入内容", "不在脚本中但在录制中检测到的字词", "danger"),
+        # "Omission": ("grey", "遗漏字词", "脚本中已提供，但未说出的字词", "secondary"),
+        # "Insertion": ("red", "插入内容", "不在脚本中但在录制中检测到的字词", "danger"),
         "UnexpectedBreak": ("violet", "意外中断", "同一句子中的单词之间未正确暂停", "info"),
         "MissingBreak": ("blue", "缺少停顿", "当两个单词之间存在标点符号时，词之间缺少暂停", "light"),
         "Monotone": ("rainbow", "单调发音", "这些单词正以平淡且不兴奋的语调阅读，没有任何节奏或表达", "dark"),
@@ -262,7 +237,7 @@ MD_BADGE_TEMPLATE = """
 
 
 def view_tb1_md_badges():
-    assessment = st.session_state["assessment_tb1"]
+    assessment = st.session_state["assessment_tb2"]
     badges = []
     cols = st.columns(len(MD_BADGE_MAPS.keys()))
     error_counts = assessment.get("error_counts", {})
@@ -276,78 +251,6 @@ def view_tb1_md_badges():
 
 
 # endregion
-
-
-def generate_paragraph(assessment):
-    # 发音评估单词级报告文本【提示信息展示音素得分】
-    words_list = assessment.get("words_list", [])
-    res = ""
-    for word in words_list:
-        error_type = word["error_type"]
-        # print(error_type)
-        btn_class = (
-            f"""btn-{BADGE_MAPS[error_type][0]}""" if error_type != "None" else ""
-        )
-        label = fmt_word(word["word"], error_type)
-        # 解决单引号、双引号问题
-        title = generate_word_tooltip(word).replace("'", "&#39;").replace('"', "&quot;")
-        res += BTN_TEMPLATE.format(
-            btn_class=btn_class,
-            title=title,
-            label=label,
-        )
-    return f"""<p class="text-start">{res}</p>"""
-
-
-# TODO:废弃
-def view_progress(value: int):
-    """
-    Displays a progress bar with the given value.
-
-    Parameters:
-    value (int): The value to display in the progress bar.
-
-    Returns:
-    None
-    """
-    color = get_bg_color(value)
-    html = f"""\
-<div class="progress" role="progressbar" aria-label="Success example" aria-valuenow="{value}" aria-valuemin="0"\
-    aria-valuemax="100">\
-    <div class="progress-bar {color}" style="width: {value}%">{value}%</div>\
-</div>\
-    """
-    components.html(STYLE + html, height=30)
-
-
-def view_report_tb1(assessment_placeholder, add_spinner=False):
-    name = "assessment_tb1"
-    # 显示音素得分
-    assessment = st.session_state[name]
-    badges = generate_badges(assessment)
-    # st.write(badges)
-    html = "".join(badges)
-    html += generate_paragraph(assessment)
-    if len(badges) > 0:
-        html = "<hr>" + html + "<hr>"
-
-    # 雷达图
-    item_maps_tab1 = {
-        "pronunciation_score": "发音总评分",
-        "accuracy_score": "准确性评分",
-        "completeness_score": "完整性评分",
-        "fluency_score": "流畅性评分",
-        "prosody_score": "韵律分数",
-    }
-    data_tb1 = {
-        key: st.session_state.assessment_tb1.get(key, 0)
-        for key in item_maps_tab1.keys()
-    }
-
-    with assessment_placeholder:
-        # Place them at the very bottom of the <body>, ensuring they are placed before your own scripts.
-        components.html(STYLE + html + TIPPY_JS, scrolling=True)
-        gen_radar(data_tb1, item_maps_tab1, 320)
 
 
 # region 单词发音
@@ -389,7 +292,7 @@ def fmt_word(text: str, err_type: str):
 
 
 def view_tb1_word_pronunciation():
-    assessment = st.session_state["assessment_tb1"]
+    assessment = st.session_state["assessment_tb2"]
     words_list = assessment.get("words_list", [])
     html = ""
     for word in words_list:
@@ -427,7 +330,7 @@ def view_tab1_radar():
         "prosody_score": "韵律分数",
     }
     data_tb1 = {
-        key: st.session_state.assessment_tb1.get(key, 0)
+        key: st.session_state.assessment_tb2.get(key, 0)
         for key in item_maps_tab1.keys()
     }
     gen_radar(data_tb1, item_maps_tab1, 320)
@@ -489,21 +392,17 @@ st.set_page_config(
     page_title="评估发音与对话",
     page_icon="🗣️",
     layout="wide",
-    initial_sidebar_state="auto",
 )
 
 if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
     st.error("您尚未付费，无法使用此功能。")
     st.stop()
 
-tab1, tab2 = st.tabs(["🎙️ 发音评估", "🗣️ 对话能力"])
 # endregion
 
 # region 边栏
 
-language: str = st.sidebar.selectbox(
-    "选择目标语言", options=LANGUAGES, format_func=lambda x: LAN_MAPS[x]
-)  # type: ignore
+language = "en-US"
 
 with open(voices_fp, "r", encoding="utf-8") as f:
     names = json.load(f)[language]
@@ -511,50 +410,52 @@ voice_style: Any = st.sidebar.selectbox(
     "合成语音风格", names, format_func=lambda x: f"{x[2]}【{x[1]}】"
 )
 
+level = st.sidebar.selectbox(
+    "您当前的英语水平",
+    CEFR_LEVEL_MAPS.keys(),
+    format_func=lambda x: CEFR_LEVEL_MAPS[x],
+    on_change=reset_session,
+    key="dialogue_level",
+    help="场景话题会根据您的选择来匹配难度",
+)
+topic = st.sidebar.selectbox(
+    "主题",
+    TOPICS["zh-CN"],
+    key="topic",
+    on_change=reset_session,
+    help="选择主题，AI生成话题供您选择",
+)
+
+
 # endregion
 
 # region 事件
 
 
-def reset_tb1():
+def reset_tb2():
     # get_synthesize_speech.clear()
-    st.session_state["assessment_tb1"] = {}
+    st.session_state["assessment_tb2"] = {}
     st.session_state["text_tb1"] = ""
     if os.path.exists(replay_fp):
         os.remove(replay_fp)
-    if os.path.exists(listen_fp):
-        os.remove(listen_fp)
 
 
 def on_tb1_text_changed():
-    if os.path.exists(replay_fp):
-        os.remove(replay_fp)
-    if os.path.exists(listen_fp):
-        os.remove(listen_fp)
-
-
-def on_cls_btn_click_tb2():
-    st.session_state["assessment_tb2"] = {}
-    st.session_state["text_to_be_evaluated_tb2"] = ""
-    # st.session_state["report_ready"] = False
-    st.session_state["record_ready"] = False
     if os.path.exists(replay_fp):
         os.remove(replay_fp)
 
 
 @st.cache_data(show_spinner="使用 Azure 服务评估对话...")
 def pronunciation_assessment_func(text_to_be_evaluated_tb1):
-    # st.toast("正在评估对话...", icon="💯")
     try:
-        assessment = pronunciation_assessment_from_wavfile(
+        assessment = pronunciation_assessment_with_content_assessment(
             replay_fp,
             text_to_be_evaluated_tb1,
             language,
             st.secrets["Microsoft"]["SPEECH_KEY"],
             st.secrets["Microsoft"]["SPEECH_REGION"],
         )
-        st.session_state["assessment_tb1"] = assessment
-        # st.toast("🎈 完成评估")
+        st.session_state["assessment_tb2"] = assessment
     except Exception as e:
         st.toast(e)
         st.stop()
@@ -598,238 +499,99 @@ def on_syn_btn_tb1_click(text_to_be_evaluated_tb1, voice_style, placeholder):
 
 # region 发音评估
 
-with tab1:
-    st.session_state["tab_flag"] = "tb1"
-    page_emoji = "🎙️"
-    st.markdown(
-        f"""#### {page_emoji} 发音评估
-英语发音评估是帮助学习者了解自己的发音水平，并针对性地进行练习的重要工具。本产品基于`Azure`语音服务，提供发音评估和语音合成功能。
+
+page_emoji = "🗣️"
+st.markdown(
+    f"""#### {page_emoji} 口语评估
+英语口语评估是帮助学习者了解自己的口语水平，并针对性地进行练习的重要工具。本产品基于`Azure`语音服务，借助`Google Vertex AI`，提供口语评估和AI辅助教学功能。
+
 使用方法如下：
-1. 在文本框内输入要评估的英语文本。
-2. 点击“录音”按钮，大声朗读文本框内文本，开始录音。
-3. 说完后，点击“停止”按钮，停止录音。
+1. 使用👈左侧菜单，设定您当前的英语水平和主题。
+2. AI会根据您的设定自动生成口语评估话题，使用下面的下拉框选择您喜欢的话题。
+3. 准备就绪后，开始录制或上传关于此主题的讨论。
 4. 点击“评估”按钮，查看发音评估报告。报告将包括音素准确性、完整性、流畅性、韵律等方面的评分。
 5. 点击“合成”按钮，合成选定风格的语音。只有文本框内有文本时，才激活“合成”按钮。
 6. 点击“重置”按钮，重置发音评估文本。
 """
-    )
+)
 
-    text_to_be_evaluated_tb1 = st.text_area(
-        "📝 **发音评估文本**",
-        key="text_tb1",
-        max_chars=1000,
-        height=120,
-        label_visibility="collapsed",
-        on_change=on_tb1_text_changed,
-        placeholder="请在文本框中输入要评估的文本。请注意，您的文本要与左侧下拉列表中的“目标语言”一致。",
-        help="输入要评估的文本。",
-    )
-    message_placeholder = st.empty()
-    btn_num = 8
-    btn_cols = st.columns(btn_num)
+text_to_be_evaluated_tb1 = st.text_area(
+    "📝 **发音评估文本**",
+    key="text_tb1",
+    max_chars=1000,
+    height=120,
+    label_visibility="collapsed",
+    on_change=on_tb1_text_changed,
+    placeholder="请在文本框中输入要评估的文本。请注意，您的文本要与左侧下拉列表中的“目标语言”一致。",
+    help="输入要评估的文本。",
+)
+message_placeholder = st.empty()
+btn_num = 8
+btn_cols = st.columns(btn_num)
 
-    with btn_cols[1]:
-        audio = mic_recorder(start_prompt="录音[🔴]", stop_prompt="停止[⏹️]", key="recorder")
+with btn_cols[1]:
+    audio = mic_recorder(start_prompt="录音[🔴]", stop_prompt="停止[⏹️]", key="recorder")
 
-    rep_btn = btn_cols[2].button(
-        "回放[🎧]",
-        key="rep_btn_tb1",
-        disabled=not st.session_state.get("record_ready", False),
-        help="点击按钮，回放麦克风录音。",
-    )
+rep_btn = btn_cols[2].button(
+    "回放[🎧]",
+    key="rep_btn_tb1",
+    disabled=not st.session_state.get("record_ready", False),
+    help="点击按钮，回放麦克风录音。",
+)
 
-    ass_btn = btn_cols[3].button(
-        "评估[🔍]",
-        key="ass_btn_tb1",
-        help="生成发音评估报告。",
-        on_click=on_ass_btn_tb1_click,
-        args=(text_to_be_evaluated_tb1,),
-    )
-    syn_btn = btn_cols[4].button(
-        "合成[🔊]",
-        key="syn_btn_tb1",
-        on_click=on_syn_btn_tb1_click,
-        args=(text_to_be_evaluated_tb1, voice_style, message_placeholder),
-        disabled=len(text_to_be_evaluated_tb1) == 0,
-        help="点击合成按钮，合成选定风格的语音。",
-    )
-    lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
-    cls_btn = btn_cols[6].button(
-        "重置[🔄]",
-        key="cls_btn_tb1",
-        help="重置发音评估文本。",
-        on_click=reset_tb1,
-    )
+ass_btn = btn_cols[3].button(
+    "评估[🔍]",
+    key="ass_btn_tb1",
+    help="生成发音评估报告。",
+    on_click=on_ass_btn_tb1_click,
+    args=(text_to_be_evaluated_tb1,),
+)
+syn_btn = btn_cols[4].button(
+    "合成[🔊]",
+    key="syn_btn_tb1",
+    on_click=on_syn_btn_tb1_click,
+    args=(text_to_be_evaluated_tb1, voice_style, message_placeholder),
+    disabled=len(text_to_be_evaluated_tb1) == 0,
+    help="点击合成按钮，合成选定风格的语音。",
+)
+lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
+cls_btn = btn_cols[6].button(
+    "重置[🔄]",
+    key="cls_btn_tb1",
+    help="重置发音评估文本。",
+    on_click=reset_tb2,
+)
 
-    if audio:
-        # 保存wav文件
-        update_mav(audio)
-        st.session_state["record_ready"] = True
+if audio:
+    # 保存wav文件
+    update_mav(audio)
+    st.session_state["record_ready"] = True
 
-    if rep_btn:
-        if not os.path.exists(replay_fp):
-            message_placeholder.warning("抱歉，您尚未录制音频，无法回放。")
-            st.stop()
-        # 自动播放，不显示控件
-        components.html(audio_autoplay_elem(replay_fp, fmt="mav"), height=0)
-
-    if lst_btn:
-        if not os.path.exists(listen_fp):
-            message_placeholder.warning("抱歉，您尚未合成音频，无法聆听。")
-            st.stop()
-        # 自动播放，不显示控件
-        components.html(audio_autoplay_elem(listen_fp), height=0)
-
-    st.markdown("#### :trophy: 评估结果")
-    view_tb1_report()
-
-    with st.expander("🔊 操作提示..."):
-        st.markdown("如何进行发音评估👇")
-        record_tip = (
-            current_cwd
-            / "resource"
-            / "audio_tip"
-            / "cn-pronunciation-assessment-tip.wav"
-        )
-        st.audio(str(record_tip), format="audio/wav")
-
-        st.markdown("如何聆听发音示例👇")
-        lst_tip = current_cwd / "resource" / "audio_tip" / "cn-synthesis-tip.wav"
-        st.audio(str(lst_tip), format="audio/wav")
-# endregion
-
-# region 对话能力
-
-with tab2:
-    st.session_state["tab_flag"] = "tb2"
-    page_emoji = "🗣️"
-    st.markdown(f"#### {page_emoji} 对话能力")
-
-    st.markdown("📝 **要讨论的主题**", help="输入要讨论的主题。光标移出文本区域后，激活录音按钮。")
-    text_to_be_evaluated_tb2 = st.text_area(
-        "📝 **主题文本**",
-        key="text_to_be_evaluated_tb2",
-        max_chars=100,
-        height=30,
-        label_visibility="collapsed",
-        # on_change=on_tb2_text_changed,
-        # help="输入要评估的文本。光标移出文本区域后，激活录音按钮。",
-    )
-
-    btn_num = 6
-    btn_cols = st.columns(btn_num)
-    rec_btn = btn_cols[1].button(
-        "录音[🎙️]",
-        key="rec_btn_tb2",
-        # on_click=on_record_btn_click,
-        disabled=not st.session_state.get("record_ready", False)
-        or len(text_to_be_evaluated_tb2) == 0,
-        help="按麦克风开始说话。要求录制不少于15秒的语音，单词不少于50个，句子不少于3个。",
-    )
-    stop_rec_btn = btn_cols[2].button(
-        "停止[⏹️]",
-        key="stop_rec_btn_tb2",
-        disabled=not st.session_state.get("recording", False),
-        # on_click=on_stop_btn_click,
-        help="停止麦克风录音，显示发音评估结果",
-    )
-    cls_btn = btn_cols[4].button(
-        "重置[🔄]",
-        key="cls_btn_tb2",
-        help="重置发音评估文本",
-        on_click=on_cls_btn_click_tb2,
-    )
-
-    # status_placeholder = st.empty()
-
-    audio_col_1, audio_col_2 = st.columns(2)
-
-    # 回放
-    audio_col_1.markdown("🎙️ 👇回放录音", help="点击下方按钮，回放麦克风录音")
-    replay_placeholder = audio_col_1.empty()
+if rep_btn:
     if not os.path.exists(replay_fp):
-        record_tip = current_cwd / "resource" / "audio" / "cn_replay.wav"
-        replay_placeholder.audio(str(record_tip), format="audio/wav")
-    else:
-        replay_placeholder.audio(replay_fp, format="audio/wav")
+        message_placeholder.warning("抱歉，您尚未录制音频，无法回放。")
+        st.stop()
+    # 自动播放，不显示控件
+    components.html(audio_autoplay_elem(replay_fp, fmt="mav"), height=0)
 
-    st.markdown("#### 评估结果")
+if lst_btn:
+    if not os.path.exists(listen_fp):
+        message_placeholder.warning("抱歉，您尚未合成音频，无法聆听。")
+        st.stop()
+    # 自动播放，不显示控件
+    components.html(audio_autoplay_elem(listen_fp), height=0)
 
-    assessment_placeholder = st.container()
+st.markdown("#### :trophy: 评估结果")
+view_tb1_report()
 
-    # with assessment_placeholder:
-    #     view_report(True)
+with st.expander("🔊 操作提示..."):
+    st.markdown("如何进行发音评估👇")
+    record_tip = (
+        current_cwd / "resource" / "audio_tip" / "cn-pronunciation-assessment-tip.wav"
+    )
+    st.audio(str(record_tip), format="audio/wav")
 
-    progress_cols = st.columns(4)
-
-    # cp1 = CircularProgress(
-    #     label="发音评分",
-    #     value=int(st.session_state.assessment_tb2.get("pronunciation_score", 0)),
-    #     size="Medium",
-    #     color=get_cp_color(
-    #         int(st.session_state.assessment_tb2.get("pronunciation_score", 0))
-    #     ),
-    #     key=f"dsh_pronunciation_score_tb2",
-    # )
-    # cp2 = CircularProgress(
-    #     label="内容分数",
-    #     value=int(st.session_state.assessment_tb2.get("content_score", 0)),
-    #     size="Medium",
-    #     color=get_cp_color(
-    #         int(st.session_state.assessment_tb2.get("content_score", 0))
-    #     ),
-    #     key=f"dsh_content_score_tb2",
-    # )
-
-    with progress_cols[0]:
-        st.markdown(
-            "**:trophy:发音分数**",
-            help="表示给定语音发音质量的总体分数。它是从 AccuracyScore、FluencyScore、CompletenessScore、Weight 按权重聚合的。",
-        )
-        # cp1.st_circular_progress()
-        view_score_legend(True)
-
-    with progress_cols[1]:
-        st.markdown("**得分明细**")
-        st.markdown(
-            "准确性评分",
-            help="语音的发音准确性。准确性表示音素与母语说话人的发音的匹配程度。字词和全文的准确性得分是由音素级的准确度得分汇总而来。",
-        )
-        view_progress(int(st.session_state.assessment_tb2.get("accuracy_score", 0)))
-        st.markdown(
-            "流畅性评分",
-            help="给定语音的流畅性。流畅性表示语音与母语说话人在单词间的停顿上有多接近。",
-        )
-        view_progress(int(st.session_state.assessment_tb2.get("fluency_score", 0)))
-        st.markdown(
-            "韵律分数",
-            help="给定语音的韵律。韵律指示给定语音的性质，包括重音、语调、语速和节奏。",
-        )
-        view_progress(int(st.session_state.assessment_tb2.get("prosody_score", 0)))
-
-    with progress_cols[2]:
-        st.markdown(
-            "**:trophy:内容分数**",
-            help="此分数提供语音内容的聚合评估，包括词汇分数、语法分数和主题分数。",
-        )
-        # cp2.st_circular_progress()
-        view_score_legend(True)
-
-    with progress_cols[3]:
-        st.markdown("**得分明细**")
-        st.markdown(
-            "词汇分数",
-            help="词汇运用能力的熟练程度是通过说话者有效地使用单词来评估的，即在特定语境中使用某单词以表达观点是否恰当。",
-        )
-        view_progress(int(st.session_state.assessment_tb2.get("accuracy_score", 0)))
-        st.markdown(
-            "语法分数",
-            help="词汇运用能力的熟练程度是通过说话者有效地使用单词来评估的，即在特定语境中使用某单词以表达观点是否恰当。",
-        )
-        view_progress(int(st.session_state.assessment_tb2.get("fluency_score", 0)))
-        st.markdown(
-            "主题分数",
-            help="词汇运用能力的熟练程度是通过说话者有效地使用单词来评估的，即在特定语境中使用某单词以表达观点是否恰当。",
-        )
-        view_progress(int(st.session_state.assessment_tb2.get("prosody_score", 0)))
+    st.markdown("如何聆听发音示例👇")
+    lst_tip = current_cwd / "resource" / "audio_tip" / "cn-synthesis-tip.wav"
+    st.audio(str(lst_tip), format="audio/wav")
 # endregion
