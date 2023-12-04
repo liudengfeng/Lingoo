@@ -133,7 +133,7 @@ def get_synthesize_speech(text, voice):
         listen_fp,
         # language,
         st.secrets["Microsoft"]["SPEECH_KEY"],
-        st.secrets["Microsoft"]["SPEECH_SERVICE_REGION"],
+        st.secrets["Microsoft"]["SPEECH_REGION"],
         voice,
     )
 
@@ -551,7 +551,7 @@ def pronunciation_assessment_func(text_to_be_evaluated_tb1):
             text_to_be_evaluated_tb1,
             language,
             st.secrets["Microsoft"]["SPEECH_KEY"],
-            st.secrets["Microsoft"]["SPEECH_SERVICE_REGION"],
+            st.secrets["Microsoft"]["SPEECH_REGION"],
         )
         st.session_state["assessment_tb1"] = assessment
         # st.toast("🎈 完成评估")
@@ -701,8 +701,6 @@ with tab1:
 # region 对话能力
 
 with tab2:
-    st.error("尚未完成")
-    st.stop()
     st.session_state["tab_flag"] = "tb2"
     page_emoji = "🗣️"
     st.markdown(f"#### {page_emoji} 对话能力")

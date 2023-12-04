@@ -52,7 +52,7 @@ if need_update:
             res[lan] = speech_synthesis_get_available_voices(
                 lan,
                 st.secrets["Microsoft"]["SPEECH_KEY"],
-                st.secrets["Microsoft"]["SPEECH_SERVICE_REGION"],
+                st.secrets["Microsoft"]["SPEECH_REGION"],
             )
         # 将数据存储为 JSON 格式
         with open(voices_fp, "w", encoding="utf-8") as f:

@@ -73,7 +73,7 @@ def synthesize_speech(text, idx, voice):
         listen_fp,
         # language,
         st.secrets["Microsoft"]["SPEECH_KEY"],
-        st.secrets["Microsoft"]["SPEECH_SERVICE_REGION"],
+        st.secrets["Microsoft"]["SPEECH_REGION"],
         voice,
     )
 

@@ -137,7 +137,7 @@ def gen_audio_fp(word: str, style: str):
             word,
             audio_fp,
             st.secrets["Microsoft"]["SPEECH_KEY"],
-            st.secrets["Microsoft"]["SPEECH_SERVICE_REGION"],
+            st.secrets["Microsoft"]["SPEECH_REGION"],
             style,  # type: ignore
         )
     return audio_fp

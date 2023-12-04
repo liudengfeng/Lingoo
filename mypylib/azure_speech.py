@@ -477,13 +477,13 @@ def get_content_results(
 ):
     """Performs pronunciation assessment asynchronously with input from an audio file and return content score.
     See more information at https://aka.ms/csspeech/pa"""
-    # 定价层：S0 标准
-
+    # 定价层：S0 标准 每分钟 300 个请求
     # provide a WAV file as an example. Replace it with your own.
-    audio_config = speechsdk.audio.AudioConfig(filename=wavfile)
     speech_config = speechsdk.SpeechConfig(
         subscription=speech_key, region=service_region
     )
+    audio_config = speechsdk.audio.AudioConfig(filename=wavfile)
+
     speech_recognizer = speechsdk.SpeechRecognizer(
         speech_config=speech_config, audio_config=audio_config, language=language
     )
@@ -549,13 +549,13 @@ def get_content_results(
                 )
             )
             if len(json_result["DisplayText"].strip()) > 1:
-                # print(f"Pronunciation Assessment for: {evt.result.text}")
-                # print(json.dumps(json_result, indent=4))
                 recognized_text += " " + evt.result.text
+                print(f"Pronunciation Assessment for: {evt.result.text}")
+                print(json.dumps(json_result, indent=4))
             else:
-                print(f"Content Assessment for: {recognized_text}")
-                # print(json.dumps(json_result, indent=4))
-            print(json.dumps(json_result, indent=4))
+                print(f"内容评分: {recognized_text}")
+                print(json.dumps(json_result, indent=4))
+            # print(json.dumps(json_result, indent=4))
 
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
@@ -580,6 +580,26 @@ def get_content_results(
     connection.close()
 
 
+def pronunciation_assessment_with_content_assessment(
+    wavfile: str,
+    topic: str,
+    language: str,
+    speech_key: str,
+    service_region: str,
+):
+    """Performs content assessment asynchronously with input from an audio file.
+    See more information at https://aka.ms/csspeech/pa"""
+    # See more information at https://aka.ms/csspeech/pa"""
+    # 定价层：S0 标准 每分钟 300 个请求
+    # Generally, the waveform should longer than 20s and the content should be more than 3 sentences.
+    # Create an instance of a speech config with specified subscription key and service region.
+    speech_config = speechsdk.SpeechConfig(
+        subscription=speech_key,
+        region=service_region,
+    )
+    audio_config = speechsdk.audio.AudioConfig(filename=wavfile)
+
+
 def speech_synthesis_get_available_voices(
     language: str,
     speech_key: str,
@@ -600,8 +620,11 @@ def speech_synthesis_get_available_voices(
 
     result = speech_synthesizer.get_voices_async(language).get()
     # Check result
-    if result.reason == speechsdk.ResultReason.VoicesListRetrieved:
-        # print("Voices successfully retrieved, they are:")
+    if (
+        result is not None
+        and result.reason == speechsdk.ResultReason.VoicesListRetrieved
+    ):
+        res = []
         for voice in result.voices:
             res.append(
                 (
@@ -611,7 +634,7 @@ def speech_synthesis_get_available_voices(
                 )
             )
         return res
-    elif result.reason == speechsdk.ResultReason.Canceled:
+    elif result is not None and result.reason == speechsdk.ResultReason.Canceled:
         raise ValueError(
             "Speech synthesis canceled; error details: {}".format(result.error_details)
         )
