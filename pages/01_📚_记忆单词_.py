@@ -32,8 +32,8 @@ from mypylib.word_utils import hash_word, audio_autoplay_elem
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
 
-# 设置日志级别
-logger.setLevel(logging.DEBUG)
+# # 设置日志级别
+# logger.setLevel(logging.DEBUG)
 
 # region 常量
 # streamlit中各页都是相对当前根目录

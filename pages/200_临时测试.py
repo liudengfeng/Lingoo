@@ -1,82 +1,135 @@
 import json
 from pathlib import Path
-
-import google.generativeai as palm
+import streamlit.components.v1 as components
 import streamlit as st
-import vertexai
-from vertexai.language_models import TextGenerationModel
-
-from mypylib.google_palm import (
-    lookup,
-)
-from mypylib.google_api import get_translation_client, google_translate
-from mypylib.google_api import init_vertex
 
 current_cwd: Path = Path(__file__).parent.parent  # type: ignore
-# model = "models/text-bison-001"
 
-palm.configure(api_key=st.secrets["Google"]["PALM_API_KEY"])
+tip = """\
+<table>\
+    <tr>\
+        <td>数据1</td>\
+        <td>数据2</td>\
+        <td>数据3</td>\
+        <td>数据4</td>\
+    </tr>\
+    <tr>\
+        <td>数据5</td>\
+        <td>数据6</td>\
+        <td>数据7</td>\
+        <td>数据8</td>\
+    </tr>\
+</table>\
+"""
 
-if "google_tranlator" not in st.session_state:
-    st.session_state["google_tranlator"] = get_translation_client(st.secrets)
+words = f"""\
+<p>\
+<button data-tippy-content="Tooltip">Text</button>\
+<button data-tippy-content="Another Tooltip">Text</button>
+<button data-tippy-content="Tooltip">Text</button>
+<button data-tippy-content="Tooltip">Text</button>
+<button data-tippy-content="Another Tooltip">Text</button>
+<button data-tippy-content="Tooltip">Text</button>
+<button data-tippy-content="Tooltip">Text</button>
+<button data-tippy-content="Another Tooltip">Text</button>
+<button data-tippy-content="Tooltip">Text</button>
+<button data-tippy-content="Tooltip">Text</button>
+<button data-tippy-content="Another Tooltip">Text</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button data-tippy-content="{tip}">表格提示</button>
+<button class="btn-success" data-tippy-content="{tip}">表格提示</button>
+<button class="btn-primary" data-tippy-content="{tip}">表格提示</button>
+</p>
+"""
 
+html = """
+<style>
 
-def generate_text(word: str, level: str):
-    # vertexai.init(project="lingo-406201", location="asia-northeast1")
-    parameters = {
-        "candidate_count": 1,
-        "max_output_tokens": 1024,
-        "temperature": 0.5,
-        "top_p": 0.5,
-        "top_k": 20,
-    }
+button {
+    border: none; /* 无边框 */
+    height: 30px; /* 高度为 20px */
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
 
-    prompt = f"""As an experienced English instructor who is proficient in CEFR graded vocabulary, you will be tasked with designing questions based on your students\' proficiency levels to assess their understanding of specific words or phrases.
+.btn-primary {
+    color: #fff;
+    background-color: #007bff;
+    border-color: #007bff;
+}
 
-    Require:
-    1. Structure: The output should contain four distinct components: question, options, correct answer, and explanation.
-    2. Language: Question stems and options should be presented in English.
-    3. Clarity and Appropriateness: The language used in the question stem and options should be consistent with the student’s current level of English understanding.
-    4. Concise language: The language is concise and clear, avoiding overly complex sentence structures or obscure vocabulary.
-    5. Contextualization: Questions should be contextualized to help students grasp the meaning of the target word or phrase.
-    6. Option Relevance: Options should be relevant to the question stem.
-    7. Option Distribution: Out of the four options provided, only one should represent the correct answer, while the remaining three serve as incorrect options. The order of correct answers should be randomized to avoid predictability.
-    8. Option identification: Each option must be clearly identified using a capital letter A, B, C, or D, separated from the option content by a period.
-    9. Answer markings: Correct answers are marked A, B, C and D.
-    10. Answer Explanation: In addition to stating the rationale behind the correct answer, if necessary, provide an explanation to clarify why other options are incorrect.
-    11. Output format: The final output should follow the JSON format, using the \"Question\", \"Option\", \"Answer\" and \"Explanation\" keys to represent the corresponding components.
+.btn-secondary {
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
+}
 
-    Please answer a multiple-choice question based on the following information:
-    Student’s current level: {level}
-    Word: {word}"""
+.btn-success {
+    color: #fff;
+    background-color: #28a745;
+    border-color: #28a745;
+}
 
-    model = TextGenerationModel.from_pretrained("text-bison")
-    response = model.predict(
-        prompt,
-        **parameters,
-    )
-    return response.text
+.btn-danger {
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
 
+.btn-warning {
+    color: #212529;
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
 
-if "inited_vertex" not in st.session_state:
-    init_vertex(st.secrets)
-    st.session_state["inited_vertex"] = True
+.btn-info {
+    color: #fff;
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+}
 
-levels = ["A1", "A2", "B1", "B2", "C1", "C2"]
-level = st.sidebar.selectbox("选择等级", levels)
-st.text_input("输入", key="input", value="hello world")
+.btn-light {
+    color: #212529;
+    background-color: #f8f9fa;
+    border-color: #f8f9fa;
+}
 
-if st.button("执行"):
-    word = st.session_state["input"]
-    cn = google_translate(word, st.session_state["google_tranlator"])
-    d = lookup(st.session_state["input"])
-    st.write(cn)
-    st.write(d)
+.btn-dark {
+    color: #fff;
+    background-color: #343a40;
+    border-color: #343a40;
+}
 
-    # with open(current_cwd / "resource" / f"{word}.json", "w", encoding="utf-8") as f:  # type: ignore
-    #     json.dump(d, f, ensure_ascii=False, indent=4)
-    # st.write(generate_text(word, level))  # type: ignore
+.tippy-tooltip.tomato-theme {
+    background-color: #28a745; /* Bootstrap Success color */
+    color: #ffffff; /* White color for text */
+}
+</style>
 
-if st.button("测试"):
-    word = st.session_state["input"]
-    st.write(generate_text(word, level))  # type: ignore
+<script src="https://unpkg.com/popper.js@1"></script>
+<script src="https://unpkg.com/tippy.js@5"></script>
+
+<script>
+    tippy('[data-tippy-content]', {
+        allowHTML: true,
+        theme: 'tomato',
+    });
+</script>
+"""
+components.html(words + html)

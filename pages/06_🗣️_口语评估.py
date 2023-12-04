@@ -21,7 +21,7 @@ from mypylib.azure_speech import (
 )
 from mypylib.azure_translator import language_detect
 from mypylib.constants import LAN_MAPS, LANGUAGES
-from mypylib.html_constants import CSS, JS, SCRIPT, STYLE
+from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
 from mypylib.word_utils import audio_autoplay_elem
 
@@ -48,7 +48,7 @@ hex_dig = hash_object.hexdigest()[:16]
 user_eh = f"h{hex_dig}"
 
 current_cwd: Path = Path(__file__).parent.parent
-voices_fp = current_cwd / "resource/voices.json"
+voices_fp = current_cwd / "resource" / "voices.json"
 audio_dir = current_cwd / "resource" / "audio_data"
 
 if not os.path.exists(audio_dir):
@@ -70,20 +70,21 @@ BADGE_MAPS = OrderedDict(
     }
 )
 
+
 # region templates
 
-WORD_TOOLTIP_TEMPLATE = """
-<table>
-    <tr>
-        <td colspan="{n}">{word_score}</td>
-    </tr>
-    <tr>
-        {phoneme_cols}
-    </tr>
-    <tr>
-        {score_cols}
-    </tr>
-</table>
+WORD_TOOLTIP_TEMPLATE = """\
+<table>\
+    <tr>\
+        <td colspan="{n}">{word_score}</td>\
+    </tr>\
+    <tr>\
+        {phoneme_cols}\
+    </tr>\
+    <tr>\
+        {score_cols}\
+    </tr>\
+</table>\
 """
 
 BADGE_TEMPLATE = """
@@ -94,8 +95,14 @@ BADGE_TEMPLATE = """
 </button>
 """
 
+# BTN_TEMPLATE = """
+# <button type="button" class="btn {btn_class}"
+#         data-tippy-content="{title}">
+#   {label}
+# </button>
+# """
 BTN_TEMPLATE = """
-<button type="button" class="btn {btn_class}"
+<button type="button" class="btn {btn_class}" data-bs-placement="top"
         data-tippy-content="{title}">
   {label}
 </button>
@@ -119,6 +126,7 @@ if "assessment_tb2" not in st.session_state:
 
 
 # @st.cache_data(show_spinner="从 Azure 语音库合成语音...")
+@st.cache_data
 def get_synthesize_speech(text, voice):
     synthesize_speech_to_file(
         text,
@@ -230,31 +238,44 @@ def generate_badges(assessment):
     return badges
 
 
-def fmt_word(text: str, err_type: str):
-    """
-    Formats a word based on the error type.
+# region 标头
 
-    Args:
-        text (str): The word to format.
-        err_type (str): The type of error.
+MD_BADGE_MAPS = OrderedDict(
+    {
+        "None": ("green", "发音优秀", "发音优秀的字词", "success"),
+        "Mispronunciation": ("orange", "发音错误", "说得不正确的字词", "warning"),
+        "Omission": ("grey", "遗漏字词", "脚本中已提供，但未说出的字词", "secondary"),
+        "Insertion": ("red", "插入内容", "不在脚本中但在录制中检测到的字词", "danger"),
+        "UnexpectedBreak": ("violet", "意外中断", "同一句子中的单词之间未正确暂停", "info"),
+        "MissingBreak": ("blue", "缺少停顿", "当两个单词之间存在标点符号时，词之间缺少暂停", "light"),
+        "Monotone": ("rainbow", "单调发音", "这些单词正以平淡且不兴奋的语调阅读，没有任何节奏或表达", "dark"),
+    }
+)
 
-    Returns:
-        str: The formatted word.
-    """
-    t = err_type.lower()
-    match t:
-        case "mispronunciation":
-            return f"""<span class="text-decoration-underline">{text}</span>"""
-        case "omission":
-            return f"""[{text}]"""
-        case "pause":
-            return f"""[{text}]"""
-        case "insertion":
-            return f"""<span class="text-decoration-line-through">{text}</span>"""
-        case "interruption":
-            return f"""<span class="text-decoration-line-through">[{text}]</span>"""
-        case _:
-            return f"""{text}"""
+MD_BADGE_TEMPLATE = """
+<button type="button" class="btn btn-{btn_class}" data-bs-toggle="tooltip" data-bs-placement="top"
+        data-bs-custom-class="custom-tooltip"
+        data-bs-title="{title}">
+  {label} <span class="badge text-bg-{color}">{num}</span>
+</button>
+"""
+
+
+def view_tb1_md_badges():
+    assessment = st.session_state["assessment_tb1"]
+    badges = []
+    cols = st.columns(len(MD_BADGE_MAPS.keys()))
+    error_counts = assessment.get("error_counts", {})
+    for i, t in enumerate(MD_BADGE_MAPS.keys()):
+        num = f"{error_counts.get(t,0):3d}"
+        body = f"""{MD_BADGE_MAPS[t][1]}({num})"""
+        cols[i].markdown(
+            f""":{MD_BADGE_MAPS[t][0]}[{body}]""",
+            help=MD_BADGE_MAPS[t][2],
+        )
+
+
+# endregion
 
 
 def generate_paragraph(assessment):
@@ -278,6 +299,7 @@ def generate_paragraph(assessment):
     return f"""<p class="text-start">{res}</p>"""
 
 
+# TODO:废弃
 def view_progress(value: int):
     """
     Displays a progress bar with the given value.
@@ -295,7 +317,7 @@ def view_progress(value: int):
     <div class="progress-bar {color}" style="width: {value}%">{value}%</div>\
 </div>\
     """
-    components.html(CSS + JS + STYLE + html, height=30)
+    components.html(STYLE + html, height=30)
 
 
 def view_report_tb1(assessment_placeholder, add_spinner=False):
@@ -303,6 +325,7 @@ def view_report_tb1(assessment_placeholder, add_spinner=False):
     # 显示音素得分
     assessment = st.session_state[name]
     badges = generate_badges(assessment)
+    # st.write(badges)
     html = "".join(badges)
     html += generate_paragraph(assessment)
     if len(badges) > 0:
@@ -322,8 +345,108 @@ def view_report_tb1(assessment_placeholder, add_spinner=False):
     }
 
     with assessment_placeholder:
-        components.html(CSS + JS + STYLE + html + SCRIPT, scrolling=True)
+        # Place them at the very bottom of the <body>, ensuring they are placed before your own scripts.
+        components.html(STYLE + html + TIPPY_JS, scrolling=True)
         gen_radar(data_tb1, item_maps_tab1, 320)
+
+
+# region 单词发音
+
+MD_BTN_TEMPLATE = """
+<button class="btn-{btn_class}" data-tippy-content="{title}">
+  {label}
+</button>
+"""
+
+
+def fmt_word(text: str, err_type: str):
+    """
+    Formats a word based on the error type.
+
+    Args:
+        text (str): The word to format.
+        err_type (str): The type of error.
+
+    Returns:
+        str: The formatted word.
+    """
+    t = err_type.lower()
+    match t:
+        case "mispronunciation":
+            return f"""<span class="text-decoration-underline">{text}</span>"""
+        case "omission":
+            return f"""[{text}]"""
+        case "pause":
+            return f"""[{text}]"""
+        case "insertion":
+            return f"""<span class="text-decoration-line-through">{text}</span>"""
+        case "interruption":
+            return f"""<span class="text-decoration-line-through">[{text}]</span>"""
+        case "monotone":
+            return f"""<span class="text-decoration-overline">[{text}]</span>"""
+        case _:
+            return f"""{text}"""
+
+
+def view_tb1_word_pronunciation():
+    assessment = st.session_state["assessment_tb1"]
+    words_list = assessment.get("words_list", [])
+    html = ""
+    for word in words_list:
+        error_type = word["error_type"]
+        # print(error_type)
+        btn_class = (
+            f"""{MD_BADGE_MAPS[error_type][3]}""" if error_type != "success" else ""
+        )
+        label = fmt_word(word["word"], error_type)
+        # 解决单引号、双引号问题
+        title = generate_word_tooltip(word).replace("'", "&#39;").replace('"', "&quot;")
+        btn = MD_BTN_TEMPLATE.format(
+            btn_class=btn_class,
+            title=title,
+            label=label,
+        )
+        # st.write(btn)
+        html += btn
+    html = f"""<p>{html}</p>"""
+    components.html(STYLE + html + TIPPY_JS, scrolling=True)
+
+
+# endregion
+
+# region 雷达图
+
+
+def view_tab1_radar():
+    # 雷达图
+    item_maps_tab1 = {
+        "pronunciation_score": "发音总评分",
+        "accuracy_score": "准确性评分",
+        "completeness_score": "完整性评分",
+        "fluency_score": "流畅性评分",
+        "prosody_score": "韵律分数",
+    }
+    data_tb1 = {
+        key: st.session_state.assessment_tb1.get(key, 0)
+        for key in item_maps_tab1.keys()
+    }
+    gen_radar(data_tb1, item_maps_tab1, 320)
+
+
+# endregion
+
+# region 发音评估报告
+
+
+def view_tb1_report():
+    # 发音评估报告
+    view_tb1_md_badges()
+    st.divider()
+    view_tb1_word_pronunciation()
+    view_tab1_radar()
+
+
+# endregion
 
 
 def view_score_legend(progress_cols, add_spinner=False):
@@ -355,7 +478,7 @@ def view_score_legend(progress_cols, add_spinner=False):
     score_legend = generate_score_legend()
     # if add_spinner:
     #     score_legend += "<hr>"
-    components.html(CSS + JS + STYLE + score_legend + SCRIPT)
+    components.html(STYLE + score_legend)
 
 
 # endregion
@@ -419,8 +542,9 @@ def on_cls_btn_click_tb2():
         os.remove(replay_fp)
 
 
+@st.cache_data(show_spinner="使用 Azure 服务评估对话...")
 def pronunciation_assessment_func(text_to_be_evaluated_tb1):
-    st.toast("正在评估对话...", icon="💯")
+    # st.toast("正在评估对话...", icon="💯")
     try:
         assessment = pronunciation_assessment_from_wavfile(
             replay_fp,
@@ -430,7 +554,7 @@ def pronunciation_assessment_func(text_to_be_evaluated_tb1):
             st.secrets["Microsoft"]["SPEECH_SERVICE_REGION"],
         )
         st.session_state["assessment_tb1"] = assessment
-        st.toast("🎈 完成评估")
+        # st.toast("🎈 完成评估")
     except Exception as e:
         st.toast(e)
         st.stop()
@@ -546,23 +670,20 @@ with tab1:
         if not os.path.exists(replay_fp):
             message_placeholder.warning("抱歉，您尚未录制音频，无法回放。")
             st.stop()
-        components.html(audio_autoplay_elem(replay_fp, fmt="mav"))
+        # 自动播放，不显示控件
+        components.html(audio_autoplay_elem(replay_fp, fmt="mav"), height=0)
 
     if lst_btn:
         if not os.path.exists(listen_fp):
             message_placeholder.warning("抱歉，您尚未合成音频，无法聆听。")
             st.stop()
-        components.html(audio_autoplay_elem(listen_fp))
+        # 自动播放，不显示控件
+        components.html(audio_autoplay_elem(listen_fp), height=0)
 
     st.markdown("#### :trophy: 评估结果")
-    assessment_placeholder = st.container()
-    view_report_tb1(assessment_placeholder)
-    # 显示图标
-    # st.divider()
-    # progress_cols = st.columns(5)
-    # view_score_legend(progress_cols, True)
+    view_tb1_report()
 
-    with st.expander("操作提示..."):
+    with st.expander("🔊 操作提示..."):
         st.markdown("如何进行发音评估👇")
         record_tip = (
             current_cwd

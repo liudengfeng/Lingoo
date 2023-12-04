@@ -13,6 +13,7 @@ import time
 import wave
 from collections import defaultdict
 from typing import Callable, Dict, List, Optional
+import logging
 
 try:
     import azure.cognitiveservices.speech as speechsdk
@@ -28,6 +29,9 @@ except ImportError:
     import sys
 
     sys.exit(1)
+
+# 创建或获取logger对象
+logger = logging.getLogger("streamlit")
 
 
 def synthesize_speech_to_file(
@@ -333,9 +337,13 @@ def pronunciation_assessment_from_wavfile(
     # )
     def view_canceled(evt):
         cancellation_details = evt.result.cancellation_details
-        print("Speech Recognition canceled: {}".format(cancellation_details.reason))
+        logger.debug(
+            "Speech Recognition canceled: {}".format(cancellation_details.reason)
+        )
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
-            print("❌ Error details: {}".format(cancellation_details.error_details))
+            logger.debug(
+                "❌ Error details: {}".format(cancellation_details.error_details)
+            )
 
     # speech_recognizer.canceled.connect(lambda evt: print("CANCELED {}".format(evt)))
     speech_recognizer.canceled.connect(view_canceled)
