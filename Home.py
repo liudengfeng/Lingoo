@@ -33,7 +33,7 @@ st.set_page_config(
 )
 
 need_update = False
-# 如果文件不存在，或者文件的最后修改时间距离当前时间超过15天
+# 如果文件不存在，或者文件的最后修改时间距离当前时间超过120天
 if not os.path.exists(voices_fp):
     need_update = True
 else:
@@ -41,7 +41,7 @@ else:
     now = time.time()
     # 获取文件的最后修改时间
     mtime = os.path.getmtime(voices_fp)
-    if now - mtime >= 30 * 24 * 60 * 60:
+    if now - mtime >= 120 * 24 * 60 * 60:
         need_update = True
 
 if need_update:
