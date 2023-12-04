@@ -24,10 +24,6 @@ dialogue_dir = audio_dir / "dialogue"
 if not os.path.exists(dialogue_dir):
     os.makedirs(dialogue_dir, exist_ok=True)
 
-email = st.experimental_user.email if st.experimental_user.email else "none"
-hash_object = hashlib.sha256(email.encode())  # type: ignore
-hex_dig = hash_object.hexdigest()[:16]
-user_eh = f"h{hex_dig}"
 
 # silent_fp = str(audio_dir / "silent.wav")
 
@@ -57,7 +53,7 @@ def get_translation(text):
 
 
 def get_dialogue_audio_file_path(idx, voice):
-    return str(dialogue_dir / f"{user_eh}-{idx}-{voice}.mp3")
+    return str(dialogue_dir / f"{st.session_state.user_id}-{idx}-{voice}.mp3")
 
 
 @st.cache_data(ttl=60 * 60, show_spinner="从 Azure 语音库合成语音...")
@@ -113,7 +109,7 @@ def reset_session():
     st.session_state["dialogue_idx"] = -1
     st.session_state["dialogue_tgt"] = {}
     st.session_state["audio_fp"] = {}
-    files = dialogue_dir.glob(f"{user_eh}-*.mp3")
+    files = dialogue_dir.glob(f"{st.session_state.user_id}-*.mp3")
     for f in files:
         # print(f)
         os.remove(f)

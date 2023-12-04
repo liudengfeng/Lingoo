@@ -36,22 +36,17 @@ if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
     st.error("非付费用户，无法使用此功能。")
     st.stop()
 
-# if st.secrets["env"] in ["streamlit", "azure"]:
-#     if "inited_vertex" not in st.session_state:
-#         init_vertex(st.secrets)
-#         st.session_state["inited_vertex"] = True
-# else:
-#     st.error("非云端环境，无法使用 Vertex AI")
-#     st.stop()
+if st.secrets["env"] in ["streamlit", "azure"]:
+    if "inited_vertex" not in st.session_state:
+        init_vertex(st.secrets)
+        st.session_state["inited_vertex"] = True
+else:
+    st.error("非云端环境，无法使用 Vertex AI")
+    st.stop()
 
 # endregion
 
 # region 常量
-
-email = st.experimental_user.email if st.experimental_user.email else "none"
-hash_object = hashlib.sha256(email.encode())  # type: ignore
-hex_dig = hash_object.hexdigest()[:16]
-user_eh = f"h{hex_dig}"
 
 current_cwd: Path = Path(__file__).parent.parent
 voices_fp = current_cwd / "resource" / "voices.json"
@@ -61,8 +56,8 @@ if not os.path.exists(audio_dir):
     os.makedirs(audio_dir, exist_ok=True)
 
 # 使用临时文件
-replay_fp = os.path.join(audio_dir, f"{user_eh}-tab2-replay.wav")
-listen_fp = os.path.join(audio_dir, f"{user_eh}-tab2-listen.wav")
+replay_fp = os.path.join(audio_dir, f"{st.session_state.user_id}-tab2-replay.wav")
+listen_fp = os.path.join(audio_dir, f"{st.session_state.user_id}-tab2-listen.wav")
 
 # region templates
 
@@ -110,20 +105,19 @@ BTN_TEMPLATE = """
 if "assessment_tb2" not in st.session_state:
     st.session_state["assessment_tb2"] = {}
 
+if "tab2_topics" not in st.session_state:
+    st.session_state["tab2_topics"] = []
+
 # endregion
 
 # region 函数
 
 
-def reset_session():
-    st.session_state["dialogue_context"] = []
-    st.session_state["dialogue_idx"] = -1
-    st.session_state["dialogue_tgt"] = {}
-    st.session_state["audio_fp"] = {}
-    files = dialogue_dir.glob(f"{user_eh}-*.mp3")
-    for f in files:
-        # print(f)
-        os.remove(f)
+def reset_topics():
+    level = st.session_state["ps_level"]
+    category = st.session_state["ps_category"]
+    st.session_state["tab2_topics"] = generate_english_topics("测试英语口语水平", category, level)
+    
 
 
 # @st.cache_data(show_spinner="从 Azure 语音库合成语音...")
@@ -410,19 +404,19 @@ voice_style: Any = st.sidebar.selectbox(
     "合成语音风格", names, format_func=lambda x: f"{x[2]}【{x[1]}】"
 )
 
-level = st.sidebar.selectbox(
+st.sidebar.selectbox(
     "您当前的英语水平",
     CEFR_LEVEL_MAPS.keys(),
     format_func=lambda x: CEFR_LEVEL_MAPS[x],
-    on_change=reset_session,
-    key="dialogue_level",
+    on_change=reset_topics,
+    key="ps_level",
     help="场景话题会根据您的选择来匹配难度",
 )
-topic = st.sidebar.selectbox(
+st.sidebar.selectbox(
     "主题",
     TOPICS["zh-CN"],
-    key="topic",
-    on_change=reset_session,
+    key="ps_category",
+    on_change=reset_topics,
     help="选择主题，AI生成话题供您选择",
 )
 
@@ -435,22 +429,22 @@ topic = st.sidebar.selectbox(
 def reset_tb2():
     # get_synthesize_speech.clear()
     st.session_state["assessment_tb2"] = {}
-    st.session_state["text_tb1"] = ""
+    st.session_state["text_tb2"] = ""
     if os.path.exists(replay_fp):
         os.remove(replay_fp)
 
 
-def on_tb1_text_changed():
-    if os.path.exists(replay_fp):
-        os.remove(replay_fp)
+# def on_tb1_text_changed():
+#     if os.path.exists(replay_fp):
+#         os.remove(replay_fp)
 
 
 @st.cache_data(show_spinner="使用 Azure 服务评估对话...")
-def pronunciation_assessment_func(text_to_be_evaluated_tb1):
+def pronunciation_assessment_func(topic):
     try:
         assessment = pronunciation_assessment_with_content_assessment(
             replay_fp,
-            text_to_be_evaluated_tb1,
+            topic,
             language,
             st.secrets["Microsoft"]["SPEECH_KEY"],
             st.secrets["Microsoft"]["SPEECH_REGION"],
@@ -461,7 +455,7 @@ def pronunciation_assessment_func(text_to_be_evaluated_tb1):
         st.stop()
 
 
-def on_ass_btn_tb1_click(text_to_be_evaluated_tb1):
+def on_ass_btn_click(text_to_be_evaluated_tb1):
     pronunciation_assessment_func(text_to_be_evaluated_tb1)
     st.session_state["record_ready"] = False
 
@@ -472,7 +466,7 @@ def _get_cn_name(lan):
             return v
 
 
-def on_syn_btn_tb1_click(text_to_be_evaluated_tb1, voice_style, placeholder):
+def on_ai_btn_click(text_to_be_evaluated_tb1, voice_style, placeholder):
     lan = language_detect(
         text_to_be_evaluated_tb1,
         st.secrets["Microsoft"]["TRANSLATOR_TEXT_SUBSCRIPTION_KEY"],
@@ -507,24 +501,27 @@ st.markdown(
 
 使用方法如下：
 1. 使用👈左侧菜单，设定您当前的英语水平和主题。
-2. AI会根据您的设定自动生成口语评估话题，使用下面的下拉框选择您喜欢的话题。
+2. AI会根据您的设定自动生成口语评估话题，使用👇的下拉框选择您愿意讨论的话题。
 3. 准备就绪后，开始录制或上传关于此主题的讨论。
-4. 点击“评估”按钮，查看发音评估报告。报告将包括音素准确性、完整性、流畅性、韵律等方面的评分。
-5. 点击“合成”按钮，合成选定风格的语音。只有文本框内有文本时，才激活“合成”按钮。
-6. 点击“重置”按钮，重置发音评估文本。
+4. 点击“评估”按钮，查看发音评估报告。除发音得分外，还包括词汇、语法、主题评分。
+5. 点击“AI”按钮，选定合成语音风格，生成参考示例。
+6. 点击“聆听”按钮，聆听合成语音。
 """
 )
 
-text_to_be_evaluated_tb1 = st.text_area(
+st.selectbox("话题", st.session_state["tab2_topics"], key="topic")
+
+st.text_area(
     "📝 **发音评估文本**",
-    key="text_tb1",
+    key="text_tb2",
     max_chars=1000,
     height=120,
     label_visibility="collapsed",
-    on_change=on_tb1_text_changed,
+    # on_change=on_tb1_text_changed,
     placeholder="请在文本框中输入要评估的文本。请注意，您的文本要与左侧下拉列表中的“目标语言”一致。",
     help="输入要评估的文本。",
 )
+
 message_placeholder = st.empty()
 btn_num = 8
 btn_cols = st.columns(btn_num)
@@ -542,25 +539,17 @@ rep_btn = btn_cols[2].button(
 ass_btn = btn_cols[3].button(
     "评估[🔍]",
     key="ass_btn_tb1",
-    help="生成发音评估报告。",
-    on_click=on_ass_btn_tb1_click,
-    args=(text_to_be_evaluated_tb1,),
+    help="生成口语评估报告。",
+    on_click=on_ass_btn_click,
 )
 syn_btn = btn_cols[4].button(
-    "合成[🔊]",
+    "AI[🤖]",
     key="syn_btn_tb1",
-    on_click=on_syn_btn_tb1_click,
-    args=(text_to_be_evaluated_tb1, voice_style, message_placeholder),
-    disabled=len(text_to_be_evaluated_tb1) == 0,
+    on_click=on_ai_btn_click,
     help="点击合成按钮，合成选定风格的语音。",
 )
 lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
-cls_btn = btn_cols[6].button(
-    "重置[🔄]",
-    key="cls_btn_tb1",
-    help="重置发音评估文本。",
-    on_click=reset_tb2,
-)
+uploaded_file = btn_cols[6].file_uploader("📁 上传音频", type=["wav"],help="时长超过 15 秒，文字篇幅在 50 个字词和 3 个句子以上。")
 
 if audio:
     # 保存wav文件

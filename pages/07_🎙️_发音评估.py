@@ -41,11 +41,6 @@ if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
 
 # region 常量
 
-email = st.experimental_user.email if st.experimental_user.email else "none"
-hash_object = hashlib.sha256(email.encode())  # type: ignore
-hex_dig = hash_object.hexdigest()[:16]
-user_eh = f"h{hex_dig}"
-
 current_cwd: Path = Path(__file__).parent.parent
 voices_fp = current_cwd / "resource" / "voices.json"
 audio_dir = current_cwd / "resource" / "audio_data"
@@ -54,8 +49,8 @@ if not os.path.exists(audio_dir):
     os.makedirs(audio_dir, exist_ok=True)
 
 # 使用临时文件
-replay_fp = os.path.join(audio_dir, f"{user_eh}-tab1-replay.wav")
-listen_fp = os.path.join(audio_dir, f"{user_eh}-tab1-listen.wav")
+replay_fp = os.path.join(audio_dir, f"{st.session_state.user_id}-tab1-replay.wav")
+listen_fp = os.path.join(audio_dir, f"{st.session_state.user_id}-tab1-listen.wav")
 
 
 # region templates
