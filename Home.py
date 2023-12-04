@@ -230,10 +230,10 @@ welcome_image = Image.open(logo_dir / "welcome-1.jpg")
 
 with log_cols[1]:
     st.markdown(
-        """<a href="用户管理" target="_self">step 1 用户注册</a>""", unsafe_allow_html=True
+        """<a href="用户中心" target="_self">step 1 用户注册</a>""", unsafe_allow_html=True
     )
     st.markdown(
-        """<a href="用户管理" target="_self">step 2 订阅付费</a>""", unsafe_allow_html=True
+        """<a href="用户中心" target="_self">step 2 订阅付费</a>""", unsafe_allow_html=True
     )
     st.markdown("""<a href="" target="_self">step 3 登录使用</a>""", unsafe_allow_html=True)
 

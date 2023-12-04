@@ -598,6 +598,73 @@ def pronunciation_assessment_with_content_assessment(
         region=service_region,
     )
     audio_config = speechsdk.audio.AudioConfig(filename=wavfile)
+    pronunciation_config = speechsdk.PronunciationAssessmentConfig(
+        grading_system=speechsdk.PronunciationAssessmentGradingSystem.HundredMark,
+        granularity=speechsdk.PronunciationAssessmentGranularity.Phoneme,
+        enable_miscue=False,
+    )
+    pronunciation_config.enable_prosody_assessment()
+    pronunciation_config.enable_content_assessment_with_topic(topic)
+    # must set phoneme_alphabet, otherwise the output of phoneme is **not** in form of  /hɛˈloʊ/
+    pronunciation_config.phoneme_alphabet = "IPA"
+
+    speech_recognizer = speechsdk.SpeechRecognizer(
+        speech_config=speech_config, language=language, audio_config=audio_config
+    )
+    # Apply pronunciation assessment config to speech recognizer
+    pronunciation_config.apply_to(speech_recognizer)
+
+    done = False
+    pron_results = []
+    recognized_text = ""
+
+    def stop_cb(evt):
+        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
+        logger.debug("CLOSING on {}".format(evt))
+        nonlocal done
+        done = True
+
+    def recognized(evt):
+        nonlocal pron_results, recognized_text
+        if (
+            evt.result.reason == speechsdk.ResultReason.RecognizedSpeech
+            or evt.result.reason == speechsdk.ResultReason.NoMatch
+        ):
+            pron_results.append(speechsdk.PronunciationAssessmentResult(evt.result))
+            if evt.result.text.strip().rstrip(".") != "":
+                logger.debug(f"Recognizing: {evt.result.text}")
+                recognized_text += " " + evt.result.text.strip()
+
+    # Connect callbacks to the events fired by the speech recognizer
+    speech_recognizer.recognized.connect(recognized)
+    speech_recognizer.session_started.connect(
+        lambda evt: print("SESSION STARTED: {}".format(evt))
+    )
+    speech_recognizer.session_stopped.connect(
+        lambda evt: print("SESSION STOPPED {}".format(evt))
+    )
+    speech_recognizer.canceled.connect(lambda evt: print("CANCELED {}".format(evt)))
+    # Stop continuous recognition on either session stopped or canceled events
+    speech_recognizer.session_stopped.connect(stop_cb)
+    speech_recognizer.canceled.connect(stop_cb)
+
+    # Start continuous pronunciation assessment
+    speech_recognizer.start_continuous_recognition()
+    while not done:
+        time.sleep(0.5)
+    speech_recognizer.stop_continuous_recognition()
+
+    # Content assessment result is in the last pronunciation assessment block
+    assert pron_results[-1].content_assessment_result is not None
+    content_result = pron_results[-1].content_assessment_result
+    print(f"Content Assessment for: {recognized_text.strip()}")
+    print(
+        "Content Assessment results:\n"
+        f"\tGrammar score: {content_result.grammar_score:.1f}\n"
+        f"\tVocabulary score: {content_result.vocabulary_score:.1f}\n"
+        f"\tTopic score: {content_result.topic_score:.1f}"
+    )
+    return pron_results, recognized_text.strip()
 
 
 def speech_synthesis_get_available_voices(
