@@ -521,14 +521,15 @@ if len(st.session_state["tab2_topics"]) == 0:
 topic = st.selectbox("话题", st.session_state["tab2_topics"], key="topic_tb2")
 
 st.text_area(
-    "📝 **发音评估文本**",
+    "📝 **识别的文本**",
     key="text_tb2",
-    max_chars=1000,
-    height=120,
+    max_chars=2000,
+    height=300,
     label_visibility="collapsed",
+    disabled=True,
     # on_change=on_tb1_text_changed,
-    placeholder="请在文本框中输入要评估的文本。请注意，您的文本要与左侧下拉列表中的“目标语言”一致。",
-    help="输入要评估的文本。",
+    placeholder="识别的文本",
+    help="识别的文本",
 )
 
 message_placeholder = st.empty()
