@@ -3,11 +3,11 @@ STYLE = """
 
 button {
     border: none; /* 无边框 */
-    height: 30px; /* 高度为 20px */
+    height: 20px; /* 高度为 20px */
     margin-left: 5px;
     margin-right: 5px;
     margin-top: 20px;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
 }
 
 .text-decoration-underline {
