@@ -116,17 +116,16 @@ if "tab2_topics" not in st.session_state:
 def reset_topics():
     level = st.session_state["ps_level"]
     category = st.session_state["ps_category"]
-    st.session_state["tab2_topics"] = generate_english_topics("测试英语口语水平", category, level)
-    
+    st.session_state["tab2_topics"] = generate_english_topics(
+        "测试英语口语水平", category, level
+    )
 
 
-# @st.cache_data(show_spinner="从 Azure 语音库合成语音...")
 @st.cache_data
 def get_synthesize_speech(text, voice):
     synthesize_speech_to_file(
         text,
         listen_fp,
-        # language,
         st.secrets["Microsoft"]["SPEECH_KEY"],
         st.secrets["Microsoft"]["SPEECH_REGION"],
         voice,
@@ -230,10 +229,9 @@ MD_BADGE_TEMPLATE = """
 """
 
 
-def view_tb1_md_badges():
+def view_md_badges():
     assessment = st.session_state["assessment_tb2"]
-    badges = []
-    cols = st.columns(len(MD_BADGE_MAPS.keys()))
+    cols = st.columns(len(MD_BADGE_MAPS.keys())+2)
     error_counts = assessment.get("error_counts", {})
     for i, t in enumerate(MD_BADGE_MAPS.keys()):
         num = f"{error_counts.get(t,0):3d}"
@@ -337,7 +335,7 @@ def view_tab1_radar():
 
 def view_tb1_report():
     # 发音评估报告
-    view_tb1_md_badges()
+    view_md_badges()
     st.divider()
     view_tb1_word_pronunciation()
     view_tab1_radar()
@@ -442,14 +440,13 @@ def reset_tb2():
 @st.cache_data(show_spinner="使用 Azure 服务评估对话...")
 def pronunciation_assessment_func(topic):
     try:
-        assessment = pronunciation_assessment_with_content_assessment(
+        st.session_state["assessment_tb2"] = pronunciation_assessment_with_content_assessment(
             replay_fp,
             topic,
             language,
             st.secrets["Microsoft"]["SPEECH_KEY"],
             st.secrets["Microsoft"]["SPEECH_REGION"],
         )
-        st.session_state["assessment_tb2"] = assessment
     except Exception as e:
         st.toast(e)
         st.stop()
@@ -523,33 +520,39 @@ st.text_area(
 )
 
 message_placeholder = st.empty()
+st.info("要求：时长超过15秒，文字篇幅在50个字词和3个句子以上。")
 btn_num = 8
 btn_cols = st.columns(btn_num)
 
-with btn_cols[1]:
+uploaded_file = btn_cols[1].file_uploader(
+    "📁 上传音频", type=["wav"], help="上传您录制的音频文件")
+
+with btn_cols[2]:
     audio = mic_recorder(start_prompt="录音[🔴]", stop_prompt="停止[⏹️]", key="recorder")
 
-rep_btn = btn_cols[2].button(
+rep_btn = btn_cols[3].button(
     "回放[🎧]",
     key="rep_btn_tb1",
     disabled=not st.session_state.get("record_ready", False),
-    help="点击按钮，回放麦克风录音。",
+    help="点击按钮，播放麦克风录音或您上传的音频文件。",
 )
-
-ass_btn = btn_cols[3].button(
+ass_btn = btn_cols[4].button(
     "评估[🔍]",
     key="ass_btn_tb1",
     help="生成口语评估报告。",
     on_click=on_ass_btn_click,
 )
-syn_btn = btn_cols[4].button(
-    "AI[🤖]",
+syn_btn = btn_cols[5].button(
+    "样例[🤖]",
     key="syn_btn_tb1",
     on_click=on_ai_btn_click,
-    help="点击合成按钮，合成选定风格的语音。",
+    help="点击按钮后，AI将生成示例文本，并根据用户选择的风格合成语音。",
 )
-lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
-uploaded_file = btn_cols[6].file_uploader("📁 上传音频", type=["wav"],help="时长超过 15 秒，文字篇幅在 50 个字词和 3 个句子以上。")
+lst_btn = btn_cols[6].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
+
+if uploaded_file is not None:
+    with open(replay_fp, 'wb') as f:
+        f.write(uploaded_file.getvalue())
 
 if audio:
     # 保存wav文件

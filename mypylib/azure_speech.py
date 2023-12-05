@@ -37,7 +37,6 @@ logger = logging.getLogger("streamlit")
 def synthesize_speech_to_file(
     text,
     fp,
-    # language,
     speech_key,
     service_region,
     voice_name="en-US-JennyMultilingualNeural",
@@ -114,23 +113,23 @@ def pronunciation_assessment_from_microphone(
     pronunciation_config.apply_to(recognizer)
 
     # Starts recognizing.
-    # print('Read out "{}" for pronunciation assessment ...'.format(reference_text))
+    # logger.debug('Read out "{}" for pronunciation assessment ...'.format(reference_text))
 
     # Note: Since recognize_once() returns only a single utterance, it is suitable only for single
     # shot evaluation.
     # result = recognizer.recognize_once_async().get()
     result = recognizer.recognize_once()
-    # print(f"{result.text=}")
+    # logger.debug(f"{result.text=}")
     return result
 
 
 def get_word_phonemes(word: speechsdk.PronunciationAssessmentWordResult):
-    # print(f"{type(word)}")
+    # logger.debug(f"{type(word)}")
     phonemes = []
     scores = []
     if word.error_type != "Omission":
         for p in word.phonemes:
-            # print(f"{p.phoneme=}\t{p.accuracy_score=}")
+            # logger.debug(f"{p.phoneme=}\t{p.accuracy_score=}")
             phonemes.append(p.phoneme)
             scores.append(p.accuracy_score)
     return (phonemes, scores)
@@ -267,7 +266,6 @@ def pronunciation_assessment_from_wavfile(
     accuracy_score = 0.0
     completeness_score = 0.0
     fluency_score = 0.0
-    error = ""
     # Creates an instance of a speech config with specified subscription key and service region.
     speech_config = speechsdk.SpeechConfig(
         subscription=speech_key, region=service_region
@@ -282,7 +280,7 @@ def pronunciation_assessment_from_wavfile(
         "EnableMiscue": True,
         "EnableProsodyAssessment": True,
     }
-    # print(f"{json.dumps(pa_config)}")
+    # logger.debug(f"{json.dumps(pa_config)}")
     pronunciation_config = speechsdk.PronunciationAssessmentConfig(
         json_string=json.dumps(pa_config)
     )
@@ -306,12 +304,12 @@ def pronunciation_assessment_from_wavfile(
 
     def stop_cb(evt: speechsdk.SessionEventArgs):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
-        # print("CLOSING on {}".format(evt))
+        # logger.debug("CLOSING on {}".format(evt))
         nonlocal done
         done = True
 
     def recognized(evt: speechsdk.SpeechRecognitionEventArgs):
-        # print("pronunciation assessment for: {}".format(evt.result.text))
+        # logger.debug("pronunciation assessment for: {}".format(evt.result.text))
         # pronunciation_result = speechsdk.PronunciationAssessmentResult(evt.result)
         pronunciation_result = _PronunciationAssessmentResultV2(evt.result)
         nonlocal recognized_words, fluency_scores, durations, prosody_scores
@@ -321,7 +319,7 @@ def pronunciation_assessment_from_wavfile(
             speechsdk.PropertyId.SpeechServiceResponse_JsonResult
         )
         jo = json.loads(json_result)  # type: ignore
-        # print(json.dumps(jo, indent=4))
+        # logger.debug(json.dumps(jo, indent=4))
         nb = jo["NBest"][0]
         durations.append(sum([int(w["Duration"]) for w in nb["Words"]]))
         prosody_scores.append(nb["PronunciationAssessment"]["ProsodyScore"])
@@ -330,10 +328,10 @@ def pronunciation_assessment_from_wavfile(
     speech_recognizer.recognized.connect(recognized)
 
     # speech_recognizer.session_started.connect(
-    #     lambda evt: print("SESSION STARTED: {}".format(evt))
+    #     lambda evt: logger.debug("SESSION STARTED: {}".format(evt))
     # )
     # speech_recognizer.session_stopped.connect(
-    #     lambda evt: print("SESSION STOPPED {}".format(evt))
+    #     lambda evt: logger.debug("SESSION STOPPED {}".format(evt))
     # )
     def view_canceled(evt):
         cancellation_details = evt.result.cancellation_details
@@ -345,7 +343,7 @@ def pronunciation_assessment_from_wavfile(
                 "❌ Error details: {}".format(cancellation_details.error_details)
             )
 
-    # speech_recognizer.canceled.connect(lambda evt: print("CANCELED {}".format(evt)))
+    # speech_recognizer.canceled.connect(lambda evt: logger.debug("CANCELED {}".format(evt)))
     speech_recognizer.canceled.connect(view_canceled)
     # stop continuous recognition on either session stopped or canceled events
     speech_recognizer.session_stopped.connect(stop_cb)
@@ -434,10 +432,10 @@ def pronunciation_assessment_from_wavfile(
     )
     # 创建一个defaultdict，当访问不存在的键时，自动创建一个默认值为0的int
     error_counts = defaultdict(int)
-    # print("Error counts:")
+    # logger.debug("Error counts:")
     for word in final_words:
         error_counts[word.error_type] += 1
-        # print(f"{word.word=}\t{word.Feedback=}")
+        # logger.debug(f"{word.word=}\t{word.Feedback=}")
         if word.IsUnexpectedBreak:
             error_counts["UnexpectedBreak"] += 1
         if word.IsMissingBreak:
@@ -454,7 +452,7 @@ def pronunciation_assessment_from_wavfile(
             "feedback": word.Feedback,
         }
         words_list.append(word_info)
-
+    # TODO:根据新版调整
     return {
         "pronunciation_score": pron_score,
         "accuracy_score": accuracy_score,
@@ -463,121 +461,7 @@ def pronunciation_assessment_from_wavfile(
         "prosody_score": prosody_score,
         "words_list": words_list,
         "error_counts": error_counts,
-        "error": error,
     }
-
-
-# please refer to Reading sample to get pronunciation/accuracy/fluency/prosody score.
-def get_content_results(
-    wavfile: str,
-    topic: str,
-    language: str,
-    speech_key: str,
-    service_region: str,
-):
-    """Performs pronunciation assessment asynchronously with input from an audio file and return content score.
-    See more information at https://aka.ms/csspeech/pa"""
-    # 定价层：S0 标准 每分钟 300 个请求
-    # provide a WAV file as an example. Replace it with your own.
-    speech_config = speechsdk.SpeechConfig(
-        subscription=speech_key, region=service_region
-    )
-    audio_config = speechsdk.audio.AudioConfig(filename=wavfile)
-
-    speech_recognizer = speechsdk.SpeechRecognizer(
-        speech_config=speech_config, audio_config=audio_config, language=language
-    )
-    connection = speechsdk.Connection.from_recognizer(speech_recognizer)
-
-    # topic = "your own topic"
-
-    phrase_detection_config = {
-        "enrichment": {
-            "pronunciationAssessment": {
-                "referenceText": "",
-                "gradingSystem": "HundredMark",
-                "granularity": "Word",
-                "dimension": "Comprehensive",
-                "enableMiscue": "False",
-                "enableProsodyAssessment": "True",
-            },
-            "contentAssessment": {
-                "topic": topic,
-            },
-        }
-    }
-    connection.set_message_property(
-        "speech.context", "phraseDetection", (json.dumps(phrase_detection_config))
-    )
-
-    phrase_output_config = {
-        "format": "Detailed",
-        "detailed": {
-            "options": [
-                "WordTimings",
-                "PronunciationAssessment",
-                "ContentAssessment",
-                "SNR",
-            ]
-        },
-    }
-    connection.set_message_property(
-        "speech.context", "phraseOutput", (json.dumps(phrase_output_config))
-    )
-
-    # Open the connection
-    connection.open(for_continuous_recognition=True)
-
-    done = False
-    recognized_text = ""
-
-    def stop_cb(evt):
-        """callback that signals to stop continuous recognition upon receiving an event `evt`"""
-        print("CLOSING on {}".format(evt))
-        nonlocal done
-        done = True
-
-    def recognized(evt):
-        nonlocal recognized_text
-        if (
-            evt.result.reason == speechsdk.ResultReason.RecognizedSpeech
-            or evt.result.reason == speechsdk.ResultReason.NoMatch
-        ):
-            json_result = json.loads(
-                evt.result.properties.get(
-                    speechsdk.PropertyId.SpeechServiceResponse_JsonResult
-                )
-            )
-            if len(json_result["DisplayText"].strip()) > 1:
-                recognized_text += " " + evt.result.text
-                print(f"Pronunciation Assessment for: {evt.result.text}")
-                print(json.dumps(json_result, indent=4))
-            else:
-                print(f"内容评分: {recognized_text}")
-                print(json.dumps(json_result, indent=4))
-            # print(json.dumps(json_result, indent=4))
-
-    # Connect callbacks to the events fired by the speech recognizer
-    speech_recognizer.recognized.connect(recognized)
-    speech_recognizer.session_started.connect(
-        lambda evt: print("SESSION STARTED: {}".format(evt))
-    )
-    speech_recognizer.session_stopped.connect(
-        lambda evt: print("SESSION STOPPED {}".format(evt))
-    )
-    speech_recognizer.canceled.connect(lambda evt: print("CANCELED {}".format(evt)))
-    # Stop continuous recognition on either session stopped or canceled events
-    speech_recognizer.session_stopped.connect(stop_cb)
-    speech_recognizer.canceled.connect(stop_cb)
-
-    # Start continuous pronunciation assessment
-    speech_recognizer.start_continuous_recognition()
-    while not done:
-        time.sleep(0.5)
-    speech_recognizer.stop_continuous_recognition()
-
-    # close the connection
-    connection.close()
 
 
 def pronunciation_assessment_with_content_assessment(
@@ -638,12 +522,12 @@ def pronunciation_assessment_with_content_assessment(
     # Connect callbacks to the events fired by the speech recognizer
     speech_recognizer.recognized.connect(recognized)
     speech_recognizer.session_started.connect(
-        lambda evt: print("SESSION STARTED: {}".format(evt))
+        lambda evt: logger.debug("SESSION STARTED: {}".format(evt))
     )
     speech_recognizer.session_stopped.connect(
-        lambda evt: print("SESSION STOPPED {}".format(evt))
+        lambda evt: logger.debug("SESSION STOPPED {}".format(evt))
     )
-    speech_recognizer.canceled.connect(lambda evt: print("CANCELED {}".format(evt)))
+    speech_recognizer.canceled.connect(lambda evt: logger.debug("CANCELED {}".format(evt)))
     # Stop continuous recognition on either session stopped or canceled events
     speech_recognizer.session_stopped.connect(stop_cb)
     speech_recognizer.canceled.connect(stop_cb)
@@ -657,14 +541,43 @@ def pronunciation_assessment_with_content_assessment(
     # Content assessment result is in the last pronunciation assessment block
     assert pron_results[-1].content_assessment_result is not None
     content_result = pron_results[-1].content_assessment_result
-    print(f"Content Assessment for: {recognized_text.strip()}")
-    print(
-        "Content Assessment results:\n"
-        f"\tGrammar score: {content_result.grammar_score:.1f}\n"
-        f"\tVocabulary score: {content_result.vocabulary_score:.1f}\n"
-        f"\tTopic score: {content_result.topic_score:.1f}"
-    )
-    return pron_results, recognized_text.strip()
+    # logger.debug(f"Content Assessment for: {recognized_text.strip()}")
+    # logger.debug(
+    #     "Content Assessment results:\n"
+    #     f"\tGrammar score: {content_result.grammar_score:.1f}\n"
+    #     f"\tVocabulary score: {content_result.vocabulary_score:.1f}\n"
+    #     f"\tTopic score: {content_result.topic_score:.1f}"
+    # )
+    n = len(pron_results) - 1
+    pronunciation_score = []
+    accuracy_score = []
+    fluency_score = []
+    completeness_score = []
+    prosody_score = []
+    words_list = []
+    error_counts = defaultdict(int)
+    for i in range(n):
+        p = pron_results[i]
+        pronunciation_score.append(p.pronunciation_score)
+        accuracy_score.append(p.accuracy_score)
+        fluency_score.append(p.fluency_score)
+        completeness_score.append(p.completeness_score)
+        prosody_score.append(p.prosody_score)
+        words_list.extend(p.words)
+        for w in p.words:
+            if w.error_type:
+                error_counts[w.error_type] += 1
+    return {
+        "pronunciation_score": sum(pronunciation_score) / n,
+        "accuracy_score": sum(accuracy_score) / n,
+        "fluency_score": sum(fluency_score) / n,
+        "completeness_score": sum(completeness_score) / n,
+        "prosody_score": sum(prosody_score) / n,
+        "words_list": words_list,
+        "error_counts": error_counts,
+        "recognized_text": recognized_text.strip(),
+        "content_result": content_result,
+    }
 
 
 def speech_synthesis_get_available_voices(

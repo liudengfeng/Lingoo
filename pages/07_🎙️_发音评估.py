@@ -104,7 +104,6 @@ def get_synthesize_speech(text, voice):
     synthesize_speech_to_file(
         text,
         listen_fp,
-        # language,
         st.secrets["Microsoft"]["SPEECH_KEY"],
         st.secrets["Microsoft"]["SPEECH_REGION"],
         voice,
@@ -178,7 +177,6 @@ MD_BADGE_MAPS = OrderedDict(
 
 def view_tb1_md_badges():
     assessment = st.session_state["assessment_tb1"]
-    badges = []
     cols = st.columns(len(MD_BADGE_MAPS.keys()))
     error_counts = assessment.get("error_counts", {})
     for i, t in enumerate(MD_BADGE_MAPS.keys()):
