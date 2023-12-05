@@ -19,7 +19,11 @@ from mypylib.azure_speech import (
 )
 from mypylib.azure_translator import language_detect
 from mypylib.constants import CEFR_LEVEL_MAPS, LAN_MAPS, TOPICS
-from mypylib.google_api import init_vertex, generate_english_topics
+from mypylib.google_api import (
+    init_vertex,
+    generate_english_topics,
+    generate_short_discussion,
+)
 from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
 from mypylib.word_utils import audio_autoplay_elem
@@ -449,11 +453,6 @@ def reset_tb2():
         os.remove(replay_fp)
 
 
-# def on_tb1_text_changed():
-#     if os.path.exists(replay_fp):
-#         os.remove(replay_fp)
-
-
 @st.cache_data(show_spinner="使用 Azure 服务评估对话...")
 def pronunciation_assessment_func(topic):
     try:
@@ -484,9 +483,11 @@ def _get_cn_name(lan):
             return v
 
 
-def on_ai_btn_click(text_to_be_evaluated_tb1, voice_style, placeholder):
+def on_ai_btn_click(topic, level, voice_style, placeholder):
+    text = generate_short_discussion(topic, level)
+    st.session_state["text_tb2"] = text
     try:
-        get_synthesize_speech(text_to_be_evaluated_tb1, voice_style[0])
+        get_synthesize_speech(text, voice_style[0])
     except Exception as e:
         placeholder.error(e)
         st.stop()
@@ -560,6 +561,7 @@ syn_btn = btn_cols[4].button(
     "样例[🤖]",
     key="syn_btn_tb1",
     on_click=on_ai_btn_click,
+    args=(topic, level_selectbox, message_placeholder),
     help="点击按钮后，AI将生成示例文本，并根据用户选择的风格合成语音。",
 )
 lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")

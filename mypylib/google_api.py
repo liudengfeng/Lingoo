@@ -143,3 +143,26 @@ def generate_english_topics(target, category, level, n=5):
     )
     # 输出列表
     return response.text.splitlines()
+
+
+def generate_short_discussion(topic, level):
+    parameters = {
+        "candidate_count": 1,
+        "max_output_tokens": 1024,
+        "temperature": 0.8,
+        "top_p": 0.8,
+        "top_k": 40,
+    }
+    model = TextGenerationModel.from_pretrained("text-bison")
+    response = model.predict(
+        f"""You are a student with CEFR English level {level}. Please complete the following topic discussion, no less than 150 words, no more than 300 words. No less than three sentences.
+    topic:{topic}
+
+    Require:
+    1. The language used should be appropriate for the students' current level of proficiency.
+    2. Start a discussion around the topic
+    3. Express ideas clearly and make the discussion logical.
+    4. Correct grammar and smooth wording""",
+        **parameters,
+    )
+    return response.text
