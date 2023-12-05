@@ -352,6 +352,7 @@ def view_report():
     st.divider()
     view_word_pronunciation()
     view_radar()
+    st.divider()
 
 
 # endregion
