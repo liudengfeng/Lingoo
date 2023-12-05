@@ -117,16 +117,20 @@ if "text_tb2" not in st.session_state:
 
 # region 辅助函数
 
-
-def reset_topics():
-    level = st.session_state["ps_level"]
-    category = st.session_state["ps_category"]
+@st.cache_data(show_spinner="使用Google Vertex AI 生成话题清单...")
+def _reset_topics(level, category):
     st.session_state["tab2_topics"] = generate_english_topics(
         "测试英语口语水平", category, level, 20
     )
 
 
-@st.cache_data
+def reset_topics():
+    level = st.session_state["ps_level"]
+    category = st.session_state["ps_category"]
+    _reset_topics(level, category)
+
+
+@st.cache_data(show_spinner="使用 Azure 服务合成语音...")
 def get_synthesize_speech(text, voice):
     synthesize_speech_to_file(
         text,
