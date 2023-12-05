@@ -524,31 +524,31 @@ st.info("要求：时长超过15秒，文字篇幅在50个字词和3个句子以
 btn_num = 8
 btn_cols = st.columns(btn_num)
 
-uploaded_file = btn_cols[1].file_uploader(
+uploaded_file = st.file_uploader(
     "📁 上传音频", type=["wav"], help="上传您录制的音频文件")
 
-with btn_cols[2]:
+with btn_cols[1]:
     audio = mic_recorder(start_prompt="录音[🔴]", stop_prompt="停止[⏹️]", key="recorder")
 
-rep_btn = btn_cols[3].button(
+rep_btn = btn_cols[2].button(
     "回放[🎧]",
     key="rep_btn_tb1",
     disabled=not st.session_state.get("record_ready", False),
     help="点击按钮，播放麦克风录音或您上传的音频文件。",
 )
-ass_btn = btn_cols[4].button(
+ass_btn = btn_cols[3].button(
     "评估[🔍]",
     key="ass_btn_tb1",
     help="生成口语评估报告。",
     on_click=on_ass_btn_click,
 )
-syn_btn = btn_cols[5].button(
+syn_btn = btn_cols[4].button(
     "样例[🤖]",
     key="syn_btn_tb1",
     on_click=on_ai_btn_click,
     help="点击按钮后，AI将生成示例文本，并根据用户选择的风格合成语音。",
 )
-lst_btn = btn_cols[6].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
+lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
 
 if uploaded_file is not None:
     with open(replay_fp, 'wb') as f:
