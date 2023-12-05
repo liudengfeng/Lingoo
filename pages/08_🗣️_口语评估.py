@@ -183,7 +183,7 @@ def generate_score_legend():
 """
 
 
-def generate_word_tooltip(word: dict) -> str:
+def generate_word_tooltip(word) -> str:
     """
     生成单词的工具提示。
 
@@ -195,11 +195,11 @@ def generate_word_tooltip(word: dict) -> str:
         tooltip (str): 包含单词和定义的HTML工具提示字符串。
     """
     res = ""
-    assert len(word["phonemes"]) == len(word["scores"])
-    n = len(word["phonemes"])
-    word_score = f"{word['word']} : {int(word['accuracy_score'])}"
-    phoneme_cols = """ """.join([f"""<td>{p}&nbsp;</td>""" for p in word["phonemes"]])
-    score_cols = """ """.join([f"""<td>{int(s)}&nbsp;</td>""" for s in word["scores"]])
+    assert len(word.phonemes) == len(word.scores)
+    n = len(word.phonemes)
+    word_score = f"{word.word} : {int(word.accuracy_score)}"
+    phoneme_cols = """ """.join([f"""<td>{p}&nbsp;</td>""" for p in word.phonemes])
+    score_cols = """ """.join([f"""<td>{int(s)}&nbsp;</td>""" for s in word.scores])
     res = WORD_TOOLTIP_TEMPLATE.format(
         n=n, word_score=word_score, phoneme_cols=phoneme_cols, score_cols=score_cols
     )
@@ -288,12 +288,12 @@ def view_word_pronunciation():
     words_list = assessment.get("words_list", [])
     html = ""
     for word in words_list:
-        error_type = word["error_type"]
+        error_type = word.error_type
         # print(error_type)
         btn_class = (
             f"""{MD_BADGE_MAPS[error_type][3]}""" if error_type != "success" else ""
         )
-        label = fmt_word(word["word"], error_type)
+        label = fmt_word(word.word, error_type)
         # 解决单引号、双引号问题
         title = generate_word_tooltip(word).replace("'", "&#39;").replace('"', "&quot;")
         btn = MD_BTN_TEMPLATE.format(
@@ -352,7 +352,6 @@ def view_report():
     st.divider()
     view_word_pronunciation()
     view_radar()
-    st.divider()
 
 
 # endregion
