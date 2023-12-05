@@ -17,7 +17,8 @@ from mypylib.azure_speech import (
     pronunciation_assessment_with_content_assessment,
     synthesize_speech_to_file,
 )
-from mypylib.azure_translator import language_detect
+
+# from mypylib.azure_translator import language_detect
 from mypylib.constants import CEFR_LEVEL_MAPS, LAN_MAPS, TOPICS
 from mypylib.google_api import (
     init_vertex,
@@ -124,7 +125,7 @@ def reset_topics():
     level = st.session_state["ps_level"]
     category = st.session_state["ps_category"]
     st.session_state["tab2_topics"] = generate_english_topics(
-        "测试英语口语水平", category, level
+        "测试英语口语水平", category, level, 20
     )
 
 
@@ -511,7 +512,7 @@ st.markdown(
 # 初始化
 if len(st.session_state["tab2_topics"]) == 0:
     st.session_state["tab2_topics"] = generate_english_topics(
-        "测试英语口语水平", topic_selectbox, level_selectbox
+        "测试英语口语水平", topic_selectbox, level_selectbox, 20
     )
 
 topic = st.selectbox("话题", st.session_state["tab2_topics"], key="topic_tb2")
