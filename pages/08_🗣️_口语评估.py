@@ -329,6 +329,7 @@ def view_radar():
         gen_radar(data_1, item_1, 320)
 
     content_result = st.session_state.assessment_tb2.get("content_result", {})
+    st.write(content_result)
     item_2 = {
         "content_score": "内容分数",
         "grammar_score": "语法分数",
