@@ -474,7 +474,7 @@ def pronunciation_assessment_func(topic):
 def on_ass_btn_click(topic):
     pronunciation_assessment_func(topic)
     # 显示识别的文本
-    st.session_state["text_tb2"] = st.session_state.assessment_tb2.recognized_text
+    st.session_state["text_tb2"] = st.session_state.assessment_tb2["recognized_text"]
     st.session_state["record_ready"] = False
 
 
