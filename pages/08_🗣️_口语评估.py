@@ -112,6 +112,9 @@ if "assessment_tb2" not in st.session_state:
 if "tab2_topics" not in st.session_state:
     st.session_state["tab2_topics"] = []
 
+if "text_tb2" not in st.session_state:
+    st.session_state["text_tb2"] = ""
+
 # endregion
 
 # region 函数
@@ -520,18 +523,9 @@ if len(st.session_state["tab2_topics"]) == 0:
     )
 
 topic = st.selectbox("话题", st.session_state["tab2_topics"], key="topic_tb2")
+st.markdown("#### :microphone: 识别的文本")
+st.markdown(st.session_state["text_tb2"], help="识别的文本")
 
-st.text_area(
-    "📝 **识别的文本**",
-    key="text_tb2",
-    max_chars=2000,
-    height=200,
-    label_visibility="collapsed",
-    disabled=True,
-    # on_change=on_tb1_text_changed,
-    placeholder="识别的文本",
-    help="识别的文本",
-)
 
 message_placeholder = st.empty()
 st.info("要求：时长超过15秒，文字篇幅在50个字词和3个句子以上。")
