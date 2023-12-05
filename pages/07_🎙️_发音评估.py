@@ -250,7 +250,7 @@ def view_word_pronunciation():
         # st.write(btn)
         html += btn
     html = f"""<p>{html}</p>"""
-    components.html(STYLE + html + TIPPY_JS, scrolling=True)
+    components.html(STYLE + html + TIPPY_JS, height=300, scrolling=True)
 
 
 # endregion

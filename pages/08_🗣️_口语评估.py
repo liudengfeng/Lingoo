@@ -473,6 +473,8 @@ def pronunciation_assessment_func(topic):
 
 def on_ass_btn_click(topic):
     pronunciation_assessment_func(topic)
+    # 显示识别的文本
+    st.session_state["text_tb2"] = st.session_state.assessment_tb2.recognized_text
     st.session_state["record_ready"] = False
 
 
@@ -483,21 +485,6 @@ def _get_cn_name(lan):
 
 
 def on_ai_btn_click(text_to_be_evaluated_tb1, voice_style, placeholder):
-    # lan = language_detect(
-    #     text_to_be_evaluated_tb1,
-    #     st.secrets["Microsoft"]["TRANSLATOR_TEXT_SUBSCRIPTION_KEY"],
-    #     st.secrets["Microsoft"]["TRANSLATOR_TEXT_REGION"],
-    # )
-    # # actual='zh-Hans' expected='en-US-JennyMultilingualNeural'
-    # actual = lan[0]["language"].split("-")[0].lower()
-    # expected = voice_style[0].split("-")[0].lower()
-    # if actual != expected:
-    #     e_name = _get_cn_name(expected)
-    #     a_name = _get_cn_name(actual)
-    #     placeholder.warning(
-    #         f'您希望合成"{e_name}"语音，但系统检测到您输入的文本是"{a_name}"。在左侧菜单栏中，点击“口语评估”菜单重新开始。'
-    #     )
-    #     st.stop()
     try:
         get_synthesize_speech(text_to_be_evaluated_tb1, voice_style[0])
     except Exception as e:
