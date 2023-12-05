@@ -334,8 +334,8 @@ def view_radar():
         "topic_score": "主题分数",
     }
     data_2 = {key: st.session_state.assessment_tb2.get(key, 0) for key in item_2.keys()}
-    item_2["content_score"] = (
-        item_2["grammar_score"] + item_2["vocabulary_score"] + item_2["topic_score"]
+    data_2["content_score"] = (
+        data_2["grammar_score"] + data_2["vocabulary_score"] + data_2["topic_score"]
     ) / 3
     with cols[1]:
         gen_radar(data_2, item_2, 320)
