@@ -552,7 +552,8 @@ lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合
 
 if uploaded_file is not None:
     with open(replay_fp, 'wb') as f:
-        f.write(uploaded_file.getvalue())
+        # To read file as string:
+        f.write(uploaded_file.read())
 
 if audio:
     # 保存wav文件
