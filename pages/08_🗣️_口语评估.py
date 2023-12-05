@@ -561,7 +561,7 @@ syn_btn = btn_cols[4].button(
     "样例[🤖]",
     key="syn_btn_tb1",
     on_click=on_ai_btn_click,
-    args=(topic, level_selectbox, message_placeholder),
+    args=(topic, level_selectbox, voice_style, message_placeholder),
     help="点击按钮后，AI将生成示例文本，并根据用户选择的风格合成语音。",
 )
 lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
