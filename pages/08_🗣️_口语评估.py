@@ -412,11 +412,11 @@ level_selectbox = st.sidebar.selectbox(
     help="场景话题会根据您的选择来匹配难度",
 )
 topic_selectbox = st.sidebar.selectbox(
-    "主题",
+    "您喜欢讨论的领域",
     TOPICS["zh-CN"],
     key="ps_category",
     on_change=reset_topics,
-    help="选择主题，AI生成话题供您选择",
+    help="选择领域，AI生成话题供您选择",
 )
 
 
@@ -481,6 +481,8 @@ page_emoji = "🗣️"
 st.markdown(
     f"""#### {page_emoji} 口语评估
 英语口语评估是帮助学习者了解自己的口语水平，并针对性地进行练习的重要工具。本产品基于`Azure`语音服务，借助`Google Vertex AI`，提供口语评估和AI辅助教学功能。
+
+如需详细了解使用方法，请参考最下方的操作提示。
 
 ##### \U0001F4AD 选择您要讨论的话题
 """
@@ -570,22 +572,22 @@ with st.expander("🔊 操作提示..."):
     st.markdown(
         """
 使用方法如下：
-1. 请使用👈左侧菜单来设置您的英语水平和要讨论的领域。
-2. 基于您的设置，AI将自动生成口语评估话题。您可以使用👇下拉框选择您愿意讨论的话题。
+1. 使用👈左侧菜单来设置您的英语水平和要讨论的领域。
+2. 使用👆下拉框选择您要讨论的话题。
 3. 准备就绪后，您可以使用麦克风开始录制关于该主题的讨论，也可以直接上传您已录制好的音频。
 4. 点击“评估”按钮，查看发音评估报告。该报告包括发音得分、词汇得分、语法得分和主题得分。
-5. 点击“样例”按钮，合成选定的语音风格，生成参考示例。
+5. 点击“样例”按钮，智能机器人将为您提供一份讨论样例，并合成选定风格的语音。
 6. 点击“聆听”按钮，聆听合成语音。
 """
     )
-    st.markdown("如何进行发音评估👇")
+    st.markdown("如何进行口语评估👇")
     record_tip = (
-        current_cwd / "resource" / "audio_tip" / "cn-pronunciation-assessment-tip.wav"
+        current_cwd / "resource" / "audio_tip" / "cn-speaking assessment-tip1.wav"
     )
     st.audio(str(record_tip), format="audio/wav")
 
-    st.markdown("如何聆听发音示例👇")
-    lst_tip = current_cwd / "resource" / "audio_tip" / "cn-synthesis-tip.wav"
+    st.markdown("如何让智能机器人生成样例并收听样例音频👇")
+    lst_tip = current_cwd / "resource" / "audio_tip" / "cn-speaking assessment-tip2.wav"
     st.audio(str(lst_tip), format="audio/wav")
 
 # endregion

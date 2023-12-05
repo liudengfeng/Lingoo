@@ -420,7 +420,7 @@ def on_syn_btn_tb1_click(text_to_be_evaluated_tb1, voice_style, placeholder):
 
 # endregion
 
-# region 发音评估
+# region 主页
 
 
 st.session_state["tab_flag"] = "tb1"
@@ -428,13 +428,8 @@ page_emoji = "🎙️"
 st.markdown(
     f"""#### {page_emoji} 发音评估
 英语发音评估是帮助学习者了解自己的发音水平，并针对性地进行练习的重要工具。本产品基于`Azure`语音服务，提供发音评估和语音合成功能。
-使用方法如下：
-1. 在文本框内输入要评估的英语文本。
-2. 点击“录音”按钮，大声朗读文本框内文本，开始录音。
-3. 说完后，点击“停止”按钮，停止录音。
-4. 点击“评估”按钮，查看发音评估报告。报告将包括音素准确性、完整性、流畅性、韵律等方面的评分。
-5. 点击“合成”按钮，合成选定风格的语音。只有文本框内有文本时，才激活“合成”按钮。
-6. 点击“重置”按钮，重置发音评估文本。
+
+如需详细了解使用方法，请参考最下方的操作提示。
 """
 )
 
@@ -507,14 +502,32 @@ if lst_btn:
 st.markdown("#### :trophy: 评估结果")
 view_tb1_report()
 
+# endregion
+
+# region 操作提示
+
 with st.expander("🔊 操作提示..."):
+    st.markdown(
+        f"""
+使用方法如下：
+1. 在文本框内输入要评估的英语文本。
+2. 点击“录音”按钮，大声朗读文本框内文本，开始录音。
+3. 说完后，点击“停止”按钮，停止录音。
+4. 点击“评估”按钮，查看发音评估报告。报告将包括音素准确性、完整性、流畅性、韵律等方面的评分。
+5. 点击“合成”按钮，合成选定风格的语音。只有文本框内有文本时，才激活“合成”按钮。
+6. 点击“重置”按钮，重置发音评估文本。
+"""
+    )
     st.markdown("如何进行发音评估👇")
     record_tip = (
-        current_cwd / "resource" / "audio_tip" / "cn-pronunciation-assessment-tip.wav"
+        current_cwd / "resource" / "audio_tip" / "cn-pronunciation-assessment-tip1.wav"
     )
     st.audio(str(record_tip), format="audio/wav")
 
     st.markdown("如何聆听发音示例👇")
-    lst_tip = current_cwd / "resource" / "audio_tip" / "cn-synthesis-tip.wav"
+    lst_tip = (
+        current_cwd / "resource" / "audio_tip" / "cn-pronunciation-assessment-tip2.wav"
+    )
     st.audio(str(lst_tip), format="audio/wav")
+
 # endregion
