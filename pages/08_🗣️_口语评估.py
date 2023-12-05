@@ -1,4 +1,3 @@
-import hashlib
 import json
 import os
 import time
@@ -7,7 +6,6 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Any
 
-import numpy as np
 import streamlit as st
 import streamlit.components.v1 as components
 from streamlit_mic_recorder import mic_recorder
@@ -18,7 +16,6 @@ from mypylib.azure_speech import (
     synthesize_speech_to_file,
 )
 
-# from mypylib.azure_translator import language_detect
 from mypylib.constants import CEFR_LEVEL_MAPS, LAN_MAPS, TOPICS
 from mypylib.google_api import (
     init_vertex,
@@ -51,7 +48,7 @@ else:
 
 # endregion
 
-# region 常量
+# region 路径
 
 current_cwd: Path = Path(__file__).parent.parent
 voices_fp = current_cwd / "resource" / "voices.json"
@@ -118,7 +115,7 @@ if "text_tb2" not in st.session_state:
 
 # endregion
 
-# region 函数
+# region 辅助函数
 
 
 def reset_topics():
@@ -147,24 +144,6 @@ def update_mav(audio):
         wav_file.setsampwidth(audio["sample_width"])
         wav_file.setframerate(audio["sample_rate"])
         wav_file.writeframes(audio["bytes"])
-
-
-def get_bg_color(score):
-    if score < 60:
-        return "bg-danger"
-    elif score < 80:
-        return "bg-warning"
-    else:
-        return "bg-success"
-
-
-def get_cp_color(score):
-    if score < 60:
-        return "#c02a2a"
-    elif score < 80:
-        return "yellow"
-    else:
-        return "green"
 
 
 def generate_score_legend():
@@ -411,9 +390,6 @@ st.set_page_config(
     layout="wide",
 )
 
-if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
-    st.error("您尚未付费，无法使用此功能。")
-    st.stop()
 
 # endregion
 
@@ -499,13 +475,14 @@ def on_ai_btn_click(topic, level, voice_style, placeholder):
 
 # endregion
 
-# region 发音评估
-
+# region 主页
 
 page_emoji = "🗣️"
 st.markdown(
     f"""#### {page_emoji} 口语评估
 英语口语评估是帮助学习者了解自己的口语水平，并针对性地进行练习的重要工具。本产品基于`Azure`语音服务，借助`Google Vertex AI`，提供口语评估和AI辅助教学功能。
+
+##### 选择您要讨论的话题
 """
 )
 
@@ -515,10 +492,12 @@ if len(st.session_state["tab2_topics"]) == 0:
         "测试英语口语水平", topic_selectbox, level_selectbox, 20
     )
 
-topic = st.selectbox("话题", st.session_state["tab2_topics"], key="topic_tb2")
+topic = st.selectbox(
+    "话题", st.session_state["tab2_topics"], key="topic_tb2", label_visibility="collapsed"
+)
 st.markdown("#### :microphone: 识别的文本")
 st.markdown(st.session_state["text_tb2"])
-
+st.divider()
 
 message_placeholder = st.empty()
 st.info("要求：时长超过15秒，文字篇幅在50个字词和3个句子以上。")
@@ -555,10 +534,10 @@ lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合
 
 
 if uploaded_file is not None:
-    st.session_state["record_ready"] = True
     with open(replay_fp, "wb") as f:
         # To read file as string:
         f.write(uploaded_file.read())
+    st.session_state["record_ready"] = True
 
 if audio:
     # 保存wav文件
@@ -581,6 +560,10 @@ if lst_btn:
 
 st.markdown("#### :trophy: 评估结果")
 view_report()
+
+# endregion
+
+# region 操作提示
 
 with st.expander("🔊 操作提示..."):
     st.markdown("如何进行口语评估👇")
