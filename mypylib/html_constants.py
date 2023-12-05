@@ -3,7 +3,7 @@ STYLE = """
 
 button {
     border: none; /* 无边框 */
-    height: 20px; /* 高度为 20px */
+    height: 40px;
     margin-left: 5px;
     margin-right: 5px;
     margin-top: 20px;
