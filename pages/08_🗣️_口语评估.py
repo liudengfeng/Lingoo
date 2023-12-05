@@ -231,7 +231,7 @@ MD_BADGE_TEMPLATE = """
 
 def view_md_badges():
     assessment = st.session_state["assessment_tb2"]
-    cols = st.columns(len(MD_BADGE_MAPS.keys())+2)
+    cols = st.columns(len(MD_BADGE_MAPS.keys()) + 2)
     error_counts = assessment.get("error_counts", {})
     for i, t in enumerate(MD_BADGE_MAPS.keys()):
         num = f"{error_counts.get(t,0):3d}"
@@ -283,7 +283,7 @@ def fmt_word(text: str, err_type: str):
             return f"""{text}"""
 
 
-def view_tb1_word_pronunciation():
+def view_word_pronunciation():
     assessment = st.session_state["assessment_tb2"]
     words_list = assessment.get("words_list", [])
     html = ""
@@ -312,20 +312,33 @@ def view_tb1_word_pronunciation():
 # region 雷达图
 
 
-def view_tab1_radar():
+def view_radar():
+    cols = st.columns(2)
     # 雷达图
-    item_maps_tab1 = {
+    item_1 = {
         "pronunciation_score": "发音总评分",
         "accuracy_score": "准确性评分",
         "completeness_score": "完整性评分",
         "fluency_score": "流畅性评分",
         "prosody_score": "韵律分数",
     }
-    data_tb1 = {
-        key: st.session_state.assessment_tb2.get(key, 0)
-        for key in item_maps_tab1.keys()
+    data_1 = {key: st.session_state.assessment_tb2.get(key, 0) for key in item_1.keys()}
+    with cols[0]:
+        gen_radar(data_1, item_1, 320)
+
+    content_result = st.session_state.assessment_tb2.get("content_result", {})
+    item_2 = {
+        "content_score": "内容分数",
+        "grammar_score": "语法分数",
+        "vocabulary_score": "词汇分数",
+        "topic_score": "主题分数",
     }
-    gen_radar(data_tb1, item_maps_tab1, 320)
+    data_2 = {key: st.session_state.assessment_tb2.get(key, 0) for key in item_2.keys()}
+    item_2["content_score"] = (
+        item_2["grammar_score"] + item_2["vocabulary_score"] + item_2["topic_score"]
+    ) / 3
+    with cols[1]:
+        gen_radar(data_2, item_2, 320)
 
 
 # endregion
@@ -333,12 +346,12 @@ def view_tab1_radar():
 # region 发音评估报告
 
 
-def view_tb1_report():
+def view_report():
     # 发音评估报告
     view_md_badges()
     st.divider()
-    view_tb1_word_pronunciation()
-    view_tab1_radar()
+    view_word_pronunciation()
+    view_radar()
 
 
 # endregion
@@ -402,7 +415,7 @@ voice_style: Any = st.sidebar.selectbox(
     "合成语音风格", names, format_func=lambda x: f"{x[2]}【{x[1]}】"
 )
 
-st.sidebar.selectbox(
+level_selectbox = st.sidebar.selectbox(
     "您当前的英语水平",
     CEFR_LEVEL_MAPS.keys(),
     format_func=lambda x: CEFR_LEVEL_MAPS[x],
@@ -410,7 +423,7 @@ st.sidebar.selectbox(
     key="ps_level",
     help="场景话题会根据您的选择来匹配难度",
 )
-st.sidebar.selectbox(
+topic_selectbox = st.sidebar.selectbox(
     "主题",
     TOPICS["zh-CN"],
     key="ps_category",
@@ -440,7 +453,9 @@ def reset_tb2():
 @st.cache_data(show_spinner="使用 Azure 服务评估对话...")
 def pronunciation_assessment_func(topic):
     try:
-        st.session_state["assessment_tb2"] = pronunciation_assessment_with_content_assessment(
+        st.session_state[
+            "assessment_tb2"
+        ] = pronunciation_assessment_with_content_assessment(
             replay_fp,
             topic,
             language,
@@ -452,8 +467,8 @@ def pronunciation_assessment_func(topic):
         st.stop()
 
 
-def on_ass_btn_click(text_to_be_evaluated_tb1):
-    pronunciation_assessment_func(text_to_be_evaluated_tb1)
+def on_ass_btn_click(topic):
+    pronunciation_assessment_func(topic)
     st.session_state["record_ready"] = False
 
 
@@ -464,21 +479,21 @@ def _get_cn_name(lan):
 
 
 def on_ai_btn_click(text_to_be_evaluated_tb1, voice_style, placeholder):
-    lan = language_detect(
-        text_to_be_evaluated_tb1,
-        st.secrets["Microsoft"]["TRANSLATOR_TEXT_SUBSCRIPTION_KEY"],
-        st.secrets["Microsoft"]["TRANSLATOR_TEXT_REGION"],
-    )
-    # actual='zh-Hans' expected='en-US-JennyMultilingualNeural'
-    actual = lan[0]["language"].split("-")[0].lower()
-    expected = voice_style[0].split("-")[0].lower()
-    if actual != expected:
-        e_name = _get_cn_name(expected)
-        a_name = _get_cn_name(actual)
-        placeholder.warning(
-            f'您希望合成"{e_name}"语音，但系统检测到您输入的文本是"{a_name}"。在左侧菜单栏中，点击“口语评估”菜单重新开始。'
-        )
-        st.stop()
+    # lan = language_detect(
+    #     text_to_be_evaluated_tb1,
+    #     st.secrets["Microsoft"]["TRANSLATOR_TEXT_SUBSCRIPTION_KEY"],
+    #     st.secrets["Microsoft"]["TRANSLATOR_TEXT_REGION"],
+    # )
+    # # actual='zh-Hans' expected='en-US-JennyMultilingualNeural'
+    # actual = lan[0]["language"].split("-")[0].lower()
+    # expected = voice_style[0].split("-")[0].lower()
+    # if actual != expected:
+    #     e_name = _get_cn_name(expected)
+    #     a_name = _get_cn_name(actual)
+    #     placeholder.warning(
+    #         f'您希望合成"{e_name}"语音，但系统检测到您输入的文本是"{a_name}"。在左侧菜单栏中，点击“口语评估”菜单重新开始。'
+    #     )
+    #     st.stop()
     try:
         get_synthesize_speech(text_to_be_evaluated_tb1, voice_style[0])
     except Exception as e:
@@ -497,16 +512,22 @@ st.markdown(
 英语口语评估是帮助学习者了解自己的口语水平，并针对性地进行练习的重要工具。本产品基于`Azure`语音服务，借助`Google Vertex AI`，提供口语评估和AI辅助教学功能。
 
 使用方法如下：
-1. 使用👈左侧菜单，设定您当前的英语水平和主题。
-2. AI会根据您的设定自动生成口语评估话题，使用👇的下拉框选择您愿意讨论的话题。
-3. 准备就绪后，开始录制或上传关于此主题的讨论。
-4. 点击“评估”按钮，查看发音评估报告。除发音得分外，还包括词汇、语法、主题评分。
-5. 点击“AI”按钮，选定合成语音风格，生成参考示例。
+1. 请使用👈左侧菜单来设置您的英语水平和要讨论的领域。
+2. 基于您的设置，AI将自动生成口语评估话题。您可以使用👇下拉框选择您愿意讨论的话题。
+3. 准备就绪后，您可以使用麦克风开始录制关于该主题的讨论，也可以直接上传您已录制好的音频。
+4. 点击“评估”按钮，查看发音评估报告。该报告包括发音得分、词汇得分、语法得分和主题得分。
+5. 点击“样例”按钮，合成选定的语音风格，生成参考示例。
 6. 点击“聆听”按钮，聆听合成语音。
 """
 )
 
-st.selectbox("话题", st.session_state["tab2_topics"], key="topic")
+# 初始化
+if len(st.session_state["tab2_topics"]) == 0:
+    st.session_state["tab2_topics"] = generate_english_topics(
+        "测试英语口语水平", topic_selectbox, level_selectbox
+    )
+
+topic = st.selectbox("话题", st.session_state["tab2_topics"], key="topic_tb2")
 
 st.text_area(
     "📝 **发音评估文本**",
@@ -521,8 +542,8 @@ st.text_area(
 
 message_placeholder = st.empty()
 st.info("要求：时长超过15秒，文字篇幅在50个字词和3个句子以上。")
-uploaded_file = st.file_uploader(
-    "📁 上传音频", type=["wav"], help="上传您录制的音频文件")
+uploaded_file = st.file_uploader("📁 上传音频", type=["wav"], help="上传您录制的音频文件")
+
 btn_num = 8
 btn_cols = st.columns(btn_num)
 
@@ -541,6 +562,7 @@ ass_btn = btn_cols[3].button(
     key="ass_btn_tb1",
     help="生成口语评估报告。",
     on_click=on_ass_btn_click,
+    args=(topic,),
 )
 syn_btn = btn_cols[4].button(
     "样例[🤖]",
@@ -553,7 +575,7 @@ lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合
 
 if uploaded_file is not None:
     st.session_state["record_ready"] = True
-    with open(replay_fp, 'wb') as f:
+    with open(replay_fp, "wb") as f:
         # To read file as string:
         f.write(uploaded_file.read())
 
@@ -577,7 +599,7 @@ if lst_btn:
     components.html(audio_autoplay_elem(listen_fp), height=0)
 
 st.markdown("#### :trophy: 评估结果")
-view_tb1_report()
+view_report()
 
 with st.expander("🔊 操作提示..."):
     st.markdown("如何进行发音评估👇")
