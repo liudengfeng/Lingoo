@@ -197,8 +197,12 @@ def generate_word_tooltip(word) -> str:
     res = ""
     n = len(word.phonemes)
     word_score = f"{word.word} : {int(word.accuracy_score)}"
-    phoneme_cols = """ """.join([f"""<td>{p.phoneme}&nbsp;</td>""" for p in word.phonemes])
-    score_cols = """ """.join([f"""<td>{int(p.accuracy_score)}&nbsp;</td>""" for p in word.phonemes])
+    phoneme_cols = """ """.join(
+        [f"""<td>{p.phoneme}&nbsp;</td>""" for p in word.phonemes]
+    )
+    score_cols = """ """.join(
+        [f"""<td>{int(p.accuracy_score)}&nbsp;</td>""" for p in word.phonemes]
+    )
     res = WORD_TOOLTIP_TEMPLATE.format(
         n=n, word_score=word_score, phoneme_cols=phoneme_cols, score_cols=score_cols
     )
@@ -292,9 +296,7 @@ def view_word_pronunciation():
         # btn_class = (
         #     f"""{MD_BADGE_MAPS[error_type][3]}""" if error_type != "success" else ""
         # )
-        btn_class = (
-            f"""{MD_BADGE_MAPS[error_type][3]}"""
-        )
+        btn_class = f"""{MD_BADGE_MAPS[error_type][3]}"""
         label = fmt_word(word.word, error_type)
         # 解决单引号、双引号问题
         title = generate_word_tooltip(word).replace("'", "&#39;").replace('"', "&quot;")
@@ -329,14 +331,13 @@ def view_radar():
         gen_radar(data_1, item_1, 320)
 
     content_result = st.session_state.assessment_tb2.get("content_result", {})
-    st.write(content_result)
     item_2 = {
         "content_score": "内容分数",
         "grammar_score": "语法分数",
         "vocabulary_score": "词汇分数",
         "topic_score": "主题分数",
     }
-    data_2 = {key: st.session_state.assessment_tb2.get(key, 0) for key in item_2.keys()}
+    data_2 = {key: getattr(content_result, key, 0) for key in item_2.keys()}
     data_2["content_score"] = (
         data_2["grammar_score"] + data_2["vocabulary_score"] + data_2["topic_score"]
     ) / 3
