@@ -127,7 +127,7 @@ def generate_english_topics(target, category, level, n=5):
     }
     model = TextGenerationModel.from_pretrained("text-bison")
     response = model.predict(
-        f"""在指定领域内，生成{n}个话题。
+        f"""在指定领域内，生成{n}个相关的话题，用英语输出。
 学生当前英语水平：CEFR 分级 {level}
 领域：{category}
 目标：{target}
