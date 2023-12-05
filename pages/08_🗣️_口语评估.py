@@ -550,7 +550,9 @@ syn_btn = btn_cols[4].button(
 )
 lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
 
+
 if uploaded_file is not None:
+    st.session_state["record_ready"] = True
     with open(replay_fp, 'wb') as f:
         # To read file as string:
         f.write(uploaded_file.read())
