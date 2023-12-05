@@ -197,7 +197,7 @@ def generate_word_tooltip(word) -> str:
     res = ""
     n = len(word.phonemes)
     word_score = f"{word.word} : {int(word.accuracy_score)}"
-    phoneme_cols = """ """.join([f"""<td>{p}&nbsp;</td>""" for p in word.phonemes])
+    phoneme_cols = """ """.join([f"""<td>{p.phoneme}&nbsp;</td>""" for p in word.phonemes])
     score_cols = """ """.join([f"""<td>{int(p.accuracy_score)}&nbsp;</td>""" for p in word.phonemes])
     res = WORD_TOOLTIP_TEMPLATE.format(
         n=n, word_score=word_score, phoneme_cols=phoneme_cols, score_cols=score_cols
