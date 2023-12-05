@@ -524,7 +524,7 @@ st.text_area(
     "📝 **识别的文本**",
     key="text_tb2",
     max_chars=2000,
-    height=300,
+    height=200,
     label_visibility="collapsed",
     disabled=True,
     # on_change=on_tb1_text_changed,
