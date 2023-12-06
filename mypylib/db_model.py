@@ -28,6 +28,16 @@ class PaymentStatus(str, Enum):
     COMPLETED = "完成"
 
 
+class EventType(Enum):
+    LOGIN = "login"
+    LOGOUT = "logout"
+
+
+class LoginEvent(BaseModel):
+    type: EventType
+    time: datetime
+
+
 def str_to_enum(s: str, enum_type: Type[Enum]) -> Union[Enum, str]:
     for t in enum_type:
         if t.value == s:
@@ -57,10 +67,14 @@ class User(BaseModel):
     name: str = Field("")
     username: str = Field("", max_length=20)
     password: str = Field("", min_length=8)
+    country: str = Field("")  # 新增国家字段
     province: str = Field("")
+    timezone: str = Field("")  # 新增时区字段
     permission: UserRole = Field(default=UserRole.USER)
     registration_time: datetime = Field(default_factory=datetime.utcnow)  # 新增注册时间字段
     memo: str = Field("")  # 新增备注字段
+    session_id: str = Field("")  # 新增会话ID字段
+    login_events: List[LoginEvent] = Field(default_factory=list)
 
     def hash_password(self):
         self.password = generate_password_hash(self.password)
