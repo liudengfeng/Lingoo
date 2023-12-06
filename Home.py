@@ -2,7 +2,7 @@ import json
 import os
 import random
 import time
-from datetime import datetime, timedelta
+import datetime
 from pathlib import Path
 
 import streamlit as st
@@ -67,7 +67,7 @@ login_btn = s_cols[0].button(
 logout_btn = s_cols[1].button("退出", help="在公共场所使用本产品时，请在离开前退出登录，以保护您的隐私和安全。")
 
 # 获取当前的日期和时间
-current_datetime = datetime.utcnow()
+current_datetime = datetime.datetime.now(datetime.UTC)
 extend_time_btn_disabled = False
 
 # 获取用户的数据

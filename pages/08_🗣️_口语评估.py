@@ -117,6 +117,7 @@ if "text_tb2" not in st.session_state:
 
 # region 辅助函数
 
+
 @st.cache_data(show_spinner="使用Google Vertex AI 生成话题清单...")
 def _reset_topics(level, category):
     st.session_state["tab2_topics"] = generate_english_topics(
@@ -272,7 +273,7 @@ def fmt_word(text: str, err_type: str):
         case "interruption":
             return f"""<span class="text-decoration-line-through">[{text}]</span>"""
         case "monotone":
-            return f"""<span class="text-decoration-overline">[{text}]</span>"""
+            return f"""<span class="text-decoration-wavy-underline">{text}</span>"""
         case _:
             return f"""{text}"""
 
@@ -350,39 +351,6 @@ def view_report():
 
 
 # endregion
-
-
-def view_score_legend(progress_cols, add_spinner=False):
-    with progress_cols[0]:
-        st.markdown(
-            "**发音分数**",
-            help="表示给定语音发音质量的总体分数。它是从 AccuracyScore、FluencyScore、CompletenessScore、Weight 按权重聚合的。",
-        )
-    with progress_cols[1]:
-        st.markdown(
-            "准确性评分",
-            help="语音的发音准确性。准确性表示音素与母语说话人的发音的匹配程度。字词和全文的准确性得分是由音素级的准确度得分汇总而来。",
-        )
-    with progress_cols[2]:
-        st.markdown(
-            "完整性评分",
-            help="语音的完整性，按发音单词与输入引用文本的比率计算。",
-        )
-    with progress_cols[3]:
-        st.markdown(
-            "流畅性评分",
-            help="给定语音的流畅性。流畅性表示语音与母语说话人在单词间的停顿上有多接近。",
-        )
-    with progress_cols[4]:
-        st.markdown(
-            "韵律分数",
-            help="给定语音的韵律。韵律指示给定语音的性质，包括重音、语调、语速和节奏。",
-        )
-    score_legend = generate_score_legend()
-    # if add_spinner:
-    #     score_legend += "<hr>"
-    components.html(STYLE + score_legend)
-
 
 # endregion
 
@@ -486,7 +454,7 @@ st.markdown(
     f"""#### {page_emoji} 口语评估
 英语口语评估是帮助学习者了解自己的口语水平，并针对性地进行练习的重要工具。本产品基于`Azure`语音服务，借助`Google Vertex AI`，提供口语评估和AI辅助教学功能。
 
-如需详细了解使用方法，请参考最下方的操作提示。
+如需详细了解使用方法，请将滚动条滚动到页面底部，查看操作提示。
 
 ##### \U0001F4AD 选择您要讨论的话题
 """

@@ -18,8 +18,9 @@ button {
     text-decoration: line-through;
 }
 
-.text-decoration-overline {
-    text-decoration: overline;
+.text-decoration-wavy-underline {
+    text-decoration: underline wavy;
+    text-decoration-color: purple;
 }
 
 .btn-primary {

@@ -1,4 +1,3 @@
-import hashlib
 import json
 import os
 import time
@@ -69,21 +68,6 @@ WORD_TOOLTIP_TEMPLATE = """\
 </table>\
 """
 
-BADGE_TEMPLATE = """
-<button type="button" class="btn btn-{btn_class}" data-bs-toggle="tooltip" data-bs-placement="top"
-        data-bs-custom-class="custom-tooltip"
-        data-bs-title="{title}">
-  {label} <span class="badge text-bg-{color}">{num}</span>
-</button>
-"""
-
-BTN_TEMPLATE = """
-<button type="button" class="btn {btn_class}" data-bs-placement="top"
-        data-tippy-content="{title}">
-  {label}
-</button>
-"""
-
 # endregion
 
 # endregion
@@ -98,8 +82,7 @@ if "assessment_tb1" not in st.session_state:
 # region 函数
 
 
-# @st.cache_data(show_spinner="从 Azure 语音库合成语音...")
-@st.cache_data
+@st.cache_data(show_spinner="从 Azure 语音库合成语音...")
 def get_synthesize_speech(text, voice):
     synthesize_speech_to_file(
         text,
@@ -117,24 +100,6 @@ def update_mav(audio):
         wav_file.setsampwidth(audio["sample_width"])
         wav_file.setframerate(audio["sample_rate"])
         wav_file.writeframes(audio["bytes"])
-
-
-def get_bg_color(score):
-    if score < 60:
-        return "bg-danger"
-    elif score < 80:
-        return "bg-warning"
-    else:
-        return "bg-success"
-
-
-def get_cp_color(score):
-    if score < 60:
-        return "#c02a2a"
-    elif score < 80:
-        return "yellow"
-    else:
-        return "green"
 
 
 def generate_word_tooltip(word: dict) -> str:
@@ -175,7 +140,7 @@ MD_BADGE_MAPS = OrderedDict(
 )
 
 
-def view_tb1_md_badges():
+def view_md_badges():
     assessment = st.session_state["assessment_tb1"]
     cols = st.columns(len(MD_BADGE_MAPS.keys()))
     error_counts = assessment.get("error_counts", {})
@@ -189,7 +154,6 @@ def view_tb1_md_badges():
 
 
 # endregion
-
 
 # region 单词发音
 
@@ -224,7 +188,7 @@ def fmt_word(text: str, err_type: str):
         case "interruption":
             return f"""<span class="text-decoration-line-through">[{text}]</span>"""
         case "monotone":
-            return f"""<span class="text-decoration-overline">[{text}]</span>"""
+            return f"""<span class="text-decoration-wavy-underline">[{text}]</span>"""
         case _:
             return f"""{text}"""
 
@@ -239,6 +203,7 @@ def view_word_pronunciation():
         btn_class = (
             f"""{MD_BADGE_MAPS[error_type][3]}""" if error_type != "success" else ""
         )
+        # st.write(word["word"], error_type)
         label = fmt_word(word["word"], error_type)
         # 解决单引号、双引号问题
         title = generate_word_tooltip(word).replace("'", "&#39;").replace('"', "&quot;")
@@ -258,7 +223,7 @@ def view_word_pronunciation():
 # region 雷达图
 
 
-def view_tab1_radar():
+def view_radar():
     # 雷达图
     item_maps_tab1 = {
         "pronunciation_score": "发音总评分",
@@ -276,46 +241,17 @@ def view_tab1_radar():
 
 # endregion
 
+# endregion
+
 # region 发音评估报告
 
 
-def view_tb1_report():
+def view_report():
     # 发音评估报告
-    view_tb1_md_badges()
+    view_md_badges()
     st.divider()
     view_word_pronunciation()
-    view_tab1_radar()
-
-
-# endregion
-
-
-def view_score_legend(progress_cols, add_spinner=False):
-    with progress_cols[0]:
-        st.markdown(
-            "**发音分数**",
-            help="表示给定语音发音质量的总体分数。它是从 AccuracyScore、FluencyScore、CompletenessScore、Weight 按权重聚合的。",
-        )
-    with progress_cols[1]:
-        st.markdown(
-            "准确性评分",
-            help="语音的发音准确性。准确性表示音素与母语说话人的发音的匹配程度。字词和全文的准确性得分是由音素级的准确度得分汇总而来。",
-        )
-    with progress_cols[2]:
-        st.markdown(
-            "完整性评分",
-            help="语音的完整性，按发音单词与输入引用文本的比率计算。",
-        )
-    with progress_cols[3]:
-        st.markdown(
-            "流畅性评分",
-            help="给定语音的流畅性。流畅性表示语音与母语说话人在单词间的停顿上有多接近。",
-        )
-    with progress_cols[4]:
-        st.markdown(
-            "韵律分数",
-            help="给定语音的韵律。韵律指示给定语音的性质，包括重音、语调、语速和节奏。",
-        )
+    view_radar()
 
 
 # endregion
@@ -349,7 +285,7 @@ voice_style: Any = st.sidebar.selectbox(
 # region 事件
 
 
-def reset_tb1():
+def reset_page():
     # get_synthesize_speech.clear()
     st.session_state["assessment_tb1"] = {}
     st.session_state["assessment_text_tb1"] = ""
@@ -359,16 +295,16 @@ def reset_tb1():
         os.remove(listen_fp)
 
 
-def on_tb1_text_changed():
+def on_text_changed():
     if os.path.exists(replay_fp):
         os.remove(replay_fp)
     if os.path.exists(listen_fp):
         os.remove(listen_fp)
 
 
-@st.cache_data(show_spinner="使用 Azure 服务评估对话...")
+# 允许多次评估，不得缓存
+# @st.cache_data(show_spinner="使用 Azure 服务评估对话...")
 def pronunciation_assessment_func(text_to_be_evaluated_tb1):
-    # st.toast("正在评估对话...", icon="💯")
     try:
         assessment = pronunciation_assessment_from_wavfile(
             replay_fp,
@@ -378,13 +314,12 @@ def pronunciation_assessment_func(text_to_be_evaluated_tb1):
             st.secrets["Microsoft"]["SPEECH_REGION"],
         )
         st.session_state["assessment_tb1"] = assessment
-        # st.toast("🎈 完成评估")
     except Exception as e:
         st.toast(e)
         st.stop()
 
 
-def on_ass_btn_tb1_click(text_to_be_evaluated_tb1):
+def on_ass_btn_click(text_to_be_evaluated_tb1):
     pronunciation_assessment_func(text_to_be_evaluated_tb1)
     st.session_state["tb1_record_ready"] = False
 
@@ -395,7 +330,7 @@ def _get_cn_name(lan):
             return v
 
 
-def on_syn_btn_tb1_click(text_to_be_evaluated_tb1, voice_style, placeholder):
+def on_syn_btn_click(text_to_be_evaluated_tb1, voice_style, placeholder):
     lan = language_detect(
         text_to_be_evaluated_tb1,
         st.secrets["Microsoft"]["TRANSLATOR_TEXT_SUBSCRIPTION_KEY"],
@@ -422,14 +357,12 @@ def on_syn_btn_tb1_click(text_to_be_evaluated_tb1, voice_style, placeholder):
 
 # region 主页
 
-
-st.session_state["tab_flag"] = "tb1"
 page_emoji = "🎙️"
 st.markdown(
     f"""#### {page_emoji} 发音评估
 英语发音评估是帮助学习者了解自己的发音水平，并针对性地进行练习的重要工具。本产品基于`Azure`语音服务，提供发音评估和语音合成功能。
 
-如需详细了解使用方法，请参考最下方的操作提示。
+如需详细了解使用方法，请将滚动条滚动到页面底部，查看操作提示。
 """
 )
 
@@ -439,7 +372,7 @@ text_to_be_evaluated_tb1 = st.text_area(
     max_chars=1000,
     height=120,
     label_visibility="collapsed",
-    on_change=on_tb1_text_changed,
+    on_change=on_text_changed,
     placeholder="请在文本框中输入要评估的文本。请注意，您的文本要与左侧下拉列表中的“目标语言”一致。",
     help="输入要评估的文本。",
 )
@@ -461,13 +394,13 @@ ass_btn = btn_cols[3].button(
     "评估[🔍]",
     key="ass_btn_tb1",
     help="生成发音评估报告。",
-    on_click=on_ass_btn_tb1_click,
+    on_click=on_ass_btn_click,
     args=(text_to_be_evaluated_tb1,),
 )
 syn_btn = btn_cols[4].button(
     "合成[🔊]",
     key="syn_btn_tb1",
-    on_click=on_syn_btn_tb1_click,
+    on_click=on_syn_btn_click,
     args=(text_to_be_evaluated_tb1, voice_style, message_placeholder),
     disabled=len(text_to_be_evaluated_tb1) == 0,
     help="点击合成按钮，合成选定风格的语音。",
@@ -477,7 +410,7 @@ cls_btn = btn_cols[6].button(
     "重置[🔄]",
     key="cls_btn_tb1",
     help="重置发音评估文本。",
-    on_click=reset_tb1,
+    on_click=reset_page,
 )
 
 if audio:
@@ -500,7 +433,8 @@ if lst_btn:
     components.html(audio_autoplay_elem(listen_fp), height=0)
 
 st.markdown("#### :trophy: 评估结果")
-view_tb1_report()
+view_report()
+# components.html(STYLE + """<span class="text-decoration-wavy-underline">text</span>""")
 
 # endregion
 
