@@ -1,3 +1,7 @@
+### vs code
+
+#### emoji + text 使用 format，否则容易造成格式化文档出问题
+
 ### AI model parameter
 
 #### The `temperature` parameter (range: 0.0 - 1.0, default 0)

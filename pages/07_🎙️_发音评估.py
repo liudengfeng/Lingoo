@@ -430,11 +430,10 @@ if lst_btn:
         message_placeholder.warning("抱歉，您尚未合成音频，无法聆听。")
         st.stop()
     # 自动播放，不显示控件
-    components.html(audio_autoplay_elem(listen_fp), height=0)
+    components.html(audio_autoplay_elem(listen_fp, fmt="mav"), height=0)
 
 st.markdown("#### :trophy: 评估结果")
 view_report()
-# components.html(STYLE + """<span class="text-decoration-wavy-underline">text</span>""")
 
 # endregion
 

@@ -36,36 +36,61 @@ def audio_autoplay_elem(fp: str, controls: bool = False, fmt="mp3"):
     with open(fp, "rb") as f:
         data = f.read()
         b64 = base64.b64encode(data).decode()
-        if controls:
-            return f"""\
-                <audio controls autoplay>
-                    <source src="data:{audio_type};base64,{b64}" type="{audio_type}">
-                </audio>
-                """
-        else:
-            return f"""\
-                <audio autoplay>
-                    <source src="data:{audio_type};base64,{b64}" type="{audio_type}">
-                </audio>
-                """
+    if controls:
+        return f"""\
+            <audio controls autoplay>\
+                <source src="data:{audio_type};base64,{b64}" type="{audio_type}">\
+                Your browser does not support the audio element.\
+            </audio>\
+            <script>\
+                var audio = document.querySelector('audio');\
+                audio.load();\
+                audio.play();\
+            </script>\
+            """
+    else:
+        return f"""\
+            <audio autoplay>\
+                <source src="data:{audio_type};base64,{b64}" type="{audio_type}">\
+                Your browser does not support the audio element.\
+            </audio>\
+            <script>\
+                var audio = document.querySelector('audio');\
+                audio.load();\
+                audio.play();\
+            </script>\
+            """
 
 
-# def wav_autoplay_elem(wav_fp: str, controls: bool = False):
-#     with open(wav_fp, "rb") as f:
-#         data = f.read()
-#         b64 = base64.b64encode(data).decode()
-#         if controls:
-#             return f"""\
-#                 <audio controls autoplay>
-#                     <source src="data:audio/wav;base64,{b64}" type="audio/wav">
-#                 </audio>
-#                 """
-#         else:
-#             return f"""\
-#                 <audio autoplay>
-#                     <source src="data:audio/wav;base64,{b64}" type="audio/wav">
-#                 </audio>
-#                 """
+# def audio_autoplay_elem(fp: str, controls: bool = False, fmt="mp3"):
+#     relative_path = os.path.relpath(fp, current_cwd)
+#     # 如果当前操作系统是 Windows，将反斜杠替换为正斜杠
+#     if os.name == "nt":
+#         relative_path = relative_path.replace("\\", "/")
+#     if controls:
+#         return f"""\
+#             <audio controls autoplay>\
+#                 <source src="{relative_path}" type="audio/mpeg">\
+#                 Your browser does not support the audio element.\
+#             </audio>\
+#             <script>\
+#                 var audio = document.querySelector('audio');\
+#                 audio.load();\
+#                 audio.play();\
+#             </script>\
+#             """
+#     else:
+#         return f"""\
+#             <audio autoplay>\
+#                 <source src="{relative_path}" type="audio/mpeg">\
+#                 Your browser does not support the audio element.\
+#             </audio>\
+#             <script>\
+#                 var audio = document.querySelector('audio');\
+#                 audio.load();\
+#                 audio.play();\
+#             </script>\
+#             """
 
 
 def gtts_autoplay_elem(text: str, lang: str, tld: str):

@@ -47,8 +47,8 @@ COLUMN_CONFIG = {
     "order_id": "订单编号",
     "payment_time": "支付时间",
     "payment_method": "付款方式",
-    "name": "姓名",
-    "username": "用户名称",
+    "full_name": "姓名",
+    "display_name": "显示名称",
     "phone_number": "手机号码",
     "purchase_type": st.column_config.SelectboxColumn(
         "套餐类型",
@@ -287,8 +287,8 @@ def search(**kwargs):
         {
             "$project": {
                 "phone_number": 1,
-                "name": 1,
-                "username": 1,
+                "full_name": 1,
+                "display_name": 1,
                 "permission": 1,
                 "registration_time": 1,
                 "order_id": "$payments.order_id",
@@ -416,8 +416,8 @@ with tabs[items.index("用户管理")]:
         user_cols = st.columns(5)
         user_cols[0].text_input(label="手机号码", key="phone_number-1")
         user_cols[1].text_input(label="邮箱", key="email-1")
-        user_cols[2].text_input(label="姓名", key="name-1")
-        user_cols[3].text_input(label="用户名称", key="username-1")
+        user_cols[2].text_input(label="姓名", key="full_name-1")
+        user_cols[3].text_input(label="用户名称", key="display_name-1")
 
         user_cols[4].selectbox(
             "用户权限",
@@ -513,8 +513,8 @@ with tabs[items.index("用户管理")]:
                     "is_approved",
                     "phone_number",
                     "email",
-                    "name",
-                    "username",
+                    "full_name",
+                    "display_name",
                     "permission",
                     "registration_start_date",
                     "registration_start_time",
