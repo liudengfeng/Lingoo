@@ -2,7 +2,7 @@ import time
 import streamlit as st
 from vertexai.language_models import ChatModel, InputOutputTextPair
 
-from mypylib.authenticate import DbInterface
+from mypylib.db_interface import DbInterface
 from mypylib.google_api import init_vertex
 
 # region 认证及初始化

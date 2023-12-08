@@ -2,9 +2,10 @@
 import logging
 import random
 import string
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 import streamlit as st
+from bson import ObjectId
 from cachetools import TTLCache
 from faker import Faker
 from pymongo import ASCENDING, IndexModel, MongoClient
@@ -14,8 +15,7 @@ from .db_model import Payment, PaymentStatus, PurchaseType, User, UserRole, str_
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
-# 设置日志级别
-logger.setLevel(logging.DEBUG)
+
 
 PRICES = {
     PurchaseType.ANNUAL: 6570,
@@ -69,18 +69,35 @@ class DbInterface:
             # 集合不存在，创建集合和索引
             self.words.create_index([("word", ASCENDING)], unique=True)
 
+    # region 用户管理
     def register_user(self, user: User):
-        user.hash_password()
         self.users.insert_one(user.model_dump())
 
-    def find_user(self, phone_number=None, email=None):
-        key = phone_number or email
-        # 否则，查询数据库
-        user = self.users.find_one(
-            {"$or": [{"phone_number": phone_number}, {"email": email}]}
-        )
+    def find_user(self, user_id: str):
+        # 查询数据库
+        user = self.users.find_one({"_id": ObjectId(user_id)})
         return user
 
+    def find_user_by(self, phone=None, email=None):
+        query = {}
+        if phone:
+            query["phone_number"] = phone
+        if email:
+            query["email"] = email
+
+        user = self.users.find_one(query)
+        return user
+
+    def update_user(self, user_id, update_fields: dict):
+        result = self.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": update_fields},
+        )
+        return result.modified_count
+
+    # endregion
+
+    # region 支付管理
     def update_payment(self, phone_number, order_id, update_fields: dict):
         result = self.payments.update_one(
             {"phone_number": phone_number, "order_id": order_id},
@@ -89,27 +106,22 @@ class DbInterface:
         # print(f"Update result: {result.raw_result}")
         return result.modified_count
 
-    def update_user(self, identifier, update_fields: dict):
-        # print(f"Updating user with identifier {identifier} and fields {update_fields}")
-        result = self.users.update_one(
-            {"$or": [{"phone_number": identifier}, {"email": identifier}]},
-            {"$set": update_fields},
-        )
-        # print(f"Update result: {result.raw_result}")
-        return result.modified_count
+    # endregion
 
     def is_service_active(self, phone_number):
         # 查询用户
         user = self.users.find_one({"phone_number": phone_number})
         # 如果用户是管理员，直接返回True
-        if user and user["permission"] == "管理员":
+        if user and user["user_role"] == "管理员":
             return True
         # 查询用户的所有支付记录
         payments = self.payments.find({"phone_number": phone_number})
         # 遍历所有支付记录
         for payment in payments:
             # 如果找到一条已经被批准且服务尚未到期的记录，返回True
-            if payment["is_approved"] and payment["expiry_time"] > datetime.utcnow():
+            if payment["is_approved"] and payment["expiry_time"] > datetime.now(
+                timezone.utc
+            ):
                 return True
         # 如果没有找到符合条件的记录，返回False
         return False
@@ -121,10 +133,12 @@ class DbInterface:
             sort=[("expiry_time", -1)],
         )
         # 如果存在未过期的订阅，以其到期时间为基准
-        if last_subscription and last_subscription["expiry_time"] > datetime.utcnow():
+        if last_subscription and last_subscription["expiry_time"] > datetime.now(
+            timezone.utc
+        ):
             base_time = last_subscription["expiry_time"]
         else:
-            base_time = datetime.utcnow()
+            base_time = datetime.now(timezone.utc)
         # 将字符串转换为 PurchaseType 枚举
         purchase_type = str_to_enum(purchase_type, PurchaseType)  # type: ignore
         expiry_time = base_time + self.calculate_expiry(purchase_type)  # type: ignore
@@ -159,9 +173,10 @@ class DbInterface:
                 username=self.faker.user_name(),
                 email=f"{phone_number}@{FAKE_EMAIL_DOMAIN}",
                 password="12345678",
-                registration_time=datetime.utcnow(),
+                registration_time=datetime.now(timezone.utc),
                 memo=f"订单号：{payment.order_id}",
             )  # type: ignore
+            new_user.hash_password()
             self.register_user(new_user)
 
         if payment.receivable == payment.payment_amount:
@@ -192,17 +207,22 @@ class DbInterface:
             {
                 "$set": {
                     "verification_code": verification_code,
-                    "verification_code_time": datetime.utcnow(),
+                    "verification_code_time": datetime.now(timezone.utc),
                 }
             },
         )
         return verification_code
 
     def cache_user(self, user):
-        # Add user to cache
-        identifier = user["phone_number"] or user["email"]
-        self.cache[identifier] = user
+        phone_number = user["phone_number"]
+        self.cache[phone_number] = {
+            "phone_number": user.phone_number,
+            "display_name": user.display_name,
+            "email": user.email,
+            "user_role": user.user_role,
+        }
 
+    # TODO：删除
     def login_with_verification_code(self, identifier: str, verification_code: str):
         # 查询用户
         user = self.users.find_one(
@@ -210,11 +230,9 @@ class DbInterface:
         )
         if user:
             # 检查验证码是否正确和有效
-            if user.get(
-                "verification_code"
-            ) == verification_code and datetime.utcnow() - user.get(
-                "verification_code_time", datetime.min
-            ) <= timedelta(
+            if user.get("verification_code") == verification_code and datetime.now(
+                timezone.utc
+            ) - user.get("verification_code_time", datetime.min) <= timedelta(
                 minutes=30
             ):
                 # 如果登录成功，将用户添加到缓存
@@ -225,22 +243,21 @@ class DbInterface:
         else:
             return "Invalid phone number or email"
 
-    def send_email(self, to_email: str, subject: str, content: str):
-        raise NotImplementedError
-
     def login(self, phone_number, password):
         # 在缓存中查询是否已经正常登录
         if phone_number in self.cache and self.cache[phone_number]:
             return "您已登录"
         # 检查用户的凭据
-        user_data = self.users.find_one({"phone_number": phone_number})
-        if user_data:
+        user_doc = self.users.find_one(
+            {"f_phone_number": User.encrypt(phone_number, st.secrets["FERNET_KEY"])}
+        )
+        if user_doc:
             # 创建一个User实例
-            user = User(**user_data)
+            user = User.from_doc(user_doc)
             # 验证密码
             if user.check_password(password):
                 # 如果密码正确，将用户的登录状态存储到缓存中
-                self.cache[phone_number] = True
+                self.cache_user(user)
                 return "Login successful"
         return "无效的手机号码，或者密码无效。请展开下面的帮助文档，查看如何注册账号或重置密码。"
 
@@ -255,14 +272,14 @@ class DbInterface:
         key = phone_number or email
         if key in self.cache and self.cache[key]:
             # 检查用户是否为管理员
-            user_data = self.users.find_one(
+            user_doc = self.users.find_one(
                 {"$or": [{"phone_number": phone_number}, {"email": email}]}
             )
-            if user_data:
+            if user_doc:
                 # 创建一个User实例
-                user = User(**user_data)
+                user = User.from_doc(user_doc)
                 # 检查permission属性
-                if user.permission == UserRole.ADMIN:
+                if user.user_role == UserRole.ADMIN:
                     return True
         return False
 
@@ -271,30 +288,30 @@ class DbInterface:
         key = phone_number or email
         if key in self.cache and self.cache[key]:
             # 检查用户是否为 VIP 或管理员
-            user_data = self.users.find_one(
+            user_doc = self.users.find_one(
                 {"$or": [{"phone_number": phone_number}, {"email": email}]}
             )
-            if user_data:
+            if user_doc:
                 # 创建一个User实例
-                user = User(**user_data)
+                user = User.from_doc(user_doc)
                 # 检查permission属性
-                if user.permission in [UserRole.ADMIN, UserRole.VIP]:
+                if user.user_role in [UserRole.ADMIN, UserRole.VIP]:
                     return True
         return False
 
     # region 个人词库管理
 
     def find_personal_dictionary(self, phone_number):
-        user_data = self.users.find_one({"phone_number": phone_number})
-        if user_data:
-            return user_data.get("personal_words", [])
+        user_doc = self.users.find_one({"phone_number": phone_number})
+        if user_doc:
+            return user_doc.get("personal_words", [])
         else:
             return []
 
     def add_word_to_personal_dictionary(self, phone_number, word):
-        user_data = self.users.find_one({"phone_number": phone_number})
-        if user_data:
-            personal_words = user_data.get("personal_words", [])
+        user_doc = self.users.find_one({"phone_number": phone_number})
+        if user_doc:
+            personal_words = user_doc.get("personal_words", [])
             if word not in personal_words:
                 self.users.update_one(
                     {"phone_number": phone_number}, {"$push": {"personal_words": word}}

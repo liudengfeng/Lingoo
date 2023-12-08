@@ -2,29 +2,31 @@ import json
 import os
 import random
 import time
-import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import streamlit as st
 from PIL import Image
 
-from mypylib.auth_utils import is_valid_email, is_valid_phone_number
-from mypylib.authenticate import DbInterface
+from mypylib.auth_utils import is_valid_phone_number
+from mypylib.db_interface import DbInterface
 from mypylib.azure_speech import speech_synthesis_get_available_voices
 from mypylib.constants import LANGUAGES
-from mypylib.db_model import PaymentStatus
+from mypylib.db_model import PaymentStatus, LoginEvent
 
 current_cwd: Path = Path(__file__).parent
 logo_dir: Path = current_cwd / "resource/logo"
 
 voices_fp = current_cwd / "resource/voices.json"
 
-if "user_id" not in st.session_state:
-    st.session_state["user_id"] = None
-if "is_login" not in st.session_state:
-    st.session_state["is_login"] = False
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface()
+
+if "user_id" not in st.session_state:
+    st.session_state["user_id"] = None
+
+if "display_name" not in st.session_state:
+    st.session_state["display_name"] = ""
 
 st.set_page_config(
     page_title="主页",
@@ -60,138 +62,143 @@ if need_update:
 
 s_cols = st.sidebar.columns(3)
 login_btn = s_cols[0].button(
-    label="登录" if not st.session_state["is_login"] else "👤 已登录",
-    type="primary" if st.session_state["is_login"] else "secondary",
-    disabled=st.session_state["is_login"],
+    label="登录" if st.session_state["user_id"] is None else "👤 已登录",
+    type="primary" if st.session_state["user_id"] is None else "secondary",
+    disabled=st.session_state["user_id"] is not None,
 )
 logout_btn = s_cols[1].button("退出", help="在公共场所使用本产品时，请在离开前退出登录，以保护您的隐私和安全。")
 
 # 获取当前的日期和时间
-current_datetime = datetime.datetime.now(datetime.UTC)
+current_datetime = datetime.now(timezone.utc)
 extend_time_btn_disabled = False
 
-# 获取用户的数据
-user_data = st.session_state.dbi.users.find_one(
-    {"phone_number": st.session_state["user_id"]}
-)
-# 查询在服务期内，处于服务状态的支付记录
-payment_record = st.session_state.dbi.payments.find_one(
-    {
-        "phone_number": st.session_state["user_id"],
-        "status": PaymentStatus.IN_SERVICE,
-    }
-)
-# 检查用户是否已经领取
-
-# 检查当前的小时是否在6到8之间
-if 6 <= current_datetime.hour + 8 <= 8 or 18 <= current_datetime.hour + 8 <= 20:
-    extend_time_btn_disabled = False
-else:
-    extend_time_btn_disabled = True
-
-if user_data:
-    # 获取用户的最后领取日期
-    last_received_date = user_data.get("last_received_date")
-    # 检查 last_received_date 是否存在并且是 datetime 对象
-    if last_received_date and isinstance(last_received_date, datetime):
-        if current_datetime.date() == last_received_date.date():
-            extend_time_btn_disabled = True
-
-extend_time_btn = s_cols[2].button(
-    "免费🎁",
-    disabled=extend_time_btn_disabled or not st.session_state["is_login"],
-    help="付费用户每天上午或下午6-8点打卡。奖励1小时。",
-)
 status = st.sidebar.empty()
 
-# if payment_record:
-#     st.write("expiry_time:", payment_record.get("expiry_time", datetime.utcnow()))
+if st.session_state["user_id"] is not None:
+    # 获取用户的数据
+    user_data = st.session_state.dbi.users.find_one(
+        {"phone_number": st.session_state["user_id"]}
+    )
+    # 查询在服务期内，处于服务状态的支付记录
+    payment_record = st.session_state.dbi.payments.find_one(
+        {
+            "phone_number": st.session_state["user_id"],
+            "status": PaymentStatus.IN_SERVICE,
+        }
+    )
+    # 检查用户是否已经领取
 
-if extend_time_btn and payment_record:
-    # 获取用户的到期时间
-    expiry_time = payment_record.get("expiry_time", datetime.utcnow())
+    # 检查当前的小时是否在6到8之间
+    if 6 <= current_datetime.hour + 8 <= 8 or 18 <= current_datetime.hour + 8 <= 20:
+        extend_time_btn_disabled = False
+    else:
+        extend_time_btn_disabled = True
 
-    # 将到期时间转换为时间戳
-    expiry_timestamp = expiry_time.timestamp()
+    if user_data:
+        # 获取用户的最后领取日期
+        last_received_date = user_data.get("last_received_date")
+        # 检查 last_received_date 是否存在并且是 datetime 对象
+        if last_received_date and isinstance(last_received_date, datetime):
+            if current_datetime.date() == last_received_date.date():
+                extend_time_btn_disabled = True
 
-    # 增加1小时的秒数
-    expiry_timestamp += 60 * 60
-
-    # 将时间戳转回日期
-    new_expiry_time = datetime.fromtimestamp(expiry_timestamp)
-
-    # 更新用户的到期时间
-    st.session_state.dbi.payments.update_one(
-        {"phone_number": st.session_state["user_id"]},
-        {"$set": {"expiry_time": new_expiry_time}},
+    extend_time_btn = s_cols[2].button(
+        "免费🎁",
+        disabled=extend_time_btn_disabled,
+        help="付费用户每天上午或下午6-8点打卡。奖励1小时。",
     )
 
-    # 更新用户的最后领取日期
-    st.session_state.dbi.users.update_one(
-        {"phone_number": st.session_state["user_id"]},
-        {"$set": {"last_received_date": current_datetime}},
-    )
-    # 重新刷新
-    st.rerun()
+    if extend_time_btn and payment_record:
+        # 获取用户的到期时间
+        expiry_time = payment_record.get("expiry_time", datetime.now(timezone.utc))
 
-if user_data and payment_record:
-    # 计算剩余的时间
-    expiry_time = payment_record.get("expiry_time", datetime.utcnow())
-    remaining_time = expiry_time.timestamp() - datetime.utcnow().timestamp()
-    remaining_days = remaining_time // (24 * 60 * 60)
-    remaining_hours = (remaining_time - remaining_days * 24 * 60 * 60) // 3600
-    remaining_minutes = (
-        remaining_time - remaining_days * 24 * 60 * 60 - remaining_hours * 3600
-    ) // 60
-    status.info(
-        f"到期：剩余{remaining_days:.0f}天{remaining_hours:.0f}小时{remaining_minutes:.0f}分钟"
-    )
+        # 将到期时间转换为时间戳
+        expiry_timestamp = expiry_time.timestamp()
 
-if not st.session_state["is_login"]:
-    # with cols[1].form(key="login_form", clear_on_submit=True):
+        # 增加1小时的秒数
+        expiry_timestamp += 60 * 60
+
+        # 将时间戳转回日期
+        new_expiry_time = datetime.fromtimestamp(expiry_timestamp)
+
+        # 更新用户的到期时间
+        st.session_state.dbi.payments.update_one(
+            {"phone_number": st.session_state["user_id"]},
+            {"$set": {"expiry_time": new_expiry_time}},
+        )
+
+        # 更新用户的最后领取日期
+        st.session_state.dbi.users.update_one(
+            {"phone_number": st.session_state["user_id"]},
+            {"$set": {"last_received_date": current_datetime}},
+        )
+        # 重新刷新
+        st.rerun()
+
+    if user_data and payment_record:
+        # 计算剩余的时间
+        expiry_time = payment_record.get("expiry_time", datetime.now(timezone.utc))
+        remaining_time = (
+            expiry_time.timestamp() - datetime.now(timezone.utc).timestamp()
+        )
+        remaining_days = remaining_time // (24 * 60 * 60)
+        remaining_hours = (remaining_time - remaining_days * 24 * 60 * 60) // 3600
+        remaining_minutes = (
+            remaining_time - remaining_days * 24 * 60 * 60 - remaining_hours * 3600
+        ) // 60
+        status.info(
+            f"到期：剩余{remaining_days:.0f}天{remaining_hours:.0f}小时{remaining_minutes:.0f}分钟"
+        )
+
+if st.session_state["user_id"] is None:
+    if st.session_state.user_id and st.session_state.dbi.cache.get(
+        st.session_state.user_id
+    ):
+        status.success(f"您已登录，{st.session_state.user_id} 您好！")
     with st.sidebar.form(key="login_form", clear_on_submit=True):
-        identifier = st.text_input(
-            "标识符",
+        phone_number = st.text_input(
+            "手机号码",
             type="password",
-            key="identifier",
+            key="phone_number",
             help="请输入手机号码",
-            placeholder="使用手机号码登录",
+            placeholder="输入手机号码",
         )
         password = st.text_input(
             "密码",
             type="password",
             key="password",
             help="输入个人登录密码",
-            placeholder="个人登录密码",
+            placeholder="输入个人登录密码",
         )
         sub_btn = st.form_submit_button(label="确定")
-        if st.session_state.user_id and st.session_state.dbi.cache.get(
-            st.session_state.user_id
-        ):
-            status.success(f"您已登录，{st.session_state.user_id} 您好！")
+
         if sub_btn:
-            phone_number = None
-            if identifier:
-                st.session_state["user_id"] = identifier
-                if is_valid_phone_number(identifier):
-                    phone_number = identifier
-                else:
-                    status.error("请输入有效的手机号码")
-                    st.stop()
+            if not is_valid_phone_number(phone_number):
+                status.error(f"请输入有效的手机号码。您输入的号码是：{phone_number}")
+                st.stop()
+                # # 修改为 user_id
+                # st.session_state["user_id"] = phone_number
+                # if is_valid_phone_number(phone_number):
+                #     phone_number = identifier
+            else:
                 msg = st.session_state.dbi.login(
                     phone_number=phone_number, password=password
                 )
+                from mypylib.db_model import User
+                st.sidebar.write(
+                    "encrypt",
+                    phone_number,
+                    User.encrypt(phone_number, st.secrets["FERNET_KEY"]),
+                )
                 if msg == "Login successful":
-                    st.session_state["is_login"] = True
-                    status.success(f"登录成功，{identifier} 您好！")
+                    # status.success(f"登录成功，{identifier} 您好！")
+                    status.success(f"登录成功，您好！")
                     # st.rerun()
                 elif msg == "您已登录":
                     status.success("您已登录")
                 else:
                     status.error(msg)
-            else:
-                status.error("请输入有效的手机号码")
-                st.stop()
+
 
 col1, col2 = st.columns(2)
 
@@ -261,7 +268,6 @@ LinGoo，让你学好英语，so easy！
 
 if logout_btn:
     st.session_state.dbi.logout(st.session_state.user_id)
-    st.session_state["is_login"] = False
     st.session_state["user_id"] = None
     status.success("已退出登录")
     st.rerun()

@@ -1,25 +1,29 @@
+import locale
 import os
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytz
 import streamlit as st
 from azure.core.exceptions import ResourceNotFoundError
 from azure.storage.blob import BlobServiceClient
+from cryptography.fernet import Fernet
 from PIL import Image
 from pymongo.errors import DuplicateKeyError
 
 from mypylib.auth_utils import is_valid_email, is_valid_phone_number
-from mypylib.authenticate import DbInterface
+from mypylib.db_interface import DbInterface
 from mypylib.constants import FAKE_EMAIL_DOMAIN, PROVINCES
 from mypylib.db_model import User
+
 
 current_cwd: Path = Path(__file__).parent.parent
 wxskm_dir = current_cwd / "resource" / "wxskm"
 feedback_dir = current_cwd / "resource" / "feedback"
 
-# 创建Authenticator实例
+# 创建 Fernet 实例【必须将key转换为bytes类型】
+fernet = Fernet(st.secrets["FERNET_KEY"].encode())
 
 st.set_page_config(
     page_title="用户管理",
@@ -29,17 +33,21 @@ st.set_page_config(
 
 if "user_id" not in st.session_state:
     st.session_state["user_id"] = None
+    
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface()
 
-items = ["用户注册", "选择套餐", "更新信息", "重置密码", "统计报表", "问题反馈"]
+
+emojis = ["👤", "🍱", "🔄", "🔑", "📊", "📝"]
+item_names = ["用户注册", "选择套餐", "更新信息", "重置密码", "统计报表", "问题反馈"]
+items = [f"{e} {n}" for e, n in zip(emojis, item_names)]
 tabs = st.tabs(items)
 
 
 # region 创建注册页面
 
-with tabs[items.index("用户注册")]:
-    st.subheader("用户注册")
+with tabs[items.index("👤 用户注册")]:
+    st.subheader("👤 用户注册")
 
     with st.form(key="registration_form"):
         col1, col2 = st.columns(2)
@@ -52,9 +60,9 @@ with tabs[items.index("用户注册")]:
         email = col2.text_input(
             "邮箱", key="email", help="请输入您常用的电子邮件地址", placeholder="可选。请输入您常用的电子邮件地址"
         )
-        full_name = col1.text_input(
+        real_name = col1.text_input(
             "真实姓名",
-            key="full_name",
+            key="real_name",
             help="成绩册上的姓名",
             placeholder="可选。如果您希望展示您的成就（例如：获得的奖项、完成的项目等），请在此处填写。",
         )
@@ -96,7 +104,7 @@ with tabs[items.index("用户注册")]:
             # help="请再次输入密码",
             placeholder="为了确认，再次输入您刚才输入的密码",
         )
-        timezone = col1.selectbox(
+        tz = col1.selectbox(
             "所在时区",
             pytz.common_timezones,
             index=pytz.common_timezones.index("Asia/Shanghai"),
@@ -111,6 +119,9 @@ with tabs[items.index("用户注册")]:
         )
         status = st.empty()
         if st.form_submit_button(label="注册"):
+            if not agree:
+                status.error("请仔细阅读《服务条款》，并勾选同意。")
+                st.stop()
             if phone_number is None or not is_valid_phone_number(phone_number):
                 status.error("必须输入有效的手机号码")
                 st.stop()
@@ -130,29 +141,50 @@ with tabs[items.index("用户注册")]:
                 status.error("密码长度至少为8位")
                 st.stop()
 
+            # 由于邮箱作为索引，有必要保证其唯一性
+            email = email if email else f"{phone_number}@{FAKE_EMAIL_DOMAIN}"
             user = User(
-                # 由于邮箱作为索引，有必要保证其唯一性
-                email=email if email else f"{phone_number}@{FAKE_EMAIL_DOMAIN}",
-                full_name=full_name,
+                # 加密字段
+                f_phone_number=fernet.encrypt(phone_number.encode()),
+                f_email=fernet.encrypt(email.encode()),
+                f_real_name=fernet.encrypt(real_name.encode()),
+                f_country=fernet.encrypt(country.encode()),
+                f_province=fernet.encrypt(province.encode()),
+                f_timezone=fernet.encrypt(tz.encode()),
+                # 普通字段
+                current_level=current_level,
+                target_level=target_level,
                 display_name=display_name,
                 password=password_reg,
-                province=province,
-                phone_number=phone_number,
-                registration_time=datetime.utcnow(),
+                registration_time=datetime.now(timezone.utc),
             )  # type: ignore
-
+            user.hash_password()
             try:
                 st.session_state.dbi.register_user(user)
-            except DuplicateKeyError:
-                st.markdown(
-                    """您输入的手机号码或邮箱已被注册。如果您已经付费，请使用以下方式直接登录：
-1. 在“登录”选项，输入您已注册的手机号码或邮箱。
-2. 输入默认密码：12345678。
-3. 点击“登录”。
-登录成功后，您可以修改个人信息。"""
+            except DuplicateKeyError as e:
+                # 如果抛出 DuplicateKeyError 异常，从异常的消息中解析出字段的名称
+                field_name = str(e).split("index: ")[1].split(" dup key")[0]
+                msg = "邮箱" if field_name.startswith("f_email") else "电话号码"
+                status.markdown(
+                    f"""
+                **您输入的{msg}已被注册。**
+                如果您已完成付款，系统会自动为您注册，请使用以下方式直接登录：
+                1. 在左侧菜单“用户中心”的“登录”选项，输入您已注册的手机号码。
+                2. 输入默认密码：12345678。
+                3. 点击“确定”按钮。
+                登录成功后，您可以在“用户中心”修改个人信息。"""
                 )
                 st.stop()
-            st.success(f"""恭喜{display_name}注册成功！请在三天内完成付款，以便您尽快使用我们的服务。""")
+            # 截至付款期限
+            deadline = datetime.now(timezone.utc) + timedelta(days=3)
+            # 创建一个时区对象
+            tz = pytz.timezone(tz)  # 请将 'Asia/Shanghai' 替换为你的时区
+            # 将 UTC 时间转换为特定的时区
+            deadline = deadline.astimezone(tz)
+            deadline_str = deadline.strftime("%Y-%m-%d %H:%M:%S")
+            st.success(
+                f"""恭喜{display_name}注册成功！为确保您能尽快体验我们的服务，请于{deadline_str}前完成付款。"""
+            )
 
         with st.expander("**服务条款**", expanded=False):
             st.markdown(
@@ -219,7 +251,7 @@ DF Studio 尊重用户的隐私权，会采取一切合理的措施保护用户�
 注册本应用时，DF Studio 会收集用户的以下个人信息：
 
 * 用户名
-* 密码
+* 个人密码
 * 真实姓名
 * 手机号码
 * 个人邮箱
@@ -233,16 +265,29 @@ DF Studio 尊重用户的隐私权，会采取一切合理的措施保护用户�
 
 DF Studio 会将用户个人信息用于以下目的：
 
-* 提供本应用的服务
-* 改善本应用的服务
-* 向用户发送服务升级信息
+* 提供本应用的服务：DF Studio 会使用用户个人信息来提供本应用的基础功能，例如用户登录、用户信息展示等。
+* 改善本应用的服务：DF Studio 会使用用户个人信息来分析用户行为，以改进本应用的功能和性能。
+* 向用户发送服务升级信息：DF Studio 会使用用户个人信息来向用户发送服务升级信息，例如新功能介绍、安全公告等
 
 **(三) 用户个人信息的安全**
 
 DF Studio 会采取以下措施保护用户个人信息的安全：
 
-* 用户密码采用加密技术，DF Studio 员工不能获得用户密码。
-* 用户个人信息加密存储在数据库，除非系统管理员，其他任何人都不可能获的真实的信息。
+* 除用户手机号码外，所有个人隐私信息均采用安全加密算法存储在数据库中，仅对应用程序服务器可访问。
+* 应用程序服务器使用访问控制列表（ACL）来限制对个人隐私信息的访问，只有系统管理员才有权查看。
+* 用户密码采用加密技术，有效保护用户密码的安全，即使 DF Studio 员工也不可能获得用户密码。
+
+| 项目 | 加密存储 | 明文存储 | 权限 | 说明 |
+|---|:-:|:-:|---|---|
+| 用户名 | 否 | 是 | 不限 | 用于在app显示用户自定义的名称 |
+| 个人密码 | 是 | 否 | 仅用户可见 | 用于登录应用程序 |
+| 真实姓名 | 是 | 否 | 仅用户、系统管理员可见 | 个人隐私信息 |
+| 手机号码 | 否 | 是 | 仅用户、系统管理员可见 |app交互|
+| 真实姓名 | 是 | 否 | 仅用户、系统管理员可见 | 个人隐私信息 |
+| 个人邮箱 | 是 | 否 | 仅用户、系统管理员可见 | 个人隐私信息 |
+| 所在国家 | 是 | 否 | 仅用户、系统管理员可见 | 个人隐私信息 |
+| 所在省份 | 是 | 否 | 仅用户、系统管理员可见 | 个人隐私信息 |
+| 所在时区 | 是 | 否 | 仅用户、系统管理员可见 | 个人隐私信息 |
 
 * **数据使用**
 
@@ -312,8 +357,8 @@ DF studio 可能会使用用户的数据来提供本应用的服务，包括但�
 
 # region 创建缴费页面
 
-with tabs[items.index("选择套餐")]:
-    st.subheader("选择套餐")
+with tabs[items.index("🍱 选择套餐")]:
+    st.subheader("🍱 选择套餐")
 
     # Define pricing tiers
     pricing_tiers = [
@@ -384,29 +429,63 @@ with tabs[items.index("选择套餐")]:
 
 # region 创建更新信息页面
 
-with tabs[items.index("更新信息")]:
-    st.subheader("更新个人信息")
-    if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
+with tabs[items.index("🔄 更新信息")]:
+    st.subheader("🔄 更新个人信息")
+    if st.session_state["user_id"] is None or not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
         st.error("您尚未登录，无法更新个人信息。")
         st.stop()
 
-    user = st.session_state.dbi.find_user(st.session_state["user_id"])
+    user_doc = st.session_state.dbi.find_user(st.session_state["user_id"])
+    user_id = str(user_doc.pop("_id", None))
+    user = User(st.secrets["FERNET_KEY"], user_id, **user_doc)
     with st.form(key="update_form"):
-        st.text_input(
+        col1, col2 = st.columns(2)
+        col1.text_input(
             "手机号码",
             key="phone_number-3",
             help="请输入有效手机号码",
-            value=user["phone_number"],
+            value=fernet.decrypt(user["phone_number"]),
             disabled=True,
         )
-        email = st.text_input(
-            "邮箱", key="email-3", help="请输入有效邮箱地址", value=user["email"]
+        email = col2.text_input(
+            "邮箱", key="email-3", help="请输入有效邮箱地址", value=fernet.decrypt(user["email"])
         )
-        full_name = st.text_input(
-            "个人姓名", key="full_name-3", help="成绩册上的姓名", value=user["name"]
+        real_name = st.text_input(
+            "个人姓名",
+            key="real_name-3",
+            help="成绩册上的姓名",
+            value=fernet.decrypt(user["real_name"]),
         )
         display_name = st.text_input(
             "用户名称", key="display_name-3", help="登录显示名称", value=user["display_name"]
+        )
+        current_level = col1.selectbox(
+            "当前英语水平",
+            ["A1", "A2", "B1", "B2", "C1", "C2"],
+            index=0,
+            key="current_level",
+            help="如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
+        )
+        target_level = col2.selectbox(
+            "期望达到的英语水平",
+            ["A1", "A2", "B1", "B2", "C1", "C2"],
+            index=5,
+            key="target_level",
+            help="如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
+        )
+        country = col1.selectbox(
+            "所在国家",
+            ["中国"],
+            index=0,
+            key="country",
+        )
+        province = col2.selectbox("所在省份", PROVINCES, index=0, key="province")
+        tz = col1.selectbox(
+            "所在时区",
+            pytz.common_timezones,
+            index=pytz.common_timezones.index("Asia/Shanghai"),
+            key="timezone",
+            help="请根据您当前所在的时区选择。如果您在中国，请使用默认值。",
         )
         status = st.empty()
         if st.form_submit_button(label="确认"):
@@ -415,7 +494,7 @@ with tabs[items.index("更新信息")]:
                     st.session_state["user_id"],
                     {
                         "email": email,
-                        "full_name": full_name,
+                        "real_name": real_name,
                         "display_name": display_name,
                     },
                 )
@@ -432,12 +511,14 @@ with tabs[items.index("更新信息")]:
 
 # region 创建重置密码页面
 
-with tabs[items.index("重置密码")]:
-    st.subheader("重置密码")
+with tabs[items.index("🔑 重置密码")]:
+    st.subheader("🔑 重置密码")
     if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
         st.error("您尚未付费，无法使用此功能。")
         st.stop()
-    user = User(**st.session_state.dbi.find_user(st.session_state["user_id"]))
+    user_doc = st.session_state.dbi.find_user(st.session_state["user_id"])
+    user_id = str(user_doc.pop("_id", None))
+    user = User(st.secrets["FERNET_KEY"], user_id, **user_doc)
     with st.form(key="secret_form", clear_on_submit=True):
         password_reg = st.text_input(
             "密码", type="password", key="password_reg-4", help="密码长度至少为8位"
@@ -452,11 +533,14 @@ with tabs[items.index("重置密码")]:
                 st.stop()
             user.password = password_reg
             user.hash_password()
-            st.session_state.dbi.update_user(
-                st.session_state["user_id"],
-                {
-                    "password": user.password,
-                },
+            # TODO：查看返回结果
+            st.write(
+                st.session_state.dbi.update_user(
+                    st.session_state["user_id"],
+                    {
+                        "password": user.password,
+                    },
+                )
             )
             st.success("成功重置密码")
             st.session_state.dbi.logout(phone_number=user.phone_number)
@@ -465,8 +549,8 @@ with tabs[items.index("重置密码")]:
 
 # region 创建统计页面
 
-with tabs[items.index("统计报表")]:
-    st.subheader("统计报表")
+with tabs[items.index("📊 统计报表")]:
+    st.subheader("📊 统计报表")
     if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
         st.error("您尚未登录，无法查阅统计报表。")
         st.stop()
@@ -476,7 +560,7 @@ with tabs[items.index("统计报表")]:
 
 uploaded_emoji = "📁"
 
-with tabs[items.index("问题反馈")]:
+with tabs[items.index("📝 问题反馈")]:
     with st.form(key="feedback_form"):
         title = st.text_input("标题", key="title", help="请输入标题")
         content = st.text_area("问题描述", key="content", help="请输入内容")

@@ -10,7 +10,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 from streamlit_mic_recorder import mic_recorder
 
-from mypylib.authenticate import DbInterface
+from mypylib.db_interface import DbInterface
 from mypylib.azure_speech import (
     pronunciation_assessment_with_content_assessment,
     synthesize_speech_to_file,

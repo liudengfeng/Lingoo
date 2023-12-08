@@ -11,7 +11,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
 
-from mypylib.authenticate import DbInterface
+from mypylib.db_interface import DbInterface
 from mypylib.azure_speech import synthesize_speech_to_file
 from mypylib.google_api import (
     generate_word_memory_tip,

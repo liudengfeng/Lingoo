@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 
 import pandas as pd
@@ -11,7 +11,7 @@ from pandas import Timedelta
 from pymongo.errors import DuplicateKeyError
 
 # from mypylib.auth_utils import generate_unique_code
-from mypylib.authenticate import PRICES, DbInterface
+from mypylib.db_interface import PRICES, DbInterface
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, User, UserRole
 from mypylib.google_api import get_translation_client, google_translate
 from mypylib.word_utils import get_lowest_cefr_level
@@ -47,7 +47,7 @@ COLUMN_CONFIG = {
     "order_id": "订单编号",
     "payment_time": "支付时间",
     "payment_method": "付款方式",
-    "full_name": "姓名",
+    "real_name": "姓名",
     "display_name": "显示名称",
     "phone_number": "手机号码",
     "purchase_type": st.column_config.SelectboxColumn(
@@ -90,7 +90,7 @@ COLUMN_CONFIG = {
     "expiry_time": st.column_config.DatetimeColumn(
         "服务截至时间",
     ),
-    "permission": st.column_config.SelectboxColumn(
+    "user_role": st.column_config.SelectboxColumn(
         "权限",
         help="用户权限",
         width="small",
@@ -115,7 +115,7 @@ TIME_COLS = ["payment_time", "expiry_time", "registration_time"]
 
 EDITABLE_COLS: list[str] = [
     "is_approved",
-    "permission",
+    "user_role",
 ]
 
 PAYMENTS_FIELDS = [
@@ -287,9 +287,9 @@ def search(**kwargs):
         {
             "$project": {
                 "phone_number": 1,
-                "full_name": 1,
+                "real_name": 1,
                 "display_name": 1,
-                "permission": 1,
+                "user_role": 1,
                 "registration_time": 1,
                 "order_id": "$payments.order_id",
                 "payment_id": "$payments.payment_id",
@@ -349,14 +349,13 @@ def compute_discounted_price():
 
 with tabs[items.index("订阅登记")]:
     st.subheader("登记收款")
-    # with st.form(key="payment_form", clear_on_submit=True):
     with st.form(key="payment_form"):
         cols = st.columns(2)
         phone_number = cols[0].text_input(
             "手机号码",
             key="phone_number",
             help="请输入有效手机号码",
-            placeholder="必须",
+            placeholder="手机号码[必须]",
         )
         purchase_type = cols[1].selectbox(
             "套餐类型",
@@ -376,16 +375,16 @@ with tabs[items.index("订阅登记")]:
             "实收金额", key="payment_amount", help="请输入实际收款金额", value=0.0
         )
         remark = st.text_input("备注", key="remark", help="请输入备注信息", value="")
-        user = st.session_state.dbi.find_user(phone_number=phone_number)
+        user = st.session_state.dbi.find_user_by(phone=phone_number)
         if st.form_submit_button(label="登记"):
-            order_id = str(
-                st.session_state.dbi.payments.count_documents({}) + 1
-            ).zfill(10)
+            order_id = str(st.session_state.dbi.payments.count_documents({}) + 1).zfill(
+                10
+            )
             receivable = PRICES[purchase_type]  # type: ignore
             payment = Payment(
                 phone_number=phone_number,
                 payment_id=payment_id,
-                payment_time=datetime.utcnow(),
+                payment_time=datetime.now(timezone.utc),
                 receivable=receivable,
                 payment_amount=payment_amount,  # type: ignore
                 purchase_type=purchase_type,  # type: ignore
@@ -416,12 +415,12 @@ with tabs[items.index("用户管理")]:
         user_cols = st.columns(5)
         user_cols[0].text_input(label="手机号码", key="phone_number-1")
         user_cols[1].text_input(label="邮箱", key="email-1")
-        user_cols[2].text_input(label="姓名", key="full_name-1")
+        user_cols[2].text_input(label="姓名", key="real_name-1")
         user_cols[3].text_input(label="用户名称", key="display_name-1")
 
         user_cols[4].selectbox(
             "用户权限",
-            key="permission-1",
+            key="user_role-1",
             options=["All"] + [x.value for x in list(UserRole)],
             # format_func=lambda x: x.value,
             index=0,
@@ -432,13 +431,15 @@ with tabs[items.index("用户管理")]:
         user_time_cols[0].date_input(
             "用户注册：开始日期",
             key="registration_start_date-1",
-            value=(datetime.utcnow() - timedelta(days=365)).date(),
+            value=(datetime.now(timezone.utc) - timedelta(days=365)).date(),
         )
         user_time_cols[1].time_input(
             "时间", value=time(0, 0, 0), key="registration_start_time-1"
         )  # type: ignore
         user_time_cols[2].date_input(
-            "结束日期", key="registration_end_date-1", value=datetime.utcnow().date()
+            "结束日期",
+            key="registration_end_date-1",
+            value=datetime.now(timezone.utc).date(),
         )
         user_time_cols[3].time_input(
             "时间", key="registration_end_time-1", value=time(23, 59, 59)
@@ -469,13 +470,13 @@ with tabs[items.index("用户管理")]:
         payment_time_cols[0].date_input(
             "支付查询：开始日期",
             key="pay_start_date-1",
-            value=(datetime.utcnow() - timedelta(days=7)).date(),
+            value=(datetime.now(timezone.utc) - timedelta(days=7)).date(),
         )
         payment_time_cols[1].time_input(
             "时间", value=time(0, 0, 0), key="pay_start_time-1"
         )  # type: ignore
         payment_time_cols[2].date_input(
-            "结束日期", key="pay_end_date-1", value=datetime.utcnow().date()
+            "结束日期", key="pay_end_date-1", value=datetime.now(timezone.utc).date()
         )
         payment_time_cols[3].time_input(
             "时间", key="pay_end_time-1", value=time(23, 59, 59)
@@ -484,13 +485,13 @@ with tabs[items.index("用户管理")]:
         payment_time_cols[0].date_input(
             "服务截至：开始日期",
             key="server_start_date-1",
-            value=(datetime.utcnow() - timedelta(days=7)).date(),
+            value=(datetime.now(timezone.utc) - timedelta(days=7)).date(),
         )
         payment_time_cols[1].time_input(
             "时间", value=time(0, 0, 0), key="server_start_time-1"
         )  # type: ignore
         payment_time_cols[2].date_input(
-            "结束日期", key="server_end_date-1", value=datetime.utcnow().date()
+            "结束日期", key="server_end_date-1", value=datetime.now(timezone.utc).date()
         )
         payment_time_cols[3].time_input(
             "时间", key="server_end_time-1", value=time(23, 59, 59)
@@ -513,9 +514,9 @@ with tabs[items.index("用户管理")]:
                     "is_approved",
                     "phone_number",
                     "email",
-                    "full_name",
+                    "real_name",
                     "display_name",
-                    "permission",
+                    "user_role",
                     "registration_start_date",
                     "registration_start_time",
                     "registration_end_date",
@@ -580,8 +581,8 @@ with tabs[items.index("用户管理")]:
             purchase_type = df.iloc[idx]["purchase_type"]  # type: ignore
             order_id = df.iloc[idx]["order_id"]  # type: ignore
             # 修改权限
-            if d.get("permission", None):
-                st.session_state.dbi.update_user(phone_number, {"permission": d["permission"]})  # type: ignore
+            if d.get("user_role", None):
+                st.session_state.dbi.update_user(phone_number, {"user_role": d["user_role"]})  # type: ignore
             # 批准
             if d.get("is_approved", False):
                 st.session_state.dbi.enable_service(
@@ -694,6 +695,7 @@ with tabs[items.index("处理反馈")]:
 # endregion
 
 # region 创建词典管理页面
+
 
 def get_words():
     words = []
