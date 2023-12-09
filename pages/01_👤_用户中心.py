@@ -603,7 +603,7 @@ with tabs[items.index("📝 问题反馈")]:
 
             # 将标题和内容存储为文本文件
             text_data = (
-                f"用户：{st.session_state['user_info']["user_id"]}\n标题: {title}\n内容: {content}"
+                f"用户：{st.session_state.user_info['user_id']}\n标题: {title}\n内容: {content}"
             )
 
             blob_name = str(uuid.uuid4())
