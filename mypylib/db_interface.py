@@ -154,11 +154,11 @@ class DbInterface:
         # 查询用户的所有支付记录
         payments = self.payments.find({"phone_number": user_info["phone_number"]})
         # 遍历所有支付记录
+        now = datetime.now(timezone.utc)
         for payment in payments:
             # 如果找到一条已经被批准且服务尚未到期的记录，返回True
-            if payment["is_approved"] and payment["expiry_time"] > datetime.now(
-                timezone.utc
-            ):
+            expiry_time = payment["expiry_time"].replace(tzinfo=timezone.utc)
+            if payment["is_approved"] and expiry_time > now:
                 return True
         # 如果没有找到符合条件的记录，返回False
         return False
@@ -171,11 +171,14 @@ class DbInterface:
         )
         # 创建一个包含时区信息的 datetime 对象
         now = datetime.now(timezone.utc)
+        base_time = now
         # 如果存在未过期的订阅，以其到期时间为基准
-        if last_subscription and last_subscription["expiry_time"] > now:
-            base_time = last_subscription["expiry_time"]
-        else:
-            base_time = now
+        if last_subscription is not None:
+            last_subscription = last_subscription["expiry_time"].replace(
+                tzinfo=timezone.utc
+            )
+            if last_subscription > now:
+                base_time = last_subscription
         # 将字符串转换为 PurchaseType 枚举
         purchase_type = str_to_enum(purchase_type, PurchaseType)  # type: ignore
         expiry_time = base_time + self.calculate_expiry(purchase_type)  # type: ignore

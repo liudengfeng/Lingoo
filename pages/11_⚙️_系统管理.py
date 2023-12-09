@@ -382,6 +382,7 @@ with tabs[items.index("订阅登记")]:
                 phone_number=phone_number,
                 payment_id=payment_id,
                 payment_time=datetime.now(timezone.utc),
+                expiry_time=datetime.now(timezone.utc),
                 receivable=receivable,
                 payment_amount=payment_amount,  # type: ignore
                 purchase_type=purchase_type,  # type: ignore
