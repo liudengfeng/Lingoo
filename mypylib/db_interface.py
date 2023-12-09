@@ -59,24 +59,21 @@ class DbInterface:
         self.payments = self.db["payments"]
         self.words = self.db["words"]
         self.cache = TTLCache(maxsize=1000, ttl=86400)  # 24 hours cache
-        # 检查集合是否存在，如果不存在则创建索引
-        if "users" not in self.db.list_collection_names():
-            self.users.create_indexes(
-                [
-                    IndexModel([("phone_number", ASCENDING)], unique=True),
-                    IndexModel([("email", ASCENDING)], unique=True),
-                ]
-            )
-        # 检查 payments 集合是否存在，如果不存在则创建索引
-        if "payments" not in self.db.list_collection_names():
-            self.payments.create_index(
-                [("phone_number", ASCENDING), ("payment_id", ASCENDING)], unique=True
-            )
-
-        # 检查集合是否存在
-        if "words" not in self.db.list_collection_names():
-            # 集合不存在，创建集合和索引
-            self.words.create_index([("word", ASCENDING)], unique=True)
+        self.users.create_indexes(
+            [
+                IndexModel([("phone_number", ASCENDING)], unique=True),
+                IndexModel([("email", ASCENDING)], unique=True),
+            ]
+        )
+        self.payments.create_index(
+            [
+                ("phone_number", ASCENDING),
+                ("payment_id", ASCENDING),
+                ("expiry_time", ASCENDING),
+            ],
+            unique=True,
+        )
+        self.words.create_index([("word", ASCENDING)], unique=True)
 
     # region 会话管理
 
@@ -172,13 +169,13 @@ class DbInterface:
             {"phone_number": phone_number, "status": PaymentStatus.IN_SERVICE},
             sort=[("expiry_time", -1)],
         )
+        # 创建一个包含时区信息的 datetime 对象
+        now = datetime.now(timezone.utc)
         # 如果存在未过期的订阅，以其到期时间为基准
-        if last_subscription and last_subscription["expiry_time"] > datetime.now(
-            timezone.utc
-        ):
+        if last_subscription and last_subscription["expiry_time"] > now:
             base_time = last_subscription["expiry_time"]
         else:
-            base_time = datetime.now(timezone.utc)
+            base_time = now
         # 将字符串转换为 PurchaseType 枚举
         purchase_type = str_to_enum(purchase_type, PurchaseType)  # type: ignore
         expiry_time = base_time + self.calculate_expiry(purchase_type)  # type: ignore

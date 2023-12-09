@@ -28,9 +28,7 @@ current_cwd: Path = Path(__file__).parent.parent
 if "user_info" not in st.session_state:
     st.session_state["user_info"] = {}
 
-if not (
-    st.session_state.dbi.is_admin(st.session_state.user_info)
-):
+if not (st.session_state.dbi.is_admin(st.session_state.user_info)):
     st.error("对不起，您没有权限访问该页面。该页面仅限系统管理员使用。")
     st.stop()
 
