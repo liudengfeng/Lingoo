@@ -53,7 +53,7 @@ def get_translation(text):
 
 
 def get_dialogue_audio_file_path(idx, voice):
-    return str(dialogue_dir / f"{st.session_state.user_info["user_id"]}-{idx}-{voice}.mp3")
+    return str(dialogue_dir / f"{st.session_state.user_info['user_id']}-{idx}-{voice}.mp3")
 
 
 @st.cache_data(ttl=60 * 60, show_spinner="从 Azure 语音库合成语音...")

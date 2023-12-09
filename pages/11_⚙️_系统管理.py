@@ -20,8 +20,6 @@ from mypylib.word_utils import get_lowest_cefr_level
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
-# 设置日志级别
-logger.setLevel(logging.DEBUG)
 
 current_cwd: Path = Path(__file__).parent.parent
 
@@ -305,12 +303,7 @@ def search(**kwargs):
             }
         },
     ]
-
-    # from pprint import pprint
-
-    # pprint(pipeline)
-    # pprint("=" * 60)
-    # 执行聚合查询
+    
     result = list(st.session_state.dbi.users.aggregate(pipeline))
 
     return result
