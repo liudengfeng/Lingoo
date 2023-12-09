@@ -30,7 +30,7 @@ if "user_info" not in st.session_state:
 
 if not (
     len(st.session_state.user_info) == 0
-    or st.session_state.dbi.is_admin(st.session_state.user_info)
+    or not st.session_state.dbi.is_admin(st.session_state.user_info)
 ):
     st.error("对不起，您没有权限访问该页面。该页面仅限系统管理员使用。")
     st.stop()
