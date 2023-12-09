@@ -45,13 +45,13 @@ DICT_DIR = current_cwd / "resource/dictionary"
 
 # region 认证及初始化
 
-if "user_id" not in st.session_state:
-    st.session_state["user_id"] = None
+if "user_info" not in st.session_state:
+    st.session_state["user_info"] = {}
 
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface()
 
-if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
+if not st.session_state.dbi.is_service_active(st.session_state["user_info"]):
     st.error("非付费用户，无法使用此功能。")
     st.stop()
 
@@ -161,9 +161,9 @@ with open(DICT_DIR / "word_lists_by_edition_grade.json", "r", encoding="utf-8") 
     word_lists = json.load(f)
 
 # 从集合中提取个人词库，添加到word_lists中
-if st.session_state["user_id"] is not None:
+if st.session_state["user_info"] is not None:
     personal_word_list = st.session_state.dbi.find_personal_dictionary(
-        st.session_state["user_id"]
+        st.session_state["user_info"]
     )
     if len(personal_word_list) > 0:
         word_lists["0-个人词库"] = personal_word_list
@@ -395,14 +395,14 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
     if add_btn:
         word = st.session_state.words_to_memorize[st.session_state.word_idx]
         st.session_state.dbi.add_word_to_personal_dictionary(
-            st.session_state["user_id"], word
+            st.session_state["user_info"], word
         )
         st.toast(f"已添加单词：{word}到个人词库。")
 
     if del_btn:
         word = st.session_state.words_to_memorize[st.session_state.word_idx]
         st.session_state.dbi.remove_word_from_personal_dictionary(
-            st.session_state["user_id"], word
+            st.session_state["user_info"], word
         )
         st.toast(f"已从个人词库中删除单词：{word}。")
 
@@ -812,7 +812,7 @@ def gen_word_lib():
 
 def gen_my_word_lib():
     my_words = st.session_state.dbi.find_personal_dictionary(
-        st.session_state["user_id"]
+        st.session_state["user_info"]
     )
     # st.write("个人词库：", my_words)
     for word in my_words:
@@ -872,7 +872,7 @@ with tabs[tab_items.index("📚 个人词库")]:
             word = df.iloc[idx]["单词"]  # type: ignore
             if d["添加"]:
                 st.session_state.dbi.add_word_to_personal_dictionary(
-                    st.session_state["user_id"], word
+                    st.session_state["user_info"], word
                 )
                 st.toast(f"已添加到个人词库中：{word}。")
 
@@ -896,7 +896,7 @@ with tabs[tab_items.index("📚 个人词库")]:
             word = my_word_df.iloc[idx]["单词"]  # type: ignore
             if d["删除"]:
                 st.session_state.dbi.remove_word_from_personal_dictionary(
-                    st.session_state["user_id"], word
+                    st.session_state["user_info"], word
                 )
                 st.toast(f"已从个人词库中删除：{word}。")
         st.rerun()

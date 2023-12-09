@@ -1,5 +1,6 @@
 import locale
 import os
+import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -13,10 +14,9 @@ from PIL import Image
 from pymongo.errors import DuplicateKeyError
 
 from mypylib.auth_utils import is_valid_email, is_valid_phone_number
-from mypylib.db_interface import DbInterface
 from mypylib.constants import FAKE_EMAIL_DOMAIN, PROVINCES
+from mypylib.db_interface import DbInterface
 from mypylib.db_model import User
-
 
 current_cwd: Path = Path(__file__).parent.parent
 wxskm_dir = current_cwd / "resource" / "wxskm"
@@ -31,9 +31,9 @@ st.set_page_config(
     layout="wide",
 )
 
-if "user_id" not in st.session_state:
-    st.session_state["user_id"] = None
-    
+if "user_info" not in st.session_state:
+    st.session_state["user_info"] = {}
+
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface()
 
@@ -145,19 +145,20 @@ with tabs[items.index("👤 用户注册")]:
             email = email if email else f"{phone_number}@{FAKE_EMAIL_DOMAIN}"
             user = User(
                 # 加密字段
-                f_phone_number=fernet.encrypt(phone_number.encode()),
                 f_email=fernet.encrypt(email.encode()),
                 f_real_name=fernet.encrypt(real_name.encode()),
                 f_country=fernet.encrypt(country.encode()),
                 f_province=fernet.encrypt(province.encode()),
                 f_timezone=fernet.encrypt(tz.encode()),
                 # 普通字段
+                phone_number=phone_number,
                 current_level=current_level,
                 target_level=target_level,
                 display_name=display_name,
                 password=password_reg,
                 registration_time=datetime.now(timezone.utc),
             )  # type: ignore
+
             user.hash_password()
             try:
                 st.session_state.dbi.register_user(user)
@@ -431,74 +432,85 @@ with tabs[items.index("🍱 选择套餐")]:
 
 with tabs[items.index("🔄 更新信息")]:
     st.subheader("🔄 更新个人信息")
-    if st.session_state["user_id"] is None or not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
-        st.error("您尚未登录，无法更新个人信息。")
+    if len(
+        st.session_state.user_info
+    ) == 0 or not st.session_state.dbi.is_service_active(st.session_state.user_info):
+        st.error("您的账号未登录，或者尚未缴费、激活，无法更新个人信息。")
         st.stop()
+    CEFR = ["A1", "A2", "B1", "B2", "C1", "C2"]
+    COUNTRIES = ["中国"]
+    user_doc = st.session_state.dbi.find_user(st.session_state.user_info["user_id"])
+    user = User.from_doc(user_doc)
+    user.set_secret_key(st.secrets["FERNET_KEY"])
 
-    user_doc = st.session_state.dbi.find_user(st.session_state["user_id"])
-    user_id = str(user_doc.pop("_id", None))
-    user = User(st.secrets["FERNET_KEY"], user_id, **user_doc)
     with st.form(key="update_form"):
         col1, col2 = st.columns(2)
         col1.text_input(
             "手机号码",
             key="phone_number-3",
             help="请输入有效手机号码",
-            value=fernet.decrypt(user["phone_number"]),
+            value=user.phone_number,
             disabled=True,
         )
         email = col2.text_input(
-            "邮箱", key="email-3", help="请输入有效邮箱地址", value=fernet.decrypt(user["email"])
+            "邮箱", key="email-3", help="请输入有效邮箱地址", value=user.email
         )
-        real_name = st.text_input(
-            "个人姓名",
+        real_name = col1.text_input(
+            "真实姓名",
             key="real_name-3",
             help="成绩册上的姓名",
-            value=fernet.decrypt(user["real_name"]),
+            value=user.real_name,
         )
-        display_name = st.text_input(
-            "用户名称", key="display_name-3", help="登录显示名称", value=user["display_name"]
+        display_name = col2.text_input(
+            "显示名称", key="display_name-3", help="登录显示名称", value=user.display_name
         )
         current_level = col1.selectbox(
             "当前英语水平",
-            ["A1", "A2", "B1", "B2", "C1", "C2"],
-            index=0,
-            key="current_level",
+            CEFR,
+            index=CEFR.index(user.current_level),
+            key="current_level-3",
             help="如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
         )
         target_level = col2.selectbox(
             "期望达到的英语水平",
-            ["A1", "A2", "B1", "B2", "C1", "C2"],
-            index=5,
-            key="target_level",
+            CEFR,
+            index=CEFR.index(user.target_level),
+            key="target_level-3",
             help="如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
         )
         country = col1.selectbox(
             "所在国家",
-            ["中国"],
-            index=0,
-            key="country",
+            COUNTRIES,
+            index=COUNTRIES.index(user.country),
+            key="country-3",
         )
-        province = col2.selectbox("所在省份", PROVINCES, index=0, key="province")
+        province = col2.selectbox("所在省份", PROVINCES, index=0, key="province-3")
         tz = col1.selectbox(
             "所在时区",
             pytz.common_timezones,
-            index=pytz.common_timezones.index("Asia/Shanghai"),
-            key="timezone",
+            index=pytz.common_timezones.index(user.timezone),
+            key="timezone-3",
             help="请根据您当前所在的时区选择。如果您在中国，请使用默认值。",
         )
         status = st.empty()
         if st.form_submit_button(label="确认"):
             try:
                 st.session_state.dbi.update_user(
-                    st.session_state["user_id"],
+                    st.session_state.user_info["user_id"],
                     {
-                        "email": email,
-                        "real_name": real_name,
+                        "f_email": fernet.encrypt(email.encode()),
+                        "f_real_name": fernet.encrypt(real_name.encode()),
+                        "f_country": fernet.encrypt(country.encode()),
+                        "f_province": fernet.encrypt(province.encode()),
+                        "f_timezone": fernet.encrypt(tz.encode()),
                         "display_name": display_name,
+                        "current_level":current_level,
+                        "target_level":target_level,
                     },
                 )
-                st.success("更新成功")
+                status.success("更新成功")
+                time.sleep(3)
+                st.rerun()
             except DuplicateKeyError:
                 if email and not is_valid_email(email):
                     status.error("请输入有效的邮箱地址")
@@ -513,12 +525,14 @@ with tabs[items.index("🔄 更新信息")]:
 
 with tabs[items.index("🔑 重置密码")]:
     st.subheader("🔑 重置密码")
-    if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
-        st.error("您尚未付费，无法使用此功能。")
+    if len(
+        st.session_state.user_info
+    ) == 0 or not st.session_state.dbi.is_service_active(st.session_state.user_info):
+        st.error("您的账号尚未缴费、激活，无法重置密码。")
         st.stop()
-    user_doc = st.session_state.dbi.find_user(st.session_state["user_id"])
-    user_id = str(user_doc.pop("_id", None))
-    user = User(st.secrets["FERNET_KEY"], user_id, **user_doc)
+    
+    user_doc = st.session_state.dbi.find_user(st.session_state.user_info["user_id"])
+    user = User.from_doc(user_doc)
     with st.form(key="secret_form", clear_on_submit=True):
         password_reg = st.text_input(
             "密码", type="password", key="password_reg-4", help="密码长度至少为8位"
@@ -536,7 +550,7 @@ with tabs[items.index("🔑 重置密码")]:
             # TODO：查看返回结果
             st.write(
                 st.session_state.dbi.update_user(
-                    st.session_state["user_id"],
+                    st.session_state.user_info["user_id"],
                     {
                         "password": user.password,
                     },
@@ -551,9 +565,11 @@ with tabs[items.index("🔑 重置密码")]:
 
 with tabs[items.index("📊 统计报表")]:
     st.subheader("📊 统计报表")
-    if not st.session_state.dbi.is_service_active(st.session_state["user_id"]):
+    
+    if not st.session_state.dbi.is_service_active(st.session_state.user_info):
         st.error("您尚未登录，无法查阅统计报表。")
         st.stop()
+
 # endregion
 
 # region 创建反馈页面
@@ -561,6 +577,10 @@ with tabs[items.index("📊 统计报表")]:
 uploaded_emoji = "📁"
 
 with tabs[items.index("📝 问题反馈")]:
+    if not st.session_state.dbi.is_service_active(st.session_state.user_info):
+        st.error("您尚未登录，无法反馈问题。")
+        st.stop()
+
     with st.form(key="feedback_form"):
         title = st.text_input("标题", key="title", help="请输入标题")
         content = st.text_area("问题描述", key="content", help="请输入内容")
@@ -582,7 +602,9 @@ with tabs[items.index("📝 问题反馈")]:
                 # print("Container does not exist.")
 
             # 将标题和内容存储为文本文件
-            text_data = f"用户：{st.session_state['user_id']}\n标题: {title}\n内容: {content}"
+            text_data = (
+                f"用户：{st.session_state['user_info']["user_id"]}\n标题: {title}\n内容: {content}"
+            )
 
             blob_name = str(uuid.uuid4())
             text_blob_client = blob_service_client.get_blob_client(

@@ -2,6 +2,7 @@
 import logging
 import random
 import string
+import uuid
 from datetime import datetime, timedelta, timezone
 
 import streamlit as st
@@ -11,7 +12,15 @@ from faker import Faker
 from pymongo import ASCENDING, IndexModel, MongoClient
 
 from .constants import FAKE_EMAIL_DOMAIN
-from .db_model import Payment, PaymentStatus, PurchaseType, User, UserRole, str_to_enum
+from .db_model import (
+    LoginEvent,
+    Payment,
+    PaymentStatus,
+    PurchaseType,
+    User,
+    UserRole,
+    str_to_enum,
+)
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
@@ -69,13 +78,44 @@ class DbInterface:
             # 集合不存在，创建集合和索引
             self.words.create_index([("word", ASCENDING)], unique=True)
 
+    # region 会话管理
+
+    def get_active_sessions(self, user_id: ObjectId):
+        user_doc = self.users.find_one({"_id": user_id})
+        if user_doc:
+            user = User.from_doc(user_doc)
+            active_sessions = [
+                event for event in user.login_events if event.logout_time is None
+            ]
+            if len(active_sessions) > 1:
+                return active_sessions[:-1]  # 返回除最后一个登录事件外的所有未退出的登录事件
+        return []
+
+    def force_logout_session(self, user_id: ObjectId, session_id: str):
+        # assert isinstance(user_id, ObjectId)
+        user_doc = self.users.find_one({"_id": user_id})
+        if user_doc:
+            user = User.from_doc(user_doc)
+            for event in user.login_events:
+                if event.session_id == session_id and event.logout_time is None:
+                    event.logout_time = datetime.utcnow()
+                    self.users.update_one(
+                        {
+                            "_id": user_id,
+                            "login_events.session_id": session_id,
+                        },
+                        {"$set": {"login_events.$.logout_time": event.logout_time}},
+                    )
+                    break
+
+    # endregion
     # region 用户管理
     def register_user(self, user: User):
         self.users.insert_one(user.model_dump())
 
-    def find_user(self, user_id: str):
+    def find_user(self, user_id: ObjectId):
         # 查询数据库
-        user = self.users.find_one({"_id": ObjectId(user_id)})
+        user = self.users.find_one({"_id": user_id})
         return user
 
     def find_user_by(self, phone=None, email=None):
@@ -88,9 +128,9 @@ class DbInterface:
         user = self.users.find_one(query)
         return user
 
-    def update_user(self, user_id, update_fields: dict):
+    def update_user(self, user_id: ObjectId, update_fields: dict):
         result = self.users.update_one(
-            {"_id": ObjectId(user_id)},
+            {"_id": user_id},
             {"$set": update_fields},
         )
         return result.modified_count
@@ -108,14 +148,14 @@ class DbInterface:
 
     # endregion
 
-    def is_service_active(self, phone_number):
+    def is_service_active(self, user_info: dict):
         # 查询用户
-        user = self.users.find_one({"phone_number": phone_number})
+        user = self.users.find_one({"_id": user_info["user_id"]})
         # 如果用户是管理员，直接返回True
         if user and user["user_role"] == "管理员":
             return True
         # 查询用户的所有支付记录
-        payments = self.payments.find({"phone_number": phone_number})
+        payments = self.payments.find({"phone_number": user_info["phone_number"]})
         # 遍历所有支付记录
         for payment in payments:
             # 如果找到一条已经被批准且服务尚未到期的记录，返回True
@@ -214,9 +254,10 @@ class DbInterface:
         return verification_code
 
     def cache_user(self, user):
-        phone_number = user["phone_number"]
+        user.set_secret_key(st.secrets["FERNET_KEY"].encode())
+        phone_number = user.phone_number
         self.cache[phone_number] = {
-            "phone_number": user.phone_number,
+            "user_id": user.user_id,
             "display_name": user.display_name,
             "email": user.email,
             "user_role": user.user_role,
@@ -237,7 +278,7 @@ class DbInterface:
             ):
                 # 如果登录成功，将用户添加到缓存
                 self.cache_user(user)
-                return "Login successful"
+                return "成功登录"
             else:
                 return "Invalid verification code"
         else:
@@ -246,11 +287,9 @@ class DbInterface:
     def login(self, phone_number, password):
         # 在缓存中查询是否已经正常登录
         if phone_number in self.cache and self.cache[phone_number]:
-            return "您已登录"
+            return {"status": "warning", "message": "您已登录"}
         # 检查用户的凭据
-        user_doc = self.users.find_one(
-            {"f_phone_number": User.encrypt(phone_number, st.secrets["FERNET_KEY"])}
-        )
+        user_doc = self.users.find_one({"phone_number": phone_number})
         if user_doc:
             # 创建一个User实例
             user = User.from_doc(user_doc)
@@ -258,23 +297,64 @@ class DbInterface:
             if user.check_password(password):
                 # 如果密码正确，将用户的登录状态存储到缓存中
                 self.cache_user(user)
-                return "Login successful"
-        return "无效的手机号码，或者密码无效。请展开下面的帮助文档，查看如何注册账号或重置密码。"
+                # 创建一个登录事件
+                session_id = str(uuid.uuid4())
+                login_event = LoginEvent(
+                    session_id=session_id, login_time=datetime.now(timezone.utc)
+                )
+                # 更新数据库中的用户文档
+                self.users.update_one(
+                    {"_id": user.user_id},
+                    {"$push": {"login_events": login_event.model_dump()}},
+                )
+                return {
+                    "user_id": user.user_id,
+                    "display_name": user.display_name,
+                    "session_id": session_id,
+                    "status": "success",
+                    "message": f"{user.display_name}，又见面了！",
+                }
+        return {
+            "status": "error",
+            "message": "无效的手机号码，或者密码无效。请展开下面的帮助文档，查看如何注册账号或重置密码。",
+        }
 
-    def logout(self, phone_number):
+    def logout(self, user_info):
         # 从缓存中删除用户的登录状态
-        if phone_number in self.cache:
-            del self.cache[phone_number]
+        if user_info["phone_number"] in self.cache:
+            del self.cache[user_info["phone_number"]]
+        # 查询用户的文档
+        user_doc = self.users.find_one({"phone_number": user_info["phone_number"]})
+        if user_doc:
+            # 创建一个User实例
+            user = User.from_doc(user_doc)
+            # 找到最近的登录事件
+            if user.login_events:
+                last_login_event = max(
+                    user.login_events, key=lambda event: event.login_time
+                )
+                # 设置登出时间
+                last_login_event.logout_time = datetime.now(timezone.utc)
+                # 更新数据库中的特定登录事件
+                self.users.update_one(
+                    {
+                        "_id": user.user_id,
+                        "login_events.session_id": last_login_event.session_id,
+                    },
+                    {
+                        "$set": {
+                            "login_events.$.logout_time": last_login_event.logout_time
+                        }
+                    },
+                )
         return "Logout successful"
 
-    def is_admin(self, phone_number=None, email=None):
+    def is_admin(self, user_info: dict):
         # 在缓存中查询用户是否已经正常登录
-        key = phone_number or email
-        if key in self.cache and self.cache[key]:
+        phone_number = user_info["phone_number"]
+        if phone_number in self.cache and self.cache[phone_number]:
             # 检查用户是否为管理员
-            user_doc = self.users.find_one(
-                {"$or": [{"phone_number": phone_number}, {"email": email}]}
-            )
+            user_doc = self.users.find_one({"phone_number": phone_number})
             if user_doc:
                 # 创建一个User实例
                 user = User.from_doc(user_doc)
@@ -283,14 +363,12 @@ class DbInterface:
                     return True
         return False
 
-    def is_vip_or_admin(self, phone_number=None, email=None):
+    def is_vip_or_admin(self, user_info: dict):
         # 在缓存中查询用户是否已经正常登录
-        key = phone_number or email
-        if key in self.cache and self.cache[key]:
+        phone_number = user_info["phone_number"]
+        if phone_number in self.cache and self.cache[phone_number]:
             # 检查用户是否为 VIP 或管理员
-            user_doc = self.users.find_one(
-                {"$or": [{"phone_number": phone_number}, {"email": email}]}
-            )
+            user_doc = self.users.find_one({"phone_number": phone_number})
             if user_doc:
                 # 创建一个User实例
                 user = User.from_doc(user_doc)

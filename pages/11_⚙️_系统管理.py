@@ -25,12 +25,12 @@ logger.setLevel(logging.DEBUG)
 
 current_cwd: Path = Path(__file__).parent.parent
 
-if "user_id" not in st.session_state:
-    st.session_state["user_id"] = None
+if "user_info" not in st.session_state:
+    st.session_state["user_info"] = {}
 
 if not (
-    st.session_state.get("user_id")
-    and st.session_state.dbi.is_admin(st.session_state.get("user_id"))
+    len(st.session_state.user_info) == 0
+    or st.session_state.dbi.is_admin(st.session_state.user_info)
 ):
     st.error("对不起，您没有权限访问该页面。该页面仅限系统管理员使用。")
     st.stop()

@@ -7,13 +7,13 @@ from mypylib.google_api import init_vertex
 
 # region 认证及初始化
 
-if "user_id" not in st.session_state:
-    st.session_state["user_id"] = None
+if "user_info" not in st.session_state:
+    st.session_state["user_info"] = {}
 
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface()
 
-if not st.session_state.dbi.is_vip_or_admin(st.session_state.user_id):
+if not st.session_state.dbi.is_vip_or_admin(st.session_state.user_info):
     st.error("您不是VIP用户，无法使用该功能")
     st.stop()
 
@@ -32,7 +32,7 @@ if "chat_messages" not in st.session_state:
 
 # region 常量
 
-AVATAR_MAPS = {"user": "🧑‍💻", "assistant     ":"🤖"}
+AVATAR_MAPS = {"user": "🧑‍💻", "assistant         ":"🤖"}
 
 # endregion
 

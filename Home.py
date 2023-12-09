@@ -13,6 +13,8 @@ from mypylib.db_interface import DbInterface
 from mypylib.azure_speech import speech_synthesis_get_available_voices
 from mypylib.constants import LANGUAGES
 from mypylib.db_model import PaymentStatus, LoginEvent
+from mypylib.streamlit_helper import check_and_force_logout
+
 
 current_cwd: Path = Path(__file__).parent
 logo_dir: Path = current_cwd / "resource/logo"
@@ -22,11 +24,9 @@ voices_fp = current_cwd / "resource/voices.json"
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface()
 
-if "user_id" not in st.session_state:
-    st.session_state["user_id"] = None
+if "user_info" not in st.session_state:
+    st.session_state["user_info"] = {}
 
-if "display_name" not in st.session_state:
-    st.session_state["display_name"] = ""
 
 st.set_page_config(
     page_title="主页",
@@ -62,9 +62,9 @@ if need_update:
 
 s_cols = st.sidebar.columns(3)
 login_btn = s_cols[0].button(
-    label="登录" if st.session_state["user_id"] is None else "👤 已登录",
-    type="primary" if st.session_state["user_id"] is None else "secondary",
-    disabled=st.session_state["user_id"] is not None,
+    label="登录" if not st.session_state["user_info"] else "👤 已登录",
+    type="primary" if not st.session_state["user_info"] else "secondary",
+    disabled=len(st.session_state["user_info"]) >= 1,
 )
 logout_btn = s_cols[1].button("退出", help="在公共场所使用本产品时，请在离开前退出登录，以保护您的隐私和安全。")
 
@@ -74,15 +74,18 @@ extend_time_btn_disabled = False
 
 status = st.sidebar.empty()
 
-if st.session_state["user_id"] is not None:
+# 在页面加载时检查是否有需要强制退出的登录会话
+check_and_force_logout(st, status)
+
+if len(st.session_state["user_info"]) >= 1:
     # 获取用户的数据
     user_data = st.session_state.dbi.users.find_one(
-        {"phone_number": st.session_state["user_id"]}
+        {"phone_number": st.session_state["user_info"]["phone_number"]}
     )
     # 查询在服务期内，处于服务状态的支付记录
     payment_record = st.session_state.dbi.payments.find_one(
         {
-            "phone_number": st.session_state["user_id"],
+            "phone_number": st.session_state["user_info"]["phone_number"],
             "status": PaymentStatus.IN_SERVICE,
         }
     )
@@ -123,13 +126,13 @@ if st.session_state["user_id"] is not None:
 
         # 更新用户的到期时间
         st.session_state.dbi.payments.update_one(
-            {"phone_number": st.session_state["user_id"]},
+            {"phone_number": st.session_state["user_info"]["phone_number"]},
             {"$set": {"expiry_time": new_expiry_time}},
         )
 
         # 更新用户的最后领取日期
         st.session_state.dbi.users.update_one(
-            {"phone_number": st.session_state["user_id"]},
+            {"phone_number": st.session_state["user_info"]["phone_number"]},
             {"$set": {"last_received_date": current_datetime}},
         )
         # 重新刷新
@@ -150,11 +153,11 @@ if st.session_state["user_id"] is not None:
             f"到期：剩余{remaining_days:.0f}天{remaining_hours:.0f}小时{remaining_minutes:.0f}分钟"
         )
 
-if st.session_state["user_id"] is None:
-    if st.session_state.user_id and st.session_state.dbi.cache.get(
-        st.session_state.user_id
+if len(st.session_state["user_info"]) == 0:
+    if st.session_state.user_info and st.session_state.dbi.cache.get(
+        st.session_state.user_info["phone_number"]
     ):
-        status.success(f"您已登录，{st.session_state.user_id} 您好！")
+        status.success(f"您已登录，{st.session_state.user_info['display_name']} 您好！")
     with st.sidebar.form(key="login_form", clear_on_submit=True):
         phone_number = st.text_input(
             "手机号码",
@@ -170,34 +173,30 @@ if st.session_state["user_id"] is None:
             help="输入个人登录密码",
             placeholder="输入个人登录密码",
         )
-        sub_btn = st.form_submit_button(label="确定")
-
+        sub_btn = st.form_submit_button(label="确认")
         if sub_btn:
             if not is_valid_phone_number(phone_number):
                 status.error(f"请输入有效的手机号码。您输入的号码是：{phone_number}")
                 st.stop()
-                # # 修改为 user_id
-                # st.session_state["user_id"] = phone_number
-                # if is_valid_phone_number(phone_number):
-                #     phone_number = identifier
             else:
-                msg = st.session_state.dbi.login(
+                info = st.session_state.dbi.login(
                     phone_number=phone_number, password=password
                 )
-                from mypylib.db_model import User
-                st.sidebar.write(
-                    "encrypt",
-                    phone_number,
-                    User.encrypt(phone_number, st.secrets["FERNET_KEY"]),
-                )
-                if msg == "Login successful":
-                    # status.success(f"登录成功，{identifier} 您好！")
-                    status.success(f"登录成功，您好！")
-                    # st.rerun()
-                elif msg == "您已登录":
-                    status.success("您已登录")
+                if info["status"] == "success":
+                    display_name = info["display_name"]
+                    status.success(info["message"])
+                    st.session_state["user_info"]["phone_number"] = phone_number
+                    st.session_state["user_info"]["user_id"] = info["user_id"]
+                    st.session_state["user_info"]["session_id"] = info["session_id"]
+                    st.session_state["user_info"]["display_name"] = display_name
+                    time.sleep(3)
+                    st.rerun()
+                elif info["status"] == "warning":
+                    status.warning(info["message"])
+                    st.stop()
                 else:
-                    status.error(msg)
+                    status.error(info["message"])
+                    st.stop()
 
 
 col1, col2 = st.columns(2)
@@ -258,16 +257,9 @@ LinGoo，让你学好英语，so easy！
     unsafe_allow_html=True,
 )
 
-
-# cols = st.columns(5)
-# with cols[2]:
-#     welcome_image = Image.open(logo_dir / "welcome-2.jpg")
-#     st.image(welcome_image, width=100)
-#     st.markdown("[注册使用](用户管理)")
-
-
-if logout_btn:
-    st.session_state.dbi.logout(st.session_state.user_id)
-    st.session_state["user_id"] = None
-    status.success("已退出登录")
-    st.rerun()
+if len(st.session_state["user_info"]) >= 1:
+    if logout_btn:
+        st.session_state.dbi.logout(st.session_state.user_info)
+        st.session_state["user_info"] = {}
+        status.success("已退出登录")
+        st.rerun()

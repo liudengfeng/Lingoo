@@ -61,7 +61,7 @@ class Payment(BaseModel):
 class User(BaseModel):
     # 私有字段
     _secret_key: bytes
-    _user_id: Optional[str]
+    _user_id: Optional[ObjectId]
 
     # 加密字段
     f_email: bytes = Field(b"")
@@ -84,7 +84,7 @@ class User(BaseModel):
 
     @classmethod
     def from_doc(cls, doc: dict):
-        cls._user_id = str(doc.pop("_id", None))
+        cls._user_id = doc.pop("_id", None)
         return cls(**doc)
 
     @classmethod
@@ -108,6 +108,8 @@ class User(BaseModel):
         return self._user_id
 
     def set_secret_key(self, key: bytes):
+        if isinstance(key, str):
+            key = key.encode()
         self._secret_key = key
 
     @property
@@ -117,19 +119,9 @@ class User(BaseModel):
         return Fernet(self._secret_key)
 
     @property
-    def phone_number(self):
-        # 解密手机号码
-        return self._cipher_suite.decrypt(self.f_phone_number).decode()
-
-    @phone_number.setter
-    def phone_number(self, value):
-        # 加密手机号码
-        self.f_phone_number = self._cipher_suite.encrypt(value.encode())
-
-    @property
     def email(self):
         # 解密电子邮件地址
-        return self._cipher_suite.decrypt(self._email).decode()
+        return self._cipher_suite.decrypt(self.f_email).decode()
 
     @email.setter
     def email(self, value):
@@ -139,7 +131,7 @@ class User(BaseModel):
     @property
     def real_name(self):
         # 解密真实名字
-        return self._cipher_suite.decrypt(self._real_name).decode()
+        return self._cipher_suite.decrypt(self.f_real_name).decode()
 
     @real_name.setter
     def real_name(self, value):
@@ -149,7 +141,7 @@ class User(BaseModel):
     @property
     def country(self):
         # 解密国家
-        return self._cipher_suite.decrypt(self._country).decode()
+        return self._cipher_suite.decrypt(self.f_country).decode()
 
     @country.setter
     def country(self, value):
@@ -159,7 +151,7 @@ class User(BaseModel):
     @property
     def province(self):
         # 解密省份
-        return self._cipher_suite.decrypt.decrypt(self._province).decode()
+        return self._cipher_suite.decrypt.decrypt(self.f_province).decode()
 
     @province.setter
     def province(self, value):
@@ -169,7 +161,7 @@ class User(BaseModel):
     @property
     def timezone(self):
         # 解密时区
-        return self._cipher_suite.decrypt(self._timezone).decode()
+        return self._cipher_suite.decrypt(self.f_timezone).decode()
 
     @timezone.setter
     def timezone(self, value):
