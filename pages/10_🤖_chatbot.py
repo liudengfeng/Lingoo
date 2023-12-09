@@ -31,8 +31,10 @@ if "chat_messages" not in st.session_state:
 # endregion
 
 # region 常量
-
-AVATAR_MAPS = {"user": "🧑‍💻", "assistant         ":"🤖"}
+# 使用这种方式避免因格式化文档时被更改
+AVATAR_NAMES = ["user", "assistant"]
+AVATAR_EMOJIES = ["🧑‍💻", "🤖"]
+AVATAR_MAPS = {name: emoji for name, emoji in zip(AVATAR_NAMES, AVATAR_EMOJIES)}
 
 # endregion
 
