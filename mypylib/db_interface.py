@@ -350,6 +350,8 @@ class DbInterface:
         return "Logout successful"
 
     def is_admin(self, user_info: dict):
+        if len(user_info) == 0:
+            return False
         # 在缓存中查询用户是否已经正常登录
         phone_number = user_info["phone_number"]
         if phone_number in self.cache and self.cache[phone_number]:
