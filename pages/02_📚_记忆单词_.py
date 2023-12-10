@@ -485,7 +485,7 @@ def on_next_puzzle_btn_click():
 
 with tabs[tab_items.index("🧩 单词拼图")]:
     st.markdown(
-        "单词拼图是一种记忆单词的游戏。阅读定义，拼出这个词。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
+        "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
     puzzle_progress = st.empty()
     puzzle_cols = st.columns(4)
