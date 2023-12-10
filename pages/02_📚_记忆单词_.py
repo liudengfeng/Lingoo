@@ -519,7 +519,7 @@ with tabs[tab_items.index("🧩 单词拼图")]:
         st.session_state.puzzle_idx = -1
         st.session_state["puzzle_view_word"] = []
 
-    if len(st.session_state.puzzle_view_word) == 0:
+    if len(st.session_state.puzzle_words) == 0:
         gen_puzzle_words()
 
     display_puzzle_hint(puzzle_progress)
@@ -534,7 +534,7 @@ with tabs[tab_items.index("🧩 单词拼图")]:
     )
     puzzle_score = st.empty()
     sumbit_cols = st.columns(6)
-    
+
     if sumbit_cols[0].button("重试", help="恢复初始状态，重新开始。"):
         prepare_puzzle()
         st.rerun()
