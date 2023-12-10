@@ -162,7 +162,6 @@ st.sidebar.slider(
     50,
     step=5,
     key="num_words_key",
-    on_change=generate_flashcard_words,
 )
 
 # endregion
@@ -337,7 +336,7 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
     play_btn = btn_cols[4].button("🔊", key="play", help="聆听单词发音")
     add_btn = btn_cols[5].button("➕", key="add", help="添加到个人词库")
     del_btn = btn_cols[6].button("➖", key="del", help="从个人词库中删除")
-    refresh_btn = btn_cols[7].button("🔄", key="refresh", help="重新生成单词列表")
+    update_flashcard_wordbank_button = btn_cols[7].button("🔄", key="refresh", help="当改变词库、记忆数量后，请重新生成单词列表")
 
     placeholder = st.empty()
 
@@ -359,7 +358,7 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         components.html(audio_autoplay_elem(fp))
         # view_flash_word(container, tip_placeholder)
 
-    if refresh_btn:
+    if update_flashcard_wordbank_button:
         generate_flashcard_words()
         # 恢复初始显示状态
         st.session_state.display_state = "全部"
@@ -513,7 +512,7 @@ with tabs[tab_items.index("🧩 单词拼图")]:
         disabled=st.session_state.puzzle_idx == n - 1,
     )
 
-    refresh_btn = p_btns[3].button("🔄", key="refresh-puzzle", help="重新生成单词列表")
+    update_puzzle_wordbank_button = p_btns[3].button("🔄", key="refresh-puzzle", help="重新生成单词列表")
 
     if prev_p_btn:
         init_puzzle()
@@ -521,7 +520,7 @@ with tabs[tab_items.index("🧩 单词拼图")]:
     if next_test_btn:
         init_puzzle()
 
-    if refresh_btn:
+    if update_puzzle_wordbank_button:
         gen_words_to_puzzle()
 
     view_definition(progress_word)
