@@ -13,6 +13,12 @@ if not st.session_state.dbi.is_vip_or_admin(st.session_state.user_info):
     st.error("您不是VIP用户，无法使用该功能")
     st.stop()
 
+if "chat_messages" not in st.session_state:
+    st.session_state["chat_messages"] = []
+
+if "examples_pair" not in st.session_state:
+    st.session_state["examples_pair"] = []
+
 # endregion
 
 # region 常量
@@ -202,13 +208,6 @@ if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、�
 # endregion
 
 # region 主页
-
-if "chat_messages" not in st.session_state:
-    st.session_state["chat_messages"] = []
-    
-if "examples_pair" not in st.session_state:
-    st.session_state["examples_pair"] = []
-
 
 # 模型上下文 【按钮点击影响其他控件属性的标准做法】
 if st.session_state.get("reset_btn"):
