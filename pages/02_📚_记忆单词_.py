@@ -518,6 +518,7 @@ with tabs[tab_items.index("🧩 单词拼图")]:
         # 恢复初始显示状态
         st.session_state.puzzle_idx = -1
         st.session_state["puzzle_view_word"] = []
+        st.session_state.puzzle_answer_value = ""
 
     if len(st.session_state.puzzle_words) == 0:
         gen_puzzle_words()
