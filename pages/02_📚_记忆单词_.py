@@ -43,6 +43,21 @@ if len(st.session_state.get("word_lists", {})) == 0:
     ) as f:
         st.session_state["word_lists"] = json.load(f)
 
+if "current_word_lib" not in st.session_state:
+    st.session_state["current_word_lib"] = []
+
+if "words_to_memorize" not in st.session_state:
+    st.session_state["words_to_memorize"] = []
+
+if "words" not in st.session_state:
+    st.session_state["words"] = {}
+
+if "display_state" not in st.session_state:
+    st.session_state["display_state"] = "全部"
+
+# 初始化单词的索引
+if "current_flashcard_word_index" not in st.session_state:
+    st.session_state["current_flashcard_word_index"] = -1
 # endregion
 
 # region 页设置
@@ -142,11 +157,9 @@ selected_list = st.sidebar.selectbox(
     format_func=lambda x: x.split("-", maxsplit=1)[1],
 )
 
-# 初始化当前词库
-if len(st.session_state.current_word_lib) == 0:
-    on_word_lib_changed(st.session_state.word_lists)
 
 # 在侧边栏添加一个滑块让用户选择记忆的单词数量
+
 st.sidebar.slider(
     "请选择计划记忆的单词数量",
     10,
@@ -168,22 +181,6 @@ tabs = st.tabs(tab_items)
 
 # region 记忆闪卡辅助
 
-if "current_word_lib" not in st.session_state:
-    st.session_state["current_word_lib"] = []
-
-if "words_to_memorize" not in st.session_state:
-    st.session_state["words_to_memorize"] = []
-
-if "words" not in st.session_state:
-    st.session_state["words"] = {}
-
-if "display_state" not in st.session_state:
-    st.session_state["display_state"] = "全部"
-
-# 初始化单词的索引
-if "current_flashcard_word_index" not in st.session_state:
-    st.session_state["current_flashcard_word_index"] = -1
-
 
 def on_prev_btn_click():
     st.session_state["current_flashcard_word_index"] -= 1
@@ -191,8 +188,6 @@ def on_prev_btn_click():
 
 def on_next_btn_click():
     st.session_state["current_flashcard_word_index"] += 1
-
-
 
 
 template = """
@@ -272,10 +267,10 @@ def _memory_tip(word):
 def view_flash_word(container, tip_placeholder):
     if st.session_state.current_flashcard_word_index == -1:
         return
-    
+
     if len(st.session_state.words_to_memorize) == 0:
         gen_words_to_memorize()
-    
+
     word = st.session_state.words_to_memorize[
         st.session_state.current_flashcard_word_index
     ]
