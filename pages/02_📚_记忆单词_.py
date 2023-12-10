@@ -5,35 +5,24 @@ import random
 import re
 from pathlib import Path
 
-import google.generativeai as palm
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
 
-from mypylib.db_interface import DbInterface
 from mypylib.azure_speech import synthesize_speech_to_file
+from mypylib.db_interface import DbInterface
 from mypylib.google_api import (
     generate_word_memory_tip,
+    generate_word_test,
     get_translation_client,
     google_translate,
-    init_vertex,
 )
-
-# 使用 vertex ai
-from mypylib.google_palm import (
-    gen_vocabulary_comprehension_test,
-    get_irregular_forms_of_a_word,
-    lemmatize,
-    lookup,
-)
-from mypylib.word_utils import hash_word, audio_autoplay_elem
+from mypylib.streamlit_helper import authenticate
+from mypylib.word_utils import audio_autoplay_elem, hash_word
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
-
-# # 设置日志级别
-# logger.setLevel(logging.DEBUG)
 
 # region 常量
 # streamlit中各页都是相对当前根目录
@@ -45,36 +34,24 @@ DICT_DIR = current_cwd / "resource/dictionary"
 
 # region 认证及初始化
 
-if "user_info" not in st.session_state:
-    st.session_state["user_info"] = {}
-
-if "dbi" not in st.session_state:
-    st.session_state["dbi"] = DbInterface()
-
-if not st.session_state.dbi.is_service_active(st.session_state["user_info"]):
-    st.error("非付费用户，无法使用此功能。")
-    st.stop()
-
-if st.secrets["env"] in ["streamlit", "azure"]:
-    if "inited_vertex" not in st.session_state:
-        init_vertex(st.secrets)
-        st.session_state["inited_vertex"] = True
-else:
-    st.error("非云端环境，无法使用 Vertex AI")
-    st.stop()
-
-if "chat_messages" not in st.session_state:
-    st.session_state["chat_messages"] = []
+authenticate(st)
 
 # endregion
 
-# region 会话状态
+# region 页设置
 
 st.set_page_config(
     page_title="记忆单词",
     page_icon="📚",
     layout="wide",
 )
+
+# endregion
+
+# region 会话状态
+
+if "chat_messages" not in st.session_state:
+    st.session_state["chat_messages"] = []
 
 if "current_word_lib" not in st.session_state:
     st.session_state["current_word_lib"] = []
@@ -928,7 +905,7 @@ def on_next_test_btn_click():
 def gen_test(level, test_num):
     words = random.sample(st.session_state.words_to_memorize, test_num)
     for word in words:
-        st.session_state.tests.append(gen_vocabulary_comprehension_test(word, level))
+        st.session_state.tests.append(generate_word_test(word, level))
 
 
 def check_answer(test_container):

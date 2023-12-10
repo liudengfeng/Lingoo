@@ -1,4 +1,6 @@
 # streamlit 页面中的重复代码简化为函数
+from .db_interface import DbInterface
+from .google_api import init_vertex
 
 
 def check_and_force_logout(st, status):
@@ -26,3 +28,23 @@ def check_and_force_logout(st, status):
                 st.session_state.clear()
                 status.error("您的账号在其他设备上登录，您已被强制退出。")
                 st.stop()
+
+
+def authenticate(st):
+    if "user_info" not in st.session_state:
+        st.session_state["user_info"] = {}
+
+    if "dbi" not in st.session_state:
+        st.session_state["dbi"] = DbInterface()
+
+    if not st.session_state.dbi.is_service_active(st.session_state["user_info"]):
+        st.error("非付费用户，无法使用此功能。")
+        st.stop()
+
+    if st.secrets["env"] in ["streamlit", "azure"]:
+        if "inited_vertex" not in st.session_state:
+            init_vertex(st.secrets)
+            st.session_state["inited_vertex"] = True
+    else:
+        st.error("非云端环境，无法使用 Vertex AI")
+        st.stop()

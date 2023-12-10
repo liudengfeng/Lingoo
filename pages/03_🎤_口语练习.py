@@ -11,9 +11,14 @@ import streamlit as st
 from mypylib.azure_speech import synthesize_speech_to_file
 from mypylib.azure_translator import translate
 from mypylib.constants import NAMES, TOPICS, CEFR_LEVEL_MAPS
-from mypylib.google_palm import generate_text
+from mypylib.google_api import generate_text
+from mypylib.streamlit_helper import authenticate
 
-# palm.configure(api_key=st.secrets["Google"]["PALM_API_KEY"])
+# region 认证及初始化
+
+authenticate(st)
+
+# endregion
 
 # region 常量
 current_cwd: Path = Path(__file__).parent.parent
@@ -30,7 +35,9 @@ if not os.path.exists(dialogue_dir):
 model = "models/text-bison-001"
 language = "American English"
 
-AVATAR_MAPS = {"0": ("user", "👦"), "1": ("assistant", "👧")}
+AVATAR_NAMES = ["user", "assistant"]
+AVATAR_EMOJIES = ["👦", "👧"]
+AVATAR_MAPS = {name: emoji for name, emoji in zip(AVATAR_NAMES, AVATAR_EMOJIES)}
 
 # endregion
 
@@ -205,7 +212,6 @@ st.markdown(
 if gen_btn:
     sub_prompt = f"""Please generate 10 sub-topics related to "{en_topic}" and output them in list form"""
     sub_completion = generate_text(
-        model=model,
         prompt=sub_prompt,
         temperature=1.0,
         top_p=0.95,
@@ -221,7 +227,6 @@ if gen_btn:
         Please use {language} to simulate a conversation between {boy} and {girl} about "{sub_topic}". Please note that the actual language level of both parties is {en_level}, and the simulation content, word choice and sentence making must match their level. The word count should be no less than 200 words and no more than 400 words.
     """
     completion = generate_text(
-        model=model,
         prompt=prompt,
         temperature=1.0,
         # The maximum length of the response

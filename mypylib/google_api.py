@@ -8,6 +8,16 @@ from vertexai.language_models import TextGenerationModel
 project = "lingo-406201"
 location = "asia-northeast1"
 
+QUESTION_OPTIONS_AND_INSTRUCTIONS = """
+请从以下选项中选择正确的答案：
+第一个选项：(A)
+第二个选项：(B)
+第三个选项：(C)
+第四个选项：(D)
+
+注意：当输出正确答案时，只需要输出选项的字母标识，不需要带括号。
+"""
+
 
 def get_service_account_info(secrets):
     # 由于private_key含有大量的换行符号，所以单独存储
@@ -82,6 +92,30 @@ def init_vertex(secrets):
         experiment_description="云端使用vertex ai",
     )
     vertexai.init(project=project, location=location)
+
+
+def generate_text(
+    prompt,
+    temperature,
+    top_p,
+    top_k=40,
+    # 增加随机性
+    candidate_count=1,
+    max_output_tokens=1024,
+):
+    parameters = {
+        "candidate_count": candidate_count,
+        "max_output_tokens": max_output_tokens,
+        "temperature": temperature,
+        "top_p": top_p,
+        "top_k": top_k,
+    }
+    model = TextGenerationModel.from_pretrained("text-bison")
+    response = model.predict(
+        prompt,
+        **parameters,
+    )
+    return response.text
 
 
 def generate_word_memory_tip(word):
@@ -166,6 +200,38 @@ def generate_short_discussion(topic, level):
         **parameters,
     )
     return response.text
+
+
+def generate_word_test(word, level):
+    parameters = {
+        "candidate_count": 1,
+        "max_output_tokens": 1024,
+        "temperature": 0.9,
+        "top_p": 0.8,
+        "top_k": 40,
+    }
+    model = TextGenerationModel.from_pretrained("text-bison")
+    response = model.predict(
+        f"""您是一名英语老师，精通设计出题考核学生是否掌握单词释义。为以下单词出题考察学生是否理解单词词义：
+    单词:{word}
+    学生当前水平:CEFR {level}
+
+    要求：
+    - 题目、选项要与学生当前水平相适应。
+    - 问题应该清晰明确，让学生能理解题意。
+    - 只有四个选项，并且只有唯一正确答案。
+    - 选项应该合理，与问题相关。选项可以是同义词、反义词、近义词、同类此、异类词等。
+    - 答案应该是唯一正确的，并且问题与选项保持一致。
+    - 选项之间应该没有重叠，具有一定的逻辑关系，选项应该能够引导学生思考，并帮助他们找到正确答案。
+    - 答案应随机分布，不要集中在某个选项。
+    - 解释应该详细，说明答案是正确的理由。
+    - 输出内容包括：\"question\"、\"options、\"answer\"、\"explanation\"。
+    - 以json格式输出。
+    {QUESTION_OPTIONS_AND_INSTRUCTIONS}
+    """,
+        **parameters,
+    )
+    return json.loads(response.text.replace("```json", "").replace("```", ""))
 
 
 def remove_empty_lines(text):
