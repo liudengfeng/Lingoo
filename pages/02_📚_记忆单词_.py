@@ -74,7 +74,7 @@ st.set_page_config(
 
 
 def on_word_lib_changed():
-    word_lib_name = st.session_state["word_lib_key"]
+    word_lib_name = st.session_state["selected_list"]
     st.session_state.current_word_lib = st.session_state.word_lists[word_lib_name]
 
 
@@ -149,14 +149,14 @@ voice_style = voice_style_options[style][0]
 st.sidebar.info(f"语音风格：{voice_style[0]}({voice_style[1]})")
 
 # 在侧边栏添加一个选项卡让用户选择一个单词列表
-selected_list = st.sidebar.selectbox(
+st.sidebar.selectbox(
     "请选择单词列表",
     sorted(list(st.session_state.word_lists.keys())),
-    key="word_lib_key",
+    key="selected_list",
     on_change=on_word_lib_changed,
     format_func=lambda x: x.split("-", maxsplit=1)[1],
 )
-st.write("word_lib_key", st.session_state["word_lib_key"])
+
 
 # 在侧边栏添加一个滑块让用户选择记忆的单词数量
 
@@ -414,7 +414,7 @@ if "puzzle_test_score" not in st.session_state:
 
 def gen_words_to_puzzle():
     # 获取选中的单词列表
-    words = st.session_state.word_lists[selected_list]
+    words = st.session_state.word_lists[st.session_state["selected_list"]]
     num_words = st.session_state["num_words_key"]
     n = min(num_words, len(words))
     # 随机选择单词
@@ -772,7 +772,7 @@ del_my_word_lib_column_config = {
 
 
 def gen_word_lib():
-    words = st.session_state.word_lists[selected_list]
+    words = st.session_state.word_lists[st.session_state["selected_list"]]
     for word in words:
         if word not in st.session_state.words:
             st.session_state.words[word] = get_word_info(word)
@@ -823,8 +823,8 @@ EDITABLE_COLS: list[str] = [
 with tabs[tab_items.index("📚 个人词库")]:
     lib_cols = st.columns(2)
     view_selected_list = ""
-    if selected_list is not None:
-        view_selected_list = selected_list.split("-", maxsplit=1)[1]
+    if st.session_state["selected_list"] is not None:
+        view_selected_list = st.session_state["selected_list"].split("-", maxsplit=1)[1]
     lib_cols[0].markdown(f"#### 基础词库({view_selected_list})")
     placeholder = lib_cols[0].empty()
     lib_cols[1].markdown("#### 个人词库")
