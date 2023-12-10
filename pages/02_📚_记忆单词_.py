@@ -36,6 +36,13 @@ DICT_DIR = CURRENT_CWD / "resource/dictionary"
 
 authenticate(st)
 
+
+if len(st.session_state.get("word_lists", {})) == 0:
+    with open(
+        DICT_DIR / "word_lists_by_edition_grade.json", "r", encoding="utf-8"
+    ) as f:
+        st.session_state["word_lists"] = json.load(f)
+
 # endregion
 
 # region 页设置
@@ -50,17 +57,10 @@ st.set_page_config(
 
 # region 事件及函数
 
-def on_prev_btn_click():
-    st.session_state["current_flashcard_word_index"] -= 1
 
-
-def on_next_btn_click():
-    st.session_state["current_flashcard_word_index"] += 1
-
-
-def on_word_lib_changed(word_lists):
+def on_word_lib_changed():
     word_lib_name = st.session_state["word_lib_key"]
-    st.session_state.current_word_lib = word_lists[word_lib_name]
+    st.session_state.current_word_lib = st.session_state.word_lists[word_lib_name]
 
 
 def gen_words_to_memorize():
@@ -109,8 +109,6 @@ def get_word_info(word):
 
 # region 侧边栏
 
-with open(DICT_DIR / "word_lists_by_edition_grade.json", "r", encoding="utf-8") as f:
-    word_lists = json.load(f)
 
 # 从集合中提取个人词库，添加到word_lists中
 if st.session_state["user_info"] is not None:
@@ -118,7 +116,7 @@ if st.session_state["user_info"] is not None:
         st.session_state["user_info"]
     )
     if len(personal_word_list) > 0:
-        word_lists["0-个人词库"] = personal_word_list
+        st.session_state.word_lists["0-个人词库"] = personal_word_list
 
 with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
     voice_style_options = json.load(f)
@@ -138,16 +136,15 @@ st.sidebar.info(f"语音风格：{voice_style[0]}({voice_style[1]})")
 # 在侧边栏添加一个选项卡让用户选择一个单词列表
 selected_list = st.sidebar.selectbox(
     "请选择单词列表",
-    sorted(list(word_lists.keys())),
+    sorted(list(st.session_state.word_lists.keys())),
     key="word_lib_key",
     on_change=on_word_lib_changed,
-    args=(word_lists,),
     format_func=lambda x: x.split("-", maxsplit=1)[1],
 )
 
 # 初始化当前词库
 if len(st.session_state.current_word_lib) == 0:
-    on_word_lib_changed(word_lists)
+    on_word_lib_changed(st.session_state.word_lists)
 
 # 在侧边栏添加一个滑块让用户选择记忆的单词数量
 st.sidebar.slider(
@@ -188,8 +185,15 @@ if "current_flashcard_word_index" not in st.session_state:
     st.session_state["current_flashcard_word_index"] = -1
 
 
-if len(st.session_state.words_to_memorize) == 0:
-    gen_words_to_memorize()
+def on_prev_btn_click():
+    st.session_state["current_flashcard_word_index"] -= 1
+
+
+def on_next_btn_click():
+    st.session_state["current_flashcard_word_index"] += 1
+
+
+
 
 template = """
 ##### 单词或短语：:rainbow[{word}]
@@ -266,6 +270,12 @@ def _memory_tip(word):
 
 
 def view_flash_word(container, tip_placeholder):
+    if st.session_state.current_flashcard_word_index == -1:
+        return
+    
+    if len(st.session_state.words_to_memorize) == 0:
+        gen_words_to_memorize()
+    
     word = st.session_state.words_to_memorize[
         st.session_state.current_flashcard_word_index
     ]
@@ -311,7 +321,6 @@ def view_flash_word(container, tip_placeholder):
 
 with tabs[tab_items.index("📖 记忆闪卡")]:
     btn_cols = st.columns(9)
-    # word = st.session_state.words_to_memorize[st.session_state.current_flashcard_word_index]
     tip_placeholder = st.empty()
     container = st.container()
 
@@ -382,7 +391,6 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         )
         st.toast(f"已从个人词库中删除单词：{word}。")
 
-    # st.write("单词：", st.session_state.words_to_memorize)
     view_flash_word(container, tip_placeholder)
 
 # endregion
@@ -410,7 +418,7 @@ if "puzzle_test_score" not in st.session_state:
 
 def gen_words_to_puzzle():
     # 获取选中的单词列表
-    words = word_lists[selected_list]
+    words = st.session_state.word_lists[selected_list]
     num_words = st.session_state["num_words_key"]
     n = min(num_words, len(words))
     # 随机选择单词
@@ -768,7 +776,7 @@ del_my_word_lib_column_config = {
 
 
 def gen_word_lib():
-    words = word_lists[selected_list]
+    words = st.session_state.word_lists[selected_list]
     for word in words:
         if word not in st.session_state.words:
             st.session_state.words[word] = get_word_info(word)
