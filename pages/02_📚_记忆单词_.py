@@ -12,13 +12,9 @@ from PIL import Image
 
 from mypylib.azure_speech import synthesize_speech_to_file
 from mypylib.db_interface import DbInterface
-from mypylib.google_api import (
-    generate_word_memory_tip,
-    generate_word_test,
-    get_translation_client,
-    google_translate,
-)
-from mypylib.streamlit_helper import authenticate
+from mypylib.google_api import (generate_word_memory_tip, generate_word_test,
+                                get_translation_client, google_translate)
+from mypylib.streamlit_helper import authenticate, check_and_force_logout
 from mypylib.word_utils import audio_autoplay_elem, hash_word
 
 # 创建或获取logger对象
@@ -148,14 +144,13 @@ if st.session_state["user_info"] is not None:
 with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
     voice_style_options = json.load(f)
 
+sidebar_status = st.sidebar.empty()
+# 在页面加载时检查是否有需要强制退出的登录会话
+check_and_force_logout(st, sidebar_status)
 
 # 让用户选择语音风格
 pronunciation = st.sidebar.radio("请选择发音标准", ("美式", "英式"))
 style = "en-US" if pronunciation == "美式" else "en-GB"
-
-# voice_style = st.sidebar.selectbox(
-#     "请选择发音风格", voice_style_options[style], format_func=lambda x: f"{x[0]}({x[1]})"
-# )
 
 # 固定语音风格
 voice_style = voice_style_options[style][0]
