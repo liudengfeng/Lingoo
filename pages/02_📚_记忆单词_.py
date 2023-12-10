@@ -724,7 +724,6 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
     st.progress(
         (st.session_state.pic_idx + 1) / pic_num,
         text=progress_text,
-        key="pic_progress",
     )
     pic_test_cols = st.columns(6)
 
