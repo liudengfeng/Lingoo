@@ -115,7 +115,7 @@ def reset_session():
     st.session_state["dialogue_idx"] = -1
     st.session_state["dialogue_tgt"] = {}
     st.session_state["audio_fp"] = {}
-    files = dialogue_dir.glob(f"{st.session_state.user_info["user_id"]}-*.mp3")
+    files = dialogue_dir.glob(f"{st.session_state.user_info['user_id']}-*.mp3")
     for f in files:
         # print(f)
         os.remove(f)

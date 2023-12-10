@@ -150,7 +150,7 @@ if len(st.session_state["user_info"]) >= 1:
             remaining_time - remaining_days * 24 * 60 * 60 - remaining_hours * 3600
         ) // 60
         sidebar_status.info(
-            f"到期：剩余{remaining_days:.0f}天{remaining_hours:.0f}小时{remaining_minutes:.0f}分钟"
+            f"剩余{remaining_days:.0f}天{remaining_hours:.0f}小时{remaining_minutes:.0f}分钟到期"
         )
 
 if len(st.session_state["user_info"]) == 0:
