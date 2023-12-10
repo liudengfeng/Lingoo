@@ -21,10 +21,10 @@ authenticate(st)
 # endregion
 
 # region 常量
-current_cwd: Path = Path(__file__).parent.parent
-voices_fp = current_cwd / "resource" / "voices.json"
+CURRENT_CWD: Path = Path(__file__).parent.parent
+VOICES_FP = CURRENT_CWD / "resource" / "voices.json"
 
-audio_dir = current_cwd / "resource" / "audio_data"
+audio_dir = CURRENT_CWD / "resource" / "audio_data"
 dialogue_dir = audio_dir / "dialogue"
 if not os.path.exists(dialogue_dir):
     os.makedirs(dialogue_dir, exist_ok=True)
@@ -128,7 +128,7 @@ def on_voice_changed():
 # endregion
 
 # region 边栏
-with open(voices_fp, "r", encoding="utf-8") as f:
+with open(VOICES_FP, "r", encoding="utf-8") as f:
     voices = json.load(f)["en-US"]
 
 m_voices = [v for v in voices if v[1] == "Male"]

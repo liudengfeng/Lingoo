@@ -50,9 +50,9 @@ else:
 
 # region 路径
 
-current_cwd: Path = Path(__file__).parent.parent
-voices_fp = current_cwd / "resource" / "voices.json"
-audio_dir = current_cwd / "resource" / "audio_data"
+CURRENT_CWD: Path = Path(__file__).parent.parent
+VOICES_FP = CURRENT_CWD / "resource" / "voices.json"
+audio_dir = CURRENT_CWD / "resource" / "audio_data"
 
 if not os.path.exists(audio_dir):
     os.makedirs(audio_dir, exist_ok=True)
@@ -369,7 +369,7 @@ st.set_page_config(
 
 language = "en-US"
 
-with open(voices_fp, "r", encoding="utf-8") as f:
+with open(VOICES_FP, "r", encoding="utf-8") as f:
     names = json.load(f)[language]
 voice_style: Any = st.sidebar.selectbox(
     "合成语音风格", names, format_func=lambda x: f"{x[2]}【{x[1]}】"
@@ -554,12 +554,12 @@ with st.expander("🔊 操作提示..."):
     )
     st.markdown("如何进行口语评估👇")
     record_tip = (
-        current_cwd / "resource" / "audio_tip" / "cn-speaking assessment-tip1.wav"
+        CURRENT_CWD / "resource" / "audio_tip" / "cn-speaking assessment-tip1.wav"
     )
     st.audio(str(record_tip), format="audio/wav")
 
     st.markdown("如何让智能机器人生成样例并收听样例音频👇")
-    lst_tip = current_cwd / "resource" / "audio_tip" / "cn-speaking assessment-tip2.wav"
+    lst_tip = CURRENT_CWD / "resource" / "audio_tip" / "cn-speaking assessment-tip2.wav"
     st.audio(str(lst_tip), format="audio/wav")
 
 # endregion

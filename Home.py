@@ -16,10 +16,10 @@ from mypylib.db_model import PaymentStatus, LoginEvent
 from mypylib.streamlit_helper import check_and_force_logout
 
 
-current_cwd: Path = Path(__file__).parent
-logo_dir: Path = current_cwd / "resource/logo"
+CURRENT_CWD: Path = Path(__file__).parent
+LOGO_DIR: Path = CURRENT_CWD / "resource/logo"
 
-voices_fp = current_cwd / "resource/voices.json"
+VOICES_FP = CURRENT_CWD / "resource/voices.json"
 
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface()
@@ -36,13 +36,13 @@ st.set_page_config(
 
 need_update = False
 # 如果文件不存在，或者文件的最后修改时间距离当前时间超过120天
-if not os.path.exists(voices_fp):
+if not os.path.exists(VOICES_FP):
     need_update = True
 else:
     # 获取当前时间
     now = time.time()
     # 获取文件的最后修改时间
-    mtime = os.path.getmtime(voices_fp)
+    mtime = os.path.getmtime(VOICES_FP)
     if now - mtime >= 120 * 24 * 60 * 60:
         need_update = True
 
@@ -56,7 +56,7 @@ if need_update:
                 st.secrets["Microsoft"]["SPEECH_REGION"],
             )
         # 将数据存储为 JSON 格式
-        with open(voices_fp, "w", encoding="utf-8") as f:
+        with open(VOICES_FP, "w", encoding="utf-8") as f:
             json.dump(res, f, ensure_ascii=False)
 
 
@@ -225,13 +225,13 @@ with col1:
     )
 
 
-logo_image = Image.open(logo_dir / "logo.png")
+logo_image = Image.open(LOGO_DIR / "logo.png")
 with col2:
     st.image(logo_image, width=320)
 st.divider()
 
 log_cols = st.columns(5)
-welcome_image = Image.open(logo_dir / "welcome-1.jpg")
+welcome_image = Image.open(LOGO_DIR / "welcome-1.jpg")
 
 with log_cols[1]:
     st.markdown(

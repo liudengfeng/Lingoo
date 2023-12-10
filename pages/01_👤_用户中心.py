@@ -18,9 +18,9 @@ from mypylib.constants import FAKE_EMAIL_DOMAIN, PROVINCES
 from mypylib.db_interface import DbInterface
 from mypylib.db_model import User
 
-current_cwd: Path = Path(__file__).parent.parent
-wxskm_dir = current_cwd / "resource" / "wxskm"
-feedback_dir = current_cwd / "resource" / "feedback"
+CURRENT_CWD: Path = Path(__file__).parent.parent
+wxskm_dir = CURRENT_CWD / "resource" / "wxskm"
+feedback_dir = CURRENT_CWD / "resource" / "feedback"
 
 # 创建 Fernet 实例【必须将key转换为bytes类型】
 fernet = Fernet(st.secrets["FERNET_KEY"].encode())

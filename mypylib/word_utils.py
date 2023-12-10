@@ -8,7 +8,7 @@ from pathlib import Path
 
 from gtts import gTTS
 
-current_cwd: Path = Path(__file__).parent.parent
+CURRENT_CWD: Path = Path(__file__).parent.parent
 
 
 def hash_word(word: str):
@@ -63,7 +63,7 @@ def audio_autoplay_elem(fp: str, controls: bool = False, fmt="mp3"):
 
 
 # def audio_autoplay_elem(fp: str, controls: bool = False, fmt="mp3"):
-#     relative_path = os.path.relpath(fp, current_cwd)
+#     relative_path = os.path.relpath(fp, CURRENT_CWD)
 #     # 如果当前操作系统是 Windows，将反斜杠替换为正斜杠
 #     if os.name == "nt":
 #         relative_path = relative_path.replace("\\", "/")
@@ -115,7 +115,7 @@ def get_lowest_cefr_level(word):
     Returns:
     str or None: The lowest CEFR level of the word, or None if the word is not found in the CEFR dictionary.
     """
-    fp = os.path.join(current_cwd, "resource", "dictionary", "cefr.json")
+    fp = os.path.join(CURRENT_CWD, "resource", "dictionary", "cefr.json")
     levels = ["A1", "A2", "B1", "B2", "C1"]
     with open(fp, "r") as f:
         cefr = json.load(f)
@@ -138,7 +138,7 @@ def sample_words(level, n):
     """
     levels = ["A1", "A2", "B1", "B2", "C1"]
     assert level in levels, f"level must be one of {levels}"
-    fp = os.path.join(current_cwd, "resource", "dictionary", "cefr.json")
+    fp = os.path.join(CURRENT_CWD, "resource", "dictionary", "cefr.json")
     with open(fp, "r") as f:
         cefr = json.load(f)
     return random.sample(cefr[level], n)

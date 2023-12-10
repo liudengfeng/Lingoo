@@ -21,7 +21,7 @@ from mypylib.word_utils import get_lowest_cefr_level
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
 
-current_cwd: Path = Path(__file__).parent.parent
+CURRENT_CWD: Path = Path(__file__).parent.parent
 
 if "user_info" not in st.session_state:
     st.session_state["user_info"] = {}
@@ -690,7 +690,7 @@ with tabs[items.index("处理反馈")]:
 
 def get_words():
     words = []
-    fp = current_cwd / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
+    fp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
     with open(fp, "r", encoding="utf-8") as f:
         data = json.load(f)
     for d in data.values():
@@ -736,7 +736,7 @@ def translate_doc(doc, target_language_code):
 def init_word_db():
     added = ()
     target_language_code = "zh-CN"
-    fp = current_cwd / "resource" / "cambridge.json"
+    fp = CURRENT_CWD / "resource" / "cambridge.json"
     with open(fp, "r", encoding="utf-8") as f:
         cambridge_dict = json.load(f)
 

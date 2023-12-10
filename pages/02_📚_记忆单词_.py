@@ -27,8 +27,8 @@ logger = logging.getLogger("streamlit")
 # region 常量
 # streamlit中各页都是相对当前根目录
 
-current_cwd: Path = Path(__file__).parent.parent
-DICT_DIR = current_cwd / "resource/dictionary"
+CURRENT_CWD: Path = Path(__file__).parent.parent
+DICT_DIR = CURRENT_CWD / "resource/dictionary"
 
 # endregion
 
@@ -106,7 +106,7 @@ def gen_audio_fp(word: str, style: str):
     hash_value = hash_word(word)
 
     # 生成单词的语音文件名
-    audio_dir = os.path.join(current_cwd, f"resource/word_voices/{style}")
+    audio_dir = os.path.join(CURRENT_CWD, f"resource/word_voices/{style}")
     if not os.path.exists(audio_dir):
         os.makedirs(audio_dir)
 
@@ -145,7 +145,7 @@ if st.session_state["user_info"] is not None:
     if len(personal_word_list) > 0:
         word_lists["0-个人词库"] = personal_word_list
 
-with open(current_cwd / "resource/voices.json", "r", encoding="utf-8") as f:
+with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
     voice_style_options = json.load(f)
 
 
@@ -580,12 +580,12 @@ def on_next_pic_btn_click():
     st.session_state["pic_idx"] += 1
 
 
-pic_dir = current_cwd / "resource/quiz/images"
+pic_dir = CURRENT_CWD / "resource/quiz/images"
 pic_categories = sorted([d.name for d in pic_dir.iterdir() if d.is_dir()])
 
 
 def gen_pic_qa(category, num):
-    pic_qa_path = current_cwd / "resource/quiz/quiz_image_qa.json"
+    pic_qa_path = CURRENT_CWD / "resource/quiz/quiz_image_qa.json"
     pic_qa = {}
     with open(pic_qa_path, "r", encoding="utf-8") as f:
         pic_qa = json.load(f)
