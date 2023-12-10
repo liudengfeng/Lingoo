@@ -5,7 +5,7 @@ import random
 from pathlib import Path
 from typing import List, Tuple
 
-import google.generativeai as palm
+# import google.generativeai as palm
 import streamlit as st
 
 from mypylib.azure_speech import synthesize_speech_to_file
@@ -13,7 +13,7 @@ from mypylib.azure_translator import translate
 from mypylib.constants import NAMES, TOPICS, CEFR_LEVEL_MAPS
 from mypylib.google_palm import generate_text
 
-palm.configure(api_key=st.secrets["Google"]["PALM_API_KEY"])
+# palm.configure(api_key=st.secrets["Google"]["PALM_API_KEY"])
 
 # region 常量
 current_cwd: Path = Path(__file__).parent.parent

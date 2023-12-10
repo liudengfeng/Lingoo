@@ -166,3 +166,29 @@ def generate_short_discussion(topic, level):
         **parameters,
     )
     return response.text
+
+
+def remove_empty_lines(text):
+    lines = text.split("\n")
+    non_empty_lines = [line for line in lines if line.strip() != ""]
+    text_without_empty_lines = "\n".join(non_empty_lines)
+    return text_without_empty_lines
+
+
+def generate_dialogue(style, scene, topic, level):
+    parameters = {
+        "candidate_count": 1,
+        "max_output_tokens": 1024,
+        "temperature": 0.8,
+        "top_p": 0.8,
+        "top_k": 40,
+    }
+    model = TextGenerationModel.from_pretrained("text-bison")
+    prompt = f"""请生成一段英语对话材料，用于模拟{style}英语听力考试。对话场景是{scene}，主题是{topic}。\
+    要求：\
+    1. 难度适应于英语能力水平为CEFR {level}的学生。\
+    2. 对话应使用口语化的词汇、句子、语法结构和表达方式。\
+    3. 二人对话形式，每人至少三句话。\
+    4. 使用英语输出。"""
+    response = model.predict(prompt, **parameters)
+    return remove_empty_lines(response.text)
