@@ -146,6 +146,8 @@ class DbInterface:
     # endregion
 
     def is_service_active(self, user_info: dict):
+        if len(user_info) == 0:
+            return False
         # 查询用户
         user = self.users.find_one({"_id": user_info["user_id"]})
         # 如果用户是管理员，直接返回True

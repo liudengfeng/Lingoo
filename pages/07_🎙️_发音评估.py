@@ -21,21 +21,13 @@ from mypylib.azure_translator import language_detect
 from mypylib.constants import LAN_MAPS, LANGUAGES
 from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
-from mypylib.streamlit_helper import check_and_force_logout
+from mypylib.streamlit_helper import authenticate, check_and_force_logout
 from mypylib.word_utils import audio_autoplay_elem
 
 
 # region 认证及初始化
 
-if "user_info" not in st.session_state:
-    st.session_state["user_info"] = {}
-
-if "dbi" not in st.session_state:
-    st.session_state["dbi"] = DbInterface()
-
-if not st.session_state.dbi.is_service_active(st.session_state["user_info"]):
-    st.error("非付费用户，无法使用此功能。")
-    st.stop()
+authenticate(st)
 
 # endregion
 
@@ -49,8 +41,12 @@ if not os.path.exists(audio_dir):
     os.makedirs(audio_dir, exist_ok=True)
 
 # 使用临时文件
-replay_fp = os.path.join(audio_dir, f"{st.session_state.user_info['user_id']}-tab1-replay.wav")
-listen_fp = os.path.join(audio_dir, f"{st.session_state.user_info['user_id']}-tab1-listen.wav")
+replay_fp = os.path.join(
+    audio_dir, f"{st.session_state.user_info['user_id']}-tab1-replay.wav"
+)
+listen_fp = os.path.join(
+    audio_dir, f"{st.session_state.user_info['user_id']}-tab1-listen.wav"
+)
 
 
 # region templates

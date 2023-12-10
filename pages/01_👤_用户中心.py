@@ -441,9 +441,7 @@ with tabs[items.index("🍱 选择套餐")]:
 
 with tabs[items.index("🔄 更新信息")]:
     st.subheader("🔄 更新个人信息")
-    if len(
-        st.session_state.user_info
-    ) == 0 or not st.session_state.dbi.is_service_active(st.session_state.user_info):
+    if not st.session_state.dbi.is_service_active(st.session_state.user_info):
         st.error("您的账号未登录，或者尚未缴费、激活，无法更新个人信息。")
         st.stop()
     CEFR = ["A1", "A2", "B1", "B2", "C1", "C2"]

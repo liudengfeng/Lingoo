@@ -24,29 +24,12 @@ from mypylib.google_api import (
 )
 from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
-from mypylib.streamlit_helper import check_and_force_logout
+from mypylib.streamlit_helper import authenticate, check_and_force_logout
 from mypylib.word_utils import audio_autoplay_elem
 
 # region 认证及初始化
 
-if "user_info" not in st.session_state:
-    st.session_state["user_info"] = {}
-
-if "dbi" not in st.session_state:
-    st.session_state["dbi"] = DbInterface()
-
-
-if st.secrets["env"] in ["streamlit", "azure"]:
-    if "inited_vertex" not in st.session_state:
-        init_vertex(st.secrets)
-        st.session_state["inited_vertex"] = True
-else:
-    st.error("非云端环境，无法使用 Vertex AI")
-    st.stop()
-
-if not st.session_state.dbi.is_service_active(st.session_state["user_info"]):
-    st.error("非付费用户，无法使用此功能。")
-    st.stop()
+authenticate(st)
 
 # endregion
 
