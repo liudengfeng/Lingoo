@@ -333,8 +333,7 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
     add_btn = btn_cols[5].button("➕", key="add", help="添加到个人词库")
     del_btn = btn_cols[6].button("➖", key="del", help="从个人词库中删除")
     update_flashcard_wordbank_button = btn_cols[7].button(
-        "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词
-    ")
+        "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词")
 
     placeholder = st.empty()
 
@@ -512,8 +511,7 @@ with tabs[tab_items.index("🧩 单词拼图")]:
     )
 
     update_puzzle_wordbank_button = puzzle_cols[3].button(
-        "🔄", key="refresh-puzzle", help="重新生成单词列表
-    ")
+        "🔄", key="refresh-puzzle", help="重新生成单词列表")
 
     if prev_puzzle_btn:
         prepare_puzzle()
