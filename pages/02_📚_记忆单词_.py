@@ -331,16 +331,12 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         on_click=on_prev_btn_click,
         disabled=st.session_state.current_flashcard_word_index <= 0,
     )
-    st.write(
-        "st.session_state.current_flashcard_word_index",
-        st.session_state.current_flashcard_word_index,
-    )
     next_btn = btn_cols[3].button(
         "↪️",
         key="next",
         help="点击按钮，切换到下一个单词。",
         on_click=on_next_btn_click,
-        disabled=st.session_state.current_flashcard_word_index
+        disabled=len(st.session_state.words_to_memorize) and st.session_state.current_flashcard_word_index
         == len(st.session_state.words_to_memorize) - 1,
     )
 
