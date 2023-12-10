@@ -612,8 +612,7 @@ def gen_pic_qa(category, num):
     for d in data:
         random.shuffle(d["options"])
     st.session_state["pic_tests"] = data
-    st.session_state.user_pic_answer = {}
-    st.session_state["pic_idx"] = -1
+
 
 
 def on_pic_radio_change(idx):
@@ -639,7 +638,6 @@ def view_pic_question(container):
     user_answer_idx = options.index(user_answer)
 
     cols = container.columns(3)
-    # my_bar = cols[0].progress(0, text=progress_text)
     container.divider()
     container.markdown(question)
     container.image(image, caption=tests[idx]["iamge_label"], width=400)  # type: ignore
@@ -722,26 +720,27 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
     pic_cols = st.columns(4)
     category = pic_cols[0].selectbox("请选择图片类别", pic_categories)
     pic_num = pic_cols[1].number_input("请选择图片测词考题数量", 1, 20, value=10, step=1)
-    my_bar = st.progress(
+    
+    st.progress(
         (st.session_state["pic_idx"] + 1) / st.session_state["num_words_key"],
         text=progress_text,
+        key="pic_progress",
     )
-    pic_qa_cols = st.columns(6)
-    pic_idx = st.session_state.get("pic_idx", 0)  # 获取当前问题的索引
+    pic_test_cols = st.columns(6)
 
     # 创建按钮
-    pic_qa_cols[1].button(
-        "↩️", help="点击按钮，切换到上一题。", on_click=on_prev_pic_btn_click, disabled=pic_idx <= 0
+    pic_test_cols[1].button(
+        "↩️", help="点击按钮，切换到上一题。", on_click=on_prev_pic_btn_click, disabled=st.session_state.pic_idx <= 0
     )
 
-    pic_qa_cols[2].button(
+    pic_test_cols[2].button(
         "↪️",
         help="点击按钮，切换到下一题。",
         on_click=on_next_pic_btn_click,
-        disabled=pic_idx == pic_num - 1,
+        disabled=st.session_state.pic_idx == pic_num - 1,
     )
     # 答题即可提交检查
-    sumbit_pic_btn = pic_qa_cols[3].button(
+    sumbit_pic_btn = pic_test_cols[3].button(
         "🔍",
         key="submit-pic",
         disabled=len(st.session_state.pic_tests) == 0
@@ -749,9 +748,11 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
         help="至少完成一道测试题后，才可点击按钮，显示测验得分。",
     )
 
-    if pic_qa_cols[4].button("🔄", key="refresh-pic", help="点击按钮，重新生成考题。"):
+    if pic_test_cols[4].button("🔄", key="refresh-pic", help="点击按钮，重新生成考题。"):
         gen_pic_qa(category, pic_num)
-
+        st.session_state.user_pic_answer = {}
+        st.session_state.pic_idx = -1
+    
     if len(st.session_state.pic_tests) == 0:
         gen_pic_qa(category, pic_num)
 
@@ -761,7 +762,8 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
             st.toast("您尚未完成测试。")
         check_pic_answer(pic_qa_container)
-    else:
+    
+    if st.session_state.current_tab == "图片测词":
         view_pic_question(pic_qa_container)
 
 
