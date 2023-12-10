@@ -722,7 +722,7 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
     pic_num = pic_cols[1].number_input("请选择图片测词考题数量", 1, 20, value=10, step=1)
     
     st.progress(
-        (st.session_state["pic_idx"] + 1) / st.session_state["num_words_key"],
+        (st.session_state.pic_idx + 1) / pic_num,
         text=progress_text,
         key="pic_progress",
     )
