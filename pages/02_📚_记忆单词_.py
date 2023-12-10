@@ -49,8 +49,8 @@ if "current_word_lib" not in st.session_state:
 if "flashcard_words" not in st.session_state:
     st.session_state["flashcard_words"] = []
 
-if "words" not in st.session_state:
-    st.session_state["words"] = {}
+if "flashcard_word_info" not in st.session_state:
+    st.session_state["flashcard_word_info"] = {}
 
 if "display_state" not in st.session_state:
     st.session_state["display_state"] = "全部"
@@ -85,10 +85,6 @@ def generate_flashcard_words():
     n = min(num_words, len(words))
     # 随机选择单词
     st.session_state.flashcard_words = random.sample(words, n)
-    # st.write("单词:", st.session_state.flashcard_words)
-    # 恢复初始显示状态
-    # st.session_state.display_state = "全部"
-    # st.session_state["current_flashcard_word_index"] = -1
 
 
 def gen_audio_fp(word: str, style: str):
@@ -166,7 +162,7 @@ st.sidebar.slider(
     50,
     step=5,
     key="num_words_key",
-    # on_change=generate_flashcard_words
+    on_change=generate_flashcard_words,
 )
 
 # endregion
@@ -268,16 +264,13 @@ def view_flash_word(container, tip_placeholder):
     if st.session_state.current_flashcard_word_index == -1:
         return
 
-    if len(st.session_state.flashcard_words) == 0:
-        generate_flashcard_words()
-
     word = st.session_state.flashcard_words[
         st.session_state.current_flashcard_word_index
     ]
-    if word not in st.session_state.words:
-        st.session_state.words[word] = get_word_info(word)
+    if word not in st.session_state.flashcard_word_info:
+        st.session_state.flashcard_word_info[word] = get_word_info(word)
 
-    word_info = st.session_state.words.get(word, {})
+    word_info = st.session_state.flashcard_word_info.get(word, {})
     if word_info is None:
         st.error(f"没有该单词：“{word}”的信息。TODO：添加到单词库。")
         st.stop()
@@ -368,6 +361,9 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
 
     if refresh_btn:
         generate_flashcard_words()
+        # 恢复初始显示状态
+        st.session_state.display_state = "全部"
+        st.session_state["current_flashcard_word_index"] = -1
 
     if add_btn:
         word = st.session_state.flashcard_words[
@@ -386,6 +382,10 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
             st.session_state["user_info"], word
         )
         st.toast(f"已从个人词库中删除单词：{word}。")
+
+    # 初始化闪卡单词
+    if len(st.session_state.flashcard_words) == 0:
+        generate_flashcard_words()
 
     view_flash_word(container, tip_placeholder)
 
@@ -542,15 +542,15 @@ with tabs[tab_items.index("🧩 单词拼图")]:
 
     if sumbit_cols[1].button("检查", help="点击按钮，检查您的答案是否正确。"):
         word = st.session_state.words_to_puzzle[st.session_state.puzzle_idx]
-        if word not in st.session_state.words:
-            st.session_state.words[word] = get_word_info(word)
+        if word not in st.session_state.flashcard_word_info:
+            st.session_state.flashcard_word_info[word] = get_word_info(word)
 
         if user_input == word:
             st.balloons()
             st.session_state.puzzle_test_score[word] = True
         else:
             st.write(
-                f'对不起，您回答错误。正确的单词应该为：{word}，翻译：{st.session_state.words[word]["zh-CN"]["translation"]}'
+                f'对不起，您回答错误。正确的单词应该为：{word}，翻译：{st.session_state.flashcard_word_info[word]["zh-CN"]["translation"]}'
             )
             st.session_state.puzzle_test_score[word] = False
 
@@ -774,11 +774,11 @@ del_my_word_lib_column_config = {
 def gen_word_lib():
     words = st.session_state.word_lists[st.session_state["selected_list"]]
     for word in words:
-        if word not in st.session_state.words:
-            st.session_state.words[word] = get_word_info(word)
+        if word not in st.session_state.flashcard_word_info:
+            st.session_state.flashcard_word_info[word] = get_word_info(word)
     data = []
     for w in words:
-        info = st.session_state.words[w]
+        info = st.session_state.flashcard_word_info[w]
         data.append(
             {
                 "单词": w,
@@ -796,15 +796,17 @@ def gen_my_word_lib():
     )
     # st.write("个人词库：", my_words)
     for word in my_words:
-        if word not in st.session_state.words:
-            st.session_state.words[word] = get_word_info(word)
+        if word not in st.session_state.flashcard_word_info:
+            st.session_state.flashcard_word_info[word] = get_word_info(word)
     data = []
     for w in my_words:
         data.append(
             {
                 "单词": w,
-                "CEFR最低分级": st.session_state.words[w].get("level", ""),
-                "翻译": st.session_state.words[w]["zh-CN"].get("translation", ""),
+                "CEFR最低分级": st.session_state.flashcard_word_info[w].get("level", ""),
+                "翻译": st.session_state.flashcard_word_info[w]["zh-CN"].get(
+                    "translation", ""
+                ),
                 "删除": False,
             }
         )
