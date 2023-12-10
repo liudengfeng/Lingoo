@@ -389,8 +389,8 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
 if "puzzle_idx" not in st.session_state:
     st.session_state["puzzle_idx"] = -1
 
-if "words_to_puzzle" not in st.session_state:
-    st.session_state["words_to_puzzle"] = []
+if "puzzle_words" not in st.session_state:
+    st.session_state["puzzle_words"] = []
 
 if "puzzle_answer_value" not in st.session_state:
     st.session_state["puzzle_answer_value"] = ""
@@ -405,16 +405,13 @@ if "puzzle_test_score" not in st.session_state:
     st.session_state["puzzle_test_score"] = {}
 
 
-def gen_words_to_puzzle():
+def gen_puzzle_words():
     # 获取选中的单词列表
     words = st.session_state.word_dict[st.session_state["selected_list"]]
     num_words = st.session_state["num_words_key"]
     n = min(num_words, len(words))
     # 随机选择单词
-    st.session_state.words_to_puzzle = random.sample(words, n)
-    # 恢复初始显示状态
-    st.session_state.puzzle_idx = 0
-    st.session_state["puzzle_view_word"] = []
+    st.session_state.puzzle_words = random.sample(words, n)
 
 
 def get_word_definition(word):
@@ -428,8 +425,8 @@ def get_word_definition(word):
     return definition
 
 
-def init_puzzle():
-    word = st.session_state.words_to_puzzle[st.session_state.puzzle_idx]
+def prepare_puzzle():
+    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
     ws = [w for w in word]
     random.shuffle(ws)
     st.session_state.puzzle_view_word = ws
@@ -438,8 +435,11 @@ def init_puzzle():
 
 
 def view_puzzle_word():
+    if st.session_state.puzzle_idx == -1:
+        return
+
     if len(st.session_state.puzzle_view_word) == 0:
-        init_puzzle()
+        prepare_puzzle()
 
     ws = st.session_state["puzzle_view_word"]
     n = len(ws)
@@ -458,16 +458,16 @@ def view_puzzle_word():
             st.rerun()
 
 
-def view_definition(progress_word):
-    if len(st.session_state.puzzle_view_word) == 0:
-        gen_words_to_puzzle()
-    n = len(st.session_state.words_to_puzzle)
+def display_puzzle_hint(puzzle_progress):
+    if st.session_state.puzzle_idx == -1:
+        return
+    n = len(st.session_state.puzzle_words)
     progress = 1.0 * (st.session_state.puzzle_idx + 1) / n
     # st.write("进度：", progress, "idx", st.session_state.puzzle_idx)
-    progress_word.progress(progress, text="🧩 单词拼图进度")
-    word = st.session_state.words_to_puzzle[st.session_state.puzzle_idx]
+    puzzle_progress.progress(progress, text="🧩 单词拼图进度")
+    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
     definition = get_word_definition(word)
-    st.write("参考信息：")
+    st.write("提示信息：")
     st.markdown(definition)
 
 
@@ -485,40 +485,44 @@ def on_next_puzzle_btn_click():
 
 with tabs[tab_items.index("🧩 单词拼图")]:
     st.markdown(
-        "单词拼图是一种记忆单词的游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
+        "单词拼图是一种记忆单词的游戏。阅读定义，拼出这个词。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
-    p_progress_text = "进度"
-    n = st.session_state["num_words_key"]
-    progress_word = st.empty()
-    p_btns = st.columns(4)
-    prev_p_btn = p_btns[1].button(
+    puzzle_progress = st.empty()
+    puzzle_cols = st.columns(4)
+    prev_puzzle_btn = puzzle_cols[1].button(
         "↩️",
         key="prev-puzzle",
         help="点击按钮，切换到上一单词拼图。",
         on_click=on_prev_puzzle_btn_click,
         disabled=st.session_state.puzzle_idx <= 0,
     )
-    next_test_btn = p_btns[2].button(
+    next_puzzle_btn = puzzle_cols[2].button(
         "↪️",
         key="next-puzzle",
         help="点击按钮，切换到下一单词拼图。",
         on_click=on_next_puzzle_btn_click,
-        disabled=st.session_state.puzzle_idx == n - 1,
+        disabled=st.session_state.puzzle_idx == st.session_state["num_words_key"] - 1,
     )
 
-    update_puzzle_wordbank_button = p_btns[3].button(
+    update_puzzle_wordbank_button = puzzle_cols[3].button(
         "🔄", key="refresh-puzzle", help="重新生成单词列表")
 
-    if prev_p_btn:
-        init_puzzle()
+    if prev_puzzle_btn:
+        prepare_puzzle()
 
-    if next_test_btn:
-        init_puzzle()
+    if next_puzzle_btn:
+        prepare_puzzle()
 
     if update_puzzle_wordbank_button:
-        gen_words_to_puzzle()
+        gen_puzzle_words()
+        # 恢复初始显示状态
+        st.session_state.puzzle_idx = -1
+        st.session_state["puzzle_view_word"] = []
 
-    view_definition(progress_word)
+    if len(st.session_state.puzzle_view_word) == 0:
+        gen_puzzle_words()
+
+    display_puzzle_hint(puzzle_progress)
     view_puzzle_word()
 
     user_input = st.text_input(
@@ -530,12 +534,13 @@ with tabs[tab_items.index("🧩 单词拼图")]:
     )
     puzzle_score = st.empty()
     sumbit_cols = st.columns(6)
+    
     if sumbit_cols[0].button("重试", help="恢复初始状态，重新开始。"):
-        init_puzzle()
+        prepare_puzzle()
         st.rerun()
 
     if sumbit_cols[1].button("检查", help="点击按钮，检查您的答案是否正确。"):
-        word = st.session_state.words_to_puzzle[st.session_state.puzzle_idx]
+        word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
         if word not in st.session_state.flashcard_word_info:
             st.session_state.flashcard_word_info[word] = get_word_info(word)
 
@@ -548,10 +553,14 @@ with tabs[tab_items.index("🧩 单词拼图")]:
             )
             st.session_state.puzzle_test_score[word] = False
 
-        if st.session_state.puzzle_idx == n - 1:
-            score = sum(st.session_state.puzzle_test_score.values()) / n * 100
-            msg = f":red[您的得分：{score:.0f}%]"
-            puzzle_score.markdown(msg)
+        # if st.session_state.puzzle_idx == st.session_state["num_words_key"] - 1:
+        score = (
+            sum(st.session_state.puzzle_test_score.values())
+            / st.session_state["num_words_key"]
+            * 100
+        )
+        msg = f":red[您的得分：{score:.0f}%]"
+        puzzle_score.markdown(msg)
 
 
 # endregion
@@ -702,7 +711,10 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
     pic_cols = st.columns(4)
     category = pic_cols[0].selectbox("请选择图片类别", pic_categories)
     pic_num = pic_cols[1].number_input("请选择图片测词考题数量", 1, 20, value=10, step=1)
-    my_bar = st.progress((st.session_state["pic_idx"] + 1) / n, text=progress_text)
+    my_bar = st.progress(
+        (st.session_state["pic_idx"] + 1) / st.session_state["num_words_key"],
+        text=progress_text,
+    )
     pic_qa_cols = st.columns(6)
     pic_idx = st.session_state.get("pic_idx", 0)  # 获取当前问题的索引
 
