@@ -621,6 +621,8 @@ def on_pic_radio_change(idx):
 
 
 def view_pic_question(container):
+    if st.session_state.pic_idx == -1:
+        return
     # progress_text = "答题进度"
     tests = st.session_state.pic_tests
     n = len(tests)
