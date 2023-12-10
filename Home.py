@@ -72,10 +72,10 @@ logout_btn = s_cols[1].button("退出", help="在公共场所使用本产品时�
 current_datetime = datetime.now(timezone.utc)
 extend_time_btn_disabled = False
 
-status = st.sidebar.empty()
+sidebar_status = st.sidebar.empty()
 
 # 在页面加载时检查是否有需要强制退出的登录会话
-check_and_force_logout(st, status)
+check_and_force_logout(st, sidebar_status)
 
 if len(st.session_state["user_info"]) >= 1:
     # 获取用户的数据
@@ -149,7 +149,7 @@ if len(st.session_state["user_info"]) >= 1:
         remaining_minutes = (
             remaining_time - remaining_days * 24 * 60 * 60 - remaining_hours * 3600
         ) // 60
-        status.info(
+        sidebar_status.info(
             f"到期：剩余{remaining_days:.0f}天{remaining_hours:.0f}小时{remaining_minutes:.0f}分钟"
         )
 
@@ -157,7 +157,7 @@ if len(st.session_state["user_info"]) == 0:
     if st.session_state.user_info and st.session_state.dbi.cache.get(
         st.session_state.user_info["phone_number"]
     ):
-        status.success(f"您已登录，{st.session_state.user_info['display_name']} 您好！")
+        sidebar_status.success(f"您已登录，{st.session_state.user_info['display_name']} 您好！")
     with st.sidebar.form(key="login_form", clear_on_submit=True):
         phone_number = st.text_input(
             "手机号码",
@@ -176,7 +176,7 @@ if len(st.session_state["user_info"]) == 0:
         sub_btn = st.form_submit_button(label="确认")
         if sub_btn:
             if not is_valid_phone_number(phone_number):
-                status.error(f"请输入有效的手机号码。您输入的号码是：{phone_number}")
+                sidebar_status.error(f"请输入有效的手机号码。您输入的号码是：{phone_number}")
                 st.stop()
             else:
                 info = st.session_state.dbi.login(
@@ -184,7 +184,7 @@ if len(st.session_state["user_info"]) == 0:
                 )
                 if info["status"] == "success":
                     display_name = info["display_name"]
-                    status.success(info["message"])
+                    sidebar_status.success(info["message"])
                     st.session_state["user_info"]["phone_number"] = phone_number
                     st.session_state["user_info"]["user_id"] = info["user_id"]
                     st.session_state["user_info"]["session_id"] = info["session_id"]
@@ -192,10 +192,10 @@ if len(st.session_state["user_info"]) == 0:
                     time.sleep(3)
                     st.rerun()
                 elif info["status"] == "warning":
-                    status.warning(info["message"])
+                    sidebar_status.warning(info["message"])
                     st.stop()
                 else:
-                    status.error(info["message"])
+                    sidebar_status.error(info["message"])
                     st.stop()
 
 
@@ -261,5 +261,5 @@ if len(st.session_state["user_info"]) >= 1:
     if logout_btn:
         st.session_state.dbi.logout(st.session_state.user_info)
         st.session_state["user_info"] = {}
-        status.success("已退出登录")
+        sidebar_status.success("已退出登录")
         st.rerun()

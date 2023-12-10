@@ -17,10 +17,11 @@ from mypylib.auth_utils import is_valid_email, is_valid_phone_number
 from mypylib.constants import FAKE_EMAIL_DOMAIN, PROVINCES
 from mypylib.db_interface import DbInterface
 from mypylib.db_model import User
+from mypylib.streamlit_helper import check_and_force_logout
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
-wxskm_dir = CURRENT_CWD / "resource" / "wxskm"
-feedback_dir = CURRENT_CWD / "resource" / "feedback"
+WXSKM_DIR = CURRENT_CWD / "resource" / "wxskm"
+FEEDBACK_DIR = CURRENT_CWD / "resource" / "feedback"
 
 # 创建 Fernet 实例【必须将key转换为bytes类型】
 fernet = Fernet(st.secrets["FERNET_KEY"].encode())
@@ -37,6 +38,14 @@ if "user_info" not in st.session_state:
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface()
 
+
+# region 侧边栏
+
+sidebar_status = st.sidebar.empty()
+# 在页面加载时检查是否有需要强制退出的登录会话
+check_and_force_logout(st, sidebar_status)
+
+# endregion
 
 emojis = ["👤", "🍱", "🔄", "🔑", "📊", "📝"]
 item_names = ["用户注册", "选择套餐", "更新信息", "重置密码", "统计报表", "问题反馈"]
@@ -423,7 +432,7 @@ with tabs[items.index("🍱 选择套餐")]:
         for feature in tier["description"]:
             col.write(f"➕ {feature}")
         # col.button(tier["img_name"])
-        image = Image.open(wxskm_dir / tier["img_name"])
+        image = Image.open(WXSKM_DIR / tier["img_name"])
         col.image(image, width=100)
 
 # endregion
@@ -452,9 +461,7 @@ with tabs[items.index("🔄 更新信息")]:
             value=user.phone_number,
             disabled=True,
         )
-        email = col2.text_input(
-            "邮箱", key="email-3", help="请输入有效邮箱地址", value=user.email
-        )
+        email = col2.text_input("邮箱", key="email-3", help="请输入有效邮箱地址", value=user.email)
         real_name = col1.text_input(
             "真实姓名",
             key="real_name-3",
@@ -504,8 +511,8 @@ with tabs[items.index("🔄 更新信息")]:
                         "f_province": fernet.encrypt(province.encode()),
                         "f_timezone": fernet.encrypt(tz.encode()),
                         "display_name": display_name,
-                        "current_level":current_level,
-                        "target_level":target_level,
+                        "current_level": current_level,
+                        "target_level": target_level,
                     },
                 )
                 status.success("更新成功")
@@ -530,7 +537,7 @@ with tabs[items.index("🔑 重置密码")]:
     ) == 0 or not st.session_state.dbi.is_service_active(st.session_state.user_info):
         st.error("您的账号尚未缴费、激活，无法重置密码。")
         st.stop()
-    
+
     user_doc = st.session_state.dbi.find_user(st.session_state.user_info["user_id"])
     user = User.from_doc(user_doc)
     with st.form(key="secret_form", clear_on_submit=True):
@@ -565,7 +572,7 @@ with tabs[items.index("🔑 重置密码")]:
 
 with tabs[items.index("📊 统计报表")]:
     st.subheader("📊 统计报表")
-    
+
     if not st.session_state.dbi.is_service_active(st.session_state.user_info):
         st.error("您尚未登录，无法查阅统计报表。")
         st.stop()
@@ -602,9 +609,7 @@ with tabs[items.index("📝 问题反馈")]:
                 # print("Container does not exist.")
 
             # 将标题和内容存储为文本文件
-            text_data = (
-                f"用户：{st.session_state.user_info['user_id']}\n标题: {title}\n内容: {content}"
-            )
+            text_data = f"用户：{st.session_state.user_info['user_id']}\n标题: {title}\n内容: {content}"
 
             blob_name = str(uuid.uuid4())
             text_blob_client = blob_service_client.get_blob_client(
@@ -631,7 +636,7 @@ with tabs[items.index("📝 问题反馈")]:
 1. 请从应用右上角打开应用菜单(浏览器地址栏下方，屏幕右上角)。
     """
         )
-        image_1 = Image.open(feedback_dir / "step-1.png")
+        image_1 = Image.open(FEEDBACK_DIR / "step-1.png")
         st.image(image_1, width=200)
 
         st.markdown(
@@ -639,7 +644,7 @@ with tabs[items.index("📝 问题反馈")]:
     3. 如果要通过麦克风录制音频，请选中"Also record audio"。
     """
         )
-        image_2 = Image.open(feedback_dir / "step-2.png")
+        image_2 = Image.open(FEEDBACK_DIR / "step-2.png")
         st.image(image_2, width=400)
 
         st.markdown(
@@ -647,14 +652,14 @@ with tabs[items.index("📝 问题反馈")]:
     5. 从列出的选项中选择要录制的选项卡、窗口或监视器。界面会因您的浏览器而异。
     """
         )
-        image_3 = Image.open(feedback_dir / "step-3.png")
+        image_3 = Image.open(FEEDBACK_DIR / "step-3.png")
         st.image(image_3, width=400)
 
         st.markdown(
             """6. 单击"共享"。
     """
         )
-        image_4 = Image.open(feedback_dir / "step-4.png")
+        image_4 = Image.open(FEEDBACK_DIR / "step-4.png")
         st.image(image_4, width=400)
 
         st.markdown(
@@ -662,7 +667,7 @@ with tabs[items.index("📝 问题反馈")]:
 7. 录制时，您将在应用程序的选项卡和应用程序菜单图标上看到一个红色圆圈。如果您想取消录制，请单击应用程序底部的“停止共享”。
     """
         )
-        image_5 = Image.open(feedback_dir / "step-5.png")
+        image_5 = Image.open(FEEDBACK_DIR / "step-5.png")
         st.image(image_5, width=400)
 
         st.markdown(
@@ -670,7 +675,7 @@ with tabs[items.index("📝 问题反馈")]:
 8. 完成录制后，按键盘上的“Esc”或单击应用程序菜单中的“停止录制”。
     """
         )
-        image_6 = Image.open(feedback_dir / "step-6.png")
+        image_6 = Image.open(FEEDBACK_DIR / "step-6.png")
         st.image(image_6, width=400)
 
         st.markdown(
