@@ -333,7 +333,8 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
     add_btn = btn_cols[5].button("➕", key="add", help="添加到个人词库")
     del_btn = btn_cols[6].button("➖", key="del", help="从个人词库中删除")
     update_flashcard_wordbank_button = btn_cols[7].button(
-        "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词")
+        "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词
+    ")
 
     placeholder = st.empty()
 
@@ -511,7 +512,8 @@ with tabs[tab_items.index("🧩 单词拼图")]:
     )
 
     update_puzzle_wordbank_button = puzzle_cols[3].button(
-        "🔄", key="refresh-puzzle", help="重新生成单词列表")
+        "🔄", key="refresh-puzzle", help="重新生成单词列表
+    ")
 
     if prev_puzzle_btn:
         prepare_puzzle()
@@ -612,7 +614,6 @@ def gen_pic_tests(category, num):
     for d in data:
         random.shuffle(d["options"])
     st.session_state["pic_tests"] = data
-
 
 
 def on_pic_radio_change(idx):
@@ -722,7 +723,7 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
     pic_cols = st.columns(4)
     category = pic_cols[0].selectbox("请选择图片类别", pic_categories)
     pic_num = pic_cols[1].number_input("请选择图片测词考题数量", 1, 20, value=10, step=1)
-    
+
     st.progress(
         (st.session_state.pic_idx + 1) / pic_num,
         text=progress_text,
@@ -731,7 +732,10 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
 
     # 创建按钮
     pic_test_cols[1].button(
-        "↩️", help="点击按钮，切换到上一题。", on_click=on_prev_pic_btn_click, disabled=st.session_state.pic_idx <= 0
+        "↩️",
+        help="点击按钮，切换到上一题。",
+        on_click=on_prev_pic_btn_click,
+        disabled=st.session_state.pic_idx <= 0,
     )
 
     pic_test_cols[2].button(
@@ -754,7 +758,7 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
         st.session_state.user_pic_answer = {}
         st.session_state.pic_idx = -1
         st.rerun()
-    
+
     if len(st.session_state.pic_tests) == 0:
         gen_pic_tests(category, pic_num)
 
@@ -764,9 +768,9 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
             st.toast("您尚未完成测试。")
         check_pic_answer(pic_test_container)
-    
-    if st.session_state.current_tab == "图片测词":
-        view_pic_question(pic_test_container)
+    else:
+        if st.session_state.current_tab == "图片测词":
+            view_pic_question(pic_test_container)
 
 
 # endregion
