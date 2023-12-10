@@ -600,7 +600,7 @@ pic_dir = CURRENT_CWD / "resource/quiz/images"
 pic_categories = sorted([d.name for d in pic_dir.iterdir() if d.is_dir()])
 
 
-def gen_pic_qa(category, num):
+def gen_pic_tests(category, num):
     pic_qa_path = CURRENT_CWD / "resource/quiz/quiz_image_qa.json"
     pic_qa = {}
     with open(pic_qa_path, "r", encoding="utf-8") as f:
@@ -749,23 +749,24 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
         help="至少完成一道测试题后，才可点击按钮，显示测验得分。",
     )
 
-    if pic_test_cols[4].button("🔄", key="refresh-pic", help="点击按钮，重新生成考题。"):
-        gen_pic_qa(category, pic_num)
+    if pic_test_cols[4].button("🔄", key="refresh-pic", help="点击按钮，重新生成图片测试题。"):
+        gen_pic_tests(category, pic_num)
         st.session_state.user_pic_answer = {}
         st.session_state.pic_idx = -1
+        st.rerun()
     
     if len(st.session_state.pic_tests) == 0:
-        gen_pic_qa(category, pic_num)
+        gen_pic_tests(category, pic_num)
 
-    pic_qa_container = st.container()
+    pic_test_container = st.container()
 
     if sumbit_pic_btn:
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
             st.toast("您尚未完成测试。")
-        check_pic_answer(pic_qa_container)
+        check_pic_answer(pic_test_container)
     
     if st.session_state.current_tab == "图片测词":
-        view_pic_question(pic_qa_container)
+        view_pic_question(pic_test_container)
 
 
 # endregion
