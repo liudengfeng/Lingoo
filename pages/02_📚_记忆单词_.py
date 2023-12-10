@@ -331,6 +331,10 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         on_click=on_prev_btn_click,
         disabled=st.session_state.current_flashcard_word_index <= 0,
     )
+    st.write(
+        "st.session_state.current_flashcard_word_index",
+        st.session_state.current_flashcard_word_index,
+    )
     next_btn = btn_cols[3].button(
         "↪️",
         key="next",
