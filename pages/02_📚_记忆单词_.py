@@ -525,43 +525,44 @@ with tabs[tab_items.index("🧩 单词拼图")]:
 
     display_puzzle_hint(puzzle_progress)
     view_puzzle_word()
-
-    user_input = st.text_input(
-        "点击字符按钮或输入您的答案",
-        placeholder="点击字符按钮或输入您的答案",
-        value=st.session_state.puzzle_answer_value,
-        key="puzzle_answer",
-        label_visibility="collapsed",
-    )
-    puzzle_score = st.empty()
-    sumbit_cols = st.columns(6)
-
-    if sumbit_cols[0].button("重试", help="恢复初始状态，重新开始。"):
-        prepare_puzzle()
-        st.rerun()
-
-    if sumbit_cols[1].button("检查", help="点击按钮，检查您的答案是否正确。"):
-        word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-        if word not in st.session_state.flashcard_word_info:
-            st.session_state.flashcard_word_info[word] = get_word_info(word)
-
-        if user_input == word:
-            st.balloons()
-            st.session_state.puzzle_test_score[word] = True
-        else:
-            st.write(
-                f'对不起，您回答错误。正确的单词应该为：{word}，翻译：{st.session_state.flashcard_word_info[word]["zh-CN"]["translation"]}'
-            )
-            st.session_state.puzzle_test_score[word] = False
-
-        # if st.session_state.puzzle_idx == st.session_state["num_words_key"] - 1:
-        score = (
-            sum(st.session_state.puzzle_test_score.values())
-            / st.session_state["num_words_key"]
-            * 100
+    
+    if st.session_state.puzzle_idx != -1:
+        user_input = st.text_input(
+            "点击字符按钮或输入您的答案",
+            placeholder="点击字符按钮或输入您的答案",
+            value=st.session_state.puzzle_answer_value,
+            key="puzzle_answer",
+            label_visibility="collapsed",
         )
-        msg = f":red[您的得分：{score:.0f}%]"
-        puzzle_score.markdown(msg)
+        puzzle_score = st.empty()
+        sumbit_cols = st.columns(6)
+
+        if sumbit_cols[0].button("重试", help="恢复初始状态，重新开始。"):
+            prepare_puzzle()
+            st.rerun()
+
+        if sumbit_cols[1].button("检查", help="点击按钮，检查您的答案是否正确。"):
+            word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+            if word not in st.session_state.flashcard_word_info:
+                st.session_state.flashcard_word_info[word] = get_word_info(word)
+
+            if user_input == word:
+                st.balloons()
+                st.session_state.puzzle_test_score[word] = True
+            else:
+                st.write(
+                    f'对不起，您回答错误。正确的单词应该为：{word}，翻译：{st.session_state.flashcard_word_info[word]["zh-CN"]["translation"]}'
+                )
+                st.session_state.puzzle_test_score[word] = False
+
+            # if st.session_state.puzzle_idx == st.session_state["num_words_key"] - 1:
+            score = (
+                sum(st.session_state.puzzle_test_score.values())
+                / st.session_state["num_words_key"]
+                * 100
+            )
+            msg = f":red[您的得分：{score:.0f}%]"
+            puzzle_score.markdown(msg)
 
 
 # endregion
