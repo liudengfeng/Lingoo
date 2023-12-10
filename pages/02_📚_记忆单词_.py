@@ -37,14 +37,11 @@ DICT_DIR = CURRENT_CWD / "resource/dictionary"
 authenticate(st)
 
 
-if len(st.session_state.get("word_lists", {})) == 0:
+if len(st.session_state.get("word_dict", {})) == 0:
     with open(
         DICT_DIR / "word_lists_by_edition_grade.json", "r", encoding="utf-8"
     ) as f:
-        st.session_state["word_lists"] = json.load(f)
-
-if "current_word_lib" not in st.session_state:
-    st.session_state["current_word_lib"] = []
+        st.session_state["word_dict"] = json.load(f)
 
 if "flashcard_words" not in st.session_state:
     st.session_state["flashcard_words"] = []
@@ -52,8 +49,8 @@ if "flashcard_words" not in st.session_state:
 if "flashcard_word_info" not in st.session_state:
     st.session_state["flashcard_word_info"] = {}
 
-if "display_state" not in st.session_state:
-    st.session_state["display_state"] = "全部"
+if "flashcard_display_state" not in st.session_state:
+    st.session_state["flashcard_display_state"] = "全部"
 
 # 初始化单词的索引
 if "current_flashcard_word_index" not in st.session_state:
@@ -73,14 +70,10 @@ st.set_page_config(
 # region 事件及函数
 
 
-def on_word_lib_changed():
-    word_lib_name = st.session_state["selected_list"]
-    st.session_state.current_word_lib = st.session_state.word_lists[word_lib_name]
-
-
 def generate_flashcard_words():
     # 获取选中的单词列表
-    words = st.session_state.current_word_lib
+    word_lib_name = st.session_state["selected_list"]
+    words = st.session_state.word_dict[word_lib_name]
     num_words = st.session_state["num_words_key"]
     n = min(num_words, len(words))
     # 随机选择单词
@@ -127,7 +120,7 @@ if st.session_state["user_info"] is not None:
         st.session_state["user_info"]
     )
     if len(personal_word_list) > 0:
-        st.session_state.word_lists["0-个人词库"] = personal_word_list
+        st.session_state.word_dict["0-个人词库"] = personal_word_list
 
 with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
     voice_style_options = json.load(f)
@@ -147,9 +140,9 @@ st.sidebar.info(f"语音风格：{voice_style[0]}({voice_style[1]})")
 # 在侧边栏添加一个选项卡让用户选择一个单词列表
 st.sidebar.selectbox(
     "请选择单词列表",
-    sorted(list(st.session_state.word_lists.keys())),
+    sorted(list(st.session_state.word_dict.keys())),
     key="selected_list",
-    on_change=on_word_lib_changed,
+    # on_change=on_word_lib_changed,
     format_func=lambda x: x.split("-", maxsplit=1)[1],
 )
 
@@ -212,7 +205,7 @@ def _view_detail(container, detail, t_detail, word):
     e1 = detail["examples"]
     d2 = t_detail["definition"]
     e2 = t_detail["examples"]
-    if st.session_state.display_state == "全部":
+    if st.session_state.flashcard_display_state == "全部":
         container.markdown(f"definition：**{d1[:-1]}**")
         container.markdown(f"定义：**{d2[:-1]}**")
         # container.markdown("-" * num)
@@ -222,7 +215,7 @@ def _view_detail(container, detail, t_detail, word):
             content += f"- {_rainbow_word(e, word)}\n"
             content += f"- {t}\n"
         container.markdown(content)
-    elif st.session_state.display_state == "英文":
+    elif st.session_state.flashcard_display_state == "英文":
         container.markdown(f"definition：**{d1[:-1]}**")
         # container.markdown("-" * num)
 
@@ -282,10 +275,10 @@ def view_flash_word(container, tip_placeholder):
 
     v_word = word
     t_word = ""
-    if st.session_state.display_state == "中文":
+    if st.session_state.flashcard_display_state == "中文":
         v_word = ""
 
-    if st.session_state.display_state != "英文":
+    if st.session_state.flashcard_display_state != "英文":
         t_word = word_info["zh-CN"].get("translation", "")
 
     md = template.format(
@@ -336,18 +329,19 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
     play_btn = btn_cols[4].button("🔊", key="play", help="聆听单词发音")
     add_btn = btn_cols[5].button("➕", key="add", help="添加到个人词库")
     del_btn = btn_cols[6].button("➖", key="del", help="从个人词库中删除")
-    update_flashcard_wordbank_button = btn_cols[7].button("🔄", key="refresh", help="当改变词库、记忆数量后，请重新生成单词列表")
+    update_flashcard_wordbank_button = btn_cols[7].button(
+        "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词")
 
     placeholder = st.empty()
 
     # 创建按钮
     if display_status_button:
-        if st.session_state.display_state == "全部":
-            st.session_state.display_state = "英文"
-        elif st.session_state.display_state == "英文":
-            st.session_state.display_state = "中文"
+        if st.session_state.flashcard_display_state == "全部":
+            st.session_state.flashcard_display_state = "英文"
+        elif st.session_state.flashcard_display_state == "英文":
+            st.session_state.flashcard_display_state = "中文"
         else:
-            st.session_state.display_state = "全部"
+            st.session_state.flashcard_display_state = "全部"
 
     if play_btn:
         word = st.session_state.flashcard_words[
@@ -361,7 +355,7 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
     if update_flashcard_wordbank_button:
         generate_flashcard_words()
         # 恢复初始显示状态
-        st.session_state.display_state = "全部"
+        st.session_state.flashcard_display_state = "全部"
         st.session_state["current_flashcard_word_index"] = -1
 
     if add_btn:
@@ -413,7 +407,7 @@ if "puzzle_test_score" not in st.session_state:
 
 def gen_words_to_puzzle():
     # 获取选中的单词列表
-    words = st.session_state.word_lists[st.session_state["selected_list"]]
+    words = st.session_state.word_dict[st.session_state["selected_list"]]
     num_words = st.session_state["num_words_key"]
     n = min(num_words, len(words))
     # 随机选择单词
@@ -512,7 +506,9 @@ with tabs[tab_items.index("🧩 单词拼图")]:
         disabled=st.session_state.puzzle_idx == n - 1,
     )
 
-    update_puzzle_wordbank_button = p_btns[3].button("🔄", key="refresh-puzzle", help="重新生成单词列表")
+    update_puzzle_wordbank_button = p_btns[3].button(
+        "🔄", key="refresh-puzzle", help="重新生成单词列表
+    ")
 
     if prev_p_btn:
         init_puzzle()
@@ -771,7 +767,7 @@ del_my_word_lib_column_config = {
 
 
 def gen_word_lib():
-    words = st.session_state.word_lists[st.session_state["selected_list"]]
+    words = st.session_state.word_dict[st.session_state["selected_list"]]
     for word in words:
         if word not in st.session_state.flashcard_word_info:
             st.session_state.flashcard_word_info[word] = get_word_info(word)
