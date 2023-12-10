@@ -187,7 +187,7 @@ def on_next_btn_click():
 
 template = """
 ##### 单词或短语：:rainbow[{word}]
-- CEFR：:green[{cefr}]
+- CEFR最低分级：:green[{cefr}]
 - 翻译：{translation}
 - 美式音标：:blue[{us_written}]  
 - 英式音标：:violet[{uk_written}]
