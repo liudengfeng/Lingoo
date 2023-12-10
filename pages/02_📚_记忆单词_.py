@@ -714,9 +714,10 @@ def check_pic_answer(container):
 # region 图片测词
 
 with tabs[tab_items.index("🖼️ 图片测词")]:
+    st.session_state["current_tab"] = "图片测词"
     progress_text = "图片测词进度"
     st.markdown(
-        "🖼️ 图片测词是一种记忆单词的游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
+        "🖼️ 图片测词是一种记忆单词的游戏，其玩法是给出一个图片，玩家需要根据图片内容来猜测图片所代表的单词。这种游戏可以帮助玩家记忆单词的含义。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
     pic_cols = st.columns(4)
     category = pic_cols[0].selectbox("请选择图片类别", pic_categories)
