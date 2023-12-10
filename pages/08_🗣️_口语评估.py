@@ -24,6 +24,7 @@ from mypylib.google_api import (
 )
 from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
+from mypylib.streamlit_helper import check_and_force_logout
 from mypylib.word_utils import audio_autoplay_elem
 
 # region 认证及初始化
@@ -34,9 +35,6 @@ if "user_info" not in st.session_state:
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface()
 
-if not st.session_state.dbi.is_service_active(st.session_state["user_info"]):
-    st.error("非付费用户，无法使用此功能。")
-    st.stop()
 
 if st.secrets["env"] in ["streamlit", "azure"]:
     if "inited_vertex" not in st.session_state:
@@ -44,6 +42,10 @@ if st.secrets["env"] in ["streamlit", "azure"]:
         st.session_state["inited_vertex"] = True
 else:
     st.error("非云端环境，无法使用 Vertex AI")
+    st.stop()
+
+if not st.session_state.dbi.is_service_active(st.session_state["user_info"]):
+    st.error("非付费用户，无法使用此功能。")
     st.stop()
 
 # endregion
@@ -366,6 +368,10 @@ st.set_page_config(
 # endregion
 
 # region 边栏
+
+sidebar_status = st.sidebar.empty()
+# 在页面加载时检查是否有需要强制退出的登录会话
+check_and_force_logout(st, sidebar_status)
 
 language = "en-US"
 

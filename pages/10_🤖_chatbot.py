@@ -1,32 +1,17 @@
 import time
+
 import streamlit as st
 from vertexai.language_models import ChatModel, InputOutputTextPair
 
-from mypylib.db_interface import DbInterface
-from mypylib.google_api import init_vertex
+from mypylib.streamlit_helper import authenticate, check_and_force_logout
 
 # region 认证及初始化
 
-if "user_info" not in st.session_state:
-    st.session_state["user_info"] = {}
-
-if "dbi" not in st.session_state:
-    st.session_state["dbi"] = DbInterface()
+authenticate(st)
 
 if not st.session_state.dbi.is_vip_or_admin(st.session_state.user_info):
     st.error("您不是VIP用户，无法使用该功能")
     st.stop()
-
-if st.secrets["env"] in ["streamlit", "azure"]:
-    if "inited_vertex" not in st.session_state:
-        init_vertex(st.secrets)
-        st.session_state["inited_vertex"] = True
-else:
-    st.error("非云端环境，无法使用 Vertex AI")
-    st.stop()
-
-if "chat_messages" not in st.session_state:
-    st.session_state["chat_messages"] = []
 
 # endregion
 
@@ -35,6 +20,16 @@ if "chat_messages" not in st.session_state:
 AVATAR_NAMES = ["user", "assistant"]
 AVATAR_EMOJIES = ["🧑‍💻", "🤖"]
 AVATAR_MAPS = {name: emoji for name, emoji in zip(AVATAR_NAMES, AVATAR_EMOJIES)}
+
+# endregion
+
+# region 页面设置
+
+st.set_page_config(
+    page_title="聊天机器人",
+    page_icon="🤖",
+    layout="wide",
+)
 
 # endregion
 
@@ -78,25 +73,11 @@ def del_chat_examples():
 
 # endregion
 
-# region 主页
+# region 侧边栏
 
-st.set_page_config(
-    page_title="聊天机器人",
-    page_icon="🤖",
-    layout="wide",
-)
-
-if "examples_pair" not in st.session_state:
-    st.session_state["examples_pair"] = []
-
-
-# 模型上下文 【按钮点击影响其他控件属性的标准做法】
-if st.session_state.get("reset_btn"):
-    st.session_state["context_text_area"] = ""
-
-if st.session_state.get("clear_example"):
-    st.session_state["user_text_area"] = ""
-    st.session_state["ai_text_area"] = ""
+sidebar_status = st.sidebar.empty()
+# 在页面加载时检查是否有需要强制退出的登录会话
+check_and_force_logout(st, sidebar_status)
 
 st.sidebar.slider(
     "响应数量上限",
@@ -218,6 +199,24 @@ if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、�
     # 删除对象
     del st.session_state["chat_messages"]
     init_chat()
+# endregion
+
+# region 主页
+
+if "chat_messages" not in st.session_state:
+    st.session_state["chat_messages"] = []
+    
+if "examples_pair" not in st.session_state:
+    st.session_state["examples_pair"] = []
+
+
+# 模型上下文 【按钮点击影响其他控件属性的标准做法】
+if st.session_state.get("reset_btn"):
+    st.session_state["context_text_area"] = ""
+
+if st.session_state.get("clear_example"):
+    st.session_state["user_text_area"] = ""
+    st.session_state["ai_text_area"] = ""
 
 
 # 主页面
@@ -229,7 +228,6 @@ if "chat_messages" in st.session_state and st.session_state.chat_messages:
         with st.chat_message(msg["role"], avatar=AVATAR_MAPS[msg["role"]]):
             st.markdown(msg["content"])
 
-
 if "chat" not in st.session_state:
     init_chat()
 
@@ -238,7 +236,7 @@ if prompt := st.chat_input("您的输入"):
         st.markdown(prompt)
     st.session_state.chat_messages.append({"role": "user", "content": prompt})
     parameters = {
-        # 流式不支持
+        # 不支持流式
         "candidate_count": st.session_state[
             "candidate_count"
         ],  # The candidate_count parameter determines the maximum number of responses to return.

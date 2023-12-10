@@ -12,8 +12,12 @@ from PIL import Image
 
 from mypylib.azure_speech import synthesize_speech_to_file
 from mypylib.db_interface import DbInterface
-from mypylib.google_api import (generate_word_memory_tip, generate_word_test,
-                                get_translation_client, google_translate)
+from mypylib.google_api import (
+    generate_word_memory_tip,
+    generate_word_test,
+    get_translation_client,
+    google_translate,
+)
 from mypylib.streamlit_helper import authenticate, check_and_force_logout
 from mypylib.word_utils import audio_autoplay_elem, hash_word
 
@@ -44,39 +48,14 @@ st.set_page_config(
 
 # endregion
 
-# region 会话状态
-
-if "chat_messages" not in st.session_state:
-    st.session_state["chat_messages"] = []
-
-if "current_word_lib" not in st.session_state:
-    st.session_state["current_word_lib"] = []
-
-if "words_to_memorize" not in st.session_state:
-    st.session_state["words_to_memorize"] = []
-
-if "words" not in st.session_state:
-    st.session_state["words"] = {}
-
-if "display_state" not in st.session_state:
-    st.session_state["display_state"] = "全部"
-
-# 初始化单词的索引
-if "word_idx" not in st.session_state:
-    st.session_state["word_idx"] = -1
-
-
-# endregion
-
 # region 事件及函数
 
-
 def on_prev_btn_click():
-    st.session_state["word_idx"] -= 1
+    st.session_state["current_flashcard_word_index"] -= 1
 
 
 def on_next_btn_click():
-    st.session_state["word_idx"] += 1
+    st.session_state["current_flashcard_word_index"] += 1
 
 
 def on_word_lib_changed(word_lists):
@@ -94,7 +73,7 @@ def gen_words_to_memorize():
     # st.write("单词:", st.session_state.words_to_memorize)
     # 恢复初始显示状态
     st.session_state.display_state = "全部"
-    st.session_state["word_idx"] = -1
+    st.session_state["current_flashcard_word_index"] = -1
 
 
 def gen_audio_fp(word: str, style: str):
@@ -192,6 +171,23 @@ tabs = st.tabs(tab_items)
 
 # region 记忆闪卡辅助
 
+if "current_word_lib" not in st.session_state:
+    st.session_state["current_word_lib"] = []
+
+if "words_to_memorize" not in st.session_state:
+    st.session_state["words_to_memorize"] = []
+
+if "words" not in st.session_state:
+    st.session_state["words"] = {}
+
+if "display_state" not in st.session_state:
+    st.session_state["display_state"] = "全部"
+
+# 初始化单词的索引
+if "current_flashcard_word_index" not in st.session_state:
+    st.session_state["current_flashcard_word_index"] = -1
+
+
 if len(st.session_state.words_to_memorize) == 0:
     gen_words_to_memorize()
 
@@ -270,7 +266,9 @@ def _memory_tip(word):
 
 
 def view_flash_word(container, tip_placeholder):
-    word = st.session_state.words_to_memorize[st.session_state.word_idx]
+    word = st.session_state.words_to_memorize[
+        st.session_state.current_flashcard_word_index
+    ]
     if word not in st.session_state.words:
         st.session_state.words[word] = get_word_info(word)
 
@@ -313,13 +311,13 @@ def view_flash_word(container, tip_placeholder):
 
 with tabs[tab_items.index("📖 记忆闪卡")]:
     btn_cols = st.columns(9)
-    # word = st.session_state.words_to_memorize[st.session_state.word_idx]
+    # word = st.session_state.words_to_memorize[st.session_state.current_flashcard_word_index]
     tip_placeholder = st.empty()
     container = st.container()
 
     # placeholder = st.container()
     # 创建前后选择的按钮
-    mask_btn = btn_cols[1].button(
+    display_status_button = btn_cols[1].button(
         "♻️", key="mask", help="点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。"
     )
     prev_btn = btn_cols[2].button(
@@ -327,14 +325,14 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         key="prev",
         help="点击按钮，切换到上一个单词。",
         on_click=on_prev_btn_click,
-        disabled=st.session_state.word_idx <= 0,
+        disabled=st.session_state.current_flashcard_word_index <= 0,
     )
     next_btn = btn_cols[3].button(
         "↪️",
         key="next",
         help="点击按钮，切换到下一个单词。",
         on_click=on_next_btn_click,
-        disabled=st.session_state.word_idx
+        disabled=st.session_state.current_flashcard_word_index
         == len(st.session_state.words_to_memorize) - 1,
     )
 
@@ -346,7 +344,7 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
     placeholder = st.empty()
 
     # 创建按钮
-    if mask_btn:
+    if display_status_button:
         if st.session_state.display_state == "全部":
             st.session_state.display_state = "英文"
         elif st.session_state.display_state == "英文":
@@ -355,8 +353,10 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
             st.session_state.display_state = "全部"
 
     if play_btn:
-        word = st.session_state.words_to_memorize[st.session_state.word_idx]
-        fp = gen_audio_fp(st.session_state.words_to_memorize[st.session_state.word_idx], voice_style[0])  # type: ignore
+        word = st.session_state.words_to_memorize[
+            st.session_state.current_flashcard_word_index
+        ]
+        fp = gen_audio_fp(st.session_state.words_to_memorize[st.session_state.current_flashcard_word_index], voice_style[0])  # type: ignore
         # placeholder.text(fp)
         components.html(audio_autoplay_elem(fp))
         # view_flash_word(container, tip_placeholder)
@@ -365,14 +365,18 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         gen_words_to_memorize()
 
     if add_btn:
-        word = st.session_state.words_to_memorize[st.session_state.word_idx]
+        word = st.session_state.words_to_memorize[
+            st.session_state.current_flashcard_word_index
+        ]
         st.session_state.dbi.add_word_to_personal_dictionary(
             st.session_state["user_info"], word
         )
         st.toast(f"已添加单词：{word}到个人词库。")
 
     if del_btn:
-        word = st.session_state.words_to_memorize[st.session_state.word_idx]
+        word = st.session_state.words_to_memorize[
+            st.session_state.current_flashcard_word_index
+        ]
         st.session_state.dbi.remove_word_from_personal_dictionary(
             st.session_state["user_info"], word
         )

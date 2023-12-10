@@ -21,6 +21,7 @@ from mypylib.azure_translator import language_detect
 from mypylib.constants import LAN_MAPS, LANGUAGES
 from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
+from mypylib.streamlit_helper import check_and_force_logout
 from mypylib.word_utils import audio_autoplay_elem
 
 
@@ -269,6 +270,10 @@ st.set_page_config(
 # endregion
 
 # region 边栏
+
+sidebar_status = st.sidebar.empty()
+# 在页面加载时检查是否有需要强制退出的登录会话
+check_and_force_logout(st, sidebar_status)
 
 language: str = st.sidebar.selectbox(
     "选择目标语言", options=LANGUAGES, format_func=lambda x: LAN_MAPS[x]
