@@ -46,8 +46,8 @@ if len(st.session_state.get("word_lists", {})) == 0:
 if "current_word_lib" not in st.session_state:
     st.session_state["current_word_lib"] = []
 
-if "words_to_memorize" not in st.session_state:
-    st.session_state["words_to_memorize"] = []
+if "flashcard_words" not in st.session_state:
+    st.session_state["flashcard_words"] = []
 
 if "words" not in st.session_state:
     st.session_state["words"] = {}
@@ -78,17 +78,17 @@ def on_word_lib_changed():
     st.session_state.current_word_lib = st.session_state.word_lists[word_lib_name]
 
 
-def gen_words_to_memorize():
+def generate_flashcard_words():
     # 获取选中的单词列表
     words = st.session_state.current_word_lib
     num_words = st.session_state["num_words_key"]
     n = min(num_words, len(words))
     # 随机选择单词
-    st.session_state.words_to_memorize = random.sample(words, n)
-    # st.write("单词:", st.session_state.words_to_memorize)
+    st.session_state.flashcard_words = random.sample(words, n)
+    # st.write("单词:", st.session_state.flashcard_words)
     # 恢复初始显示状态
-    st.session_state.display_state = "全部"
-    st.session_state["current_flashcard_word_index"] = -1
+    # st.session_state.display_state = "全部"
+    # st.session_state["current_flashcard_word_index"] = -1
 
 
 def gen_audio_fp(word: str, style: str):
@@ -156,7 +156,7 @@ selected_list = st.sidebar.selectbox(
     on_change=on_word_lib_changed,
     format_func=lambda x: x.split("-", maxsplit=1)[1],
 )
-
+st.write("word_lib_key", st.session_state["word_lib_key"])
 
 # 在侧边栏添加一个滑块让用户选择记忆的单词数量
 
@@ -166,7 +166,7 @@ st.sidebar.slider(
     50,
     step=5,
     key="num_words_key",
-    # on_change=gen_words_to_memorize
+    # on_change=generate_flashcard_words
 )
 
 # endregion
@@ -268,10 +268,10 @@ def view_flash_word(container, tip_placeholder):
     if st.session_state.current_flashcard_word_index == -1:
         return
 
-    if len(st.session_state.words_to_memorize) == 0:
-        gen_words_to_memorize()
+    if len(st.session_state.flashcard_words) == 0:
+        generate_flashcard_words()
 
-    word = st.session_state.words_to_memorize[
+    word = st.session_state.flashcard_words[
         st.session_state.current_flashcard_word_index
     ]
     if word not in st.session_state.words:
@@ -336,8 +336,9 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         key="next",
         help="点击按钮，切换到下一个单词。",
         on_click=on_next_btn_click,
-        disabled=len(st.session_state.words_to_memorize) and st.session_state.current_flashcard_word_index
-        == len(st.session_state.words_to_memorize) - 1,
+        disabled=len(st.session_state.flashcard_words)
+        and st.session_state.current_flashcard_word_index
+        == len(st.session_state.flashcard_words) - 1,
     )
 
     play_btn = btn_cols[4].button("🔊", key="play", help="聆听单词发音")
@@ -357,19 +358,19 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
             st.session_state.display_state = "全部"
 
     if play_btn:
-        word = st.session_state.words_to_memorize[
+        word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
         ]
-        fp = gen_audio_fp(st.session_state.words_to_memorize[st.session_state.current_flashcard_word_index], voice_style[0])  # type: ignore
+        fp = gen_audio_fp(st.session_state.flashcard_words[st.session_state.current_flashcard_word_index], voice_style[0])  # type: ignore
         # placeholder.text(fp)
         components.html(audio_autoplay_elem(fp))
         # view_flash_word(container, tip_placeholder)
 
     if refresh_btn:
-        gen_words_to_memorize()
+        generate_flashcard_words()
 
     if add_btn:
-        word = st.session_state.words_to_memorize[
+        word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
         ]
         st.session_state.dbi.add_word_to_personal_dictionary(
@@ -378,7 +379,7 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         st.toast(f"已添加单词：{word}到个人词库。")
 
     if del_btn:
-        word = st.session_state.words_to_memorize[
+        word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
         ]
         st.session_state.dbi.remove_word_from_personal_dictionary(
@@ -905,7 +906,7 @@ def on_next_test_btn_click():
 
 @st.spinner("AI🤖正在生成单词理解测试题，请稍候...")
 def gen_test(level, test_num):
-    words = random.sample(st.session_state.words_to_memorize, test_num)
+    words = random.sample(st.session_state.flashcard_words, test_num)
     for word in words:
         st.session_state.tests.append(generate_word_test(word, level))
 
