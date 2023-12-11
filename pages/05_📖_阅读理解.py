@@ -7,14 +7,15 @@ import streamlit as st
 
 from mypylib.streamlit_helper import check_and_force_logout
 
-sidebar_status = st.sidebar.empty()
-# 在页面加载时检查是否有需要强制退出的登录会话
-check_and_force_logout(st, sidebar_status)
 
 st.set_page_config(
     page_title="阅读理解",
     page_icon="📖",
     layout="wide",
 )
+
+sidebar_status = st.sidebar.empty()
+# 在页面加载时检查是否有需要强制退出的登录会话
+check_and_force_logout(st, sidebar_status)
 
 st.markdown("# 敬请期待......")
