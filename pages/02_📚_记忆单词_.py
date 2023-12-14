@@ -326,14 +326,15 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         on_click=on_next_btn_click,
         disabled=len(st.session_state.flashcard_words)
         and st.session_state.current_flashcard_word_index
-        == len(st.session_state.flashcard_words) - 1, # type: ignore
+        == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
 
     play_btn = btn_cols[4].button("🔊", key="play", help="聆听单词发音")
     add_btn = btn_cols[5].button("➕", key="add", help="添加到个人词库")
     del_btn = btn_cols[6].button("➖", key="del", help="从个人词库中删除")
     update_flashcard_wordbank_button = btn_cols[7].button(
-        "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词")
+        "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词
+    ")
 
     placeholder = st.empty()
 
@@ -491,7 +492,7 @@ def on_next_puzzle_btn_click():
 with tabs[tab_items.index("🧩 单词拼图")]:
     st.session_state["current_tab"] = "单词拼图"
     st.markdown(
-        "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
+        "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。它是一种非常有效的学习方式，可以帮助我们提高词汇量、拼写能力、思维能力和解决问题能力。单词来自于您的记忆闪卡。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
     puzzle_progress = st.empty()
     puzzle_cols = st.columns(4)
@@ -511,7 +512,8 @@ with tabs[tab_items.index("🧩 单词拼图")]:
     )
 
     update_puzzle_wordbank_button = puzzle_cols[3].button(
-        "🔄", key="refresh-puzzle", help="重新生成单词列表")
+        "🔄", key="refresh-puzzle", help="重新生成单词列表
+    ")
 
     if prev_puzzle_btn:
         prepare_puzzle()
