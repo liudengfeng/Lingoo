@@ -511,8 +511,7 @@ with tabs[tab_items.index("🧩 单词拼图")]:
     )
 
     update_puzzle_wordbank_button = puzzle_cols[3].button(
-        "🔄", key="refresh-puzzle", help="重新生成单词列表
-    ")
+        "🔄", key="refresh-puzzle", help="重新生成单词列表")
 
     if prev_puzzle_btn:
         prepare_puzzle()
