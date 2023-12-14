@@ -326,15 +326,14 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
         on_click=on_next_btn_click,
         disabled=len(st.session_state.flashcard_words)
         and st.session_state.current_flashcard_word_index
-        == len(st.session_state.flashcard_words) - 1,
+        == len(st.session_state.flashcard_words) - 1, # type: ignore
     )
 
     play_btn = btn_cols[4].button("🔊", key="play", help="聆听单词发音")
     add_btn = btn_cols[5].button("➕", key="add", help="添加到个人词库")
     del_btn = btn_cols[6].button("➖", key="del", help="从个人词库中删除")
     update_flashcard_wordbank_button = btn_cols[7].button(
-        "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词
-    ")
+        "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词")
 
     placeholder = st.empty()
 
