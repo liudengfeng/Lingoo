@@ -568,7 +568,7 @@ with tabs[tab_items.index("🧩 单词拼图")]:
                     / st.session_state["num_words_key"]
                     * 100
                 )
-                msg = f":red[您的得分：{score:.0f}%] {msg}"
+                msg = f":red[您的得分：{score:.0f}%]\t{msg}"
                 puzzle_score.markdown(msg)
 
 
