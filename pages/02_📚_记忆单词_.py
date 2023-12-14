@@ -554,7 +554,7 @@ with tabs[tab_items.index("🧩 单词拼图")]:
                 if word not in st.session_state.flashcard_word_info:
                     st.session_state.flashcard_word_info[word] = get_word_info(word)
 
-                msg = f'单词：{word} 翻译：{st.session_state.flashcard_word_info[word]["zh-CN"]["translation"]}'
+                msg = f'单词：{word}\t翻译：{st.session_state.flashcard_word_info[word]["zh-CN"]["translation"]}'
                 if user_input == word:
                     st.balloons()
                     st.session_state.puzzle_test_score[word] = True
