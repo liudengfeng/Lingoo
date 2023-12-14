@@ -18,6 +18,6 @@ werkzeug
 faker
 bs4
 google-cloud-translate
-google-cloud-aiplatform
 google-cloud-texttospeech
+google-cloud-aiplatform
 cryptography

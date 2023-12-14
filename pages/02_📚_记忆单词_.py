@@ -333,7 +333,8 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
     add_btn = btn_cols[5].button("➕", key="add", help="添加到个人词库")
     del_btn = btn_cols[6].button("➖", key="del", help="从个人词库中删除")
     update_flashcard_wordbank_button = btn_cols[7].button(
-        "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词")
+        "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词
+    ")
 
     placeholder = st.empty()
 
@@ -511,7 +512,8 @@ with tabs[tab_items.index("🧩 单词拼图")]:
     )
 
     update_puzzle_wordbank_button = puzzle_cols[3].button(
-        "🔄", key="refresh-puzzle", help="重新生成单词列表")
+        "🔄", key="refresh-puzzle", help="重新生成单词列表
+    ")
 
     if prev_puzzle_btn:
         prepare_puzzle()
@@ -554,13 +556,12 @@ with tabs[tab_items.index("🧩 单词拼图")]:
                 if word not in st.session_state.flashcard_word_info:
                     st.session_state.flashcard_word_info[word] = get_word_info(word)
 
+                msg = f'单词：{word} 翻译：{st.session_state.flashcard_word_info[word]["zh-CN"]["translation"]}'
                 if user_input == word:
                     st.balloons()
                     st.session_state.puzzle_test_score[word] = True
                 else:
-                    st.write(
-                        f'对不起，您回答错误。正确的单词应该为：{word}，翻译：{st.session_state.flashcard_word_info[word]["zh-CN"]["translation"]}'
-                    )
+                    st.write(f"对不起，您回答错误。正确的单词应该为：{word}")
                     st.session_state.puzzle_test_score[word] = False
 
                 # if st.session_state.puzzle_idx == st.session_state["num_words_key"] - 1:
@@ -569,7 +570,7 @@ with tabs[tab_items.index("🧩 单词拼图")]:
                     / st.session_state["num_words_key"]
                     * 100
                 )
-                msg = f":red[您的得分：{score:.0f}%]"
+                msg = f":red[您的得分：{score:.0f}%] {msg}"
                 puzzle_score.markdown(msg)
 
 
