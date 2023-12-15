@@ -12,7 +12,7 @@ def multiturn_generate_content():
     config = {"max_output_tokens": 2048, "temperature": 0.9, "top_p": 1}
     model = GenerativeModel("gemini-pro")
     chat = model.start_chat()
-    print(chat.send_message("""介绍下你自己""", generation_config=config))
+    st.write(chat.send_message("""介绍下你自己""", generation_config=config))
 
 
-st.write(multiturn_generate_content())
+multiturn_generate_content()
