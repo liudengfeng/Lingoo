@@ -16,4 +16,4 @@ def multiturn_generate_content():
     st.write(response.usage_metadata.total_token_count)  # type: ignore
 
 
-# multiturn_generate_content()
+multiturn_generate_content()
