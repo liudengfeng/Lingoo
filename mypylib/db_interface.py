@@ -314,7 +314,7 @@ class DbInterface:
                     "display_name": user.display_name,
                     "session_id": session_id,
                     "status": "success",
-                    "message": f"{user.display_name}，又见面了！",
+                    "message": f"嗨！{user.display_name}，又见面了。",
                 }
         return {
             "status": "error",
