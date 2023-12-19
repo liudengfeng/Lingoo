@@ -15,7 +15,7 @@ def multiturn_generate_content():
     response = chat.send_message("""你好""", generation_config=config)
     # st.write(response.usage_metadata.total_token_count)  # type: ignore
     st.write(response.text)
-    total_token_count = response.usage_metadata.total_token_count
+    total_token_count = response.usageMetadata.totalTokenCount
     st.write(total_token_count)
 
 
