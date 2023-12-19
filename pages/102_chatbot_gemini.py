@@ -16,7 +16,7 @@ def multiturn_generate_content():
     # st.write(response.usage_metadata.total_token_count)  # type: ignore
     st.write(response.text)
     total_token_count = response._raw_response.usage_metadata
-    st.write(total_token_count["total_token_count"])
+    st.write(total_token_count.total_token_count)
 
 
 multiturn_generate_content()
