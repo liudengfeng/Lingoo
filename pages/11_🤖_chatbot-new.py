@@ -124,12 +124,12 @@ st.sidebar.slider(
 )
 
 
-user_example = st.sidebar.text_area(
+user_example = st.sidebar.text_input(
     "👤 用户示例",
     key="user_text_area",
     max_chars=1000,
 )
-ai_example = st.sidebar.text_area(
+ai_example = st.sidebar.text_input(
     "🔯 示例",
     key="ai_text_area",
     max_chars=1000,
