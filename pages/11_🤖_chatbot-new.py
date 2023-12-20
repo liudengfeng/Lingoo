@@ -180,7 +180,8 @@ if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、�
 with st.sidebar.expander("查看当前样例..."):
     if "chat_session" not in st.session_state:
         init_chat()
-    for his in st.session_state.chat_session.history:
+    num = len(st.session_state.examples_pair) * 2
+    for his in st.session_state.chat_session.history[:num]:
         st.write(f"**{his.role}**：{his.parts[0].text}")
 
 st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。", icon="✨")
