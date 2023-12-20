@@ -40,9 +40,8 @@ def init_chat():
     )
     history = []
     for user, model in st.session_state["examples_pair"]:
-        history.append(
-            {"role": "user", "parts": user}, {"role": "model", "parts": model}
-        )
+        history.append({"role": "user", "parts": user})
+        history.append({"role": "model", "parts": model})
     st.session_state["chat"] = model.start_chat(history=history)
 
 
@@ -167,8 +166,6 @@ sidebar_col3.button(
 
 if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、示例，开始新的对话"):
     st.session_state["examples_pair"] = []
-    # 删除对象
-    del st.session_state["chat_messages"]
     init_chat()
 
 st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。", icon="✨")
