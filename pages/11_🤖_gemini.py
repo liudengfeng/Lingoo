@@ -23,6 +23,6 @@ configure(st)
 #     st.write(total_token_count.total_token_count)
 
 
-for m in genai.list_models():
-    if "generateContent" in m.supported_generation_methods:
-        st.write(m.name)
+model = genai.GenerativeModel("gemini-pro")
+response = model.generate_content("生活的意义是什么？")
+st.markdown(response.text)
