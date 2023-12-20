@@ -220,5 +220,6 @@ if prompt := st.chat_input("您的输入"):
     st.session_state.total_token_count += current_token_count
     msg = f"当前令牌数：{current_token_count}，总令牌数：{st.session_state.total_token_count}"
     sidebar_status.markdown(msg)
+    st.write(st.session_state.chat_session.history)
 
 # endregion
