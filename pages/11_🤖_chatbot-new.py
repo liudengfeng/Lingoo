@@ -174,8 +174,12 @@ st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。1
 sidebar_status = st.sidebar.empty()
 # endregion
 
+# region 认证及强制退出
+
 authenticate(st)
 check_and_force_logout(st, sidebar_status)
+
+# endregion
 
 # def multiturn_generate_content():
 #     config = {"max_output_tokens": 2048, "temperature": 0.9, "top_p": 1}
