@@ -2,12 +2,10 @@ import time
 
 import google.generativeai as genai
 import streamlit as st
-from vertexai.preview.generative_models import ChatSession, GenerativeModel
-from mypylib.streamlit_helper import authenticate, check_and_force_logout
-from mypylib.google_gemini import SAFETY_SETTINGS
 
-# import vertexai
-# from vertexai.preview.generative_models import GenerativeModel, Part
+from mypylib.google_gemini import SAFETY_SETTINGS
+from mypylib.streamlit_helper import authenticate, check_and_force_logout
+
 # response.usage_metadata.total_token_count
 
 # region 页面设置
@@ -20,6 +18,10 @@ st.set_page_config(
 
 if "examples_pair" not in st.session_state:
     st.session_state["examples_pair"] = []
+
+if st.session_state.get("clear_example"):
+    st.session_state["user_text_area"] = ""
+    st.session_state["ai_text_area"] = ""
 
 # endregion
 
