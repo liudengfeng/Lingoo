@@ -254,7 +254,7 @@ if prompt := st.chat_input("您的输入"):
     }
     # st.write("参数",parameters)
     response = st.session_state.chat.send_message(message=prompt, **parameters)
-    with st.chat_message("user", avatar=AVATAR_MAPS["assistant"]):
+    with st.chat_message("assistant", avatar=AVATAR_MAPS["assistant"]):
         st.markdown(response.text)
     st.session_state.chat_messages.append(
         {"role": "assistant", "content": response.text}

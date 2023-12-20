@@ -16,9 +16,15 @@ st.set_page_config(
     layout="wide",
 )
 
+AVATAR_NAMES = ["user", "model"]
+AVATAR_EMOJIES = ["🧑‍💻", "🤖"]
+AVATAR_MAPS = {name: emoji for name, emoji in zip(AVATAR_NAMES, AVATAR_EMOJIES)}
+
 if "examples_pair" not in st.session_state:
     st.session_state["examples_pair"] = []
 
+if "total_token_count" not in st.session_state:
+    st.session_state["total_token_count"] = 0
 
 if st.session_state.get("clear_example"):
     st.session_state["user_text_area"] = ""
@@ -43,9 +49,8 @@ def init_chat():
     )
     history = []
     for user, ai in st.session_state["examples_pair"]:
-        st.write("user, ai", user, ai)
-        history.append({"role": "user", "parts": user})
-        history.append({"role": "model", "parts": ai})
+        history.append({"role": "user", "parts": {"text": user}})
+        history.append({"role": "model", "parts": {"text": ai}})
     st.session_state["chat_session"] = model.start_chat(history=history)
 
 
@@ -65,7 +70,7 @@ def add_chat_examples():
         st.toast("示例对不能为空。")
 
 
-def del_chat_examples():
+def del_last_examples():
     if st.session_state["examples_pair"]:
         st.session_state["examples_pair"].pop()
         # st.write(st.session_state["examples_pair"])
@@ -158,7 +163,7 @@ sidebar_col1.button(
 )
 sidebar_col2.button(
     "➖",
-    on_click=del_chat_examples,
+    on_click=del_last_examples,
     disabled=len(st.session_state["examples_pair"]) <= 0,
     help="删除最后一对示例",
 )
@@ -183,20 +188,25 @@ check_and_force_logout(st, sidebar_status)
 
 # endregion
 
-# def multiturn_generate_content():
-#     config = {"max_output_tokens": 2048, "temperature": 0.9, "top_p": 1}
-#     model = GenerativeModel("gemini-pro")
-#     chat_session = model.start_chat()
-#     response = chat_session.send_message("""你好""", generation_config=config)
-#     # st.write(response.usage_metadata.total_token_count)  # type: ignore
-#     st.write(response.text)
-#     total_token_count = response._raw_response.usage_metadata
-#     st.write(total_token_count.total_token_count)
+# region 主页面
 
+st.title("🤖 多模态模型 Google Gemini 聊天机器人")
+if "chat_session" not in st.session_state:
+    init_chat()
 
-# model = genai.GenerativeModel("gemini-pro")
-# response = model.generate_content("生活的意义是什么？")
-# st.markdown(response.text)
+start_idx = len(st.session_state.examples_pair) * 2
+for message in st.session_state.chat_session.history[start_idx:]:
+    # role = "assistant" if message.role =="model" else "user"
+    role = message.role
+    with st.chat_message(role, avatar=AVATAR_MAPS[role]):
+        st.markdown(message.parts[0].text)
 
+if prompt := st.chat_input("您的输入"):
+    with st.chat_message("user", avatar=AVATAR_MAPS["user"]):
+        st.markdown(prompt)
 
-st.write(st.session_state["chat_session"].history)
+    # response = st.session_state.chat_session.send_message(prompt, stream=True)
+    response = st.session_state.chat_session.send_message(prompt)
+    with st.chat_message("assistant", avatar=AVATAR_MAPS["assistant"]):
+        st.markdown(response.text)
+# endregion
