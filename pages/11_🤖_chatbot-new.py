@@ -64,7 +64,7 @@ def add_chat_examples():
                 st.toast("示例对已存在.请点击🗑️清除后再添加。")
                 st.stop()
         st.session_state["examples_pair"].append((user, ai))
-        # st.write(st.session_state["examples_pair"])
+        st.write(st.session_state["examples_pair"])
         init_chat()
     else:
         st.toast("示例对不能为空。")
