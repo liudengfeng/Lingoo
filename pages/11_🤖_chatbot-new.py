@@ -19,8 +19,6 @@ st.set_page_config(
 if "examples_pair" not in st.session_state:
     st.session_state["examples_pair"] = []
 
-if "chat_session" not in st.session_state:
-    st.session_state["chat_session"] = None
 
 if st.session_state.get("clear_example"):
     st.session_state["user_text_area"] = ""
@@ -44,9 +42,9 @@ def init_chat():
         safety_settings=SAFETY_SETTINGS,
     )
     history = []
-    for user, model in st.session_state["examples_pair"]:
+    for user, ai in st.session_state["examples_pair"]:
         history.append({"role": "user", "parts": user})
-        history.append({"role": "model", "parts": model})
+        history.append({"role": "model", "parts": ai})
     st.session_state["chat_session"] = model.start_chat(history=history)
 
 
