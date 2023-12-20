@@ -178,6 +178,8 @@ if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、�
     init_chat()
 
 with st.sidebar.expander("查看当前样例..."):
+    if "chat_session" not in st.session_state:
+        init_chat()
     for his in st.session_state.chat_session.history:
         st.write(f"**{his.role}**：{his.parts[0].text}")
 
