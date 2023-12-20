@@ -91,7 +91,7 @@ st.sidebar.slider(
     "词元限制",
     key="max_output_tokens",
     min_value=32,
-    max_value=2048,
+    max_value=8192,
     value=1024,
     step=32,
     help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 1024。""",
@@ -177,6 +177,11 @@ if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、�
     st.session_state["examples_pair"] = []
     init_chat()
 
+with st.sidebar.expander("查看样例..."):
+    for user, ai in st.session_state["examples_pair"]:
+        st.write(f"**用户示例**：{user}")
+        st.write(f"**AI示例**：{ai}")
+
 st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。", icon="✨")
 sidebar_status = st.sidebar.empty()
 # endregion
@@ -190,7 +195,7 @@ check_and_force_logout(st, sidebar_status)
 
 # region 主页面
 
-st.subheader("🤖 多模态模型 Google Gemini 聊天机器人")
+st.subheader("🤖 Google Gemini 聊天机器人")
 if "chat_session" not in st.session_state:
     init_chat()
 

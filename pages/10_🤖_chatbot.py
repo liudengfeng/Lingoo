@@ -97,10 +97,10 @@ st.sidebar.slider(
 st.sidebar.slider(
     "词元限制",
     key="max_output_tokens",
-    min_value=64,
-    max_value=4096,
-    value=1024,
-    step=64,
+    min_value=32,
+    max_value=1024,
+    value=256,
+    step=32,
     help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 1024。""",
 )
 # 生成参数
