@@ -2,10 +2,10 @@ import time
 
 import google.generativeai as genai
 import streamlit as st
+from google.generativeai.types.generation_types import BlockedPromptException
 
 from mypylib.google_gemini import SAFETY_SETTINGS
 from mypylib.st_helper import authenticate, check_and_force_logout
-
 
 # region 页面设置
 
@@ -223,28 +223,36 @@ if prompt := st.chat_input("输入提示以便开始对话"):
         "top_k": st.session_state["top_k"],
         "max_output_tokens": st.session_state["max_output_tokens"],
     }
-    response = st.session_state.chat_session.send_message(
-        prompt, generation_config=config, stream=True
-    )
-    with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
-        message_placeholder = st.empty()
-        full_response = ""
-        for chunk in response:
-            full_response += chunk.text
-            time.sleep(0.05)
-            # Add a blinking cursor to simulate typing
-            message_placeholder.markdown(full_response + "▌")
-        message_placeholder.markdown(full_response)
-        # st.markdown(response.text)
+    try:
+        response = st.session_state.chat_session.send_message(
+            prompt,
+            generation_config=config,
+            safety_settings=SAFETY_SETTINGS,
+            stream=True,
+        )
+    except BlockedPromptException:
+        # 处理被阻止的消息
+        st.toast("抱歉，您尝试发送的消息包含潜在不安全的内容，已被阻止。")
+    else:
+        with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
+            message_placeholder = st.empty()
+            full_response = ""
+            for chunk in response:
+                full_response += chunk.text
+                time.sleep(0.05)
+                # Add a blinking cursor to simulate typing
+                message_placeholder.markdown(full_response + "▌")
+            message_placeholder.markdown(full_response)
+            # st.markdown(response.text)
 
-    # 显示令牌数
-    # current_token_count = response._raw_response.usage_metadata.total_token_count
-    # st.session_state.total_token_count += current_token_count
+        # 显示令牌数
+        # current_token_count = response._raw_response.usage_metadata.total_token_count
+        # st.session_state.total_token_count += current_token_count
 
-    st.session_state.current_token_count = st.session_state.chat_model.count_tokens(
-        prompt + full_response
-    ).total_tokens
-    st.session_state.total_token_count += st.session_state.current_token_count
+        st.session_state.current_token_count = st.session_state.chat_model.count_tokens(
+            prompt + full_response
+        ).total_tokens
+        st.session_state.total_token_count += st.session_state.current_token_count
 
 msg = f"当前令牌数：{st.session_state.current_token_count}，总令牌数：{st.session_state.total_token_count}"
 sidebar_status.markdown(msg)
