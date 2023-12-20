@@ -51,6 +51,7 @@ def init_chat():
         history.append({"role": "user", "parts": {"text": user}})
         history.append({"role": "model", "parts": {"text": ai}})
     st.session_state["chat_session"] = model.start_chat(history=history)
+    st.session_state["chat_model"] = model
 
 
 def add_chat_examples():
@@ -210,7 +211,12 @@ if prompt := st.chat_input("您的输入"):
         st.markdown(response.text)
 
     # 显示令牌数
-    current_token_count = response._raw_response.usage_metadata.total_token_count
+    # current_token_count = response._raw_response.usage_metadata.total_token_count
+    # st.session_state.total_token_count += current_token_count
+
+    current_token_count = st.session_state.chat_model.count_tokens(
+        prompt + response.text
+    )
     st.session_state.total_token_count += current_token_count
     msg = f"当前令牌数：{current_token_count}，总令牌数：{st.session_state.total_token_count}"
     sidebar_status.markdown(msg)
