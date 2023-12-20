@@ -42,7 +42,7 @@ def init_chat():
     for user, model in st.session_state["examples_pair"]:
         history.append({"role": "user", "parts": user})
         history.append({"role": "model", "parts": model})
-    st.session_state["chat"] = model.start_chat(history=history)
+    st.session_state["chat_session"] = model.start_chat(history=history)
 
 
 def add_chat_examples():
@@ -182,8 +182,8 @@ check_and_force_logout(st, sidebar_status)
 # def multiturn_generate_content():
 #     config = {"max_output_tokens": 2048, "temperature": 0.9, "top_p": 1}
 #     model = GenerativeModel("gemini-pro")
-#     chat = model.start_chat()
-#     response = chat.send_message("""你好""", generation_config=config)
+#     chat_session = model.start_chat()
+#     response = chat_session.send_message("""你好""", generation_config=config)
 #     # st.write(response.usage_metadata.total_token_count)  # type: ignore
 #     st.write(response.text)
 #     total_token_count = response._raw_response.usage_metadata
@@ -193,9 +193,6 @@ check_and_force_logout(st, sidebar_status)
 # model = genai.GenerativeModel("gemini-pro")
 # response = model.generate_content("生活的意义是什么？")
 # st.markdown(response.text)
-for e in st.session_state["examples_pair"]:
-    st.markdown(f"**用户示例**：{e[0]}")
-    st.markdown(f"**AI示例**：{e[1]}")
 
 
-st.write(st.session_state["chat"].history)
+st.write(st.session_state["chat_session"].history)
