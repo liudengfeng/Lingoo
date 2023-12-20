@@ -4,7 +4,7 @@ import google.generativeai as genai
 import streamlit as st
 
 from mypylib.google_gemini import SAFETY_SETTINGS
-from mypylib.streamlit_helper import authenticate, check_and_force_logout
+from mypylib.st_helper import authenticate, check_and_force_logout
 
 
 # region 页面设置
