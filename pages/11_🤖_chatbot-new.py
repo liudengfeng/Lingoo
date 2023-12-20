@@ -43,6 +43,7 @@ def init_chat():
     )
     history = []
     for user, ai in st.session_state["examples_pair"]:
+        st.write("user, ai", user, ai)
         history.append({"role": "user", "parts": user})
         history.append({"role": "model", "parts": ai})
     st.session_state["chat_session"] = model.start_chat(history=history)
