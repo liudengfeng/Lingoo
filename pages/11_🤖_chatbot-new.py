@@ -193,5 +193,9 @@ check_and_force_logout(st, sidebar_status)
 # model = genai.GenerativeModel("gemini-pro")
 # response = model.generate_content("生活的意义是什么？")
 # st.markdown(response.text)
+for e in st.session_state["examples_pair"]:
+    st.markdown(f"**用户示例**：{e[0]}")
+    st.markdown(f"**AI示例**：{e[1]}")
 
-st.write(st.session_state["examples_pair"])
+
+st.write(st.session_state["chat"].history)
