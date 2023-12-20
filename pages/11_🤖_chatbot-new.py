@@ -8,7 +8,6 @@ from mypylib.google_gemini import SAFETY_SETTINGS
 
 # import vertexai
 # from vertexai.preview.generative_models import GenerativeModel, Part
-# 注意 ：对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。
 # response.usage_metadata.total_token_count
 
 # region 页面设置
@@ -25,19 +24,23 @@ st.set_page_config(
 
 
 def init_chat():
+    generation_config = {
+        "temperature": st.session_state["temperature"],
+        "top_p": st.session_state["top_p"],
+        "top_k": st.session_state["top_k"],
+        "max_output_tokens": st.session_state["max_output_tokens"],
+    }
     model = genai.GenerativeModel(
         model_name="gemini-pro",
         generation_config=generation_config,
         safety_settings=SAFETY_SETTINGS,
     )
-    context = st.session_state["context_text_area"]
-    examples = []
-    for user, ai in st.session_state["examples_pair"]:
-        examples.append(InputOutputTextPair(user, ai))
-    st.session_state["chat"] = model.start_chat(
-        context=context,
-        examples=examples,
-    )
+    history = []
+    for user, model in st.session_state["examples_pair"]:
+        history.append(
+            {"role": "user", "parts": user}, {"role": "model", "parts": model}
+        )
+    st.session_state["chat"] = model.start_chat(history=history)
 
 
 def add_chat_examples():
@@ -73,8 +76,6 @@ st.sidebar.markdown(
 🔯 模型：Gemini Pro            
 """
 )
-sidebar_status = st.sidebar.empty()
-
 st.sidebar.slider(
     "词元限制",
     key="max_output_tokens",
@@ -84,14 +85,13 @@ st.sidebar.slider(
     step=32,
     help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 1024。""",
 )
-st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。", icon="✨")
 # 生成参数
 st.sidebar.slider(
     "温度",
     min_value=0.00,
     max_value=1.0,
     key="temperature",
-    value=0.6,  # st.session_state["model_temperature"],
+    value=0.6,
     step=0.1,
     help="温度可以控制词元选择的随机性。较低的温度适合希望获得真实或正确回复的提示，而较高的温度可能会引发更加多样化或意想不到的结果。如果温度为 0，系统始终会选择概率最高的词元。对于大多数应用场景，不妨先试着将温度设为 0.2。",
 )
@@ -122,12 +122,12 @@ st.sidebar.slider(
 
 
 user_example = st.sidebar.text_area(
-    "用户示例",
+    "👤 用户示例",
     key="user_text_area",
     max_chars=1000,
 )
 ai_example = st.sidebar.text_area(
-    "AI示例",
+    "🔯 示例",
     key="ai_text_area",
     max_chars=1000,
 )
@@ -162,6 +162,8 @@ if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、�
     del st.session_state["chat_messages"]
     init_chat()
 
+st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。", icon="✨")
+sidebar_status = st.sidebar.empty()
 # endregion
 
 authenticate(st)
