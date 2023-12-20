@@ -212,17 +212,32 @@ if prompt := st.chat_input("输入提示以便开始对话"):
     with st.chat_message("user", avatar=AVATAR_MAPS["user"]):
         st.markdown(prompt)
 
-    # response = st.session_state.chat_session.send_message(prompt, stream=True)
-    response = st.session_state.chat_session.send_message(prompt)
+    config = {
+        "temperature": st.session_state["temperature"],
+        "top_p": st.session_state["top_p"],
+        "top_k": st.session_state["top_k"],
+        "max_output_tokens": st.session_state["max_output_tokens"],
+    }
+    response = st.session_state.chat_session.send_message(
+        prompt, generation_config=config, stream=True
+    )
     with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
-        st.markdown(response.text)
+        message_placeholder = st.empty()
+        full_response = ""
+        for chunk in response:
+            full_response += chunk.text
+            time.sleep(0.05)
+            # Add a blinking cursor to simulate typing
+            message_placeholder.markdown(full_response + "▌")
+        message_placeholder.markdown(full_response)
+        # st.markdown(response.text)
 
     # 显示令牌数
     # current_token_count = response._raw_response.usage_metadata.total_token_count
     # st.session_state.total_token_count += current_token_count
 
     current_token_count = st.session_state.chat_model.count_tokens(
-        prompt + response.text
+        prompt + full_response
     ).total_tokens
     st.session_state.total_token_count += current_token_count
     msg = f"当前令牌数：{current_token_count}，总令牌数：{st.session_state.total_token_count}"
