@@ -6,7 +6,6 @@ import streamlit as st
 from mypylib.google_gemini import SAFETY_SETTINGS
 from mypylib.streamlit_helper import authenticate, check_and_force_logout
 
-# response.usage_metadata.total_token_count
 
 # region 页面设置
 
@@ -209,5 +208,11 @@ if prompt := st.chat_input("您的输入"):
     response = st.session_state.chat_session.send_message(prompt)
     with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
         st.markdown(response.text)
+
+    # 显示令牌数
+    current_token_count = response._raw_response.usage_metadata.total_token_count
+    st.session_state.total_token_count += current_token_count
+    msg = f"当前令牌数：{current_token_count}，总令牌数：{st.session_state.total_token_count}"
+    sidebar_status.markdown(msg)
 
 # endregion
