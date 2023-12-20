@@ -64,7 +64,7 @@ def add_chat_examples():
                 st.toast("示例对已存在.请点击🗑️清除后再添加。")
                 st.stop()
         st.session_state["examples_pair"].append((user, ai))
-        st.write(st.session_state["examples_pair"])
+        # st.write(st.session_state["examples_pair"])
         init_chat()
     else:
         st.toast("示例对不能为空。")
@@ -177,10 +177,9 @@ if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、�
     st.session_state["examples_pair"] = []
     init_chat()
 
-with st.sidebar.expander("查看样例..."):
-    for user, ai in st.session_state["examples_pair"]:
-        st.write(f"**用户示例**：{user}")
-        st.write(f"**AI示例**：{ai}")
+with st.sidebar.expander("查看当前样例..."):
+    for his in st.session_state.chat_session.history:
+        st.write(f"**{his.role}**：{his.parts[0].text}")
 
 st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。", icon="✨")
 sidebar_status = st.sidebar.empty()
