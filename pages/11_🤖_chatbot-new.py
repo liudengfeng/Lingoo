@@ -94,7 +94,7 @@ st.sidebar.slider(
     max_value=8192,
     value=1024,
     step=32,
-    help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 1024。""",
+    help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 2048。""",
 )
 # 生成参数
 st.sidebar.slider(
@@ -112,7 +112,7 @@ st.sidebar.slider(
     key="top_k",
     min_value=1,
     max_value=40,
-    value=20,
+    value=40,
     step=1,
     help="""Top-k 可更改模型选择输出词元的方式。
 - 如果 Top-k 设为 1，表示所选词元是模型词汇表的所有词元中概率最高的词元（也称为贪心解码）。
@@ -124,7 +124,7 @@ st.sidebar.slider(
     key="top_p",
     min_value=0.00,
     max_value=1.0,
-    value=0.6,
+    value=0.8,
     step=0.05,
     help="""Top-p 可更改模型选择输出词元的方式。系统会按照概率从最高到最低的顺序选择词元，直到所选词元的概率总和等于 Top-p 的值。
 - 例如，如果词元 A、B 和 C 的概率分别是 0.3、0.2 和 0.1，并且 Top-p 的值为 0.5，则模型将选择 A 或 B 作为下一个词元（通过温度确定）。
@@ -208,7 +208,7 @@ for message in st.session_state.chat_session.history[start_idx:]:
     with st.chat_message(role, avatar=AVATAR_MAPS[role]):
         st.markdown(message.parts[0].text)
 
-if prompt := st.chat_input("您的输入"):
+if prompt := st.chat_input("输入提示以便开始对话"):
     with st.chat_message("user", avatar=AVATAR_MAPS["user"]):
         st.markdown(prompt)
 
@@ -227,6 +227,6 @@ if prompt := st.chat_input("您的输入"):
     st.session_state.total_token_count += current_token_count
     msg = f"当前令牌数：{current_token_count}，总令牌数：{st.session_state.total_token_count}"
     sidebar_status.markdown(msg)
-    st.write(st.session_state.chat_session.history)
+    # st.write(st.session_state.chat_session.history)
 
 # endregion
