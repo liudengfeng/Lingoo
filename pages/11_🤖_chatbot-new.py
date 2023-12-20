@@ -201,12 +201,15 @@ st.subheader("🤖 Google Gemini 聊天机器人")
 if "chat_session" not in st.session_state:
     init_chat()
 
+# 显示会话历史记录
 start_idx = len(st.session_state.examples_pair) * 2
 for message in st.session_state.chat_session.history[start_idx:]:
     # role = "assistant" if message.role =="model" else "user"
     role = message.role
     with st.chat_message(role, avatar=AVATAR_MAPS[role]):
         st.markdown(message.parts[0].text)
+
+full_response = ""
 
 if prompt := st.chat_input("输入提示以便开始对话"):
     with st.chat_message("user", avatar=AVATAR_MAPS["user"]):
@@ -223,7 +226,6 @@ if prompt := st.chat_input("输入提示以便开始对话"):
     )
     with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
         message_placeholder = st.empty()
-        full_response = ""
         for chunk in response:
             full_response += chunk.text
             time.sleep(0.05)
@@ -235,13 +237,15 @@ if prompt := st.chat_input("输入提示以便开始对话"):
     # 显示令牌数
     # current_token_count = response._raw_response.usage_metadata.total_token_count
     # st.session_state.total_token_count += current_token_count
+else:
+    prompt = ""
 
-    current_token_count = st.session_state.chat_model.count_tokens(
-        prompt + full_response
-    ).total_tokens
-    st.session_state.total_token_count += current_token_count
-    msg = f"当前令牌数：{current_token_count}，总令牌数：{st.session_state.total_token_count}"
-    sidebar_status.markdown(msg)
+current_token_count = st.session_state.chat_model.count_tokens(
+    prompt + full_response
+).total_tokens
+st.session_state.total_token_count += current_token_count
+msg = f"当前令牌数：{current_token_count}，总令牌数：{st.session_state.total_token_count}"
+sidebar_status.markdown(msg)
     # st.write(st.session_state.chat_session.history)
 
 # endregion
