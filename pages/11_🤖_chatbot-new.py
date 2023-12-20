@@ -18,6 +18,9 @@ st.set_page_config(
     layout="wide",
 )
 
+if "examples_pair" not in st.session_state:
+    st.session_state["examples_pair"] = []
+
 # endregion
 
 # region 辅助函数
