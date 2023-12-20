@@ -19,6 +19,9 @@ st.set_page_config(
 if "examples_pair" not in st.session_state:
     st.session_state["examples_pair"] = []
 
+if "chat_session" not in st.session_state:
+    st.session_state["chat_session"] = None
+
 if st.session_state.get("clear_example"):
     st.session_state["user_text_area"] = ""
     st.session_state["ai_text_area"] = ""
