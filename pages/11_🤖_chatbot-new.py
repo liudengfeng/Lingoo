@@ -23,8 +23,9 @@ st.set_page_config(
 
 # region 边栏
 
-st.markdown(
+st.sidebar.markdown(
     """:rainbow[运行设置]
+
 🔯 模型：Gemini Pro            
 """
 )
