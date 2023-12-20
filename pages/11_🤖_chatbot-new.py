@@ -28,12 +28,12 @@ st.markdown(
 🔯 模型：Gemini Pro            
 """
 )
-slider_status = st.slider.empty()
+sidebar_status = st.sidebar.empty()
 
 # endregion
 
 authenticate(st)
-check_and_force_logout(st, slider_status)
+check_and_force_logout(st, sidebar_status)
 
 # def multiturn_generate_content():
 #     config = {"max_output_tokens": 2048, "temperature": 0.9, "top_p": 1}
