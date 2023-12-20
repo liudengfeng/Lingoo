@@ -209,4 +209,5 @@ if prompt := st.chat_input("您的输入"):
     response = st.session_state.chat_session.send_message(prompt)
     with st.chat_message("assistant", avatar=AVATAR_MAPS["assistant"]):
         st.markdown(response.text)
+
 # endregion
