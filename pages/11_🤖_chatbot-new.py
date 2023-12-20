@@ -147,7 +147,7 @@ user_example = st.sidebar.text_input(
     max_chars=1000,
 )
 ai_example = st.sidebar.text_input(
-    "🔯 示例",
+    "🔯 模型响应",
     key="ai_text_area",
     max_chars=1000,
 )
