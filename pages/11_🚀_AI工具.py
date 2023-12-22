@@ -437,7 +437,7 @@ with st.expander("📘 提示设计基础知识..."):
 
     st.markdown(
         """模型的响应不正确。改进此问题的一些方法是，先让模型解析问题，然后再回答提示。""")
-
+    st.divider()
     cols_8 = st.columns(2)
     cols_8[0].text("更新后的提示")
     cols_8[1].text("改进了响应")
@@ -492,7 +492,7 @@ $$ b(4) = -405 $$
     
     st.markdown(
         """此模型回答是正确的 - 现在，为了简化回答，你可以要求模型逐步思考。""")
-    
+    st.divider()
     cols_9 = st.columns(2)
     cols_9[0].text("更新后的提示")
     cols_9[1].text("改进了响应")
