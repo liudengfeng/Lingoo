@@ -645,4 +645,31 @@ $$ b(4) = -405 $$
     cols_13[1].text("所有四张图片都是风景摄影的示例。")
     cols_13[0].text("这些图片有什么共同之处？")
 
+
+    st.divider()
+
+    cols_14 = st.columns(2)
+    cols_14[0].markdown(":blue[更新后的提示]")
+    cols_14[1].markdown(":rainbow[改进了的响应]")
+    cols_14[0].image(
+        Image.open(IMAGE_DIR / "packing.jpg"),
+        use_column_width=True,
+    )
+    cols_14[0].image(
+        Image.open(IMAGE_DIR / "mall.jpg"),
+        use_column_width=True,
+    )
+    cols_14[0].image(
+        Image.open(IMAGE_DIR / "toilet-paper.jpg"),
+        use_column_width=True,
+    )
+    cols_14[0].image(
+        Image.open(IMAGE_DIR / "ocean.jpg"),
+        use_column_width=True,
+    )
+    cols_14[0].markdown("""首先，请详细描述每张图片中的内容。这些图片有什么共同之处？""")
+    cols_14[1].markdown("""
+所有图片都与旅行相关。第一张图片展示一个人打包行李箱，第二张图片显示购物中心里空旷的走廊，第三张图片显示一叠厕纸，第四张图片显示的是暴风雨中的海浪。
+
+这些图片都与旅行有关，因为它们是人们在旅行时需要或使用的 所有物品。第一张图片展示了一个人打包行李，也就是人们出门旅行时所做的一件事。第二张图片显示的是购物中心内的一个空廊，人们经常前往该购物场所购物。第三张图片展示了一叠厕纸，这是人们在旅行时经常使用的东西。第四张图片展示了黑暗风暴的海浪，这是人们在旅行时经常遇到的场景。""")    
 # endregion
