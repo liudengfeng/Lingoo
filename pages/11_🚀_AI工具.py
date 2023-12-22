@@ -627,7 +627,7 @@ $$ b(4) = -405 $$
     cols_13[0].markdown("**提示**")
     cols_13[1].markdown("**模型响应**")
     cols_13[0].image(
-        Image.open(IMAGE_DIR / "packing.png"),
+        Image.open(IMAGE_DIR / "packing.jpg"),
         use_column_width=True,
     )
     cols_13[0].image(
