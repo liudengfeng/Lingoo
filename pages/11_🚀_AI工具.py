@@ -18,6 +18,9 @@ st.set_page_config(
     layout="wide",
 )
 
+if "multimodal_examples_pair" not in st.session_state:
+    st.session_state["multimodal_examples_pair"] = []
+
 if "current_token_count" not in st.session_state:
     st.session_state["current_token_count"] = 0
 
@@ -109,8 +112,8 @@ sidebar_col1, sidebar_col2, sidebar_col3, sidebar_col4 = st.sidebar.columns(4)
 sidebar_col1.button(
     "➕",
     # on_click=add_chat_examples,
-    disabled=len(st.session_state["examples_pair"]) >= 8,
-    help="""聊天提示的示例是输入输出对的列表，它们演示给定输入的示例性模型输出。控制在8对以内。使用示例来自定义模型如何响应某些问题。
+    disabled=len(st.session_state["multimodal_examples_pair"]) >= 4,
+    help="""聊天提示的示例是输入输出对的列表，它们演示给定输入的示例性模型输出。控制在4对以内。使用示例来自定义模型如何响应某些问题。
 |用户示例|AI示例|
 |:-|:-|
 |火星有多少颗卫星？|火星有两个卫星，火卫一和火卫二。|
@@ -119,7 +122,7 @@ sidebar_col1.button(
 sidebar_col2.button(
     "➖",
     # on_click=del_last_examples,
-    disabled=len(st.session_state["examples_pair"]) <= 0,
+    disabled=len(st.session_state["multimodal_examples_pair"]) <= 0,
     help="删除最后一对示例",
 )
 sidebar_col3.button(
@@ -129,13 +132,13 @@ sidebar_col3.button(
 )
 
 if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、示例，开始新的对话"):
-    st.session_state["examples_pair"] = []
+    st.session_state["multimodal_examples_pair"] = []
     # init_chat()
 
 with st.sidebar.expander("查看当前样例..."):
     # if "chat_session" not in st.session_state:
     #     init_chat()
-    num = len(st.session_state.examples_pair) * 2
+    num = len(st.session_state.multimodal_examples_pair) * 2
     for his in st.session_state.chat_session.history[:num]:
         st.write(f"**{his.role}**：{his.parts[0].text}")
 
@@ -253,9 +256,11 @@ for tomorrow based on image 3.
 | 幻觉 | 有时，推断内容可能超出图片/视频中的实际位置，或生成不正确的内容以进行广泛文本解析。降低温度或要求缩短说明有助于缓解这种情况。 |
 | 医疗用途 | 不适合解读医学图片（例如 X 光片和 CT 扫描），或不适合提供医学建议。 |
 | 多轮（多模态）聊天 | 未经训练，无法使用聊天机器人功能或以聊天语气回答问题，并且在多轮对话中表现不佳。 |
-""")
+"""
+    )
 
-    st.markdown("""
+    st.markdown(
+        """
 ##### 多模态提示最佳实践
                 
 您可以按照以下最佳实践改进多模态提示：
@@ -274,5 +279,6 @@ for tomorrow based on image 3.
 - **排查哪个部分出错**：要求模型描述图片，或要求模型解释原因，从而衡量模型对图片的初步理解。
 - **如果提示会生成幻觉内容**：请尝试调低温度设置，或要求模型提供较短的说明，以降低推断出其他细节的可能性。
 - **调整采样参数**：尝试不同的温度设置和 Top-k 选择，以调整模型的创造力。
-""")
+"""
+    )
 # endregion
