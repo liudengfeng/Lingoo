@@ -18,7 +18,7 @@ CURRENT_CWD: Path = Path(__file__).parent.parent
 IMAGE_DIR: Path = CURRENT_CWD / "resource/multimodal"
 
 st.set_page_config(
-    page_title="AI 工具",
+    page_title="多模态AI",
     page_icon="🚀",
     layout="wide",
 )
