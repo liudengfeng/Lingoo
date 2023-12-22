@@ -308,8 +308,8 @@ with st.expander("📘 提示设计基础知识..."):
 """
     )
     cols_1 = st.columns(2)
-    cols_1[0].text("提示")
-    cols_1[1].text("模型响应")
+    cols_1[0].markdown("**提示**")
+    cols_1[1].markdown("**模型响应**")
     cols_1[0].image(
         Image.open(IMAGE_DIR / "timetable.png"),
         use_column_width=True,
@@ -320,8 +320,8 @@ with st.expander("📘 提示设计基础知识..."):
     st.divider()
 
     cols_2 = st.columns(2)
-    cols_2[0].text("更新后的提示")
-    cols_2[1].text("改进了响应")
+    cols_2[0].markdown(":blue[更新后的提示]")
+    cols_2[1].markdown(":rainbow[改进了的响应]")
     cols_2[0].image(
         Image.open(IMAGE_DIR / "timetable.png"),
         use_column_width=True,
@@ -357,8 +357,8 @@ with st.expander("📘 提示设计基础知识..."):
     )
 
     cols_3 = st.columns(2)
-    cols_3[0].text("提示")
-    cols_3[1].text("模型响应")
+    cols_3[0].markdown("**提示**")
+    cols_3[1].markdown("**模型响应**")
     cols_3[0].image(
         Image.open(IMAGE_DIR / "redeemer.png"),
         use_column_width=True,
@@ -369,8 +369,8 @@ with st.expander("📘 提示设计基础知识..."):
     st.divider()
 
     cols_4 = st.columns(2)
-    cols_4[0].text("更新后的提示")
-    cols_4[1].text("改进了响应")
+    cols_4[0].markdown(":blue[更新后的提示]")
+    cols_4[1].markdown(":rainbow[改进了的响应]")
     cols_4[0].text("确定城市和地标。")
     cols_4[0].image(
         Image.open(IMAGE_DIR / "colosseum.png"),
@@ -397,8 +397,8 @@ with st.expander("📘 提示设计基础知识..."):
 对于像需要视觉理解和推理这样的复杂任务，将任务拆分为更小、更简单的步骤会很有帮助。或者，如果你在提示中直接要求模型“一步步思考”，也可以有效地解决问题。"""
     )
     cols_5 = st.columns(2)
-    cols_5[0].text("提示")
-    cols_5[1].text("模型响应")
+    cols_5[0].markdown("**提示**")
+    cols_5[1].markdown("**模型响应**")
     cols_5[0].image(
         Image.open(IMAGE_DIR / "toilet-paper.jpg"),
         use_column_width=True,
@@ -409,8 +409,8 @@ with st.expander("📘 提示设计基础知识..."):
     st.divider()
 
     cols_6 = st.columns(2)
-    cols_6[0].text("更新后的提示")
-    cols_6[1].text("改进了响应")
+    cols_6[0].markdown(":blue[更新后的提示]")
+    cols_6[1].markdown(":rainbow[改进了的响应]")
 
     cols_6[0].image(
         Image.open(IMAGE_DIR / "toilet-paper.jpg"),
@@ -430,8 +430,8 @@ with st.expander("📘 提示设计基础知识..."):
         """数学题或其他类型的文字题非常适合要求模型分步思考。""")
     
     cols_7 = st.columns(2)
-    cols_7[0].text("提示")
-    cols_7[1].text("模型响应")
+    cols_7[0].markdown("**提示**")
+    cols_7[1].markdown("**模型响应**")
     cols_7[0].image(
         Image.open(IMAGE_DIR / "math.jpg"),
         use_column_width=True,
@@ -443,8 +443,8 @@ with st.expander("📘 提示设计基础知识..."):
         """模型的响应不正确。改进此问题的一些方法是，先让模型解析问题，然后再回答提示。""")
     st.divider()
     cols_8 = st.columns(2)
-    cols_8[0].text("更新后的提示")
-    cols_8[1].text("改进了响应")
+    cols_8[0].markdown(":blue[更新后的提示]")
+    cols_8[1].markdown(":rainbow[改进了的响应]")
 
     cols_8[0].image(
         Image.open(IMAGE_DIR / "math.jpg"),
@@ -498,8 +498,8 @@ $$ b(4) = -405 $$
         """此模型回答是正确的 - 现在，为了简化回答，你可以要求模型逐步思考。""")
     st.divider()
     cols_9 = st.columns(2)
-    cols_9[0].text("更新后的提示")
-    cols_9[1].text("改进了响应")
+    cols_9[0].markdown(":blue[更新后的提示]")
+    cols_9[1].markdown(":rainbow[改进了的响应]")
 
     cols_9[0].image(
         Image.open(IMAGE_DIR / "math.jpg"),
@@ -523,8 +523,8 @@ $$ b(4) = -405 $$
 一个常见问题是，模型输出需要采用某种格式（例如`Markdown`、`JSON`、`HTML`），尤其是在模型输出需要由下游任务提取时。您可以尝试在提示中指示模型生成该格式的输出。以下是两个示例：""")
 
     cols_10 = st.columns(2)
-    cols_10[0].text("提示")
-    cols_10[1].text("模型响应")
+    cols_10[0].markdown("**提示**")
+    cols_10[1].markdown("**模型响应**")
     cols_10[0].image(
         Image.open(IMAGE_DIR / "excel-example.png"),
         use_column_width=True,
@@ -540,8 +540,8 @@ $$ b(4) = -405 $$
 
     st.divider()
     cols_10 = st.columns(2)
-    cols_10[0].text("提示")
-    cols_10[1].text("模型响应")
+    cols_10[0].markdown("**提示**")
+    cols_10[1].markdown("**模型响应**")
     cols_10[0].image(
         Image.open(IMAGE_DIR / "spanish-meal.png"),
         use_column_width=True,
@@ -588,8 +588,8 @@ $$ b(4) = -405 $$
 为了获得更具体的响应，您可以指出您希望提示从图片的哪些方面获取信息来作为响应。""")
     
     cols_11 = st.columns(2)
-    cols_11[0].text("提示")
-    cols_11[1].text("模型响应")
+    cols_11[0].markdown("**提示**")
+    cols_11[1].markdown("**模型响应**")
     cols_11[0].image(
         Image.open(IMAGE_DIR / "diapers.png"),
         use_column_width=True,
@@ -600,8 +600,8 @@ $$ b(4) = -405 $$
     st.divider()
 
     cols_12 = st.columns(2)
-    cols_12[0].text("更新后的提示")
-    cols_12[1].text("改进了响应")
+    cols_12[0].markdown(":blue[更新后的提示]")
+    cols_12[1].markdown(":rainbow[改进了的响应]")
     cols_12[0].image(
         Image.open(IMAGE_DIR / "diapers.png"),
         use_column_width=True,
