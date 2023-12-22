@@ -386,4 +386,38 @@ with st.expander("📘 提示设计基础知识..."):
     )
     cols_4[1].markdown("""城市：里约热内卢，地标：基督救世主雕像""")
 
+    st.markdown(
+        """
+###### 分步解析
+
+对于像需要视觉理解和推理这样的复杂任务，将任务拆分为更小、更简单的步骤会很有帮助。或者，如果你在提示中直接要求模型“一步步思考”，也可以有效地解决问题。"""
+    )
+    cols_5 = st.columns(2)
+    cols_5[0].text("提示")
+    cols_5[1].text("模型响应")
+    cols_5[0].image(
+        Image.open(IMAGE_DIR / "toilet-paper.jpg"),
+        use_column_width=True,
+    )
+    cols_5[1].text("您只剩下 3 卷了。")
+    cols_5[0].text("我什么时候会用完卫生纸？")
+
+    st.divider()
+
+    cols_6 = st.columns(2)
+    cols_6[0].text("更新后的提示")
+    cols_6[1].text("改进了响应")
+
+    cols_6[0].image(
+        Image.open(IMAGE_DIR / "toilet-paper.jpg"),
+        use_column_width=True,
+    )
+    cols_6[1].markdown("""
+1. 这张图片中有 3 卷卫生纸。
+2. 一个典型的人每天使用大约 20 张卫生纸。
+3. 如果每卷包含 200 张纸，则每卷将持续约 10 天。因此，3 卷将持续大约一个月。""")
+    cols_6[0].markdown("""
+1. 首先，统计此图片中有多少个卫生纸卷。
+2. 然后，确定一般人每天会使用多少卫生纸。
+3. 计算这些卫生纸卷的使用时长。""")
 # endregion
