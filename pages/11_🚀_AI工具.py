@@ -32,6 +32,9 @@ if "current_token_count" not in st.session_state:
 if "total_token_count" not in st.session_state:
     st.session_state["total_token_count"] = 0
 
+if st.session_state.get("clear_prompt"):
+    st.session_state["user_prompt"] = ""
+
 # endregion
 
 # region 边栏
@@ -207,10 +210,11 @@ prompt = st.text_area(
     placeholder="输入您关于图片的提示词",
     disabled=not uploaded_files,
 )
-cols = st.columns([1, 1, 1, 4])
+cols = st.columns([1, 1, 1, 1, 4])
 add_btn = cols[0].button("➕", help="添加 '<>' 分隔符号")
 del_btn = cols[1].button("➖", help="删除 '<>' 分隔符号")
-submitted = cols[2].button("提交", help="如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
+cls_btn = cols[2].button("🗑️", help="清空提示词", key="clear_prompt")
+submitted = cols[3].button("提交", help="如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
 
 response_element = st.empty()
 
