@@ -536,4 +536,38 @@ $$ b(4) = -405 $$
 | 生物学 | 未开始 | 6 小时 | 2016 年 11 月 2 日 | 2023 年 12 月 6 日 |""")
     cols_10[0].text("将此图片中的表解析为 Markdown 格式")
 
+    st.divider()
+    cols_10 = st.columns(2)
+    cols_10[0].text("提示")
+    cols_10[1].text("模型响应")
+    cols_10[0].image(
+        Image.open(IMAGE_DIR / "spanish-meal.png"),
+        use_column_width=True,
+    )
+    cols_10[1].markdown("""
+```json
+```json```
+{
+"ingredients": [
+"rice",
+"shrimp",
+"clams",
+"mussels",
+"peas",
+"tomatoes",
+"onions",
+"garlic",
+"olive oil",
+"paprika",
+"salt",
+"pepper"
+],
+"type of cuisine": "Spanish",
+"vegetarian": false                        
+```
+""")
+    cols_10[0].markdown("""
+请提供以下所有属性的列表：
+食材、菜系类型、是否是素食（采用 JSON 格式）""")
+
 # endregion
