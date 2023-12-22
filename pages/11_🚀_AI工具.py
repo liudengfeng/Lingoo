@@ -85,7 +85,7 @@ st.sidebar.text_input(
 )
 
 user_examples = st.sidebar.file_uploader(
-    "🖼️",
+    "🖼️ 多媒体示例",
     key="image_examples",
     accept_multiple_files=True,
     type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
