@@ -1,33 +1,11 @@
 import time
 
+import google.generativeai as genai
 import streamlit as st
-from vertexai.language_models import ChatModel, InputOutputTextPair
+from google.generativeai.types.generation_types import BlockedPromptException
 
-from mypylib.streamlit_helper import authenticate, check_and_force_logout
-
-# region 认证及初始化
-
-authenticate(st)
-
-if not st.session_state.dbi.is_vip_or_admin(st.session_state.user_info):
-    st.error("您不是VIP用户，无法使用该功能")
-    st.stop()
-
-if "chat_messages" not in st.session_state:
-    st.session_state["chat_messages"] = []
-
-if "examples_pair" not in st.session_state:
-    st.session_state["examples_pair"] = []
-
-# endregion
-
-# region 常量
-# 使用这种方式避免因格式化文档时被更改
-AVATAR_NAMES = ["user", "assistant"]
-AVATAR_EMOJIES = ["🧑‍💻", "🤖"]
-AVATAR_MAPS = {name: emoji for name, emoji in zip(AVATAR_NAMES, AVATAR_EMOJIES)}
-
-# endregion
+from mypylib.google_gemini import SAFETY_SETTINGS
+from mypylib.st_helper import authenticate, check_and_force_logout
 
 # region 页面设置
 
@@ -37,21 +15,46 @@ st.set_page_config(
     layout="wide",
 )
 
+AVATAR_NAMES = ["user", "model"]
+AVATAR_EMOJIES = ["🧑‍💻", "🤖"]
+AVATAR_MAPS = {name: emoji for name, emoji in zip(AVATAR_NAMES, AVATAR_EMOJIES)}
+
+if "examples_pair" not in st.session_state:
+    st.session_state["examples_pair"] = []
+
+if "current_token_count" not in st.session_state:
+    st.session_state["current_token_count"] = 0
+
+if "total_token_count" not in st.session_state:
+    st.session_state["total_token_count"] = 0
+
+if st.session_state.get("clear_example"):
+    st.session_state["user_text_area"] = ""
+    st.session_state["ai_text_area"] = ""
+
 # endregion
 
 # region 辅助函数
 
 
 def init_chat():
-    chat_model = ChatModel.from_pretrained("chat-bison")
-    context = st.session_state["context_text_area"]
-    examples = []
-    for user, ai in st.session_state["examples_pair"]:
-        examples.append(InputOutputTextPair(user, ai))
-    st.session_state["chat"] = chat_model.start_chat(
-        context=context,
-        examples=examples,
+    generation_config = {
+        "temperature": st.session_state["temperature"],
+        "top_p": st.session_state["top_p"],
+        "top_k": st.session_state["top_k"],
+        "max_output_tokens": st.session_state["max_output_tokens"],
+    }
+    model = genai.GenerativeModel(
+        model_name="gemini-pro",
+        generation_config=generation_config,
+        safety_settings=SAFETY_SETTINGS,
     )
+    history = []
+    for user, ai in st.session_state["examples_pair"]:
+        history.append({"role": "user", "parts": [user]})
+        history.append({"role": "model", "parts": [ai]})
+    st.session_state["chat_session"] = model.start_chat(history=history)
+    st.session_state["chat_model"] = model
 
 
 def add_chat_examples():
@@ -70,7 +73,7 @@ def add_chat_examples():
         st.toast("示例对不能为空。")
 
 
-def del_chat_examples():
+def del_last_examples():
     if st.session_state["examples_pair"]:
         st.session_state["examples_pair"].pop()
         # st.write(st.session_state["examples_pair"])
@@ -79,29 +82,22 @@ def del_chat_examples():
 
 # endregion
 
-# region 侧边栏
 
-sidebar_status = st.sidebar.empty()
-# 在页面加载时检查是否有需要强制退出的登录会话
-check_and_force_logout(st, sidebar_status)
+# region 边栏
 
-st.sidebar.slider(
-    "响应数量上限",
-    key="candidate_count",
-    min_value=1,
-    max_value=4,
-    value=1,
-    step=1,
-    help="""每个提示生成的模型响应数量上限。响应仍可能因安全过滤器或其他政策而被阻止。""",
+st.sidebar.markdown(
+    """:rainbow[运行设置]\n
+🔯 模型：Gemini Pro            
+"""
 )
 st.sidebar.slider(
     "词元限制",
     key="max_output_tokens",
     min_value=32,
-    max_value=1024,
-    value=256,
+    max_value=8192,
+    value=1024,
     step=32,
-    help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 1024。""",
+    help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 2048。""",
 )
 # 生成参数
 st.sidebar.slider(
@@ -109,7 +105,7 @@ st.sidebar.slider(
     min_value=0.00,
     max_value=1.0,
     key="temperature",
-    value=0.6,  # st.session_state["model_temperature"],
+    value=0.6,
     step=0.1,
     help="温度可以控制词元选择的随机性。较低的温度适合希望获得真实或正确回复的提示，而较高的温度可能会引发更加多样化或意想不到的结果。如果温度为 0，系统始终会选择概率最高的词元。对于大多数应用场景，不妨先试着将温度设为 0.2。",
 )
@@ -119,7 +115,7 @@ st.sidebar.slider(
     key="top_k",
     min_value=1,
     max_value=40,
-    value=20,
+    value=40,
     step=1,
     help="""Top-k 可更改模型选择输出词元的方式。
 - 如果 Top-k 设为 1，表示所选词元是模型词汇表的所有词元中概率最高的词元（也称为贪心解码）。
@@ -131,49 +127,29 @@ st.sidebar.slider(
     key="top_p",
     min_value=0.00,
     max_value=1.0,
-    value=0.6,
+    value=0.8,
     step=0.05,
     help="""Top-p 可更改模型选择输出词元的方式。系统会按照概率从最高到最低的顺序选择词元，直到所选词元的概率总和等于 Top-p 的值。
 - 例如，如果词元 A、B 和 C 的概率分别是 0.3、0.2 和 0.1，并且 Top-p 的值为 0.5，则模型将选择 A 或 B 作为下一个词元（通过温度确定）。
 - Top-p 的默认值为 0.8。""",
 )
 
-st.sidebar.text_area(
-    "模型上下文",
-    key="context_text_area",
-    max_chars=1000,
-    on_change=init_chat,
-    # height=60,
-    placeholder="你很诚实，从不说谎。 切勿编造事实，如果您不能 100% 确定，请回答您无法如实回答的原因。",
-    help="""使用聊天提示中的上下文来自定义聊天模型的行为（可选）。
-您可以使用上下文来执行以下操作：
-- 指定模型可以和不能使用的单词。
-- 指定要关注或避免的主题。
-- 指定响应的风格、语气或格式。
-- 假设一个人物、人物或角色。
-
-|最佳实践|描述|示例|
-|:-|:-|:-|
-|给出聊天机器人要遵循的规则。|规则限制聊天机器人的行为。|你来自1700年代。|
-|||1700年代以后你就什么都不知道了。|
-|添加提醒以始终记住并遵循说明。|帮助聊天机器人在对话中遵循上下文中的说明。|在您回复之前，请注意、思考并记住此处设置的所有说明。|
-|添加一条规则以减少幻觉。|帮助聊天机器人给出更真实的答案。|你很诚实，从不说谎。 切勿编造事实，如果您不能 100% 确定，请回答您无法如实回答的原因。|
-""",
+st.sidebar.text_input(
+    "添加停止序列",
+    key="stop_sequences",
+    max_chars=64,
+    help="停止序列是一连串字符（包括空格），如果模型中出现停止序列，则会停止生成回复。该序列不包含在回复中。您最多可以添加五个停止序列。",
 )
 
-user_example = st.sidebar.text_area(
-    "用户示例",
+user_example = st.sidebar.text_input(
+    "👤 用户示例",
     key="user_text_area",
     max_chars=1000,
-    # height=200,
-    # placeholder=user_placeholder,
 )
-ai_example = st.sidebar.text_area(
-    "AI示例",
-    key=f"ai_text_area",
+ai_example = st.sidebar.text_input(
+    "🔯 模型响应",
+    key="ai_text_area",
     max_chars=1000,
-    # height=200,
-    # placeholder=ai_placeholder,
 )
 
 sidebar_col1, sidebar_col2, sidebar_col3, sidebar_col4 = st.sidebar.columns(4)
@@ -190,7 +166,7 @@ sidebar_col1.button(
 )
 sidebar_col2.button(
     "➖",
-    on_click=del_chat_examples,
+    on_click=del_last_examples,
     disabled=len(st.session_state["examples_pair"]) <= 0,
     help="删除最后一对示例",
 )
@@ -202,62 +178,84 @@ sidebar_col3.button(
 
 if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、示例，开始新的对话"):
     st.session_state["examples_pair"] = []
-    # 删除对象
-    del st.session_state["chat_messages"]
     init_chat()
+
+with st.sidebar.expander("查看当前样例..."):
+    if "chat_session" not in st.session_state:
+        init_chat()
+    num = len(st.session_state.examples_pair) * 2
+    for his in st.session_state.chat_session.history[:num]:
+        st.write(f"**{his.role}**：{his.parts[0].text}")
+
+st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。", icon="✨")
+sidebar_status = st.sidebar.empty()
 # endregion
 
-# region 主页
+# region 认证及强制退出
 
-# 模型上下文 【按钮点击影响其他控件属性的标准做法】
-if st.session_state.get("reset_btn"):
-    st.session_state["context_text_area"] = ""
+authenticate(st)
+check_and_force_logout(st, sidebar_status)
 
-if st.session_state.get("clear_example"):
-    st.session_state["user_text_area"] = ""
-    st.session_state["ai_text_area"] = ""
+# endregion
 
+# region 主页面
 
-# 主页面
-st.title("🤖 聊天机器人")
-info_container = st.empty()
-
-if "chat_messages" in st.session_state and st.session_state.chat_messages:
-    for msg in st.session_state.chat_messages:
-        with st.chat_message(msg["role"], avatar=AVATAR_MAPS[msg["role"]]):
-            st.markdown(msg["content"])
-
-if "chat" not in st.session_state:
+st.subheader("🤖 Google Gemini 聊天机器人")
+if "chat_session" not in st.session_state:
     init_chat()
 
-if prompt := st.chat_input("您的输入"):
+# 显示会话历史记录
+start_idx = len(st.session_state.examples_pair) * 2
+for message in st.session_state.chat_session.history[start_idx:]:
+    # role = "assistant" if message.role =="model" else "user"
+    role = message.role
+    with st.chat_message(role, avatar=AVATAR_MAPS[role]):
+        st.markdown(message.parts[0].text)
+
+
+if prompt := st.chat_input("输入提示以便开始对话"):
     with st.chat_message("user", avatar=AVATAR_MAPS["user"]):
         st.markdown(prompt)
-    st.session_state.chat_messages.append({"role": "user", "content": prompt})
-    parameters = {
-        # 不支持流式
-        "candidate_count": st.session_state[
-            "candidate_count"
-        ],  # The candidate_count parameter determines the maximum number of responses to return.
-        "max_output_tokens": st.session_state[
-            "max_output_tokens"
-        ],  # Token limit determines the maximum amount of text output.
-        "temperature": st.session_state[
-            "temperature"
-        ],  # Temperature controls the degree of randomness in token selection.
-        "top_p": st.session_state[
-            "top_p"
-        ],  # Tokens are selected from most probable to least until the sum of their probabilities equals the top_p value.
-        "top_k": st.session_state[
-            "top_k"
-        ],  # A top_k of 1 means the selected token is the most probable among all tokens.
+
+    config = {
+        "temperature": st.session_state["temperature"],
+        "top_p": st.session_state["top_p"],
+        "top_k": st.session_state["top_k"],
+        "max_output_tokens": st.session_state["max_output_tokens"],
     }
-    # st.write("参数",parameters)
-    response = st.session_state.chat.send_message(message=prompt, **parameters)
-    with st.chat_message("assistant", avatar=AVATAR_MAPS["assistant"]):
-        st.markdown(response.text)
-    st.session_state.chat_messages.append(
-        {"role": "assistant", "content": response.text}
-    )
+    try:
+        response = st.session_state.chat_session.send_message(
+            prompt,
+            generation_config=config,
+            safety_settings=SAFETY_SETTINGS,
+            stream=True,
+        )
+    except BlockedPromptException:
+        # 处理被阻止的消息
+        st.toast("抱歉，您尝试发送的消息包含潜在不安全的内容，已被阻止。")
+    else:
+        with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
+            message_placeholder = st.empty()
+            full_response = ""
+            for chunk in response:
+                full_response += chunk.text
+                time.sleep(0.05)
+                # Add a blinking cursor to simulate typing
+                message_placeholder.markdown(full_response + "▌")
+            message_placeholder.markdown(full_response)
+            # st.markdown(response.text)
+
+        # 显示令牌数
+        # current_token_count = response._raw_response.usage_metadata.total_token_count
+        # st.session_state.total_token_count += current_token_count
+
+        st.session_state.current_token_count = st.session_state.chat_model.count_tokens(
+            prompt + full_response
+        ).total_tokens
+        st.session_state.total_token_count += st.session_state.current_token_count
+
+msg = f"当前令牌数：{st.session_state.current_token_count}，总令牌数：{st.session_state.total_token_count}"
+sidebar_status.markdown(msg)
+# st.write(st.session_state.chat_session.history)
 
 # endregion
