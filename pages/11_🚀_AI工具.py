@@ -316,9 +316,9 @@ with st.expander("📘 提示设计基础知识..."):
     )
     cols_1[1].text("此图片显示了机场到达和出发信息面板。")
     cols_1[0].text("描述此图片。")
-    
+
     st.divider()
-    
+
     cols_2 = st.columns(2)
     cols_2[0].text("更新后的提示")
     cols_2[1].text("改进了响应")
@@ -326,7 +326,8 @@ with st.expander("📘 提示设计基础知识..."):
         Image.open(IMAGE_DIR / "timetable.png"),
         use_column_width=True,
     )
-    cols_2[1].markdown("""
+    cols_2[1].markdown(
+        """
 - 10:50 莫斯科
 - 11:05 爱丁堡
 - 11:05 伦敦
@@ -340,7 +341,8 @@ with st.expander("📘 提示设计基础知识..."):
 - 12:40 圣彼得堡
 - 12:40 伦敦
 - 12:45 曼彻斯特
-""")
+"""
+    )
     cols_2[0].text("将下图中显示的机场面板中的时间和城市解析为列表。")
 
     st.markdown(
@@ -349,6 +351,39 @@ with st.expander("📘 提示设计基础知识..."):
 
 `Gemini`模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。
 
-在以下示例中，初始输出以句子形式编写，并且还包含国家/地区（巴西）。假设您需要不同格式或样式的输出，并且只希望输入城市而不是国家/地区。在提示中添加少样本样本可以引导模型以您想要的方式响应。""")
+在以下示例中，初始输出以句子形式编写，并且还包含国家/地区（巴西）。假设您需要不同格式或样式的输出，并且只希望输入城市而不是国家/地区。在提示中添加少样本样本可以引导模型以您想要的方式响应。"""
+    )
+
+    cols_3 = st.columns(2)
+    cols_3[0].text("提示")
+    cols_3[1].text("模型响应")
+    cols_3[0].image(
+        Image.open(IMAGE_DIR / "redeemer.png"),
+        use_column_width=True,
+    )
+    cols_3[1].text("地标是巴西里约热内卢的基督救世主雕像。")
+    cols_3[0].text("确定城市和地标。")
+
+    st.divider()
+
+    cols_4 = st.columns(2)
+    cols_4[0].text("更新后的提示")
+    cols_4[1].text("改进了响应")
+    cols_4[0].text("确定城市和地标。")
+    cols_4[0].image(
+        Image.open(IMAGE_DIR / "colosseum.png"),
+        use_column_width=True,
+    )
+    cols_4[0].text("城市：罗马 ，地标：罗马斗兽场。")
+    cols_4[0].image(
+        Image.open(IMAGE_DIR / "forbidden-city.png"),
+        use_column_width=True,
+    )
+    cols_4[0].text("城市：北京，地标：紫禁城")
+    cols_4[0].image(
+        Image.open(IMAGE_DIR / "timetable.png"),
+        use_column_width=True,
+    )
+    cols_4[1].markdown("""城市：里约热内卢，地标：基督救世主雕像""")
 
 # endregion
