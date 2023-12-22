@@ -616,4 +616,33 @@ $$ b(4) = -405 $$
 此体重范围的平均儿童可能在 1 至 2 岁之间。
 
 2 岁的孩子通常每天要换 6 片尿片，因此尿片的使用寿命约为 33 天 (198/6)。""")    
+    
+    st.markdown(
+        """
+###### 如果模型输出过于宽泛，并且未针对图片或视频输入量身打造
+
+为了帮助模型定制其对图片的响应，在执行推理任务之前，请尝试让模型对图片进行描述。""")
+    
+    cols_13 = st.columns(2)
+    cols_13[0].markdown("**提示**")
+    cols_13[1].markdown("**模型响应**")
+    cols_13[0].image(
+        Image.open(IMAGE_DIR / "packing.png"),
+        use_column_width=True,
+    )
+    cols_13[0].image(
+        Image.open(IMAGE_DIR / "mall.png"),
+        use_column_width=True,
+    )
+    cols_13[0].image(
+        Image.open(IMAGE_DIR / "toilet-paper.jpg"),
+        use_column_width=True,
+    )
+    cols_13[0].image(
+        Image.open(IMAGE_DIR / "ocean.jpg"),
+        use_column_width=True,
+    )
+    cols_13[1].text("所有四张图片都是风景摄影的示例。")
+    cols_13[0].text("这些图片有什么共同之处？")
+
 # endregion
