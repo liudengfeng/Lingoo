@@ -178,10 +178,21 @@ image1 = Part.from_data(
 )
 
 # region 主页面
-st.markdown(
-    """#### 🚀 :rainbow[多模态工具]           
-"""
-)
+st.markdown("""#### 🚀 :rainbow[多模态工具]""")
+
+with st.form(key="ai_tool_form"):
+    uploaded_file = st.file_uploader(
+        "插入多媒体文件",
+        type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
+    )
+    question = st.text_input(
+        "您的提示",
+        placeholder="看下面的图片，告诉我谁是建筑师",
+        disabled=not uploaded_file,
+    )
+
+response_element = st.empty()
+
 
 with st.expander("参考..."):
     st.markdown(
