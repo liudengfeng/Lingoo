@@ -1,16 +1,21 @@
 import base64
 import time
+from pathlib import Path
 
 import google.generativeai as genai
 import streamlit as st
 import vertexai
 from google.generativeai.types.generation_types import BlockedPromptException
+from PIL import Image
 from vertexai.preview.generative_models import GenerativeModel, Part
 
 from mypylib.google_gemini import SAFETY_SETTINGS
 from mypylib.st_helper import authenticate, check_and_force_logout
 
 # region 页面设置
+
+CURRENT_CWD: Path = Path(__file__).parent.parent
+IMAGE_DIR: Path = CURRENT_CWD / "resource/multimodal"
 
 st.set_page_config(
     page_title="AI 工具",
@@ -284,4 +289,30 @@ with st.expander("📝 多模态提示最佳实践..."):
 - **调整采样参数**：尝试不同的温度设置和 Top-k 选择，以调整模型的创造力。
 """
     )
+
+with st.expander("📘 提示设计基础知识..."):
+    st.markdown(
+        """
+##### 提示设计基础知识
+
+本部分扩展了上一部分中列出的最佳实践。
+注意：以下 Gemini 示例的模型结果可能因运行而异。
+
+###### 说明应当明确具体
+
+清晰、详尽的提示效果最好。如果您有特定的输出，最好在提示中包含该要求，以确保获得所需的输出。
+
+有时，提示的编写者可能看上去很清楚，但实际上并没有明确。如需自定义模型行为，请考虑对您的提示的误解，并确保您提供的说明简短具体。请尽量避免误解。
+
+对于此机场登机牌图片，要求模型仅“描述此图片”可以生成一般描述。如果您需要模型解析图片中的时间和城市，您可以直接在提示中包含该请求。
+"""
+    )
+    cols_1 = st.columns(2)
+    image = Image.open(IMAGE_DIR / "timetable.png")
+    cols_1[0].image(
+        image,
+        use_column_width=True,
+    )
+
+
 # endregion
