@@ -381,7 +381,7 @@ with st.expander("📘 提示设计基础知识..."):
     )
     cols_4[0].text("城市：北京，地标：紫禁城")
     cols_4[0].image(
-        Image.open(IMAGE_DIR / "colosseum.png"),
+        Image.open(IMAGE_DIR / "redeemer.png"),
         use_column_width=True,
     )
     cols_4[1].markdown("""城市：里约热内卢，地标：基督救世主雕像""")
