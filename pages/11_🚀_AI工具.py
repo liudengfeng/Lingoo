@@ -84,10 +84,11 @@ st.sidebar.text_input(
     help="停止序列是一连串字符（包括空格），如果模型中出现停止序列，则会停止生成回复。该序列不包含在回复中。您最多可以添加五个停止序列。",
 )
 
-png_examples = st.sidebar.file_uploader(
+user_examples = st.sidebar.file_uploader(
     "🖼️",
     key="image_examples",
     accept_multiple_files=True,
+    type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
     help="""
 支持的格式
 - 图片：PNG、JPG
@@ -98,7 +99,7 @@ png_examples = st.sidebar.file_uploader(
 )
 ai_examples = st.sidebar.text_input(
     "🔯 模型响应",
-    key="ai_text_area",
+    key="ai_response",
     placeholder="在多个响应之间，请添加 '\n' 符号进行分隔。注意，响应的数量应与图片示例的数量相同。",
     max_chars=2000,
 )
@@ -166,7 +167,7 @@ def generate():
     )
 
     for response in responses:
-        print(response.candidates[0].content.parts[0].text)
+        st.write(response.candidates[0].content.parts[0].text)
 
 
 image1 = Part.from_data(
