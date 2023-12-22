@@ -190,6 +190,9 @@ with st.form(key="ai_tool_form"):
         placeholder="看下面的图片，告诉我谁是建筑师",
         disabled=not uploaded_file,
     )
+    if uploaded_file and question:
+        st.info("Please add your Anthropic API key to continue.")
+    submitted = st.form_submit_button("提交")
 
 response_element = st.empty()
 
