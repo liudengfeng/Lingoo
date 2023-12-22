@@ -501,7 +501,7 @@ $$ b(4) = -405 $$
         Image.open(IMAGE_DIR / "math.jpg"),
         use_column_width=True,
     )
-    cols_9[0].text("序列中的第 4 项是什么？循序渐进地思考。")
+    cols_9[0].text("序列中的第 4 项是什么？**循序渐进**地思考。")
     cols_9[1].markdown("""
 第一项是 15。
 
