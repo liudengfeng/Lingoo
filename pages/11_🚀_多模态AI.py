@@ -95,53 +95,53 @@ st.sidebar.text_input(
     help="停止序列是一连串字符（包括空格），如果模型中出现停止序列，则会停止生成回复。该序列不包含在回复中。您最多可以添加五个停止序列。",
 )
 
-user_examples = st.sidebar.file_uploader(
-    "🖼️ 多媒体示例",
-    key="image_examples",
-    accept_multiple_files=True,
-    type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
-    help="""
-支持的格式
-- 图片：PNG、JPG
-- 视频：
-    - 您可以上传视频，支持以下格式：MKV、MOV、MP4、WEBM（最大 7MB）
-    - 该模型将分析长达 2 分钟的视频。 请注意，它将处理从视频中获取的一组不连续的图像帧。
-""",
-)
-ai_examples = st.sidebar.text_input(
-    "🔯 模型响应",
-    key="ai_response",
-    placeholder="在多个响应之间，请添加 '<>' 符号进行分隔。注意，响应的数量应与图片示例的数量相同。",
-    max_chars=2000,
-)
+# user_examples = st.sidebar.file_uploader(
+#     "🖼️ 多媒体示例",
+#     key="image_examples",
+#     accept_multiple_files=True,
+#     type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
+#     help="""
+# 支持的格式
+# - 图片：PNG、JPG
+# - 视频：
+#     - 您可以上传视频，支持以下格式：MKV、MOV、MP4、WEBM（最大 7MB）
+#     - 该模型将分析长达 2 分钟的视频。 请注意，它将处理从视频中获取的一组不连续的图像帧。
+# """,
+# )
+# ai_examples = st.sidebar.text_input(
+#     "🔯 模型响应",
+#     key="ai_response",
+#     placeholder="在多个响应之间，请添加 '<>' 符号进行分隔。注意，响应的数量应与图片示例的数量相同。",
+#     max_chars=2000,
+# )
 
-sidebar_col1, sidebar_col2, sidebar_col3, sidebar_col4 = st.sidebar.columns(4)
+# sidebar_col1, sidebar_col2, sidebar_col3, sidebar_col4 = st.sidebar.columns(4)
 
-sidebar_col1.button(
-    "➕",
-    # on_click=add_chat_examples,
-    disabled=len(st.session_state["multimodal_examples_pair"]) >= 4,
-    help="""聊天提示的示例是输入输出对的列表，它们演示给定输入的示例性模型输出。控制在4对以内。使用示例来自定义模型如何响应某些问题。
-|用户示例|AI示例|
-|:-|:-|
-|火星有多少颗卫星？|火星有两个卫星，火卫一和火卫二。|
-""",
-)
-sidebar_col2.button(
-    "➖",
-    # on_click=del_last_examples,
-    disabled=len(st.session_state["multimodal_examples_pair"]) <= 0,
-    help="删除最后一对示例",
-)
-sidebar_col3.button(
-    "🗑️",
-    key="clear_example",
-    help="清除当前示例对",
-)
+# sidebar_col1.button(
+#     "➕",
+#     # on_click=add_chat_examples,
+#     disabled=len(st.session_state["multimodal_examples_pair"]) >= 4,
+#     help="""聊天提示的示例是输入输出对的列表，它们演示给定输入的示例性模型输出。控制在4对以内。使用示例来自定义模型如何响应某些问题。
+# |用户示例|AI示例|
+# |:-|:-|
+# |火星有多少颗卫星？|火星有两个卫星，火卫一和火卫二。|
+# """,
+# )
+# sidebar_col2.button(
+#     "➖",
+#     # on_click=del_last_examples,
+#     disabled=len(st.session_state["multimodal_examples_pair"]) <= 0,
+#     help="删除最后一对示例",
+# )
+# sidebar_col3.button(
+#     "🗑️",
+#     key="clear_example",
+#     help="清除当前示例对",
+# )
 
-if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、示例，开始新的对话"):
-    st.session_state["multimodal_examples_pair"] = []
-    # init_chat()
+# if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、示例，开始新的对话"):
+#     st.session_state["multimodal_examples_pair"] = []
+#     # init_chat()
 
 # with st.sidebar.expander("查看当前样例..."):
 #     # if "chat_session" not in st.session_state:
@@ -159,8 +159,8 @@ sidebar_status = st.sidebar.empty()
 authenticate(st)
 check_and_force_logout(st, sidebar_status)
 
-
 # endregion
+
 def generate():
     model = GenerativeModel("gemini-pro-vision")
     responses = model.generate_content(
