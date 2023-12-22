@@ -167,7 +167,7 @@ def generate():
     )
 
     for response in responses:
-        st.write(response.candidates[0].content.parts[0].text)
+        st.markdown(response.candidates[0].content.parts[0].text)
 
 
 image1 = Part.from_data(
