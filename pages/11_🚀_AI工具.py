@@ -631,7 +631,7 @@ $$ b(4) = -405 $$
         use_column_width=True,
     )
     cols_13[0].image(
-        Image.open(IMAGE_DIR / "mall.png"),
+        Image.open(IMAGE_DIR / "mall.jpg"),
         use_column_width=True,
     )
     cols_13[0].image(
