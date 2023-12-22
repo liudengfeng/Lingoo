@@ -200,7 +200,7 @@ with st.form(key="ai_tool_form"):
 response_element = st.empty()
 
 
-with st.expander("参考..."):
+with st.expander("使用场景..."):
     st.markdown(
         """##### 使用场景
 
@@ -218,6 +218,7 @@ Gemini Pro Vision 非常适合各种多模态用例，包括但不限于下表�
 """
     )
 
+with st.expander("图片最佳做法..."):
     st.markdown(
         """
 ##### 图片最佳做法
@@ -242,8 +243,9 @@ for tomorrow based on image 3.
 """
     )
 
+with st.expander("`Gemini`的当前限制..."):
     st.markdown(
-        """##### Gemini 的当前限制
+        """##### `Gemini`的当前限制
 
 虽然强大，但 Gemini 存在局限性。它在图片、长视频和复杂的指令等方面难以确定精确的对象位置。不适用于医疗用途或聊天机器人。
 
@@ -259,6 +261,7 @@ for tomorrow based on image 3.
 """
     )
 
+with st.expander("多模态提示最佳实践..."):
     st.markdown(
         """
 ##### 多模态提示最佳实践
