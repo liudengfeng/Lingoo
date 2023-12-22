@@ -310,10 +310,10 @@ with st.expander("📘 提示设计基础知识..."):
     cols_1 = st.columns(2)
     cols_1[0].text("提示")
     cols_1[1].text("模型响应")
-    # cols_1[0].image(
-    #     Image.open(IMAGE_DIR / "timetable.png"),
-    #     use_column_width=True,
-    # )
+    cols_1[0].image(
+        Image.open(IMAGE_DIR / "timetable.png"),
+        use_column_width=True,
+    )
     # cols_1[1].text("此图片显示了机场到达和出发信息面板。")
     # cols_1[0].text("描述此图片。")
 
