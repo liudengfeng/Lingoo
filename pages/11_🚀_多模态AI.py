@@ -187,7 +187,10 @@ def generate(uploaded_files, prompt, response_container):
 
 
 # region 主页面
-st.markdown("""#### 🚀 :rainbow[多模态AI]""")
+st.markdown("""#### 🚀 :rainbow[多模态AI]
+
+您可以向`Gemini`模型发送多模态提示信息。支持的模态包括文字、图片和视频。
+""")
 
 uploaded_files = st.file_uploader(
     "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
