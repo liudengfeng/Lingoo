@@ -221,13 +221,14 @@ def generate(uploaded_files, prompt, response_container):
             col1.video(m)
 
     full_response = ""
+    message_placeholder = col2.empty()
     for chunk in responses:
         full_response += chunk.text
         time.sleep(0.05)
         # Add a blinking cursor to simulate typing
-        col2.markdown(full_response + "▌")
+        message_placeholder.markdown(full_response + "▌")
 
-    col2.markdown(full_response)
+    message_placeholder.markdown(full_response)
 
     st.session_state.current_token_count = model.count_tokens(
         prompt + full_response
