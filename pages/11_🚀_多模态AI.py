@@ -170,7 +170,7 @@ def _process_media(uploaded_file):
     # 用文件扩展名称形成 MIME 类型
     mime = mimetypes.guess_type(uploaded_file.name)[0]
     st.write(mime)
-    return Part.from_data(data=uploaded_file.getvalue(), mime=mime)
+    return Part.from_data(data=uploaded_file.getvalue(), mime_type=mime)
 
 
 def _process_image_and_prompt(uploaded_files, prompt):
