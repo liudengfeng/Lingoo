@@ -79,7 +79,7 @@ st.sidebar.slider(
     key="top_k",
     min_value=1,
     max_value=40,
-    value=40,
+    value=32,
     step=1,
     help="""Top-k 可更改模型选择输出词元的方式。
 - 如果 Top-k 设为 1，表示所选词元是模型词汇表的所有词元中概率最高的词元（也称为贪心解码）。
@@ -91,7 +91,7 @@ st.sidebar.slider(
     key="top_p",
     min_value=0.00,
     max_value=1.0,
-    value=0.8,
+    value=1.0,
     step=0.05,
     help="""Top-p 可更改模型选择输出词元的方式。系统会按照概率从最高到最低的顺序选择词元，直到所选词元的概率总和等于 Top-p 的值。
 - 例如，如果词元 A、B 和 C 的概率分别是 0.3、0.2 和 0.1，并且 Top-p 的值为 0.5，则模型将选择 A 或 B 作为下一个词元（通过温度确定）。
