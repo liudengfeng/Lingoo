@@ -33,6 +33,9 @@ if "current_token_count" not in st.session_state:
 if "total_token_count" not in st.session_state:
     st.session_state["total_token_count"] = 0
 
+if "user_prompt" not in st.session_state:
+    st.session_state["user_prompt"] = ""
+
 if st.session_state.get("clear_prompt"):
     st.session_state["user_prompt"] = ""
 
