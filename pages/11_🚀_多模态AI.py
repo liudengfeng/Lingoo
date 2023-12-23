@@ -271,11 +271,11 @@ submitted = cols[3].button("提交", help="如果含有示例响应，在多个�
 response_container = st.container()
 
 if add_btn:
-    st.session_state["user_prompt"] = prompt + "<>"
+    st.session_state["user_prompt"] = f"{prompt}\n<>"
     st.rerun()
 
 if del_btn:
-    st.session_state["user_prompt"] = prompt[:-2]
+    st.session_state["user_prompt"] = prompt.strip()[:-2]
     st.rerun()
 
 if submitted:
