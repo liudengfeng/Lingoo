@@ -99,63 +99,12 @@ st.sidebar.text_input(
     help="停止序列是一连串字符（包括空格），如果模型中出现停止序列，则会停止生成回复。该序列不包含在回复中。您最多可以添加五个停止序列。",
 )
 
-# user_examples = st.sidebar.file_uploader(
-#     "🖼️ 多媒体示例",
-#     key="image_examples",
-#     accept_multiple_files=True,
-#     type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
-#     help="""
-# 支持的格式
-# - 图片：PNG、JPG
-# - 视频：
-#     - 您可以上传视频，支持以下格式：MKV、MOV、MP4、WEBM（最大 7MB）
-#     - 该模型将分析长达 2 分钟的视频。 请注意，它将处理从视频中获取的一组不连续的图像帧。
-# """,
-# )
-# ai_examples = st.sidebar.text_input(
-#     "🔯 模型响应",
-#     key="ai_response",
-#     placeholder="在多个响应之间，请添加 '<>' 符号进行分隔。注意，响应的数量应与图片示例的数量相同。",
-#     max_chars=2000,
-# )
-
-# sidebar_col1, sidebar_col2, sidebar_col3, sidebar_col4 = st.sidebar.columns(4)
-
-# sidebar_col1.button(
-#     "➕",
-#     # on_click=add_chat_examples,
-#     disabled=len(st.session_state["multimodal_examples_pair"]) >= 4,
-#     help="""聊天提示的示例是输入输出对的列表，它们演示给定输入的示例性模型输出。控制在4对以内。使用示例来自定义模型如何响应某些问题。
-# |用户示例|AI示例|
-# |:-|:-|
-# |火星有多少颗卫星？|火星有两个卫星，火卫一和火卫二。|
-# """,
-# )
-# sidebar_col2.button(
-#     "➖",
-#     # on_click=del_last_examples,
-#     disabled=len(st.session_state["multimodal_examples_pair"]) <= 0,
-#     help="删除最后一对示例",
-# )
-# sidebar_col3.button(
-#     "🗑️",
-#     key="clear_example",
-#     help="清除当前示例对",
-# )
-
-# if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、示例，开始新的对话"):
-#     st.session_state["multimodal_examples_pair"] = []
-#     # init_chat()
-
-# with st.sidebar.expander("查看当前样例..."):
-#     # if "chat_session" not in st.session_state:
-#     #     init_chat()
-#     num = len(st.session_state.multimodal_examples_pair) * 2
-#     for his in st.session_state.chat_session.history[:num]:
-#         st.write(f"**{his.role}**：{his.parts[0].text}")
 
 st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。", icon="✨")
-sidebar_status = st.sidebar.empty()
+st.sidebar.markdown(
+    f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
+)
+
 # endregion
 
 # region 认证及强制退出
@@ -261,7 +210,10 @@ prompt = st.text_area(
     height=300,
 )
 cols = st.columns([1, 1, 1, 1, 4])
-add_btn = cols[0].button("➕", help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。")
+add_btn = cols[0].button(
+    "➕",
+    help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。",
+)
 del_btn = cols[1].button("➖", help="删除提示词尾部的分隔符")
 cls_btn = cols[2].button("🗑️", help="清空提示词", key="clear_prompt")
 submitted = cols[3].button("提交", help="如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
@@ -285,8 +237,6 @@ if submitted:
         st.stop()
     generate(uploaded_files, prompt, response_container)
 
-msg = f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
-sidebar_status.markdown(msg)
 
 with st.expander("💡 使用场景..."):
     st.markdown(
