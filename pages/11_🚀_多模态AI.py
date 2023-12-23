@@ -175,7 +175,14 @@ def _process_media(uploaded_file):
 
 def _process_image_and_prompt(uploaded_files, prompt):
     contents = []
-    ps = [p.strip() for p in prompt.split("<>")]
+    separator = "<>"
+    if separator not in prompt:
+        # 如果没有分隔符，代表没有示例
+        for im in uploaded_files:
+            contents.append(_process_media(im))
+        contents.append(prompt)
+        return contents
+    ps = [p.strip() for p in prompt.split(separator)]
     assert len(uploaded_files) == len(ps) + 1, "错误：多媒体文件的数量应等于提示的数量加1。请检查你的输入并重试。"
     # To read file as bytes:
     media_parts = [_process_media(im) for im in uploaded_files]
