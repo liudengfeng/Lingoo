@@ -190,7 +190,7 @@ def generate(uploaded_files, prompt, response_container):
 st.markdown("""#### 🚀 :rainbow[多模态AI]""")
 
 uploaded_files = st.file_uploader(
-    "插入多媒体文件",
+    "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
     accept_multiple_files=True,
     type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
     help="""
