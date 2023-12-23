@@ -169,7 +169,6 @@ check_and_force_logout(st, sidebar_status)
 def _process_media(uploaded_file):
     # 用文件扩展名称形成 MIME 类型
     mime = mimetypes.guess_type(uploaded_file.name)[0]
-    st.write(mime)
     return Part.from_data(data=uploaded_file.getvalue(), mime_type=mime)
 
 
@@ -193,7 +192,7 @@ def _process_image_and_prompt(uploaded_files, prompt):
     return contents
 
 
-def generate(uploaded_files, prompt, view_element):
+def generate(uploaded_files, prompt, response_container):
     try:
         contents = _process_image_and_prompt(uploaded_files, prompt)
     except Exception as e:
@@ -213,13 +212,22 @@ def generate(uploaded_files, prompt, view_element):
         stream=True,
     )
 
+    col1, col2 = response_container.columns(2)
+    for m in uploaded_files:
+        mime_type = mimetypes.guess_type(m.name)[0]
+        if mime_type.startswith("image"):
+            col1.image(m, use_column_width=True)
+        elif mime_type.startswith("video"):
+            col1.video(m)
+
     full_response = ""
     for chunk in responses:
         full_response += chunk.text
         time.sleep(0.05)
         # Add a blinking cursor to simulate typing
-        view_element.markdown(full_response + "▌")
-    view_element.markdown(full_response)
+        col2.markdown(full_response + "▌")
+
+    col2.markdown(full_response)
 
     st.session_state.current_token_count = model.count_tokens(
         prompt + full_response
@@ -259,7 +267,7 @@ del_btn = cols[1].button("➖", help="删除 '<>' 分隔符号")
 cls_btn = cols[2].button("🗑️", help="清空提示词", key="clear_prompt")
 submitted = cols[3].button("提交", help="如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
 
-response_element = st.empty()
+response_container = st.container()
 
 if add_btn:
     st.session_state["user_prompt"] += "<>"
@@ -274,7 +282,7 @@ if submitted:
     if not prompt:
         st.error("请添加提示词")
         st.stop()
-    generate(uploaded_files, prompt, response_element)
+    generate(uploaded_files, prompt, response_container)
 
 msg = f"当前令牌数：{st.session_state.current_token_count}，总令牌数：{st.session_state.total_token_count}"
 sidebar_status.markdown(msg)
