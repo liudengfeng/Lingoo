@@ -229,14 +229,11 @@ def generate(uploaded_files, prompt, response_container):
         message_placeholder.markdown(full_response + "▌")
 
     message_placeholder.markdown(full_response)
-
+    # 令牌数
     st.session_state.current_token_count = model.count_tokens(
         prompt + full_response
     ).total_tokens
     st.session_state.total_token_count += st.session_state.current_token_count
-
-    # for response in responses:
-    #     st.markdown(response.candidates[0].content.parts[0].text)
 
 
 # region 主页面
@@ -259,7 +256,7 @@ prompt = st.text_area(
     "您的提示",
     key="user_prompt_key",
     value=st.session_state.get("user_prompt", ""),
-    placeholder="输入您关于图片的提示词",
+    placeholder="请输入关于多媒体的提示词，例如：'描述这张风景图片'",
     # disabled=not uploaded_files,
 )
 cols = st.columns([1, 1, 1, 1, 4])
