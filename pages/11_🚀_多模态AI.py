@@ -209,7 +209,7 @@ def generate(uploaded_files, prompt, view_element):
     responses = model.generate_content(
         contents,
         generation_config=generation_config,
-        safety_settings=SAFETY_SETTINGS,
+        # safety_settings=SAFETY_SETTINGS,
         stream=True,
     )
 
