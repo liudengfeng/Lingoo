@@ -101,7 +101,8 @@ st.sidebar.text_input(
 
 
 st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。", icon="✨")
-st.sidebar.markdown(
+sidebar_status = st.slider.empty()
+sidebar_status.markdown(
     f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
 )
 
