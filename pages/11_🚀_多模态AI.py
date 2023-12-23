@@ -240,7 +240,7 @@ def generate(uploaded_files, prompt, response_container):
 
 
 # region 主页面
-st.markdown("""#### 🚀 :rainbow[多模态工具]""")
+st.markdown("""#### 🚀 :rainbow[多模态AI]""")
 
 uploaded_files = st.file_uploader(
     "插入多媒体文件",
@@ -272,9 +272,11 @@ response_container = st.container()
 
 if add_btn:
     st.session_state["user_prompt"] += "<>"
+    st.rerun()
 
 if del_btn:
     st.session_state["user_prompt"] = st.session_state["user_prompt"][:-2]
+    st.rerun()
 
 if submitted:
     if len(uploaded_files) == 0:
