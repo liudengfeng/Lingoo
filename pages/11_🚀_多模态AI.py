@@ -10,7 +10,7 @@ from vertexai.preview.generative_models import GenerativeModel
 from vertexai.preview.generative_models import Image as GImage
 from vertexai.preview.generative_models import Part
 
-from mypylib.google_gemini import SAFETY_SETTINGS
+from mypylib.google_gemini import NORMAL_SAFETY_SETTINGS
 from mypylib.st_helper import authenticate, check_and_force_logout
 
 # region 页面设置
@@ -208,7 +208,7 @@ def generate(uploaded_files, prompt, response_container):
     responses = model.generate_content(
         contents,
         generation_config=generation_config,
-        # safety_settings=SAFETY_SETTINGS,
+        safety_settings=NORMAL_SAFETY_SETTINGS,
         stream=True,
     )
 
@@ -261,8 +261,8 @@ prompt = st.text_area(
     height=300,
 )
 cols = st.columns([1, 1, 1, 1, 4])
-add_btn = cols[0].button("➕", help="添加 '<>' 分隔符号")
-del_btn = cols[1].button("➖", help="删除 '<>' 分隔符号")
+add_btn = cols[0].button("➕", help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。")
+del_btn = cols[1].button("➖", help="删除提示词尾部的分隔符")
 cls_btn = cols[2].button("🗑️", help="清空提示词", key="clear_prompt")
 submitted = cols[3].button("提交", help="如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
 
