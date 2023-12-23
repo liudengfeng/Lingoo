@@ -253,7 +253,7 @@ if prompt := st.chat_input("输入提示以便开始对话"):
         ).total_tokens
         st.session_state.total_token_count += st.session_state.current_token_count
 
-msg = f"当前令牌数：{st.session_state.current_token_count}，总令牌数：{st.session_state.total_token_count}"
+msg = f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
 sidebar_status.markdown(msg)
 # st.write(st.session_state.chat_session.history)
 

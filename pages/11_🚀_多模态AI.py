@@ -196,7 +196,7 @@ def generate(uploaded_files, prompt, response_container):
     try:
         contents = _process_image_and_prompt(uploaded_files, prompt)
     except Exception as e:
-        st.error(f"处理图片时出错：{e}")
+        st.error(f"处理多媒体文件时出错：{e}")
         return
     model = GenerativeModel("gemini-pro-vision")
     generation_config = {
@@ -287,7 +287,7 @@ if submitted:
         st.stop()
     generate(uploaded_files, prompt, response_container)
 
-msg = f"当前令牌数：{st.session_state.current_token_count}，总令牌数：{st.session_state.total_token_count}"
+msg = f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
 sidebar_status.markdown(msg)
 
 with st.expander("💡 使用场景..."):
