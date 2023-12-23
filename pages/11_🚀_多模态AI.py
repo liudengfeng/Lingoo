@@ -148,7 +148,7 @@ def _process_image_and_prompt(uploaded_files, prompt):
     return contents
 
 
-def generate(uploaded_files, prompt, response_container):
+def generate_content_from_files_and_prompt(uploaded_files, prompt, response_container):
     try:
         contents = _process_image_and_prompt(uploaded_files, prompt)
     except Exception as e:
@@ -185,12 +185,14 @@ def generate(uploaded_files, prompt, response_container):
         message_placeholder.markdown(full_response + "▌")
 
     message_placeholder.markdown(full_response)
-    # 令牌数
+    # 令牌数 TODO:需要考虑多媒体的令牌数
     st.session_state.current_token_count = model.count_tokens(
         prompt + full_response
     ).total_tokens
     st.session_state.total_token_count += st.session_state.current_token_count
-
+    sidebar_status.markdown(
+        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
+    )
 
 # region 主页面
 st.markdown(
@@ -247,7 +249,7 @@ if submitted:
     if not prompt:
         st.error("请添加提示词")
         st.stop()
-    generate(uploaded_files, prompt, response_container)
+    generate_content_from_files_and_prompt(uploaded_files, prompt, response_container)
 
 
 with st.expander("💡 使用场景..."):
