@@ -258,7 +258,7 @@ prompt = st.text_area(
     value=st.session_state.get("user_prompt", ""),
     placeholder="请输入关于多媒体的提示词，例如：'描述这张风景图片'",
     max_chars=12288,
-    height=400,
+    height=300,
 )
 cols = st.columns([1, 1, 1, 1, 4])
 add_btn = cols[0].button("➕", help="添加 '<>' 分隔符号")
