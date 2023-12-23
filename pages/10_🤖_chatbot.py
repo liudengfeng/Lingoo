@@ -3,11 +3,18 @@ import time
 import google.generativeai as genai
 import streamlit as st
 from google.generativeai.types.generation_types import BlockedPromptException
+from vertexai.preview.generative_models import GenerativeModel
 
 from mypylib.google_gemini import SAFETY_SETTINGS
 from mypylib.st_helper import authenticate, check_and_force_logout
 
 # region 页面设置
+
+
+@st.cache_resource
+def load_model():
+    return GenerativeModel("gemini-pro")
+
 
 st.set_page_config(
     page_title="聊天机器人",

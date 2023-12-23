@@ -18,6 +18,12 @@ from mypylib.st_helper import authenticate, check_and_force_logout
 CURRENT_CWD: Path = Path(__file__).parent.parent
 IMAGE_DIR: Path = CURRENT_CWD / "resource/multimodal"
 
+
+@st.cache_resource
+def load_model():
+    return GenerativeModel("gemini-pro-vision")
+
+
 st.set_page_config(
     page_title="多模态AI",
     page_icon="🚀",
@@ -148,7 +154,7 @@ def generate(uploaded_files, prompt, response_container):
     except Exception as e:
         st.error(f"处理多媒体文件时出错：{e}")
         return
-    model = GenerativeModel("gemini-pro-vision")
+    model = load_model()
     generation_config = {
         "temperature": st.session_state["temperature"],
         "top_p": st.session_state["top_p"],
@@ -187,10 +193,12 @@ def generate(uploaded_files, prompt, response_container):
 
 
 # region 主页面
-st.markdown("""#### 🚀 :rainbow[多模态AI]
+st.markdown(
+    """#### 🚀 :rainbow[多模态AI]
 
 您可以向`Gemini`模型发送多模态提示信息。支持的模态包括文字、图片和视频。
-""")
+"""
+)
 
 uploaded_files = st.file_uploader(
     "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
