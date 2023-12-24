@@ -330,8 +330,8 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
     )
 
     play_btn = btn_cols[4].button("🔊", key="play", help="聆听单词发音")
-    add_btn = btn_cols[5].button("➕", key="add", help="添加到个人词库")
-    del_btn = btn_cols[6].button("➖", key="del", help="从个人词库中删除")
+    add_btn = btn_cols[5].button(":plus:", key="add", help="添加到个人词库")
+    del_btn = btn_cols[6].button(":minus:", key="del", help="从个人词库中删除")
     update_flashcard_wordbank_button = btn_cols[7].button(
         "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词")
 
@@ -854,10 +854,10 @@ with tabs[tab_items.index("📚 个人词库")]:
     lib_cols[1].markdown("#### 个人词库")
     mywords_placeholder = lib_cols[1].empty()
     add_lib_btn = lib_cols[0].button(
-        "➕", key="add-lib-btn", help="点击按钮，将'基础词库'中已选单词添加到个人词库。"
+        ":plus:", key="add-lib-btn", help="点击按钮，将'基础词库'中已选单词添加到个人词库。"
     )
     del_lib_btn = lib_cols[1].button(
-        "➖", key="del-lib-btn", help="点击按钮，将已选单词从'个人词库'中删除。"
+        ":minus:", key="del-lib-btn", help="点击按钮，将已选单词从'个人词库'中删除。"
     )
     df = gen_word_lib()
     edited_df = placeholder.data_editor(

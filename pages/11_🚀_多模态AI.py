@@ -26,7 +26,7 @@ def load_model():
 
 st.set_page_config(
     page_title="多模态AI",
-    page_icon="🚀",
+    page_icon=":rocket:",
     layout="wide",
 )
 
@@ -51,7 +51,7 @@ if st.session_state.get("clear_prompt"):
 
 st.sidebar.markdown(
     """:rainbow[运行设置]\n
-🔯 模型：gemini-pro-vision            
+:dotted_six-pointed_star: 模型：gemini-pro-vision            
 """
 )
 st.sidebar.slider(
@@ -196,7 +196,7 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
 
 # region 主页面
 st.markdown(
-    """#### 🚀 :rainbow[多模态AI]
+    """#### :rocket: :rainbow[多模态AI]
 
 您可以向`Gemini`模型发送多模态提示信息。支持的模态包括文字、图片和视频。
 """
@@ -225,10 +225,10 @@ prompt = st.text_area(
 )
 cols = st.columns([1, 1, 1, 1, 4])
 add_btn = cols[0].button(
-    "➕",
+    ":plus:",
     help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。",
 )
-del_btn = cols[1].button("➖", help="删除提示词尾部的分隔符")
+del_btn = cols[1].button(":minus:", help="删除提示词尾部的分隔符")
 cls_btn = cols[2].button("🗑️", help="清空提示词", key="clear_prompt")
 submitted = cols[3].button("提交", help="如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
 

@@ -18,12 +18,12 @@ def load_model():
 
 st.set_page_config(
     page_title="聊天机器人",
-    page_icon="🤖",
+    page_icon=":robot:",
     layout="wide",
 )
 
 AVATAR_NAMES = ["user", "model"]
-AVATAR_EMOJIES = ["🧑‍💻", "🤖"]
+AVATAR_EMOJIES = [":man_technologist:", ":robot:"]
 AVATAR_MAPS = {name: emoji for name, emoji in zip(AVATAR_NAMES, AVATAR_EMOJIES)}
 
 if "examples_pair" not in st.session_state:
@@ -93,7 +93,7 @@ def del_last_examples():
 
 st.sidebar.markdown(
     """:rainbow[运行设置]\n
-🔯 模型：Gemini Pro            
+:dotted_six-pointed_star: 模型：Gemini Pro            
 """
 )
 st.sidebar.slider(
@@ -153,7 +153,7 @@ user_example = st.sidebar.text_input(
     max_chars=1000,
 )
 ai_example = st.sidebar.text_input(
-    "🔯 模型响应",
+    ":dotted_six-pointed_star: 模型响应",
     key="ai_text_area",
     max_chars=1000,
 )
@@ -161,7 +161,7 @@ ai_example = st.sidebar.text_input(
 sidebar_col1, sidebar_col2, sidebar_col3, sidebar_col4 = st.sidebar.columns(4)
 
 sidebar_col1.button(
-    "➕",
+    ":plus:",
     on_click=add_chat_examples,
     disabled=len(st.session_state["examples_pair"]) >= 8,
     help="""聊天提示的示例是输入输出对的列表，它们演示给定输入的示例性模型输出。控制在8对以内。使用示例来自定义模型如何响应某些问题。
@@ -171,7 +171,7 @@ sidebar_col1.button(
 """,
 )
 sidebar_col2.button(
-    "➖",
+    ":minus:",
     on_click=del_last_examples,
     disabled=len(st.session_state["examples_pair"]) <= 0,
     help="删除最后一对示例",

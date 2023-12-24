@@ -430,7 +430,7 @@ with tabs[items.index("🍱 选择套餐")]:
         # col.header(tier["title"])
         col.subheader(f"￥{tier['price']} / {tier['unit']}")
         for feature in tier["description"]:
-            col.write(f"➕ {feature}")
+            col.write(f":plus: {feature}")
         # col.button(tier["img_name"])
         image = Image.open(WXSKM_DIR / tier["img_name"])
         col.image(image, width=100)
