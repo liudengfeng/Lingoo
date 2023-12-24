@@ -528,7 +528,7 @@ view_report()
 
 # region 操作提示
 
-with st.expander("🔊 操作提示..."):
+with st.expander(":sound: 操作提示..."):
     st.markdown("如何进行口语评估👇")
     st.markdown(
         """

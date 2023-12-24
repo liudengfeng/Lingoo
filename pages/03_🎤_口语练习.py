@@ -304,7 +304,7 @@ cols[1].button(
     help="将对话内容翻译成中文",
 )
 cols[2].button(
-    "合成 🔊",
+    "合成 :sound:",
     key="speech",
     on_click=on_s_btn_click,
     # args=(placeholder,),

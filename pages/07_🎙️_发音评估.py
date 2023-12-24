@@ -399,7 +399,7 @@ ass_btn = btn_cols[3].button(
     args=(text_to_be_evaluated_tb1,),
 )
 syn_btn = btn_cols[4].button(
-    "合成[🔊]",
+    "合成[:sound:]",
     key="syn_btn_tb1",
     on_click=on_syn_btn_click,
     args=(text_to_be_evaluated_tb1, voice_style, message_placeholder),
@@ -440,7 +440,7 @@ view_report()
 
 # region 操作提示
 
-with st.expander("🔊 操作提示..."):
+with st.expander(":sound: 操作提示..."):
     st.markdown(
         f"""
 使用方法如下：

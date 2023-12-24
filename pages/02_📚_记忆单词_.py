@@ -350,10 +350,24 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
         and st.session_state.current_flashcard_word_index
         == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
-
-    play_btn = btn_cols[4].button("🔊", key="play", help="聆听单词发音")
-    add_btn = btn_cols[5].button(":heavy_plus_sign:", key="add", help="添加到个人词库")
-    del_btn = btn_cols[6].button(":heavy_minus_sign:", key="del", help="从个人词库中删除")
+    play_btn = btn_cols[4].button(
+        ":sound:",
+        key="play",
+        help="聆听单词发音",
+        disabled=st.session_state.current_flashcard_word_index == -1,
+    )
+    add_btn = btn_cols[5].button(
+        ":heavy_plus_sign:",
+        key="add",
+        help="将当前单词添加到个人词库",
+        disabled=st.session_state.current_flashcard_word_index == -1,
+    )
+    del_btn = btn_cols[6].button(
+        ":heavy_minus_sign:",
+        key="del",
+        help="将当前单词从个人词库中删除",
+        disabled=st.session_state.current_flashcard_word_index == -1,
+    )
     update_flashcard_wordbank_button = btn_cols[7].button(
         ":arrows_counterclockwise:", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词"
     )
