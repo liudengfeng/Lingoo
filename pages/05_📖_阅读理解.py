@@ -5,7 +5,7 @@
 # st.markdown("""<a href="page1" target="_self">page 1</a>""", unsafe_allow_html=True)
 import streamlit as st
 
-from mypylib.streamlit_helper import check_and_force_logout
+from mypylib.st_helper import check_and_force_logout
 
 
 st.set_page_config(

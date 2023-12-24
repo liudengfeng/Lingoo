@@ -1,6 +1,6 @@
 import streamlit as st
 from mypylib.google_api import generate_dialogue
-from mypylib.streamlit_helper import check_and_force_logout
+from mypylib.st_helper import check_and_force_logout
 
 # "第二页"
 

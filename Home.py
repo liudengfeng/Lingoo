@@ -13,7 +13,7 @@ from mypylib.db_interface import DbInterface
 from mypylib.azure_speech import speech_synthesis_get_available_voices
 from mypylib.constants import LANGUAGES
 from mypylib.db_model import PaymentStatus, LoginEvent
-from mypylib.streamlit_helper import check_and_force_logout
+from mypylib.st_helper import check_and_force_logout
 
 
 CURRENT_CWD: Path = Path(__file__).parent
