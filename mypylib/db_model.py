@@ -74,7 +74,7 @@ class User(BaseModel):
     display_name: str = Field("", max_length=100)
     current_level: str = Field("A1")
     target_level: str = Field("C1")
-    password: str = Field("12345678")
+    password: str = Field("")
     user_role: UserRole = Field(default=UserRole.USER)
     registration_time: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)

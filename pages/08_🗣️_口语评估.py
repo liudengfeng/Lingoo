@@ -464,7 +464,7 @@ st.divider()
 
 message_placeholder = st.empty()
 st.info("要求：时长超过15秒，文字篇幅在50个字词和3个句子以上。")
-uploaded_file = st.file_uploader("📁 上传音频", type=["wav"], help="上传您录制的音频文件")
+uploaded_file = st.file_uploader(":file_folder: 上传音频", type=["wav"], help="上传您录制的音频文件")
 
 btn_num = 8
 btn_cols = st.columns(btn_num)

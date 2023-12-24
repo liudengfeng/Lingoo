@@ -214,7 +214,7 @@ class DbInterface:
                 phone_number=phone_number,
                 username=self.faker.user_name(),
                 email=f"{phone_number}@{FAKE_EMAIL_DOMAIN}",
-                password="12345678",
+                password=phone_number,
                 registration_time=datetime.now(timezone.utc),
                 memo=f"订单号：{payment.order_id}",
             )  # type: ignore
