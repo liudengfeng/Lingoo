@@ -10,7 +10,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
 
-from mypylib.azure_speech import synthesize_speech_to_file
+# from mypylib.azure_speech import synthesize_speech_to_file
 from mypylib.db_interface import DbInterface
 from mypylib.google_api import (
     generate_word_memory_tip,
@@ -19,7 +19,7 @@ from mypylib.google_api import (
     google_translate,
 )
 from mypylib.st_helper import authenticate, check_and_force_logout
-from mypylib.word_utils import get_or_create_audio_in_blob_storage
+from mypylib.word_utils import audio_autoplay_elem, get_or_create_and_return_audio_data
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
@@ -367,15 +367,14 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
             st.session_state.current_flashcard_word_index
         ]
         # fp = gen_audio_fp(st.session_state.flashcard_words[st.session_state.current_flashcard_word_index], voice_style[0])  # type: ignore
-        url = get_or_create_audio_in_blob_storage(st.session_state.flashcard_words[st.session_state.current_flashcard_word_index], voice_style[0], st.secrets)  # type: ignore
+        # TODO:使用缓存
+        audio_data = get_or_create_and_return_audio_data(st.session_state.flashcard_words[st.session_state.current_flashcard_word_index], voice_style[0], st.secrets)  # type: ignore
         # placeholder.text(fp)
-        # components.html(audio_autoplay_elem(url))
+        components.html(audio_autoplay_elem(audio_data))
         # audio_html = (
         #     f'<audio autoplay controls><source src="{url}" type="audio/mpeg"></audio>'
         # )
         # st.markdown(audio_html, unsafe_allow_html=True)
-        st.write(f"单词：{word}，发音：{voice_style[0]}, url:{url}")
-        st.audio(url, format="audio/mp3")
         # view_flash_word(container, tip_placeholder)
 
     if update_flashcard_wordbank_button:
