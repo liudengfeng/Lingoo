@@ -333,7 +333,7 @@ with tabs[tab_items.index("📖 记忆闪卡")]:
     add_btn = btn_cols[5].button(":heavy_plus_sign:", key="add", help="添加到个人词库")
     del_btn = btn_cols[6].button(":heavy_minus_sign:", key="del", help="从个人词库中删除")
     update_flashcard_wordbank_button = btn_cols[7].button(
-        "🔄", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词")
+        ":arrows_counterclockwise:", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词")
 
     placeholder = st.empty()
 
@@ -511,7 +511,7 @@ with tabs[tab_items.index("🧩 单词拼图")]:
     )
 
     update_puzzle_wordbank_button = puzzle_cols[3].button(
-        "🔄", key="refresh-puzzle", help="重新生成单词列表")
+        ":arrows_counterclockwise:", key="refresh-puzzle", help="重新生成单词列表")
 
     if prev_puzzle_btn:
         prepare_puzzle()
@@ -750,7 +750,7 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
         help="至少完成一道测试题后，才可点击按钮，显示测验得分。",
     )
 
-    if pic_test_cols[4].button("🔄", key="refresh-pic", help="点击按钮，重新生成图片测试题。"):
+    if pic_test_cols[4].button(":arrows_counterclockwise:", key="refresh-pic", help="点击按钮，重新生成图片测试题。"):
         gen_pic_tests(category, pic_num)
         st.session_state.user_pic_answer = {}
         st.session_state.pic_idx = -1
@@ -1034,7 +1034,7 @@ with tabs[tab_items.index("📝 单词测验")]:
     test_container = st.container()
 
     test_btns = st.columns(6)
-    gen_test_btn = test_btns[1].button("🔄", key="gen-test", help="点击按钮，生成单词理解测试题。")
+    gen_test_btn = test_btns[1].button(":arrows_counterclockwise:", key="gen-test", help="点击按钮，生成单词理解测试题。")
     prev_test_btn = test_btns[2].button(
         "↩️",
         key="prev-test",

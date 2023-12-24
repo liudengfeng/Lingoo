@@ -408,7 +408,7 @@ syn_btn = btn_cols[4].button(
 )
 lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
 cls_btn = btn_cols[6].button(
-    "重置[🔄]",
+    "重置[:arrows_counterclockwise:]",
     key="cls_btn_tb1",
     help="重置发音评估文本。",
     on_click=reset_page,

@@ -28,7 +28,7 @@ fernet = Fernet(st.secrets["FERNET_KEY"].encode())
 
 st.set_page_config(
     page_title="用户管理",
-    page_icon="👤",
+    page_icon=":bust_in_silhouette:",
     layout="wide",
 )
 
@@ -47,7 +47,7 @@ check_and_force_logout(st, sidebar_status)
 
 # endregion
 
-emojis = ["👤", "🍱", "🔄", "🔑", "📊", "📝"]
+emojis = [":bust_in_silhouette:", ":bento:", ":arrows_counterclockwise:", ":key:", "📊", "📝"]
 item_names = ["用户注册", "选择套餐", "更新信息", "重置密码", "统计报表", "问题反馈"]
 items = [f"{e} {n}" for e, n in zip(emojis, item_names)]
 tabs = st.tabs(items)
@@ -55,8 +55,8 @@ tabs = st.tabs(items)
 
 # region 创建注册页面
 
-with tabs[items.index("👤 用户注册")]:
-    st.subheader("👤 用户注册")
+with tabs[items.index(":bust_in_silhouette: 用户注册")]:
+    st.subheader(":bust_in_silhouette: 用户注册")
 
     with st.form(key="registration_form"):
         col1, col2 = st.columns(2)
@@ -367,8 +367,8 @@ DF studio 可能会使用用户的数据来提供本应用的服务，包括但�
 
 # region 创建缴费页面
 
-with tabs[items.index("🍱 选择套餐")]:
-    st.subheader("🍱 选择套餐")
+with tabs[items.index(":bento: 选择套餐")]:
+    st.subheader(":bento: 选择套餐")
 
     # Define pricing tiers
     pricing_tiers = [
@@ -439,8 +439,8 @@ with tabs[items.index("🍱 选择套餐")]:
 
 # region 创建更新信息页面
 
-with tabs[items.index("🔄 更新信息")]:
-    st.subheader("🔄 更新个人信息")
+with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
+    st.subheader(":arrows_counterclockwise: 更新个人信息")
     if not st.session_state.dbi.is_service_active(st.session_state.user_info):
         st.error("您的账号未登录，或者尚未缴费、激活，无法更新个人信息。")
         st.stop()
@@ -528,8 +528,8 @@ with tabs[items.index("🔄 更新信息")]:
 
 # region 创建重置密码页面
 
-with tabs[items.index("🔑 重置密码")]:
-    st.subheader("🔑 重置密码")
+with tabs[items.index(":key: 重置密码")]:
+    st.subheader(":key: 重置密码")
     if len(
         st.session_state.user_info
     ) == 0 or not st.session_state.dbi.is_service_active(st.session_state.user_info):

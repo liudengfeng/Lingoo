@@ -148,7 +148,7 @@ st.sidebar.text_input(
 )
 
 user_example = st.sidebar.text_input(
-    "👤 用户示例",
+    ":bust_in_silhouette: 用户示例",
     key="user_text_area",
     max_chars=1000,
 )
@@ -182,7 +182,7 @@ sidebar_col3.button(
     help="清除当前示例对",
 )
 
-if sidebar_col4.button("🔄", key="reset_btn", help="重新设置上下文、示例，开始新的对话"):
+if sidebar_col4.button(":arrows_counterclockwise:", key="reset_btn", help="重新设置上下文、示例，开始新的对话"):
     st.session_state["examples_pair"] = []
     init_chat()
 

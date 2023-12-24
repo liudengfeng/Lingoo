@@ -36,7 +36,7 @@ model = "models/text-bison-001"
 language = "American English"
 
 AVATAR_NAMES = ["user", "assistant"]
-AVATAR_EMOJIES = ["👦", "👧"]
+AVATAR_EMOJIES = [":boy:", ":girl:"]
 AVATAR_MAPS = {name: emoji for name, emoji in zip(AVATAR_NAMES, AVATAR_EMOJIES)}
 
 # endregion
@@ -60,7 +60,9 @@ def get_translation(text):
 
 
 def get_dialogue_audio_file_path(idx, voice):
-    return str(dialogue_dir / f"{st.session_state.user_info['user_id']}-{idx}-{voice}.mp3")
+    return str(
+        dialogue_dir / f"{st.session_state.user_info['user_id']}-{idx}-{voice}.mp3"
+    )
 
 
 @st.cache_data(ttl=60 * 60, show_spinner="从 Azure 语音库合成语音...")
@@ -189,7 +191,7 @@ gen_btn = btn_cols[0].button(
     help="根据选择的语言熟练程度和主题,系统会生成匹配的对话场景进行练习",
 )
 view_btn = btn_cols[1].button("查看", help="查看完整对话场景")
-cls_btn = btn_cols[2].button("🔄", help="重置对话场景")
+cls_btn = btn_cols[2].button(":arrows_counterclockwise:", help="重置对话场景")
 # endregion
 
 # region 事件

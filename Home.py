@@ -62,7 +62,7 @@ if need_update:
 
 s_cols = st.sidebar.columns(3)
 login_btn = s_cols[0].button(
-    label="登录" if not st.session_state["user_info"] else "👤 已登录",
+    label="登录" if not st.session_state["user_info"] else ":bust_in_silhouette: 已登录",
     type="primary" if not st.session_state["user_info"] else "secondary",
     disabled=len(st.session_state["user_info"]) >= 1,
 )
