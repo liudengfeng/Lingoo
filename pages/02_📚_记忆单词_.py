@@ -63,7 +63,7 @@ if "current_flashcard_word_index" not in st.session_state:
 
 st.set_page_config(
     page_title="记忆单词",
-    page_icon="📚",
+    page_icon=":books:",
     layout="wide",
 )
 
@@ -164,7 +164,7 @@ st.sidebar.slider(
 # region tabs
 # 将二者分离，避免格式经常被重置
 tab_names = ["记忆闪卡", "单词拼图", "图片测词", "单词测验", "个人词库", "个人统计"]
-tab_emoji = [":book:", ":jigsaw:", ":frame_with_picture:", ":memo:", "📚", ":bar_chart:"]
+tab_emoji = [":book:", ":jigsaw:", ":frame_with_picture:", ":memo:", ":books:", ":bar_chart:"]
 tab_items = [e + " " + n for e, n in zip(tab_emoji, tab_names)]
 tabs = st.tabs(tab_items)
 # endregion
@@ -310,7 +310,7 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
     # placeholder = st.container()
     # 创建前后选择的按钮
     display_status_button = btn_cols[1].button(
-        "♻️", key="mask", help="点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。"
+        ":recycle:", key="mask", help="点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。"
     )
     prev_btn = btn_cols[2].button(
         ":leftwards_arrow_with_hook:",
@@ -320,7 +320,7 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
         disabled=st.session_state.current_flashcard_word_index <= 0,
     )
     next_btn = btn_cols[3].button(
-        "↪️",
+        ":arrow_right_hook:",
         key="next",
         help="点击按钮，切换到下一个单词。",
         on_click=on_next_btn_click,
@@ -503,7 +503,7 @@ with tabs[tab_items.index(":jigsaw: 单词拼图")]:
         disabled=st.session_state.puzzle_idx <= 0,
     )
     next_puzzle_btn = puzzle_cols[2].button(
-        "↪️",
+        ":arrow_right_hook:",
         key="next-puzzle",
         help="点击按钮，切换到下一单词拼图。",
         on_click=on_next_puzzle_btn_click,
@@ -695,9 +695,9 @@ def check_pic_answer(container):
         # container.write(f"显示 idx: {idx} 用户答案：{user_answer.split('.')[1]} 正确答案：{answer}")
         if user_answer.split(".")[1].strip() == answer.strip():
             score += 1
-            msg = f"正确答案：{answer} ✅"
+            msg = f"正确答案：{answer} :white_check_mark:"
         else:
-            msg = f"正确答案：{answer} ❌"
+            msg = f"正确答案：{answer} :x:"
         container.markdown(msg)
     percentage = score / n * 100
     if percentage >= 75:
@@ -736,7 +736,7 @@ with tabs[tab_items.index(":frame_with_picture: 图片测词")]:
     )
 
     pic_test_cols[2].button(
-        "↪️",
+        ":arrow_right_hook:",
         help="点击按钮，切换到下一题。",
         on_click=on_next_pic_btn_click,
         disabled=st.session_state.pic_idx == pic_num - 1,
@@ -844,7 +844,7 @@ EDITABLE_COLS: list[str] = [
 
 # region 个人词库
 
-with tabs[tab_items.index("📚 个人词库")]:
+with tabs[tab_items.index(":books: 个人词库")]:
     lib_cols = st.columns(2)
     view_selected_list = ""
     if st.session_state["selected_list"] is not None:
@@ -965,9 +965,9 @@ def check_answer(test_container):
         # 用户答案是选项，而提供的标准答案是A、B、C、D
         if user_answer.split(".")[0] == answer:
             score += 1
-            msg = f"正确答案：{answer} ✅"
+            msg = f"正确答案：{answer} :white_check_mark:"
         else:
-            msg = f"正确答案：{answer} ❌"
+            msg = f"正确答案：{answer} :x:"
         test_container.markdown(msg)
         test_container.markdown(f"解释：{explanation}")
     percentage = score / n * 100
@@ -1044,7 +1044,7 @@ with tabs[tab_items.index(":memo: 单词测验")]:
         disabled=st.session_state.test_idx <= 0,
     )
     next_test_btn = test_btns[3].button(
-        "↪️",
+        ":arrow_right_hook:",
         key="next-test",
         help="点击按钮，切换到下一题。",
         on_click=on_next_test_btn_click,

@@ -340,7 +340,7 @@ def pronunciation_assessment_from_wavfile(
         )
         if cancellation_details.reason == speechsdk.CancellationReason.Error:
             logger.debug(
-                "❌ Error details: {}".format(cancellation_details.error_details)
+                ":x: Error details: {}".format(cancellation_details.error_details)
             )
 
     # speech_recognizer.canceled.connect(lambda evt: logger.debug("CANCELED {}".format(evt)))
