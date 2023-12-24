@@ -370,10 +370,11 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
         url = get_or_create_audio_in_blob_storage(st.session_state.flashcard_words[st.session_state.current_flashcard_word_index], voice_style[0], st.secrets)  # type: ignore
         # placeholder.text(fp)
         # components.html(audio_autoplay_elem(url))
-        audio_html = (
-            f'<audio autoplay controls><source src="{url}" type="audio/mpeg"></audio>'
-        )
-        st.markdown(audio_html, unsafe_allow_html=True)
+        # audio_html = (
+        #     f'<audio autoplay controls><source src="{url}" type="audio/mpeg"></audio>'
+        # )
+        # st.markdown(audio_html, unsafe_allow_html=True)
+        st.audio(url, format='audio/mp3')
         # view_flash_word(container, tip_placeholder)
 
     if update_flashcard_wordbank_button:
