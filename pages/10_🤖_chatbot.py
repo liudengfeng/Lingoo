@@ -177,7 +177,7 @@ sidebar_col2.button(
     help="删除最后一对示例",
 )
 sidebar_col3.button(
-    "🗑️",
+    ":wastebasket:",
     key="clear_example",
     help="清除当前示例对",
 )

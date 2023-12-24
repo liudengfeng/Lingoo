@@ -368,7 +368,7 @@ st.markdown(
 )
 
 text_to_be_evaluated_tb1 = st.text_area(
-    "📝 **发音评估文本**",
+    ":memo: **发音评估文本**",
     key="assessment_text_tb1",
     max_chars=1000,
     height=120,
@@ -392,7 +392,7 @@ rep_btn = btn_cols[2].button(
 )
 
 ass_btn = btn_cols[3].button(
-    "评估[🔍]",
+    "评估[:mag:]",
     key="ass_btn_tb1",
     help="生成发音评估报告。",
     on_click=on_ass_btn_click,

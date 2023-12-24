@@ -229,7 +229,7 @@ add_btn = cols[0].button(
     help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。",
 )
 del_btn = cols[1].button(":minus:", help="删除提示词尾部的分隔符")
-cls_btn = cols[2].button("🗑️", help="清空提示词", key="clear_prompt")
+cls_btn = cols[2].button(":wastebasket:", help="清空提示词", key="clear_prompt")
 submitted = cols[3].button("提交", help="如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
 
 response_container = st.container()
@@ -252,7 +252,7 @@ if submitted:
     generate_content_from_files_and_prompt(uploaded_files, prompt, response_container)
 
 
-with st.expander("💡 使用场景..."):
+with st.expander(":bulb: 使用场景..."):
     st.markdown(
         """##### 使用场景
 
@@ -270,7 +270,7 @@ Gemini Pro Vision 非常适合各种多模态用例，包括但不限于下表�
 """
     )
 
-with st.expander("🖼️ 图片最佳做法..."):
+with st.expander(":frame_with_picture: 图片最佳做法..."):
     st.markdown(
         """
 ##### 图片最佳做法
@@ -295,7 +295,7 @@ for tomorrow based on image 3.
 """
     )
 
-with st.expander("⚠️ `Gemini`的当前限制..."):
+with st.expander(":warning: `Gemini`的当前限制..."):
     st.markdown(
         """##### `Gemini`的当前限制
 
@@ -313,7 +313,7 @@ with st.expander("⚠️ `Gemini`的当前限制..."):
 """
     )
 
-with st.expander("📝 多模态提示最佳实践..."):
+with st.expander(":memo: 多模态提示最佳实践..."):
     st.markdown(
         """
 ##### 多模态提示最佳实践
@@ -337,7 +337,7 @@ with st.expander("📝 多模态提示最佳实践..."):
 """
     )
 
-with st.expander("📘 提示设计基础知识..."):
+with st.expander(":blue_book: 提示设计基础知识..."):
     st.markdown(
         """
 ##### 提示设计基础知识
@@ -643,7 +643,7 @@ $$ b(4) = -405 $$
 """
     )
 
-with st.expander("🔍 排查多模态提示问题..."):
+with st.expander(":mag: 排查多模态提示问题..."):
     st.markdown(
         """    
 ##### 排查多模态提示问题

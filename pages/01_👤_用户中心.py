@@ -47,7 +47,7 @@ check_and_force_logout(st, sidebar_status)
 
 # endregion
 
-emojis = [":bust_in_silhouette:", ":bento:", ":arrows_counterclockwise:", ":key:", "📊", "📝"]
+emojis = [":bust_in_silhouette:", ":bento:", ":arrows_counterclockwise:", ":key:", ":bar_chart:", ":memo:"]
 item_names = ["用户注册", "选择套餐", "更新信息", "重置密码", "统计报表", "问题反馈"]
 items = [f"{e} {n}" for e, n in zip(emojis, item_names)]
 tabs = st.tabs(items)
@@ -568,8 +568,8 @@ with tabs[items.index(":key: 重置密码")]:
 
 # region 创建统计页面
 
-with tabs[items.index("📊 统计报表")]:
-    st.subheader("📊 统计报表")
+with tabs[items.index(":bar_chart: 统计报表")]:
+    st.subheader(":bar_chart: 统计报表")
 
     if not st.session_state.dbi.is_service_active(st.session_state.user_info):
         st.error("您尚未登录，无法查阅统计报表。")
@@ -581,7 +581,7 @@ with tabs[items.index("📊 统计报表")]:
 
 uploaded_emoji = "📁"
 
-with tabs[items.index("📝 问题反馈")]:
+with tabs[items.index(":memo: 问题反馈")]:
     if not st.session_state.dbi.is_service_active(st.session_state.user_info):
         st.error("您尚未登录，无法反馈问题。")
         st.stop()

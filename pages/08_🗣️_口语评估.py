@@ -480,7 +480,7 @@ rep_btn = btn_cols[2].button(
     help="点击按钮，播放麦克风录音或您上传的音频文件。",
 )
 ass_btn = btn_cols[3].button(
-    "评估[🔍]",
+    "评估[:mag:]",
     key="ass_btn_tb1",
     help="生成口语评估报告。",
     on_click=on_ass_btn_click,

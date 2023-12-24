@@ -164,7 +164,7 @@ st.sidebar.slider(
 # region tabs
 # 将二者分离，避免格式经常被重置
 tab_names = ["记忆闪卡", "单词拼图", "图片测词", "单词测验", "个人词库", "个人统计"]
-tab_emoji = ["📖", "🧩", "🖼️", "📝", "📚", "📊"]
+tab_emoji = [":book:", ":jigsaw:", ":frame_with_picture:", ":memo:", "📚", ":bar_chart:"]
 tab_items = [e + " " + n for e, n in zip(tab_emoji, tab_names)]
 tabs = st.tabs(tab_items)
 # endregion
@@ -301,7 +301,7 @@ def view_flash_word(container, tip_placeholder):
 
 # region 记忆闪卡
 
-with tabs[tab_items.index("📖 记忆闪卡")]:
+with tabs[tab_items.index(":book: 记忆闪卡")]:
     st.session_state["current_tab"] = "记忆闪卡"
     btn_cols = st.columns(9)
     tip_placeholder = st.empty()
@@ -469,7 +469,7 @@ def display_puzzle_hint(puzzle_progress):
     n = len(st.session_state.puzzle_words)
     progress = 1.0 * (st.session_state.puzzle_idx + 1) / n
     # st.write("进度：", progress, "idx", st.session_state.puzzle_idx)
-    puzzle_progress.progress(progress, text="🧩 单词拼图进度")
+    puzzle_progress.progress(progress, text=":jigsaw: 单词拼图进度")
     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
     definition = get_word_definition(word)
     st.write("提示信息：")
@@ -488,7 +488,7 @@ def on_next_puzzle_btn_click():
 
 # region 单词拼图
 
-with tabs[tab_items.index("🧩 单词拼图")]:
+with tabs[tab_items.index(":jigsaw: 单词拼图")]:
     st.session_state["current_tab"] = "单词拼图"
     st.markdown(
         "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。它是一种非常有效的学习方式，可以帮助我们提高词汇量、拼写能力、思维能力和解决问题能力。单词来自于您的记忆闪卡。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
@@ -711,11 +711,11 @@ def check_pic_answer(container):
 
 # region 图片测词
 
-with tabs[tab_items.index("🖼️ 图片测词")]:
+with tabs[tab_items.index(":frame_with_picture: 图片测词")]:
     st.session_state["current_tab"] = "图片测词"
     progress_text = "图片测词进度"
     st.markdown(
-        "🖼️ 图片测词是一种记忆单词的游戏，其玩法是给出一个图片，玩家需要根据图片内容来猜测图片所代表的单词。这种游戏可以帮助玩家记忆单词的含义。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
+        ":frame_with_picture: 图片测词是一种记忆单词的游戏，其玩法是给出一个图片，玩家需要根据图片内容来猜测图片所代表的单词。这种游戏可以帮助玩家记忆单词的含义。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
     pic_cols = st.columns(4)
     category = pic_cols[0].selectbox("请选择图片类别", pic_categories)
@@ -743,7 +743,7 @@ with tabs[tab_items.index("🖼️ 图片测词")]:
     )
     # 答题即可提交检查
     sumbit_pic_btn = pic_test_cols[3].button(
-        "🔍",
+        ":mag:",
         key="submit-pic",
         disabled=len(st.session_state.pic_tests) == 0
         or len(st.session_state.user_pic_answer) == 0,
@@ -1024,7 +1024,7 @@ def view_question(test_container):
 
 # region 单词测验
 
-with tabs[tab_items.index("📝 单词测验")]:
+with tabs[tab_items.index(":memo: 单词测验")]:
     st.info("试题词汇来源于【记忆闪卡】生成的单词列表。")
     cols = st.columns(4)
     level = cols[0].selectbox("单词级别", ("A1", "A2", "B1", "B2", "C1", "C2"))
@@ -1053,7 +1053,7 @@ with tabs[tab_items.index("📝 单词测验")]:
     )
     # 答题即可提交检查
     sumbit_test_btn = test_btns[4].button(
-        "🔍",
+        ":mag:",
         key="submit-test",
         disabled=len(st.session_state.tests) == 0
         or len(st.session_state.user_answer) == 0,

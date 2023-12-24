@@ -10,7 +10,7 @@ from mypylib.streamlit_helper import check_and_force_logout
 
 st.set_page_config(
     page_title="阅读理解",
-    page_icon="📖",
+    page_icon=":book:",
     layout="wide",
 )
 

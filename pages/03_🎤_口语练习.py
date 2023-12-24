@@ -296,7 +296,7 @@ def on_n_btn_click():
 cols = st.columns(5)
 
 cols[1].button(
-    "翻译 🔍",
+    "翻译 :mag:",
     on_click=on_t_btn_click,
     # args=(placeholder,),
     key="translate",
