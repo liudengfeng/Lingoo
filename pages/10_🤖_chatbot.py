@@ -206,7 +206,7 @@ check_and_force_logout(st, sidebar_status)
 
 # region 主页面
 
-st.subheader("🤖 Google Gemini 聊天机器人")
+st.subheader(":robot_face: Google Gemini 聊天机器人")
 if "chat_session" not in st.session_state:
     init_chat()
 

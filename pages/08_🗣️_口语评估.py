@@ -487,7 +487,7 @@ ass_btn = btn_cols[3].button(
     args=(topic,),
 )
 syn_btn = btn_cols[4].button(
-    "样例[🤖]",
+    "样例[:robot_face:]",
     key="syn_btn_tb1",
     on_click=on_ai_btn_click,
     args=(topic, level_selectbox, voice_style, message_placeholder),
