@@ -6,7 +6,10 @@ import random
 from io import BytesIO
 from pathlib import Path
 
+from azure.storage.blob import BlobClient, BlobServiceClient, ContainerClient
 from gtts import gTTS
+
+from .azure_speech import synthesize_speech_to_file
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 
@@ -142,3 +145,40 @@ def sample_words(level, n):
     with open(fp, "r") as f:
         cefr = json.load(f)
     return random.sample(cefr[level], n)
+
+
+def get_or_create_audio_in_blob_storage(word: str, style: str, secrets: dict):
+    # 生成单词的哈希值
+    hash_value = hash_word(word)
+
+    # 生成单词的语音文件名
+    filename = f"e{hash_value}.mp3"
+
+    # 创建 BlobServiceClient 对象，用于连接到 Blob 服务
+    blob_service_client = BlobServiceClient.from_connection_string(
+        secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+    )
+
+    # 创建 ContainerClient 对象，用于连接到容器
+    container_client = blob_service_client.get_container_client("word-voices")
+
+    # 创建 BlobClient 对象，用于操作 Blob
+    blob_client = container_client.get_blob_client(f"{style}/{filename}")
+
+    # 如果 Blob 不存在，则调用 Azure 的语音合成服务生成语音文件，并上传到 Blob
+    if not blob_client.exists():
+        # 生成语音文件
+        synthesize_speech_to_file(
+            word,
+            filename,
+            secrets["Microsoft"]["SPEECH_KEY"],
+            secrets["Microsoft"]["SPEECH_REGION"],
+            style,  # type: ignore
+        )
+
+        # 上传文件到 Blob
+        with open(filename, "rb") as data:
+            blob_client.upload_blob(data)
+
+    # 返回 Blob 的 URL
+    return blob_client.url

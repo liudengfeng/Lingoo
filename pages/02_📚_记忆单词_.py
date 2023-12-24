@@ -19,7 +19,7 @@ from mypylib.google_api import (
     google_translate,
 )
 from mypylib.st_helper import authenticate, check_and_force_logout
-from mypylib.word_utils import audio_autoplay_elem, hash_word
+from mypylib.word_utils import get_or_create_audio_in_blob_storage
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
@@ -45,6 +45,11 @@ if len(st.session_state.get("word_dict", {})) == 0:
     ) as f:
         st.session_state["word_dict"] = json.load(f)
 
+# endregion
+
+
+# region 闪卡状态
+
 if "flashcard_words" not in st.session_state:
     st.session_state["flashcard_words"] = []
 
@@ -57,6 +62,7 @@ if "flashcard_display_state" not in st.session_state:
 # 初始化单词的索引
 if "current_flashcard_word_index" not in st.session_state:
     st.session_state["current_flashcard_word_index"] = -1
+
 # endregion
 
 # region 页设置
@@ -82,28 +88,28 @@ def generate_flashcard_words():
     st.session_state.flashcard_words = random.sample(words, n)
 
 
-def gen_audio_fp(word: str, style: str):
-    # 生成单词的哈希值
-    hash_value = hash_word(word)
+# def gen_audio_fp(word: str, style: str):
+#     # 生成单词的哈希值
+#     hash_value = hash_word(word)
 
-    # 生成单词的语音文件名
-    audio_dir = os.path.join(CURRENT_CWD, f"resource/word_voices/{style}")
-    if not os.path.exists(audio_dir):
-        os.makedirs(audio_dir)
+#     # 生成单词的语音文件名
+#     audio_dir = os.path.join(CURRENT_CWD, f"resource/word_voices/{style}")
+#     if not os.path.exists(audio_dir):
+#         os.makedirs(audio_dir)
 
-    filename = f"e{hash_value}.mp3"
-    audio_fp = os.path.join(audio_dir, filename)
+#     filename = f"e{hash_value}.mp3"
+#     audio_fp = os.path.join(audio_dir, filename)
 
-    # 如果语音文件不存在，则调用Azure的语音合成服务生成语音文件
-    if not os.path.exists(audio_fp):
-        synthesize_speech_to_file(
-            word,
-            audio_fp,
-            st.secrets["Microsoft"]["SPEECH_KEY"],
-            st.secrets["Microsoft"]["SPEECH_REGION"],
-            style,  # type: ignore
-        )
-    return audio_fp
+#     # 如果语音文件不存在，则调用Azure的语音合成服务生成语音文件
+#     if not os.path.exists(audio_fp):
+#         synthesize_speech_to_file(
+#             word,
+#             audio_fp,
+#             st.secrets["Microsoft"]["SPEECH_KEY"],
+#             st.secrets["Microsoft"]["SPEECH_REGION"],
+#             style,  # type: ignore
+#         )
+#     return audio_fp
 
 
 @st.cache_data
@@ -164,7 +170,14 @@ st.sidebar.slider(
 # region tabs
 # 将二者分离，避免格式经常被重置
 tab_names = ["记忆闪卡", "单词拼图", "图片测词", "单词测验", "个人词库", "个人统计"]
-tab_emoji = [":book:", ":jigsaw:", ":frame_with_picture:", ":memo:", ":books:", ":bar_chart:"]
+tab_emoji = [
+    ":book:",
+    ":jigsaw:",
+    ":frame_with_picture:",
+    ":memo:",
+    ":books:",
+    ":bar_chart:",
+]
 tab_items = [e + " " + n for e, n in zip(tab_emoji, tab_names)]
 tabs = st.tabs(tab_items)
 # endregion
@@ -310,7 +323,9 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
     # placeholder = st.container()
     # 创建前后选择的按钮
     display_status_button = btn_cols[1].button(
-        ":recycle:", key="mask", help="点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。"
+        ":recycle:",
+        key="mask",
+        help="点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。",
     )
     prev_btn = btn_cols[2].button(
         ":leftwards_arrow_with_hook:",
@@ -333,7 +348,8 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
     add_btn = btn_cols[5].button(":heavy_plus_sign:", key="add", help="添加到个人词库")
     del_btn = btn_cols[6].button(":heavy_minus_sign:", key="del", help="从个人词库中删除")
     update_flashcard_wordbank_button = btn_cols[7].button(
-        ":arrows_counterclockwise:", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词")
+        ":arrows_counterclockwise:", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词"
+    )
 
     placeholder = st.empty()
 
@@ -350,9 +366,14 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
         word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
         ]
-        fp = gen_audio_fp(st.session_state.flashcard_words[st.session_state.current_flashcard_word_index], voice_style[0])  # type: ignore
+        # fp = gen_audio_fp(st.session_state.flashcard_words[st.session_state.current_flashcard_word_index], voice_style[0])  # type: ignore
+        url = get_or_create_audio_in_blob_storage(st.session_state.flashcard_words[st.session_state.current_flashcard_word_index], voice_style[0], st.secrets)  # type: ignore
         # placeholder.text(fp)
-        components.html(audio_autoplay_elem(fp))
+        # components.html(audio_autoplay_elem(url))
+        audio_html = (
+            f'<audio autoplay controls><source src="{url}" type="audio/mpeg"></audio>'
+        )
+        st.markdown(audio_html, unsafe_allow_html=True)
         # view_flash_word(container, tip_placeholder)
 
     if update_flashcard_wordbank_button:
@@ -511,7 +532,8 @@ with tabs[tab_items.index(":jigsaw: 单词拼图")]:
     )
 
     update_puzzle_wordbank_button = puzzle_cols[3].button(
-        ":arrows_counterclockwise:", key="refresh-puzzle", help="重新生成单词列表")
+        ":arrows_counterclockwise:", key="refresh-puzzle", help="重新生成单词列表"
+    )
 
     if prev_puzzle_btn:
         prepare_puzzle()
@@ -750,7 +772,9 @@ with tabs[tab_items.index(":frame_with_picture: 图片测词")]:
         help="至少完成一道测试题后，才可点击按钮，显示测验得分。",
     )
 
-    if pic_test_cols[4].button(":arrows_counterclockwise:", key="refresh-pic", help="点击按钮，重新生成图片测试题。"):
+    if pic_test_cols[4].button(
+        ":arrows_counterclockwise:", key="refresh-pic", help="点击按钮，重新生成图片测试题。"
+    ):
         gen_pic_tests(category, pic_num)
         st.session_state.user_pic_answer = {}
         st.session_state.pic_idx = -1
@@ -1034,7 +1058,9 @@ with tabs[tab_items.index(":memo: 单词测验")]:
     test_container = st.container()
 
     test_btns = st.columns(6)
-    gen_test_btn = test_btns[1].button(":arrows_counterclockwise:", key="gen-test", help="点击按钮，生成单词理解测试题。")
+    gen_test_btn = test_btns[1].button(
+        ":arrows_counterclockwise:", key="gen-test", help="点击按钮，生成单词理解测试题。"
+    )
     prev_test_btn = test_btns[2].button(
         ":leftwards_arrow_with_hook:",
         key="prev-test",

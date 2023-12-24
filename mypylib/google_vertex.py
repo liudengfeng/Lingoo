@@ -21,6 +21,6 @@ def get_chat_model():
 
 
 def get_text_generation(prompt, **parameters):
-    generation_model = get_generation_model()
-    response = generation_model.predict(prompt=prompt, **parameters)
-    return response.text
+    model = get_generation_model()
+    response = model.predict(prompt=prompt, **parameters)
+    return response.text, model.count_tokens(response.text).total_billable_characters
