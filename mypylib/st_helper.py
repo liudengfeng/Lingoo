@@ -4,7 +4,7 @@ from .db_interface import DbInterface
 
 
 def configure(st):
-    GOOGLE_API_KEY = st.secrets["Google"]["GEMINI_KEY"]
+    GOOGLE_API_KEY = st.secrets["Google"]["GAI_KEY"]
     genai.configure(api_key=GOOGLE_API_KEY)
 
 
