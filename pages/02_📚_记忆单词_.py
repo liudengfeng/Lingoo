@@ -374,7 +374,8 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
         #     f'<audio autoplay controls><source src="{url}" type="audio/mpeg"></audio>'
         # )
         # st.markdown(audio_html, unsafe_allow_html=True)
-        st.audio(url, format='audio/mp3')
+        st.write(f"单词：{word}，发音：{voice_style[0]}, url:{url}")
+        st.audio(url, format="audio/mp3")
         # view_flash_word(container, tip_placeholder)
 
     if update_flashcard_wordbank_button:
