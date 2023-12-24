@@ -17,7 +17,7 @@ from mypylib.auth_utils import is_valid_email, is_valid_phone_number
 from mypylib.constants import FAKE_EMAIL_DOMAIN, PROVINCES
 from mypylib.db_interface import DbInterface
 from mypylib.db_model import User
-from mypylib.streamlit_helper import check_and_force_logout
+from mypylib.st_helper import check_and_force_logout
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 WXSKM_DIR = CURRENT_CWD / "resource" / "wxskm"

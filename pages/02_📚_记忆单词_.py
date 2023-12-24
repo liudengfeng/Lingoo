@@ -18,7 +18,7 @@ from mypylib.google_api import (
     get_translation_client,
     google_translate,
 )
-from mypylib.streamlit_helper import authenticate, check_and_force_logout
+from mypylib.st_helper import authenticate, check_and_force_logout
 from mypylib.word_utils import audio_autoplay_elem, hash_word
 
 # 创建或获取logger对象

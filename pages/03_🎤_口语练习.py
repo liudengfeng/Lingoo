@@ -12,7 +12,7 @@ from mypylib.azure_speech import synthesize_speech_to_file
 from mypylib.azure_translator import translate
 from mypylib.constants import NAMES, TOPICS, CEFR_LEVEL_MAPS
 from mypylib.google_api import generate_text
-from mypylib.streamlit_helper import authenticate
+from mypylib.st_helper import authenticate
 
 # region 认证及初始化
 
