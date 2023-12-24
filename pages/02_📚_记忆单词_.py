@@ -313,7 +313,7 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
         "♻️", key="mask", help="点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。"
     )
     prev_btn = btn_cols[2].button(
-        "↩️",
+        ":leftwards_arrow_with_hook:",
         key="prev",
         help="点击按钮，切换到上一个单词。",
         on_click=on_prev_btn_click,
@@ -496,7 +496,7 @@ with tabs[tab_items.index(":jigsaw: 单词拼图")]:
     puzzle_progress = st.empty()
     puzzle_cols = st.columns(4)
     prev_puzzle_btn = puzzle_cols[1].button(
-        "↩️",
+        ":leftwards_arrow_with_hook:",
         key="prev-puzzle",
         help="点击按钮，切换到上一单词拼图。",
         on_click=on_prev_puzzle_btn_click,
@@ -729,7 +729,7 @@ with tabs[tab_items.index(":frame_with_picture: 图片测词")]:
 
     # 创建按钮
     pic_test_cols[1].button(
-        "↩️",
+        ":leftwards_arrow_with_hook:",
         help="点击按钮，切换到上一题。",
         on_click=on_prev_pic_btn_click,
         disabled=st.session_state.pic_idx <= 0,
@@ -1036,7 +1036,7 @@ with tabs[tab_items.index(":memo: 单词测验")]:
     test_btns = st.columns(6)
     gen_test_btn = test_btns[1].button(":arrows_counterclockwise:", key="gen-test", help="点击按钮，生成单词理解测试题。")
     prev_test_btn = test_btns[2].button(
-        "↩️",
+        ":leftwards_arrow_with_hook:",
         key="prev-test",
         help="点击按钮，切换到上一题。",
         on_click=on_prev_test_btn_click,
