@@ -171,7 +171,7 @@ sidebar_col1.button(
 """,
 )
 sidebar_col2.button(
-    "➖",
+    ":heavy_minus_sign:",
     on_click=del_last_examples,
     disabled=len(st.session_state["examples_pair"]) <= 0,
     help="删除最后一对示例",

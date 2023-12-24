@@ -225,7 +225,7 @@ prompt = st.text_area(
 )
 cols = st.columns([1, 1, 1, 1, 4])
 add_btn = cols[0].button(
-    ":plus:",
+    ":heavy_plus_sign:",
     help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。",
 )
 del_btn = cols[1].button(":minus:", help="删除提示词尾部的分隔符")
