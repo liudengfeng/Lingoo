@@ -161,7 +161,7 @@ ai_example = st.sidebar.text_input(
 sidebar_col1, sidebar_col2, sidebar_col3, sidebar_col4 = st.sidebar.columns(4)
 
 sidebar_col1.button(
-    ":plus:",
+    ":heavy_plus_sign:",
     on_click=add_chat_examples,
     disabled=len(st.session_state["examples_pair"]) >= 8,
     help="""聊天提示的示例是输入输出对的列表，它们演示给定输入的示例性模型输出。控制在8对以内。使用示例来自定义模型如何响应某些问题。
@@ -171,7 +171,7 @@ sidebar_col1.button(
 """,
 )
 sidebar_col2.button(
-    ":minus:",
+    "➖",
     on_click=del_last_examples,
     disabled=len(st.session_state["examples_pair"]) <= 0,
     help="删除最后一对示例",
