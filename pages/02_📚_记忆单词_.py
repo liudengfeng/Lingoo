@@ -267,6 +267,12 @@ def _memory_tip(word):
     return generate_word_memory_tip(word)
 
 
+@st.cache_data(ttl=60 * 60 * 12, show_spinner="获取音频元素...")
+def get_audio_html(word, voice_style):
+    audio_data = get_or_create_and_return_audio_data(word, voice_style[0], st.secrets)
+    return audio_autoplay_elem(audio_data)
+
+
 def view_flash_word(container, tip_placeholder):
     if st.session_state.current_flashcard_word_index == -1:
         return
@@ -366,15 +372,9 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
         word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
         ]
-        # fp = gen_audio_fp(st.session_state.flashcard_words[st.session_state.current_flashcard_word_index], voice_style[0])  # type: ignore
-        # TODO:使用缓存
-        audio_data = get_or_create_and_return_audio_data(st.session_state.flashcard_words[st.session_state.current_flashcard_word_index], voice_style[0], st.secrets)  # type: ignore
-        # placeholder.text(fp)
-        components.html(audio_autoplay_elem(audio_data))
-        # audio_html = (
-        #     f'<audio autoplay controls><source src="{url}" type="audio/mpeg"></audio>'
-        # )
-        # st.markdown(audio_html, unsafe_allow_html=True)
+        # 使用会话缓存，避免重复请求
+        audio_html = get_audio_html(word, voice_style)
+        components.html(audio_html)
         # view_flash_word(container, tip_placeholder)
 
     if update_flashcard_wordbank_button:
