@@ -19,7 +19,11 @@ from mypylib.google_api import (
     google_translate,
 )
 from mypylib.st_helper import authenticate, check_and_force_logout
-from mypylib.word_utils import audio_autoplay_elem, get_or_create_and_return_audio_data
+from mypylib.word_utils import (
+    audio_autoplay_elem,
+    get_or_create_and_return_audio_data,
+    remove_trailing_punctuation,
+)
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
@@ -216,14 +220,13 @@ def _rainbow_word(example: str, word: str):
 
 def _view_detail(container, detail, t_detail, word):
     num = 10
-    d1 = detail["definition"]
+    d1 = remove_trailing_punctuation(detail["definition"])
     e1 = detail["examples"]
-    d2 = t_detail["definition"]
+    d2 = remove_trailing_punctuation(t_detail["definition"])
     e2 = t_detail["examples"]
     if st.session_state.flashcard_display_state == "全部":
-        container.markdown(f"definition：**{d1[:-1]}**")
-        container.markdown(f"定义：**{d2[:-1]}**")
-        # container.markdown("-" * num)
+        container.markdown(f"definition：**{d1}**")
+        container.markdown(f"定义：**{d2}**")
 
         content = ""
         for e, t in zip(e1, e2):
@@ -231,8 +234,7 @@ def _view_detail(container, detail, t_detail, word):
             content += f"- {t}\n"
         container.markdown(content)
     elif st.session_state.flashcard_display_state == "英文":
-        container.markdown(f"definition：**{d1[:-1]}**")
-        # container.markdown("-" * num)
+        container.markdown(f"definition：**{d1}**")
 
         content = ""
         for e in e1:
@@ -240,8 +242,7 @@ def _view_detail(container, detail, t_detail, word):
         container.markdown(content)
     else:
         # 只显示译文
-        container.markdown(f"定义：**{d2[:-1]}**")
-        # container.markdown("-" * num)
+        container.markdown(f"定义：**{d2}**")
         content = ""
         for e in e2:
             content += f"- {e}\n"

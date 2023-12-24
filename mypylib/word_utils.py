@@ -9,10 +9,28 @@ from typing import Union
 
 from azure.storage.blob import BlobClient, BlobServiceClient, ContainerClient
 from gtts import gTTS
+import string
 
 from .azure_speech import synthesize_speech_to_file
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
+
+
+def remove_trailing_punctuation(s: str) -> str:
+    """
+    Removes trailing punctuation from a string.
+
+    Args:
+        s (str): The input string.
+
+    Returns:
+        str: The input string with trailing punctuation removed.
+    """
+    chinese_punctuation = (
+        "！？｡。＂＃＄％＆＇（）＊＋，－／：；＜＝＞＠［＼］＾＿｀｛｜｝～｟｠｢｣､、〃》「」『』【】〔〕〖〗〘〙〚〛〜〝〞〟〰〾〿–—‘’‛“”„‟…‧﹏."
+    )
+    all_punctuation = string.punctuation + chinese_punctuation
+    return s.rstrip(all_punctuation)
 
 
 def hash_word(word: str):
