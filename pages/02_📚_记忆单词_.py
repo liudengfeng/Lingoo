@@ -199,7 +199,7 @@ def _view_detail(container, detail, t_detail, word):
     content = ""
     indices = random.sample(range(len(e1)), num_elements)
     if st.session_state.flashcard_display_state == "全部":
-        container.markdown(f":flag-ch:**:blue[definition：{d1}]**")
+        container.markdown(f"**:blue[definition：{d1}]**")
         container.markdown(f"**:violet[定义：{d2}]**")
         for i in indices:
             content += f"- {_rainbow_word(e1[i], word)}\n"
