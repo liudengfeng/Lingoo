@@ -512,10 +512,12 @@ def display_puzzle_hint(puzzle_progress):
 
 def on_prev_puzzle_btn_click():
     st.session_state["puzzle_idx"] -= 1
+    st.session_state.puzzle_answer_value = ""
 
 
 def on_next_puzzle_btn_click():
     st.session_state["puzzle_idx"] += 1
+    st.session_state.puzzle_answer_value = ""
 
 
 # endregion
@@ -550,11 +552,9 @@ with tabs[tab_items.index(":jigsaw: 单词拼图")]:
 
     if prev_puzzle_btn:
         prepare_puzzle()
-        st.rerun()
 
     if next_puzzle_btn:
         prepare_puzzle()
-        st.rerun()
 
     if update_puzzle_wordbank_button:
         gen_puzzle_words()
@@ -574,7 +574,7 @@ with tabs[tab_items.index(":jigsaw: 单词拼图")]:
         if st.session_state.puzzle_idx != -1:
             user_input = st.text_input(
                 "点击字符按钮或输入您的答案",
-                placeholder="点击字符按钮或输入您的答案",
+                placeholder="点击字符按钮或直接输入您的答案",
                 value=st.session_state.puzzle_answer_value,
                 key="puzzle_answer",
                 label_visibility="collapsed",
