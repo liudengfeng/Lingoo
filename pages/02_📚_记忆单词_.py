@@ -550,13 +550,11 @@ with tabs[tab_items.index(":jigsaw: 单词拼图")]:
 
     if prev_puzzle_btn:
         prepare_puzzle()
-        # 移动需要清空原来的答案
-        st.session_state.puzzle_answer_value = ""
+        st.rerun()
 
     if next_puzzle_btn:
         prepare_puzzle()
-        # 移动需要清空原来的答案
-        st.session_state.puzzle_answer_value = ""
+        st.rerun()
 
     if update_puzzle_wordbank_button:
         gen_puzzle_words()
