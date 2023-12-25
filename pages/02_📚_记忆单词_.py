@@ -199,18 +199,18 @@ def _view_detail(container, detail, t_detail, word):
     content = ""
     indices = random.sample(range(len(e1)), num_elements)
     if st.session_state.flashcard_display_state == "全部":
-        container.markdown(f"definition：**{d1}**")
-        container.markdown(f"定义：**{d2}**")
+        container.markdown(f"**:blue[definition：{d1}]**")
+        container.markdown(f"**定义：{d2}**")
         for i in indices:
             content += f"- {_rainbow_word(e1[i], word)}\n"
             content += f"- {e2[i]}\n"
     elif st.session_state.flashcard_display_state == "英文":
-        container.markdown(f"definition：**{d1}**")
+        container.markdown(f"**definition：{d1}**")
         for i in indices:
             content += f"- {_rainbow_word(e1[i], word)}\n"
     else:
         # 只显示译文
-        container.markdown(f"定义：**{d2}**")
+        container.markdown(f"**定义：{d2}**")
         for i in indices:
             content += f"- {e2[i]}\n"
     container.markdown(content)
