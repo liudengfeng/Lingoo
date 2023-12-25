@@ -12,12 +12,18 @@ import streamlit.components.v1 as components
 from PIL import Image
 
 from mypylib.db_interface import DbInterface
-from mypylib.google_api import (generate_word_memory_tip, generate_word_test,
-                                get_translation_client, google_translate)
+from mypylib.google_api import (
+    generate_word_memory_tip,
+    generate_word_test,
+    get_translation_client,
+    google_translate,
+)
 from mypylib.st_helper import authenticate, check_and_force_logout
-from mypylib.word_utils import (audio_autoplay_elem,
-                                get_or_create_and_return_audio_data,
-                                remove_trailing_punctuation)
+from mypylib.word_utils import (
+    audio_autoplay_elem,
+    get_or_create_and_return_audio_data,
+    remove_trailing_punctuation,
+)
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
@@ -37,11 +43,16 @@ authenticate(st)
 if "current_tab" not in st.session_state:
     st.session_state["current_tab"] = "Default Tab"
 
-if len(st.session_state.get("word_dict", {})) == 0:
+
+@st.cache_resource  # 👈 Add the caching decorator
+def load_word_dict():
     with open(
         DICT_DIR / "word_lists_by_edition_grade.json", "r", encoding="utf-8"
     ) as f:
-        st.session_state["word_dict"] = json.load(f)
+        return json.load(f)
+
+if len(st.session_state.get("word_dict", {})) == 0:
+    st.session_state["word_dict"] = load_word_dict()
 
 # endregion
 
@@ -84,6 +95,7 @@ def generate_flashcard_words():
     n = min(num_words, len(words))
     # 随机选择单词
     st.session_state.flashcard_words = random.sample(words, n)
+    st.toast(f"当前闪卡单词数量: {len(st.session_state.flashcard_words)}")
 
 
 @st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词信息...")
@@ -124,7 +136,7 @@ st.sidebar.selectbox(
     "请选择单词列表",
     sorted(list(st.session_state.word_dict.keys())),
     key="selected_list",
-    # on_change=on_word_lib_changed,
+    on_change=generate_flashcard_words,
     format_func=lambda x: x.split("-", maxsplit=1)[1],
 )
 
