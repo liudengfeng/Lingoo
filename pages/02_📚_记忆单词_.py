@@ -13,18 +13,12 @@ from PIL import Image
 
 # from mypylib.azure_speech import synthesize_speech_to_file
 from mypylib.db_interface import DbInterface
-from mypylib.google_api import (
-    generate_word_memory_tip,
-    generate_word_test,
-    get_translation_client,
-    google_translate,
-)
+from mypylib.google_api import (generate_word_memory_tip, generate_word_test,
+                                get_translation_client, google_translate)
 from mypylib.st_helper import authenticate, check_and_force_logout
-from mypylib.word_utils import (
-    audio_autoplay_elem,
-    get_or_create_and_return_audio_data,
-    remove_trailing_punctuation,
-)
+from mypylib.word_utils import (audio_autoplay_elem,
+                                get_or_create_and_return_audio_data,
+                                remove_trailing_punctuation)
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
@@ -93,31 +87,7 @@ def generate_flashcard_words():
     st.session_state.flashcard_words = random.sample(words, n)
 
 
-# def gen_audio_fp(word: str, style: str):
-#     # 生成单词的哈希值
-#     hash_value = hash_word(word)
-
-#     # 生成单词的语音文件名
-#     audio_dir = os.path.join(CURRENT_CWD, f"resource/word_voices/{style}")
-#     if not os.path.exists(audio_dir):
-#         os.makedirs(audio_dir)
-
-#     filename = f"e{hash_value}.mp3"
-#     audio_fp = os.path.join(audio_dir, filename)
-
-#     # 如果语音文件不存在，则调用Azure的语音合成服务生成语音文件
-#     if not os.path.exists(audio_fp):
-#         synthesize_speech_to_file(
-#             word,
-#             audio_fp,
-#             st.secrets["Microsoft"]["SPEECH_KEY"],
-#             st.secrets["Microsoft"]["SPEECH_REGION"],
-#             style,  # type: ignore
-#         )
-#     return audio_fp
-
-
-@st.cache_data
+@st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词信息...")
 def get_word_info(word):
     return st.session_state.dbi.find_word(word)
 
@@ -252,7 +222,10 @@ def _view_detail(container, detail, t_detail, word):
 
 def _view_pos(container, key, en, zh, word):
     container.markdown(f"**{key}**")
-    for i in range(len(en)):
+    num_elements = min(3, len(en))
+    # 随机选择元素
+    indices = random.sample(range(len(en)), num_elements)
+    for i in indices:
         _view_detail(container, en[i], zh[i], word)
 
 
@@ -264,18 +237,39 @@ def view_pos(container, word_info, word):
         _view_pos(container, key, en[key], zh[key], word)
 
 
-@st.cache_data(ttl=timedelta(hours=12), show_spinner="获取 Ai 提示...")
+@st.cache_data(ttl=timedelta(hours=12), max_entries=1000, show_spinner="获取 Ai 提示...")
 def _memory_tip(word):
     return generate_word_memory_tip(word)
 
 
-@st.cache_data(ttl=timedelta(hours=12), show_spinner="获取音频元素...")
+@st.cache_data(ttl=timedelta(hours=12), max_entries=1000, show_spinner="获取音频元素...")
 def get_audio_html(word, voice_style):
+    """
+    获取单词的音频HTML代码，可供浏览器内自动播放。
+
+    参数：
+    - word：要获取音频的单词（字符串）
+    - voice_style：音频风格（字符串）
+
+    返回值：
+    - 音频的HTML代码（字符串）
+    """
     audio_data = get_or_create_and_return_audio_data(word, voice_style[0], st.secrets)
     return audio_autoplay_elem(audio_data)
 
 
 def view_flash_word(container, tip_placeholder):
+    """
+    Display the flashcard word and its information.
+
+    Args:
+        container (object): The container to display the flashcard word and information.
+        tip_placeholder (object): The placeholder to display the memory tip.
+
+    Returns:
+        None
+    """
+
     if st.session_state.current_flashcard_word_index == -1:
         return
 
@@ -286,7 +280,7 @@ def view_flash_word(container, tip_placeholder):
         st.session_state.flashcard_word_info[word] = get_word_info(word)
 
     word_info = st.session_state.flashcard_word_info.get(word, {})
-    if word_info is None:
+    if not word_info:
         st.error(f"没有该单词：“{word}”的信息。TODO：添加到单词库。")
         st.stop()
 
@@ -391,7 +385,6 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
         # 使用会话缓存，避免重复请求
         audio_html = get_audio_html(word, voice_style)
         components.html(audio_html)
-        # view_flash_word(container, tip_placeholder)
 
     if update_flashcard_wordbank_button:
         generate_flashcard_words()
@@ -422,7 +415,6 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
         # 初始化闪卡单词
         if len(st.session_state.flashcard_words) == 0:
             generate_flashcard_words()
-
         view_flash_word(container, tip_placeholder)
 
 # endregion
