@@ -190,42 +190,35 @@ def _rainbow_word(example: str, word: str):
 
 
 def _view_detail(container, detail, t_detail, word):
-    num = 10
     d1 = remove_trailing_punctuation(detail["definition"])
-    e1 = detail["examples"]
     d2 = remove_trailing_punctuation(t_detail["definition"])
+    e1 = detail["examples"]
     e2 = t_detail["examples"]
+    num_elements = min(3, len(e1))
+    # 随机选择元素
+    content = ""
+    indices = random.sample(range(len(e1)), num_elements)
     if st.session_state.flashcard_display_state == "全部":
         container.markdown(f"definition：**{d1}**")
         container.markdown(f"定义：**{d2}**")
-
-        content = ""
-        for e, t in zip(e1, e2):
-            content += f"- {_rainbow_word(e, word)}\n"
-            content += f"- {t}\n"
-        container.markdown(content)
+        for i in indices:
+            content += f"- {_rainbow_word(e1[i], word)}\n"
+            content += f"- {e2[i]}\n"
     elif st.session_state.flashcard_display_state == "英文":
         container.markdown(f"definition：**{d1}**")
-
-        content = ""
-        for e in e1:
-            content += f"- {_rainbow_word(e, word)}\n"
-        container.markdown(content)
+        for i in indices:
+            content += f"- {_rainbow_word(e1[i], word)}\n"
     else:
         # 只显示译文
         container.markdown(f"定义：**{d2}**")
-        content = ""
-        for e in e2:
-            content += f"- {e}\n"
-        container.markdown(content)
+        for i in indices:
+            content += f"- {e2[i]}\n"
+    container.markdown(content)
 
 
 def _view_pos(container, key, en, zh, word):
     container.markdown(f"**{key}**")
-    num_elements = min(3, len(en))
-    # 随机选择元素
-    indices = random.sample(range(len(en)), num_elements)
-    for i in indices:
+    for i in range(len(en)):
         _view_detail(container, en[i], zh[i], word)
 
 
