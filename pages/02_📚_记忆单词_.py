@@ -51,6 +51,7 @@ def load_word_dict():
     ) as f:
         return json.load(f)
 
+
 if len(st.session_state.get("word_dict", {})) == 0:
     st.session_state["word_dict"] = load_word_dict()
 
@@ -95,7 +96,9 @@ def generate_flashcard_words():
     n = min(num_words, len(words))
     # 随机选择单词
     st.session_state.flashcard_words = random.sample(words, n)
-    st.toast(f"当前单词列表名称：{word_lib_name} 闪卡单词数量: {len(st.session_state.flashcard_words)}")
+    st.toast(
+        f"当前单词列表名称：{word_lib_name} 闪卡单词数量: {len(st.session_state.flashcard_words)}"
+    )
 
 
 @st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词信息...")
