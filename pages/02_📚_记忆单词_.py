@@ -3,6 +3,7 @@ import logging
 import os
 import random
 import re
+from datetime import timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -263,12 +264,12 @@ def view_pos(container, word_info, word):
         _view_pos(container, key, en[key], zh[key], word)
 
 
-@st.cache_data(ttl=60 * 60 * 2, show_spinner="获取 Ai 提示...")
+@st.cache_data(ttl=timedelta(hours=12), show_spinner="获取 Ai 提示...")
 def _memory_tip(word):
     return generate_word_memory_tip(word)
 
 
-@st.cache_data(ttl=60 * 60 * 12, show_spinner="获取音频元素...")
+@st.cache_data(ttl=timedelta(hours=12), show_spinner="获取音频元素...")
 def get_audio_html(word, voice_style):
     audio_data = get_or_create_and_return_audio_data(word, voice_style[0], st.secrets)
     return audio_autoplay_elem(audio_data)
