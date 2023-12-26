@@ -11,7 +11,6 @@ import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
 
-from mypylib.db_interface import DbInterface
 from mypylib.google_api import (
     generate_word_memory_tip,
     generate_word_test,
@@ -27,6 +26,16 @@ from mypylib.word_utils import (
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
+
+# region 页设置
+
+st.set_page_config(
+    page_title="记忆单词",
+    page_icon=":books:",
+    layout="wide",
+)
+
+# endregion
 
 # region 常量
 # streamlit中各页都是相对当前根目录
@@ -72,16 +81,6 @@ if "flashcard_display_state" not in st.session_state:
 # 初始化单词的索引
 if "current_flashcard_word_index" not in st.session_state:
     st.session_state["current_flashcard_word_index"] = -1
-
-# endregion
-
-# region 页设置
-
-st.set_page_config(
-    page_title="记忆单词",
-    page_icon=":books:",
-    layout="wide",
-)
 
 # endregion
 
