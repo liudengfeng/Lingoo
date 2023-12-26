@@ -38,7 +38,7 @@ selected_theme = st.sidebar.selectbox(
 # region 主页
 
 # 添加一行按钮
-buttons = st.beta_columns(4)
+buttons = st.columns(4)
 listen_button = buttons[0].button(":ear: 收听", help="点击开始收听")
 reset_button = buttons[1].button(":arrows_counterclockwise: 重置", help="点击重置听力练习")
 show_button = buttons[2].button(":eyes: 显示", help="点击显示听力材料")
