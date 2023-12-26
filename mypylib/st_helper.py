@@ -62,6 +62,13 @@ def authenticate(st):
         if "inited_google_ai" not in st.session_state:
             configure(st)
             st.session_state["inited_google_ai"] = True
+
+        # 配置 token 计数器
+        if "current_token_count" not in st.session_state:
+            st.session_state["current_token_count"] = 0
+
+        if "total_token_count" not in st.session_state:
+            st.session_state["total_token_count"] = 0
     else:
         st.error("非云端环境，无法使用 Google AI")
         st.stop()
