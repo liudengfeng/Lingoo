@@ -35,6 +35,8 @@ st.set_page_config(
     layout="wide",
 )
 
+logger.info("当前页：记忆单词")
+
 # endregion
 
 # region 常量
