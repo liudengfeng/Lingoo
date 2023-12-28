@@ -3,7 +3,7 @@ import time
 import google.generativeai as genai
 import streamlit as st
 from google.generativeai.types.generation_types import BlockedPromptException
-from vertexai.preview.generative_models import GenerativeModel
+# from vertexai.preview.generative_models import GenerativeModel
 
 from mypylib.google_cloud_configuration import SAFETY_SETTINGS
 from mypylib.st_utils import (
@@ -261,7 +261,7 @@ if prompt := st.chat_input("输入提示以便开始对话"):
 
         st.session_state.current_token_count = st.session_state.chat_model.count_tokens(
             prompt + full_response
-        ).total_tokens
+        ).total_token_count
         st.session_state.total_token_count += st.session_state.current_token_count
 
 msg = f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
