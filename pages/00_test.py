@@ -32,7 +32,7 @@ text = ""
 def generate():
     global text
     text = ""
-    model = load_model("emini-pro")
+    model = load_model("gemini-pro")
     responses = model.generate_content(
         src,
         generation_config={"max_output_tokens": 1024, "temperature": 0.3, "top_p": 1},
