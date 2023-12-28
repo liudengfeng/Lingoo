@@ -37,5 +37,5 @@ def generate():
         placeholder.markdown(response.text)
 
 
-if st.button("翻译", key="2"):
+if st.button("提交", key="2"):
     generate()
