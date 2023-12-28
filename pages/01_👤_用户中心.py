@@ -17,7 +17,9 @@ from mypylib.auth_utils import is_valid_email, is_valid_phone_number
 from mypylib.constants import FAKE_EMAIL_DOMAIN, PROVINCES
 from mypylib.db_interface import DbInterface
 from mypylib.db_model import User
-from mypylib.st_helper import check_and_force_logout
+
+# from mypylib.st_helper import check_and_force_logout
+from mypylib.st_utils import check_and_force_logout
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 WXSKM_DIR = CURRENT_CWD / "resource" / "wxskm"
@@ -43,11 +45,19 @@ if "dbi" not in st.session_state:
 
 sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
-check_and_force_logout(st, sidebar_status)
+# check_and_force_logout(st, sidebar_status)
+check_and_force_logout(sidebar_status)
 
 # endregion
 
-emojis = [":bust_in_silhouette:", ":bento:", ":arrows_counterclockwise:", ":key:", ":bar_chart:", ":memo:"]
+emojis = [
+    ":bust_in_silhouette:",
+    ":bento:",
+    ":arrows_counterclockwise:",
+    ":key:",
+    ":bar_chart:",
+    ":memo:",
+]
 item_names = ["用户注册", "选择套餐", "更新信息", "重置密码", "统计报表", "问题反馈"]
 items = [f"{e} {n}" for e, n in zip(emojis, item_names)]
 tabs = st.tabs(items)

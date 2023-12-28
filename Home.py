@@ -13,7 +13,9 @@ from mypylib.db_interface import DbInterface
 from mypylib.azure_speech import speech_synthesis_get_available_voices
 from mypylib.constants import LANGUAGES
 from mypylib.db_model import PaymentStatus, LoginEvent
-from mypylib.st_helper import check_and_force_logout
+
+# from mypylib.st_helper import check_and_force_logout
+from mypylib.st_utils import check_and_force_logout
 
 
 CURRENT_CWD: Path = Path(__file__).parent
@@ -75,7 +77,8 @@ extend_time_btn_disabled = False
 sidebar_status = st.sidebar.empty()
 
 # 在页面加载时检查是否有需要强制退出的登录会话
-check_and_force_logout(st, sidebar_status)
+# check_and_force_logout(st, sidebar_status)
+check_and_force_logout(sidebar_status)
 
 if len(st.session_state["user_info"]) >= 1:
     # 获取用户的数据
