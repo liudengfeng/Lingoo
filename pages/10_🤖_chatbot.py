@@ -5,8 +5,12 @@ import streamlit as st
 from google.generativeai.types.generation_types import BlockedPromptException
 from vertexai.preview.generative_models import GenerativeModel
 
-from mypylib.google_gemini import SAFETY_SETTINGS
-from mypylib.st_utils import authenticate_and_configure_services, check_and_force_logout
+from mypylib.google_cloud_configuration import SAFETY_SETTINGS
+from mypylib.st_utils import (
+    authenticate_and_configure_services,
+    check_and_force_logout,
+    load_model,
+)
 
 # region 页面设置
 
@@ -48,11 +52,12 @@ def init_chat():
         "top_k": st.session_state["top_k"],
         "max_output_tokens": st.session_state["max_output_tokens"],
     }
-    model = genai.GenerativeModel(
-        model_name="gemini-pro",
-        generation_config=generation_config,
-        safety_settings=SAFETY_SETTINGS,
-    )
+    # model = genai.GenerativeModel(
+    #     model_name="gemini-pro",
+    #     generation_config=generation_config,
+    #     safety_settings=SAFETY_SETTINGS,
+    # )
+    model = load_model("gemini-pro")
     history = []
     for user, ai in st.session_state["examples_pair"]:
         history.append({"role": "user", "parts": [user]})
