@@ -1,15 +1,11 @@
-import base64
 import mimetypes
 import time
 from pathlib import Path
 
 import streamlit as st
-import vertexai
 from PIL import Image
 
-# from vertexai.preview.generative_models import GenerativeModel
-from vertexai.preview.generative_models import Image as GImage
-from vertexai.preview.generative_models import Part
+from vertexai.preview.generative_models import Part, GenerationConfig
 
 from mypylib.google_gemini import NORMAL_SAFETY_SETTINGS
 from mypylib.st_utils import (
@@ -127,10 +123,7 @@ check_and_force_logout(sidebar_status)
 def _process_media(uploaded_file):
     # 用文件扩展名称形成 MIME 类型
     mime_type = mimetypes.guess_type(uploaded_file.name)[0]
-    st.image(uploaded_file)
-    p = Part.from_data(
-        data=uploaded_file.getvalue(), mime_type=mime_type
-    )
+    p = Part.from_data(data=uploaded_file.getvalue(), mime_type=mime_type)
     return p
 
 
@@ -164,12 +157,13 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
         st.error(f"处理多媒体文件时出错：{e}")
         return
     model = load_model("gemini-pro-vision")
-    generation_config = {
-        "temperature": st.session_state["temperature"],
-        "top_p": st.session_state["top_p"],
-        "top_k": st.session_state["top_k"],
-        "max_output_tokens": st.session_state["max_output_tokens"],
-    }
+    generation_config = GenerationConfig(
+        temperature=st.session_state["temperature"],
+        top_p=st.session_state["top_p"],
+        top_k=st.session_state["top_k"],
+        max_output_tokens=st.session_state["max_output_tokens"],
+    )
+    st.write(contents)
     responses = model.generate_content(
         contents,
         generation_config=generation_config,
