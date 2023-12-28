@@ -126,8 +126,15 @@ check_and_force_logout(sidebar_status)
 
 def _process_media(uploaded_file):
     # 用文件扩展名称形成 MIME 类型
-    mime = mimetypes.guess_type(uploaded_file.name)[0]
-    return Part.from_data(data=uploaded_file.getvalue(), mime_type=mime)
+    # mime = mimetypes.guess_type(uploaded_file.name)[0]
+    # return Part.from_data(data=uploaded_file.getvalue(), mime_type=mime)
+
+    mime_type = mimetypes.guess_type(uploaded_file.name)[0]
+    if mime_type.startswith("image"):
+        return GImage.from_bytes(uploaded_file.getvalue())
+    # elif mime_type.startswith("video"):
+    #     col1.video(m)
+    raise TypeError(f"不支持的文件类型：{mime_type}")
 
 
 def _process_image_and_prompt(uploaded_files, prompt):
@@ -135,9 +142,9 @@ def _process_image_and_prompt(uploaded_files, prompt):
     separator = "<>"
     if separator not in prompt:
         # 如果没有分隔符，代表没有示例
-        for im in uploaded_files:
-            contents.append(_process_media(im))
-        contents.append(Part.from_text(prompt))
+        for mf in uploaded_files:
+            contents.append(_process_media(mf))
+        contents.append(prompt)
         return contents
     ps = [p.strip() for p in prompt.split(separator)]
     msg = f"错误：多媒体文件的数量应等于提示的数量加1。请检查你的输入并重试。"
@@ -148,7 +155,7 @@ def _process_image_and_prompt(uploaded_files, prompt):
     media_parts = [_process_media(m) for m in uploaded_files]
     for m, p in zip(media_parts[:-1], ps):
         contents.append(m)
-        contents.append(Part.from_text(p))
+        contents.append(p)
     contents.append(media_parts[-1])
     return contents
 
