@@ -127,11 +127,10 @@ check_and_force_logout(sidebar_status)
 def _process_media(uploaded_file):
     # 用文件扩展名称形成 MIME 类型
     mime_type = mimetypes.guess_type(uploaded_file.name)[0]
-    p = Part.from_data(
-        data=base64.b64decode(uploaded_file.getvalue()), mime_type=mime_type
-    )
     st.image(uploaded_file)
-    st.warning(f"文件类型：{p.mime_type}")
+    p = Part.from_data(
+        data=uploaded_file.getvalue(), mime_type=mime_type
+    )
     return p
 
 
