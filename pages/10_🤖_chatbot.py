@@ -17,14 +17,14 @@ from mypylib.st_utils import (
 
 st.set_page_config(
     page_title="聊天机器人",
-    page_icon=":robot:",
+    page_icon="🤖",
     layout="wide",
 )
 
 authenticate_and_configure_services()
 
 AVATAR_NAMES = ["user", "model"]
-AVATAR_EMOJIES = [":man_technologist:", ":robot:"]
+AVATAR_EMOJIES = ["👨‍🎓", "🤖"]
 AVATAR_MAPS = {name: emoji for name, emoji in zip(AVATAR_NAMES, AVATAR_EMOJIES)}
 
 if "examples_pair" not in st.session_state:
