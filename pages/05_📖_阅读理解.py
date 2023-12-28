@@ -5,7 +5,7 @@
 # st.markdown("""<a href="page1" target="_self">page 1</a>""", unsafe_allow_html=True)
 import streamlit as st
 
-from mypylib.st_helper import check_and_force_logout
+from mypylib.st_utils import check_and_force_logout
 
 
 st.set_page_config(
@@ -16,6 +16,6 @@ st.set_page_config(
 
 sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
-check_and_force_logout(st, sidebar_status)
+check_and_force_logout(sidebar_status)
 
 st.markdown("# 敬请期待......")

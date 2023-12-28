@@ -199,7 +199,7 @@ sidebar_status = st.sidebar.empty()
 # region 认证及强制退出
 
 
-check_and_force_logout(st, sidebar_status)
+check_and_force_logout(sidebar_status)
 
 # endregion
 

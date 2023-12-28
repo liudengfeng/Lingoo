@@ -269,7 +269,7 @@ st.set_page_config(
 
 sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
-check_and_force_logout(st, sidebar_status)
+check_and_force_logout(sidebar_status)
 
 language: str = st.sidebar.selectbox(
     "选择目标语言", options=LANGUAGES, format_func=lambda x: LAN_MAPS[x]

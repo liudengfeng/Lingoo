@@ -43,8 +43,12 @@ if not os.path.exists(audio_dir):
     os.makedirs(audio_dir, exist_ok=True)
 
 # 使用临时文件
-replay_fp = os.path.join(audio_dir, f"{st.session_state.user_info['user_id']}-tab2-replay.wav")
-listen_fp = os.path.join(audio_dir, f"{st.session_state.user_info['user_id']}-tab2-listen.wav")
+replay_fp = os.path.join(
+    audio_dir, f"{st.session_state.user_info['user_id']}-tab2-replay.wav"
+)
+listen_fp = os.path.join(
+    audio_dir, f"{st.session_state.user_info['user_id']}-tab2-listen.wav"
+)
 
 # region templates
 
@@ -354,7 +358,7 @@ st.set_page_config(
 
 sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
-check_and_force_logout(st, sidebar_status)
+check_and_force_logout(sidebar_status)
 
 language = "en-US"
 

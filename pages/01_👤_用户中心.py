@@ -43,7 +43,6 @@ if "dbi" not in st.session_state:
 
 sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
-# check_and_force_logout(st, sidebar_status)
 check_and_force_logout(sidebar_status)
 
 # endregion

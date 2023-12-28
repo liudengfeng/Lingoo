@@ -41,7 +41,7 @@ def on_theme_change():
 
 sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
-check_and_force_logout(st, sidebar_status)
+check_and_force_logout(sidebar_status)
 
 # 添加 CEFR 分级选择框
 selected_cefr_level = st.sidebar.selectbox("选择你的 CEFR 分级", CEFR_LEVEL_MAPS.keys())
