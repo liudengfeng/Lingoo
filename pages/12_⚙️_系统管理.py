@@ -30,8 +30,7 @@ if not (st.session_state.dbi.is_admin(st.session_state.user_info)):
     st.error("对不起，您没有权限访问该页面。该页面仅限系统管理员使用。")
     st.stop()
 
-if "google_translation_client" not in st.session_state:
-    st.session_state["google_translation_client"] = get_translation_client(st.secrets)
+
 # endregion
 
 # region 常量配置

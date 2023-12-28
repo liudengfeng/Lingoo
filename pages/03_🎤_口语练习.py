@@ -10,13 +10,19 @@ import streamlit as st
 
 from mypylib.azure_speech import synthesize_speech_to_file
 from mypylib.azure_translator import translate
-from mypylib.constants import NAMES, TOPICS, CEFR_LEVEL_MAPS
+from mypylib.constants import CEFR_LEVEL_MAPS, NAMES, TOPICS
 from mypylib.google_api import generate_text
-from mypylib.st_helper import authenticate
+from mypylib.st_utils import authenticate_and_configure_services
 
 # region 认证及初始化
 
-authenticate(st)
+st.set_page_config(
+    page_title="口语练习",
+    page_icon="🎤",
+    layout="wide",
+)
+
+authenticate_and_configure_services()
 
 # endregion
 
@@ -96,11 +102,6 @@ def get_conversations(completion, boy, girl):
 
 # region 基础配置
 
-st.set_page_config(
-    page_title="口语练习",
-    page_icon="🎤",
-    layout="wide",
-)
 
 if "dialogue_context" not in st.session_state:
     st.session_state["dialogue_context"] = []

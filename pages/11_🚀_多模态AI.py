@@ -11,7 +11,7 @@ from vertexai.preview.generative_models import Image as GImage
 from vertexai.preview.generative_models import Part
 
 from mypylib.google_gemini import NORMAL_SAFETY_SETTINGS
-from mypylib.st_helper import authenticate, check_and_force_logout
+from mypylib.st_utils import authenticate_and_configure_services, check_and_force_logout, load_model
 
 # region 页面设置
 
@@ -19,16 +19,13 @@ CURRENT_CWD: Path = Path(__file__).parent.parent
 IMAGE_DIR: Path = CURRENT_CWD / "resource/multimodal"
 
 
-@st.cache_resource
-def load_model():
-    return GenerativeModel("gemini-pro-vision")
-
-
 st.set_page_config(
     page_title="多模态AI",
     page_icon=":rocket:",
     layout="wide",
 )
+
+authenticate_and_configure_services()
 
 if "multimodal_examples_pair" not in st.session_state:
     st.session_state["multimodal_examples_pair"] = []
@@ -116,7 +113,7 @@ sidebar_status.markdown(
 
 # region 认证及强制退出
 
-authenticate(st)
+
 check_and_force_logout(st, sidebar_status)
 
 # endregion
@@ -154,7 +151,7 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
     except Exception as e:
         st.error(f"处理多媒体文件时出错：{e}")
         return
-    model = load_model()
+    model = load_model("gemini-pro-vision")
     generation_config = {
         "temperature": st.session_state["temperature"],
         "top_p": st.session_state["top_p"],
@@ -193,6 +190,7 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
     sidebar_status.markdown(
         f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
     )
+
 
 # region 主页面
 st.markdown(

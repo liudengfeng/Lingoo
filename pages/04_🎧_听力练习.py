@@ -1,8 +1,8 @@
 import streamlit as st
 
-from mypylib.st_helper import (
+from mypylib.st_utils import (
     check_and_force_logout,
-    authenticate,
+    authenticate_and_configure_services,
 )
 
 from mypylib.constants import CEFR_LEVEL_MAPS, rearrange_theme_scene
@@ -19,6 +19,8 @@ st.set_page_config(
     page_icon="🎧",
     layout="wide",
 )
+
+authenticate_and_configure_services()
 
 # 添加会话变量
 if "sub_scenes" not in st.session_state:
@@ -37,7 +39,6 @@ def on_theme_change():
 
 # region 边栏
 
-authenticate(st)
 sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
 check_and_force_logout(st, sidebar_status)

@@ -6,14 +6,9 @@ from google.generativeai.types.generation_types import BlockedPromptException
 from vertexai.preview.generative_models import GenerativeModel
 
 from mypylib.google_gemini import SAFETY_SETTINGS
-from mypylib.st_helper import authenticate, check_and_force_logout
+from mypylib.st_utils import authenticate_and_configure_services, check_and_force_logout
 
 # region 页面设置
-
-
-@st.cache_resource
-def load_model():
-    return GenerativeModel("gemini-pro")
 
 
 st.set_page_config(
@@ -21,6 +16,8 @@ st.set_page_config(
     page_icon=":robot:",
     layout="wide",
 )
+
+authenticate_and_configure_services()
 
 AVATAR_NAMES = ["user", "model"]
 AVATAR_EMOJIES = [":man_technologist:", ":robot:"]
@@ -182,7 +179,9 @@ sidebar_col3.button(
     help="清除当前示例对",
 )
 
-if sidebar_col4.button(":arrows_counterclockwise:", key="reset_btn", help="重新设置上下文、示例，开始新的对话"):
+if sidebar_col4.button(
+    ":arrows_counterclockwise:", key="reset_btn", help="重新设置上下文、示例，开始新的对话"
+):
     st.session_state["examples_pair"] = []
     init_chat()
 
@@ -199,7 +198,7 @@ sidebar_status = st.sidebar.empty()
 
 # region 认证及强制退出
 
-authenticate(st)
+
 check_and_force_logout(st, sidebar_status)
 
 # endregion

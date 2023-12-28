@@ -12,7 +12,7 @@ import streamlit.components.v1 as components
 from PIL import Image
 
 from mypylib.google_api import generate_word_memory_tip, generate_word_test
-from mypylib.st_helper import authenticate, check_and_force_logout
+from mypylib.st_utils import authenticate_and_configure_services, check_and_force_logout
 from mypylib.st_utils import google_translate
 from mypylib.word_utils import (
     audio_autoplay_elem,
@@ -31,7 +31,7 @@ st.set_page_config(
     layout="wide",
 )
 
-
+authenticate_and_configure_services()
 # endregion
 
 # region 常量
@@ -44,7 +44,6 @@ DICT_DIR = CURRENT_CWD / "resource/dictionary"
 
 # region 认证及初始化
 
-authenticate(st)
 
 if "current_tab" not in st.session_state:
     st.session_state["current_tab"] = "Default Tab"

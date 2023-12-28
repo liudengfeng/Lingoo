@@ -94,13 +94,14 @@ def google_translate(text: str, target_language_code: str = "zh-CN"):
     return res[0]
 
 
-def authenticate():
+def authenticate_and_configure_services():
     common_page_config()
     if not st.session_state.dbi.is_service_active(st.session_state["user_info"]):
         st.error("非付费用户，无法使用此功能。")
         st.stop()
     if "google_translate_client" not in st.session_state:
         st.session_state["google_translate_client"] = get_translation_client()
+    configure_google_apis()
 
 
 @st.cache_resource
