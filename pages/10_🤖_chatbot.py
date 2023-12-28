@@ -155,7 +155,7 @@ user_example = st.sidebar.text_input(
     max_chars=1000,
 )
 ai_example = st.sidebar.text_input(
-    ":dotted_six-pointed_star: 模型响应",
+    ":six_pointed_star: 模型响应",
     key="ai_text_area",
     max_chars=1000,
 )
