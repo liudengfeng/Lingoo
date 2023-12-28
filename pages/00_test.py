@@ -5,8 +5,6 @@ from mypylib.st_utils import (
     authenticate_and_configure_services,
     load_model,
 )
-import vertexai
-from vertexai.preview.generative_models import GenerativeModel
 
 st.set_page_config(page_title="Streamlit test", layout="centered", page_icon="🧊")
 authenticate_and_configure_services()

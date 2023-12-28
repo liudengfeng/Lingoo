@@ -47,12 +47,12 @@ if st.session_state.get("clear_example"):
 
 
 def init_chat():
-    generation_config = {
-        "temperature": st.session_state["temperature"],
-        "top_p": st.session_state["top_p"],
-        "top_k": st.session_state["top_k"],
-        "max_output_tokens": st.session_state["max_output_tokens"],
-    }
+    # generation_config = {
+    #     "temperature": st.session_state["temperature"],
+    #     "top_p": st.session_state["top_p"],
+    #     "top_k": st.session_state["top_k"],
+    #     "max_output_tokens": st.session_state["max_output_tokens"],
+    # }
     # model = genai.GenerativeModel(
     #     model_name="gemini-pro",
     #     generation_config=generation_config,
@@ -103,7 +103,7 @@ st.sidebar.slider(
     "词元限制",
     key="max_output_tokens",
     min_value=32,
-    max_value=2048,
+    max_value=8192,
     value=2048,
     step=32,
     help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 2048。""",
@@ -218,7 +218,6 @@ if "chat_session" not in st.session_state:
 # 显示会话历史记录
 start_idx = len(st.session_state.examples_pair) * 2
 for message in st.session_state.chat_session.history[start_idx:]:
-    # role = "assistant" if message.role =="model" else "user"
     role = message.role
     with st.chat_message(role, avatar=AVATAR_MAPS[role]):
         st.markdown(message.parts[0].text)
@@ -234,32 +233,43 @@ if prompt := st.chat_input("输入提示以便开始对话"):
         "top_k": st.session_state["top_k"],
         "max_output_tokens": st.session_state["max_output_tokens"],
     }
-    try:
-        response = st.session_state.chat_session.send_message(
-            prompt,
-            generation_config=config,
-            safety_settings=SAFETY_SETTINGS,
-            stream=True,
-        )
-    except BlockedPromptException:
-        # 处理被阻止的消息
-        st.toast("抱歉，您尝试发送的消息包含潜在不安全的内容，已被阻止。")
-    else:
-        with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
-            message_placeholder = st.empty()
-            full_response = ""
-            for chunk in response:
-                full_response += chunk.text
-                time.sleep(0.05)
-                # Add a blinking cursor to simulate typing
-                message_placeholder.markdown(full_response + "▌")
-            message_placeholder.markdown(full_response)
-            # st.markdown(response.text)
+    # try:
+    #     response = st.session_state.chat_session.send_message(
+    #         prompt,
+    #         generation_config=config,
+    #         safety_settings=SAFETY_SETTINGS,
+    #         stream=True,
+    #     )
+    # except BlockedPromptException:
+    #     # 处理被阻止的消息
+    #     st.toast("抱歉，您尝试发送的消息包含潜在不安全的内容，已被阻止。")
+    # else:
+    #     with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
+    #         message_placeholder = st.empty()
+    #         full_response = ""
+    #         for chunk in response:
+    #             full_response += chunk.text
+    #             time.sleep(0.05)
+    #             # Add a blinking cursor to simulate typing
+    #             message_placeholder.markdown(full_response + "▌")
+    #         message_placeholder.markdown(full_response)
+    response = st.session_state.chat_session.send_message(
+        prompt,
+        generation_config=config,
+        safety_settings=SAFETY_SETTINGS,
+        stream=True,
+    )
+    with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
+        message_placeholder = st.empty()
+        full_response = ""
+        for chunk in response:
+            full_response += chunk.text
+            time.sleep(0.05)
+            # Add a blinking cursor to simulate typing
+            message_placeholder.markdown(full_response + "▌")
+        message_placeholder.markdown(full_response)
 
         # 显示令牌数
-        # current_token_count = response._raw_response.usage_metadata.total_token_count
-        # st.session_state.total_token_count += current_token_count
-
         st.session_state.current_token_count = st.session_state.chat_model.count_tokens(
             prompt + full_response
         ).total_tokens
