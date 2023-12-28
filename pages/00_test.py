@@ -5,14 +5,11 @@ from mypylib.st_utils import (
     authenticate_and_configure_services,
     load_model,
 )
-
+import vertexai
 from vertexai.preview.generative_models import GenerativeModel
 
-model = GenerativeModel("gemini-pro")
-
-
 st.set_page_config(page_title="Streamlit test", layout="centered", page_icon="🧊")
-# authenticate_and_configure_services()
+authenticate_and_configure_services()
 
 # import vertexai
 
@@ -35,13 +32,12 @@ text = ""
 def generate():
     global text
     text = ""
-    responses = model.generate_content("The opposite of hot is", stream=True)
-
-    # responses = model.generate_content(
-    #     src,
-    #     generation_config={"max_output_tokens": 1024, "temperature": 0.3, "top_p": 1},
-    #     stream=True,
-    # )
+    model = load_model("emini-pro")
+    responses = model.generate_content(
+        src,
+        generation_config={"max_output_tokens": 1024, "temperature": 0.3, "top_p": 1},
+        stream=True,
+    )
     for response in responses:
         text += response.text
         placeholder.markdown(text + "▌")
