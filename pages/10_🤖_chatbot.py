@@ -3,6 +3,7 @@ import time
 import google.generativeai as genai
 import streamlit as st
 from google.generativeai.types.generation_types import BlockedPromptException
+
 # from vertexai.preview.generative_models import GenerativeModel
 
 from mypylib.google_cloud_configuration import SAFETY_SETTINGS
