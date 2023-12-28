@@ -13,7 +13,10 @@ from pymongo.errors import DuplicateKeyError
 # from mypylib.auth_utils import generate_unique_code
 from mypylib.db_interface import PRICES, DbInterface
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, User, UserRole
-from mypylib.google_api import get_translation_client, google_translate
+from mypylib.google_apis import (
+    get_translation_client,
+    google_translate,
+)
 from mypylib.word_utils import get_lowest_cefr_level
 
 # region 配置
@@ -303,7 +306,7 @@ def search(**kwargs):
             }
         },
     ]
-    
+
     result = list(st.session_state.dbi.users.aggregate(pipeline))
 
     return result

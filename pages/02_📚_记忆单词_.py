@@ -14,9 +14,13 @@ from PIL import Image
 from mypylib.google_api import (
     generate_word_memory_tip,
     generate_word_test,
+)
+
+from mypylib.google_apis import (
     get_translation_client,
     google_translate,
 )
+
 from mypylib.st_helper import authenticate, check_and_force_logout
 from mypylib.word_utils import (
     audio_autoplay_elem,
