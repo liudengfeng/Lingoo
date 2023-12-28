@@ -28,3 +28,5 @@ Lingoo 是一个利用`AI` 技术和游戏化元素的英语学习app，旨在�
 
 请查阅[安装指引](https://learn.microsoft.com/zh-cn/azure/ai-services/speech-service/how-to-use-codec-compressed-audio-input-streams?tabs=windows%2Cdebian%2Cjava-android%2Cterminal&pivots=programming-language-python)。
 
+### 使用的网络资源
+[图片搜索](https://serper.dev):The World's Fastest and Cheapest Google Search API
