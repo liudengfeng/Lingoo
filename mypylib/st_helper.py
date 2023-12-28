@@ -1,5 +1,7 @@
 import google.generativeai as genai
 
+from mypylib.google_cloud_configuration import gemini_configure
+
 from .constants import THEME_SCENE
 from .db_interface import DbInterface
 
@@ -13,11 +15,6 @@ def rearrange_theme_scene():
             else:
                 level_to_theme[level].append(theme)
     return level_to_theme
-
-
-def configure(st):
-    GOOGLE_API_KEY = st.secrets["Google"]["GAI_KEY"]
-    genai.configure(api_key=GOOGLE_API_KEY)
 
 
 def check_and_force_logout(st, status):
@@ -60,7 +57,7 @@ def authenticate(st):
 
     if st.secrets["env"] in ["streamlit", "azure"]:
         if "inited_google_ai" not in st.session_state:
-            configure(st)
+            gemini_configure(st.secrets)
             st.session_state["inited_google_ai"] = True
 
         # 配置 token 计数器

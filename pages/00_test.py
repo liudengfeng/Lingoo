@@ -6,9 +6,10 @@ from mypylib.google_cloud_configuration import get_translation_client
 st.set_page_config(page_title="Streamlit test", layout="centered", page_icon="🧊")
 
 
-import vertexai
+# import vertexai
 
-vertexai.init(project="gllm-409401", location="asia-northeast1")
+# vertexai.init(project="gllm-409401", location="asia-northeast1")
+
 
 st.title("Streamlit test")
 
@@ -18,16 +19,19 @@ if st.button("翻译", key="1"):
     response = google_translate(src, get_translation_client(st.secrets), "zh-CN")
     st.text(response)
 
+import google.generativeai as genai
 
-from vertexai.preview.generative_models import GenerativeModel
+# from vertexai.preview.generative_models import GenerativeModel
 
-model = GenerativeModel("gemini-pro")
+genai.configure(api_key=st.secrets["Google"]["GEMINI_KEY"])
 
 placeholder = st.empty()
 
+slider_status = st.slider.empty()
+
 
 def generate():
-    model = GenerativeModel("gemini-pro")
+    model = genai.GenerativeModel("gemini-pro")
     responses = model.generate_content(
         src,
         generation_config={"max_output_tokens": 2048, "temperature": 0.9, "top_p": 1},
