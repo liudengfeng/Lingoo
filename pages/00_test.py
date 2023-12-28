@@ -27,7 +27,7 @@ genai.configure(api_key=st.secrets["Google"]["GEMINI_KEY"])
 
 placeholder = st.empty()
 
-slider_status = st.slider.empty()
+slider_status = st.sidebar.empty()
 
 
 def generate():
