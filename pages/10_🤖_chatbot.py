@@ -95,7 +95,7 @@ def del_last_examples():
 
 st.sidebar.markdown(
     """:rainbow[运行设置]\n
-:dotted_six-pointed_star: 模型：Gemini Pro            
+:six_pointed_star: 模型：Gemini Pro            
 """
 )
 st.sidebar.slider(
