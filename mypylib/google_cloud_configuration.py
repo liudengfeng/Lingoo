@@ -1,8 +1,6 @@
 import json
 
 import google.generativeai as genai
-from google.cloud import aiplatform, translate
-from google.oauth2.service_account import Credentials
 from vertexai.preview.generative_models import HarmBlockThreshold, HarmCategory
 
 # 屏蔽大部分
@@ -31,11 +29,3 @@ def get_service_account_info(secrets):
     service_account_info = json.loads(secrets["Google"]["TRANSLATE_API_CREDENTIALS"])
     service_account_info["private_key"] = secrets["Google"]["TRANSLATE_API_PRIVATE_KEY"]
     return service_account_info
-
-
-def get_translation_client(secrets):
-    service_account_info = get_service_account_info(secrets)
-    # 创建凭据
-    credentials = Credentials.from_service_account_info(service_account_info)
-    # 使用凭据初始化客户端
-    return translate.TranslationServiceClient(credentials=credentials)

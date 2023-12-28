@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 from enum import Enum
 from typing import List, Optional, Type, Union
-from bson import ObjectId
 
+from bson import ObjectId
 from cryptography.fernet import Fernet
 from pydantic import BaseModel, Field
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -33,6 +33,22 @@ class LoginEvent(BaseModel):
     login_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     logout_time: Optional[datetime] = Field(default=None)
     session_id: str = Field("")
+
+
+class UsedToken(BaseModel):
+    token_type: str = Field(default="")
+    used_token_count: int = Field(default=0)
+
+
+class LearningRecord(BaseModel):
+    project: str = Field(default="")
+    start_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    end_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    content: str = Field(default="")
+    progress: str = Field(default="")
+    performance: str = Field(default="")
+    feedback: Optional[str] = Field(default=None)
+    difficulty: Optional[str] = Field(default=None)
 
 
 def str_to_enum(s: str, enum_type: Type[Enum]) -> Union[Enum, str]:
@@ -80,6 +96,8 @@ class User(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc)
     )  # 新增注册时间字段
     login_events: Optional[List[LoginEvent]] = Field(default_factory=list)
+    learning_records: List[LearningRecord] = Field(default=[])
+    used_tokens: List[UsedToken] = Field(default=[])
     memo: Optional[str] = Field("")  # 新增备注字段
 
     @classmethod

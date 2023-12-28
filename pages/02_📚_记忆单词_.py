@@ -11,17 +11,9 @@ import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
 
-from mypylib.google_api import (
-    generate_word_memory_tip,
-    generate_word_test,
-)
-
-from mypylib.google_apis import (
-    get_translation_client,
-    google_translate,
-)
-
+from mypylib.google_api import generate_word_memory_tip, generate_word_test
 from mypylib.st_helper import authenticate, check_and_force_logout
+from mypylib.st_utils import google_translate
 from mypylib.word_utils import (
     audio_autoplay_elem,
     get_or_create_and_return_audio_data,

@@ -13,10 +13,7 @@ from pymongo.errors import DuplicateKeyError
 # from mypylib.auth_utils import generate_unique_code
 from mypylib.db_interface import PRICES, DbInterface
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, User, UserRole
-from mypylib.google_apis import (
-    get_translation_client,
-    google_translate,
-)
+from mypylib.st_utils import google_translate
 from mypylib.word_utils import get_lowest_cefr_level
 
 # region 配置
@@ -703,10 +700,9 @@ def get_words():
     return words
 
 
+@st.cache_data(ttl=60 * 60 * 2)  # 缓存有效期为2小时
 def translate_text(text: str, target_language_code):
-    return google_translate(
-        text, st.session_state.google_translation_client, target_language_code
-    )
+    return google_translate(text, target_language_code)
 
 
 def translate_dict(d, target_language_code):
