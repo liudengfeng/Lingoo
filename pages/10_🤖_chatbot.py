@@ -17,7 +17,7 @@ from mypylib.st_utils import (
 
 st.set_page_config(
     page_title="聊天机器人",
-    page_icon="🤖",
+    page_icon=":gemini:",
     layout="wide",
 )
 
