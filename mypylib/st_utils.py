@@ -22,8 +22,8 @@ def configure_google_apis():
     # 配置 AI 服务
     if st.secrets["env"] in ["streamlit", "azure"]:
         if "inited_google_ai" not in st.session_state:
-            # gemini_configure(st.secrets)
-            vertexai.init(project=PROJECT_ID, location=LOCATION)
+            gemini_configure(st.secrets)
+            # vertexai.init(project=PROJECT_ID, location=LOCATION)
             st.session_state["inited_google_ai"] = True
 
         # 配置 token 计数器
