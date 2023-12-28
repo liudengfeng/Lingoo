@@ -6,12 +6,17 @@ from pathlib import Path
 import streamlit as st
 import vertexai
 from PIL import Image
-from vertexai.preview.generative_models import GenerativeModel
+
+# from vertexai.preview.generative_models import GenerativeModel
 from vertexai.preview.generative_models import Image as GImage
 from vertexai.preview.generative_models import Part
 
 from mypylib.google_gemini import NORMAL_SAFETY_SETTINGS
-from mypylib.st_utils import authenticate_and_configure_services, check_and_force_logout, load_model
+from mypylib.st_utils import (
+    authenticate_and_configure_services,
+    check_and_force_logout,
+    load_model,
+)
 
 # region 页面设置
 
@@ -132,15 +137,18 @@ def _process_image_and_prompt(uploaded_files, prompt):
         # 如果没有分隔符，代表没有示例
         for im in uploaded_files:
             contents.append(_process_media(im))
-        contents.append(prompt)
+        contents.append(Part.from_text(prompt))
         return contents
     ps = [p.strip() for p in prompt.split(separator)]
-    assert len(uploaded_files) == len(ps) + 1, "错误：多媒体文件的数量应等于提示的数量加1。请检查你的输入并重试。"
+    msg = f"错误：多媒体文件的数量应等于提示的数量加1。请检查你的输入并重试。"
+    if len(uploaded_files) != len(ps) + 1:
+        st.error(msg)
+        st.stop()
     # To read file as bytes:
-    media_parts = [_process_media(im) for im in uploaded_files]
-    for m, t in zip(media_parts[:-1], ps):
+    media_parts = [_process_media(m) for m in uploaded_files]
+    for m, p in zip(media_parts[:-1], ps):
         contents.append(m)
-        contents.append(t)
+        contents.append(Part.from_text(p))
     contents.append(media_parts[-1])
     return contents
 
@@ -226,7 +234,7 @@ add_btn = cols[0].button(
     ":heavy_plus_sign:",
     help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。",
 )
-del_btn = cols[1].button(":minus:", help="删除提示词尾部的分隔符")
+del_btn = cols[1].button(":heavy_minus_sign:", help="删除提示词尾部的分隔符")
 cls_btn = cols[2].button(":wastebasket:", help="清空提示词", key="clear_prompt")
 submitted = cols[3].button("提交", help="如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
 
