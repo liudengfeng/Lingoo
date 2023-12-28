@@ -28,17 +28,22 @@ genai.configure(api_key=st.secrets["Google"]["GEMINI_KEY"])
 placeholder = st.empty()
 
 slider_status = st.sidebar.empty()
+text = ""
 
 
 def generate():
+    global text
+    text = ""
     model = genai.GenerativeModel("gemini-pro")
     responses = model.generate_content(
         src,
-        generation_config={"max_output_tokens": 2048, "temperature": 0.9, "top_p": 1},
+        generation_config={"max_output_tokens": 1024, "temperature": 0.3, "top_p": 1},
         stream=True,
     )
     for response in responses:
-        placeholder.markdown(response.text)
+        text += response.text
+        placeholder.markdown(text + "▌")
+    placeholder.markdown(text)
 
 
 if st.button("提交", key="2"):
