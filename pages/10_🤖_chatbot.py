@@ -95,7 +95,7 @@ def del_last_examples():
 
 st.sidebar.markdown(
     """:rainbow[运行设置]\n
-:six_pointed_star: 模型：Gemini Pro            
+:gemini: 模型：Gemini Pro            
 """
 )
 st.sidebar.slider(
@@ -155,7 +155,7 @@ user_example = st.sidebar.text_input(
     max_chars=1000,
 )
 ai_example = st.sidebar.text_input(
-    ":six_pointed_star: 模型响应",
+    ":gemini: 模型响应",
     key="ai_text_area",
     max_chars=1000,
 )
