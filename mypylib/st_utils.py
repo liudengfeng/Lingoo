@@ -2,7 +2,9 @@ import streamlit as st
 import vertexai
 from google.cloud import translate
 from google.oauth2.service_account import Credentials
-from vertexai.preview.generative_models import GenerativeModel
+
+# from vertexai.preview.generative_models import GenerativeModel
+import google.generativeai as genai
 
 from .db_interface import DbInterface
 from .google_cloud_configuration import gemini_configure, get_service_account_info
@@ -115,4 +117,4 @@ def get_translation_client():
 
 @st.cache_resource
 def load_model(model_name):
-    return GenerativeModel(model_name)
+    return genai.GenerativeModel(model_name)
