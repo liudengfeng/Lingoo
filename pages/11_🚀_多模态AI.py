@@ -163,7 +163,6 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
         top_k=st.session_state["top_k"],
         max_output_tokens=st.session_state["max_output_tokens"],
     )
-    st.write(contents)
     responses = model.generate_content(
         contents,
         generation_config=generation_config,
