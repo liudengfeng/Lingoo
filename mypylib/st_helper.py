@@ -2,19 +2,7 @@ import google.generativeai as genai
 
 from mypylib.google_cloud_configuration import gemini_configure
 
-from .constants import THEME_SCENE
 from .db_interface import DbInterface
-
-
-def rearrange_theme_scene():
-    level_to_theme = {}
-    for theme, levels in THEME_SCENE.items():
-        for level in levels:
-            if level not in level_to_theme:
-                level_to_theme[level] = [theme]
-            else:
-                level_to_theme[level].append(theme)
-    return level_to_theme
 
 
 def check_and_force_logout(st, status):

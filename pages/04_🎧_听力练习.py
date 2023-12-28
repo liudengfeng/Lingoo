@@ -3,9 +3,9 @@ import streamlit as st
 from mypylib.st_helper import (
     check_and_force_logout,
     authenticate,
-    rearrange_theme_scene,
 )
-from mypylib.constants import CEFR_LEVEL_MAPS
+
+from mypylib.constants import CEFR_LEVEL_MAPS, rearrange_theme_scene
 from mypylib.google_vertex import generate_sub_scenes
 
 # "第二页"
