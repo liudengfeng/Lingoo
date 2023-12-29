@@ -7,7 +7,7 @@ from vertexai.preview.generative_models import GenerativeModel
 import google.generativeai as genai
 
 from .db_interface import DbInterface
-from .google_cloud_configuration import gemini_configure, get_service_account_info
+from .google_cloud_configuration import vertexai_configure, get_service_account_info
 
 PROJECT_ID = "gllm-409401"
 LOCATION = "asia-northeast1"
@@ -24,7 +24,7 @@ def configure_google_apis():
     # 配置 AI 服务
     if st.secrets["env"] in ["streamlit", "azure"]:
         if "inited_google_ai" not in st.session_state:
-            gemini_configure(st.secrets)
+            vertexai_configure(st.secrets)
             # vertexai.init(project=PROJECT_ID, location=LOCATION)
             st.session_state["inited_google_ai"] = True
 

@@ -11,7 +11,7 @@ from mypylib.google_gemini import NORMAL_SAFETY_SETTINGS
 from mypylib.st_utils import (
     authenticate_and_configure_services,
     check_and_force_logout,
-    load_model,
+    load_vertex_model,
 )
 
 # region 页面设置
@@ -122,10 +122,8 @@ check_and_force_logout(sidebar_status)
 
 def _process_media(uploaded_file):
     # 用文件扩展名称形成 MIME 类型
-    # mime_type = mimetypes.guess_type(uploaded_file.name)[0]
-    # p = Part.from_data(data=uploaded_file.getvalue(), mime_type=mime_type)
-    # return p
-    return uploaded_file.getvalue()
+    mime_type = mimetypes.guess_type(uploaded_file.name)[0]
+    return Part.from_data(data=uploaded_file.getvalue(), mime_type=mime_type)
 
 
 def _process_image_and_prompt(uploaded_files, prompt):
@@ -157,7 +155,7 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
     except Exception as e:
         st.error(f"处理多媒体文件时出错：{e}")
         return
-    model = load_model("gemini-pro-vision")
+    model = load_vertex_model("gemini-pro-vision")
     generation_config = GenerationConfig(
         temperature=st.session_state["temperature"],
         top_p=st.session_state["top_p"],
