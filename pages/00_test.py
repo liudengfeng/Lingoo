@@ -1,14 +1,16 @@
 import streamlit as st
 
+from mypylib.google_cloud_configuration import vertexai_configure
 from mypylib.st_utils import (
     google_translate,
     authenticate_and_configure_services,
     load_model,
+    load_vertex_model,
 )
 
 st.set_page_config(page_title="Streamlit test", layout="centered", page_icon="🧊")
-authenticate_and_configure_services()
-
+# authenticate_and_configure_services()
+vertexai_configure(st.secrets)
 # import vertexai
 
 
@@ -30,7 +32,8 @@ text = ""
 def generate():
     global text
     text = ""
-    model = load_model("gemini-pro")
+    # model = load_model("gemini-pro")
+    model = load_vertex_model("gemini-pro")
     responses = model.generate_content(
         src,
         generation_config={"max_output_tokens": 1024, "temperature": 0.3, "top_p": 1},

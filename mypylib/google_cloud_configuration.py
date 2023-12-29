@@ -1,6 +1,9 @@
 import json
 
 import google.generativeai as genai
+import vertexai
+from google.cloud import aiplatform
+from google.oauth2.service_account import Credentials
 from vertexai.preview.generative_models import HarmBlockThreshold, HarmCategory
 
 # 屏蔽大部分
@@ -29,3 +32,42 @@ def get_service_account_info(secrets):
     service_account_info = json.loads(secrets["Google"]["TRANSLATE_API_CREDENTIALS"])
     service_account_info["private_key"] = secrets["Google"]["TRANSLATE_API_PRIVATE_KEY"]
     return service_account_info
+
+
+def get_vertextai_service_account_info(secrets):
+    # 由于private_key含有大量的换行符号，所以单独存储
+    service_account_info = json.loads(secrets["Google"]["GLLM"])
+    service_account_info["private_key"] = secrets["Google"]["GLLM_PRIVATE_KEY"]
+    return service_account_info
+
+
+def vertexai_configure(secrets):
+    project = "gllm-409401"
+    location = "asia-northeast1"
+    # 完成认证及初始化
+    service_account_info = get_vertextai_service_account_info(secrets)
+    # 创建凭据
+    credentials = Credentials.from_service_account_info(service_account_info)
+    aiplatform.init(
+        # your Google Cloud Project ID or number
+        # environment default used is not set
+        project=project,
+        # the Vertex AI region you will use
+        # defaults to us-central1
+        location=location,
+        # Google Cloud Storage bucket in same region as location
+        # used to stage artifacts
+        # staging_bucket="gs://my_staging_bucket",
+        # custom google.auth.credentials.Credentials
+        # environment default credentials used if not set
+        credentials=credentials,
+        # customer managed encryption key resource name
+        # will be applied to all Vertex AI resources if set
+        # encryption_spec_key_name=my_encryption_key_name,
+        # the name of the experiment to use to track
+        # logged metrics and parameters
+        experiment="lingoo-experiment",
+        # description of the experiment above
+        experiment_description="云端使用vertex ai",
+    )
+    vertexai.init(project=project, location=location)
