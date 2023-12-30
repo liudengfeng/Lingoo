@@ -2,18 +2,19 @@ import os
 
 import streamlit as st
 import vertexai
+from vertexai.generative_models._generative_models import ContentsType
 from vertexai.preview.generative_models import (
     Content,
     GenerationConfig,
-    GenerativeModel,
     GenerationResponse,
+    GenerativeModel,
     Image,
     Part,
 )
-from typing import List, Optional, Union, Any
+from mypylib.ai_utils import view_stream_response
 from mypylib.google_cloud_configuration import (
-    vertexai_configure,
     DEFAULT_SAFETY_SETTINGS,
+    vertexai_configure,
 )
 from mypylib.st_utils import authenticate_and_configure_services, load_vertex_model
 
@@ -22,27 +23,26 @@ vertexai_configure(st.secrets)
 
 def get_gemini_pro_text_response(
     model: GenerativeModel,
-    contents: Any,
+    contents: ContentsType,
     generation_config: GenerationConfig,
     stream=True,
 ):
-    st.write(contents)
-    responses = model.generate_content(
+    return model.generate_content(
         contents,
         generation_config=generation_config,
         safety_settings=DEFAULT_SAFETY_SETTINGS,
         stream=stream,
     )
-    final_response = []
-    for response in responses:
-        try:
-            # st.write(response.text)
-            final_response.append(response.text)
-        except IndexError:
-            # st.write(response)
-            final_response.append("")
-            continue
-    return " ".join(final_response)
+    # final_response = []
+    # for response in responses:
+    #     try:
+    #         # st.write(response.text)
+    #         final_response.append(response.text)
+    #     except IndexError:
+    #         # st.write(response)
+    #         final_response.append("")
+    #         continue
+    # return " ".join(final_response)
 
 
 def get_gemini_pro_vision_response(
@@ -168,7 +168,9 @@ with tab1:
                 )
                 if response:
                     st.write("Your story:")
-                    st.write(response)
+                    placeholder = st.empty()
+                    # st.write(response)
+                    view_stream_response(response, placeholder)
             with first_tab2:
                 st.text(prompt)
 
