@@ -33,38 +33,20 @@ def get_gemini_pro_text_response(
         safety_settings=DEFAULT_SAFETY_SETTINGS,
         stream=stream,
     )
-    # final_response = []
-    # for response in responses:
-    #     try:
-    #         # st.write(response.text)
-    #         final_response.append(response.text)
-    #     except IndexError:
-    #         # st.write(response)
-    #         final_response.append("")
-    #         continue
-    # return " ".join(final_response)
 
 
 def get_gemini_pro_vision_response(
     model, prompt_list, generation_config=None, stream=True
 ):
-    # generation_config = {"temperature": 0.1, "max_output_tokens": 2048}
     return model.generate_content(
         prompt_list,
         generation_config=generation_config,
         safety_settings=DEFAULT_SAFETY_SETTINGS,
         stream=stream,
     )
-    # final_response = []
-    # for response in responses:
-    #     try:
-    #         final_response.append(response.text)
-    #     except IndexError:
-    #         pass
-    # return "".join(final_response)
 
 
-st.header("Vertex AI Gemini API", divider="rainbow")
+st.header("Vertex AI Gemini 示例", divider="rainbow")
 
 if "text_model_pro" not in st.session_state:
     st.session_state["text_model_pro"] = load_vertex_model("gemini-pro")
@@ -73,17 +55,15 @@ if "multimodal_model_pro" not in st.session_state:
     st.session_state["multimodal_model_pro"] = load_vertex_model("gemini-pro-vision")
 
 
-tab1, tab2, tab3, tab4 = st.tabs(
-    ["Generate story", "Marketing campaign", "Image Playground", "Video Playground"]
-)
+tab1, tab2, tab3, tab4 = st.tabs(["生成故事", "营销活动", "图像游乐场", "视频游乐场"])
 
 with tab1:
-    st.write("Using Gemini Pro - Text only model")
-    st.subheader("Generate a story")
+    st.write("使用 Gemini Pro - Text only model")
+    st.subheader("生成一个故事")
 
     # Story premise
     character_name = st.text_input(
-        "Enter character name: \n\n", key="character_name", value="Mittens"
+        "输入角色名称：", key="character_name", value="七七"
     )
     character_type = st.text_input(
         "What type of character is it? \n\n", key="character_type", value="Cat"
