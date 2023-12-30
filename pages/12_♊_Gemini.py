@@ -363,20 +363,20 @@ with tab3:
         )
         # cooking_what = st.radio("What are you cooking?",["Turkey","Pizza","Cake","Bread"],key="cooking_what",horizontal=True)
         stove_screen_img = Part.from_uri(stove_screen_uri, mime_type="image/jpeg")
-        st.image(stove_screen_url, width=350, caption="Image of a oven")
+        st.image(stove_screen_url, width=350, caption="烤箱的图像")
         st.write(
-            "Our expectation: Provide instructions for resetting the clock on this appliance in English"
+            "我们的期望：提供有关重置此设备时钟的英文说明"
         )
-        prompt = """How can I reset the clock on this appliance? Provide the instructions in English.
-If instructions include buttons, also explain where those buttons are physically located.
+        prompt = """如何重置此设备上的时钟？ 提供英文说明。
+如果说明包含按钮，还要解释这些按钮的物理位置。
 """
-        tab1, tab2 = st.tabs(["Response", "Prompt"])
+        tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
         generate_instructions_description = st.button(
-            "Generate instructions", key="generate_instructions_description"
+            "生成指令", key="generate_instructions_description"
         )
         with tab1:
             if generate_instructions_description and prompt:
-                with st.spinner("Generating instructions using Gemini..."):
+                with st.spinner("使用 Gemini 生成指令..."):
                     response = get_gemini_pro_vision_response(
                         st.session_state.multimodal_model_pro,
                         [stove_screen_img, prompt],
@@ -385,8 +385,11 @@ If instructions include buttons, also explain where those buttons are physically
                     # st.write(response)
                     view_stream_response(response, placeholder)
         with tab2:
-            st.write("Prompt used:")
+            st.write("使用的提示词：")
             st.text(prompt + "\n" + "input_image")
+        with tab3:
+            st.write("使用的参数：")
+            st.write("默认参数")
 
     with diagrams_undst:
         er_diag_uri = (
