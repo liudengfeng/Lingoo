@@ -23,17 +23,15 @@ st.header("Streamlit test", divider="rainbow")
 
 image = Image.open(CURRENT_CWD / "resource" / "multimodal" / "timetable.png")
 
-src = st.text_input("Text input", "default text")
+src = st.text_input("Text input", "解析图片中的信息")
 
 
 placeholder = st.empty()
 
 slider_status = st.sidebar.empty()
-text = ""
 
 
 def generate():
-    global text
     text = ""
     model = load_vertex_model("gemini-pro-vision")
     responses = model.generate_content(
@@ -49,7 +47,3 @@ def generate():
 
 if st.button("提交", key="2"):
     generate()
-
-
-st.subheader("分部 1 test", anchor=False, divider="rainbow")
-st.image(image, caption="Image", use_column_width=True)
