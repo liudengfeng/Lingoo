@@ -58,7 +58,7 @@ if "multimodal_model_pro" not in st.session_state:
 tab1, tab2, tab3, tab4 = st.tabs(["生成故事", "营销活动", "图像游乐场", "视频游乐场"])
 
 with tab1:
-    st.write("使用 Gemini Pro - Text only model")
+    st.write("使用 Gemini Pro - 仅有文本模型")
     st.subheader("生成一个故事")
 
     # Story premise
@@ -93,7 +93,7 @@ with tab1:
         horizontal=True,
     )
 
-    if creative_control == "Low":
+    if creative_control == "低":
         temperature = 0.30
     else:
         temperature = 0.95
@@ -111,12 +111,6 @@ with tab1:
     首先介绍本书，然后介绍章节，之后逐一介绍每一章。 应该有一个合适的结局。
     这本书应该有序言和结语。
     """
-    # config = GenerationConfig(
-    #     temperature=temperature,
-    #     candidate_count=1,
-    #     max_output_tokens=max_output_tokens,
-    # )
-
     config = {
         "temperature": 0.8,
         "max_output_tokens": 2048,
@@ -126,7 +120,7 @@ with tab1:
     if generate_t2t and prompt:
         # st.write(prompt)
         with st.spinner("使用 Gemini 生成您的故事..."):
-            first_tab1, first_tab2, first_tab3 = st.tabs(["故事", "提示词", "参数设置"])
+            first_tab1, first_tab2, first_tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
             with first_tab1:
                 response = get_gemini_pro_text_response(
                     st.session_state.text_model_pro,
@@ -145,98 +139,96 @@ with tab1:
                 st.write(config)
 
 with tab2:
-    st.write("Using Gemini Pro - Text only model")
-    st.subheader("Generate your marketing campaign")
+    st.write("使用 Gemini Pro - 仅有文本模型")
+    st.subheader("生成您的营销活动")
 
-    product_name = st.text_input(
-        "What is the name of the product? \n\n", key="product_name", value="ZomZoo"
-    )
+    product_name = st.text_input("产品名称是什么？", key="product_name", value="ZomZoo")
     product_category = st.radio(
-        "Select your product category: \n\n",
-        ["Clothing", "Electronics", "Food", "Health & Beauty", "Home & Garden"],
+        "选择您的产品类别：",
+        ["服装", "电子产品", "食品", "健康与美容", "家居与园艺"],
         key="product_category",
         horizontal=True,
     )
-    st.write("Select your target audience: ")
+    st.write("选择您的目标受众：")
     target_audience_age = st.radio(
-        "Target age: \n\n",
+        "目标年龄：",
         ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"],
         key="target_audience_age",
         horizontal=True,
     )
     # target_audience_gender = st.radio("Target gender: \n\n",["male","female","trans","non-binary","others"],key="target_audience_gender",horizontal=True)
     target_audience_location = st.radio(
-        "Target location: \n\n",
-        ["Urban", "Suburban", "Rural"],
+        "目标位置：",
+        ["城市", "郊区", "乡村"],
         key="target_audience_location",
         horizontal=True,
     )
-    st.write("Select your marketing campaign goal: ")
+    st.write("选择您的营销活动目标：")
     campaign_goal = st.multiselect(
-        "Select your marketing campaign goal: \n\n",
+        "选择您的营销活动目标：",
         [
-            "Increase brand awareness",
-            "Generate leads",
-            "Drive sales",
-            "Improve brand sentiment",
+            "提高品牌知名度",
+            "产生潜在客户",
+            "推动销售",
+            "提高品牌情感",
         ],
         key="campaign_goal",
-        default=["Increase brand awareness", "Generate leads"],
+        default=["提高品牌知名度", "产生潜在客户"],
     )
     if campaign_goal is None:
-        campaign_goal = ["Increase brand awareness", "Generate leads"]
+        campaign_goal = ["提高品牌知名度", "产生潜在客户"]
     brand_voice = st.radio(
-        "Select your brand voice: \n\n",
-        ["Formal", "Informal", "Serious", "Humorous"],
+        "选择您的品牌风格：",
+        ["正式", "非正式", "严肃", "幽默"],
         key="brand_voice",
         horizontal=True,
     )
     estimated_budget = st.radio(
-        "Select your estimated budget ($): \n\n",
+        "选择您的估计预算（人民币）：",
         ["1,000-5,000", "5,000-10,000", "10,000-20,000", "20,000+"],
         key="estimated_budget",
         horizontal=True,
     )
 
-    prompt = f"""Generate a marketing campaign for {product_name}, a {product_category} designed for the age group: {target_audience_age}. 
-    The target location is this: {target_audience_location}.
-    Aim to primarily achieve {campaign_goal}. 
-    Emphasize the product's unique selling proposition while using a {brand_voice} tone of voice. 
-    Allocate the total budget of {estimated_budget}.  
-    With these inputs, make sure to follow following guidelines and generate the marketing campaign with proper headlines: \n
-    - Briefly describe company, its values, mission, and target audience.
-    - Highlight any relevant brand guidelines or messaging frameworks.
-    - Provide a concise overview of the campaign's objectives and goals.
-    - Briefly explain the product or service being promoted.
-    - Define your ideal customer with clear demographics, psychographics, and behavioral insights.
-    - Understand their needs, wants, motivations, and pain points.
-    - Clearly articulate the desired outcomes for the campaign.
-    - Use SMART goals (Specific, Measurable, Achievable, Relevant, and Time-bound) for clarity.
-    - Define key performance indicators (KPIs) to track progress and success.
-    - Specify the primary and secondary goals of the campaign.
-    - Examples include brand awareness, lead generation, sales growth, or website traffic.
-    - Clearly define what differentiates your product or service from competitors.
-    - Emphasize the value proposition and unique benefits offered to the target audience.
-    - Define the desired tone and personality of the campaign messaging.
-    - Identify the specific channels you will use to reach your target audience.
-    - Clearly state the desired action you want the audience to take.
-    - Make it specific, compelling, and easy to understand.
-    - Identify and analyze your key competitors in the market.
-    - Understand their strengths and weaknesses, target audience, and marketing strategies.
-    - Develop a differentiation strategy to stand out from the competition.
-    - Define how you will track the success of the campaign.
-   -  Utilize relevant KPIs to measure performance and return on investment (ROI).
-   Give proper bullet points and headlines for the marketing campaign. Do not produce any empty lines.
-   Be very succinct and to the point.
+    prompt = f"""为 {product_name} 生成营销活动，该 {product_category} 专为年龄组：{target_audience_age} 设计。
+    目标位置是：{target_audience_location}。
+    主要目标是实现{campaign_goal}。
+    使用 {brand_voice} 的语气强调产品的独特销售主张。
+    分配总预算 {estimated_budget}。
+    遵循上述条件，请确保满足以下准则并生成具有正确标题的营销活动：\n
+    - 简要描述公司、其价值观、使命和目标受众。
+    - 突出显示任何相关的品牌指南或消息传递框架。
+    - 简要概述活动的目的和目标。
+    - 简要解释所推广的产品或服务。
+    - 通过清晰的人口统计数据、心理统计数据和行为洞察来定义您的理想客户。
+    - 了解他们的需求、愿望、动机和痛点。
+    - 清楚地阐明活动的预期结果。
+    - 为了清晰起见，使用 SMART 目标（具体的、可衡量的、可实现的、相关的和有时限的）。
+    - 定义关键绩效指标 (KPI) 来跟踪进度和成功。
+    - 指定活动的主要和次要目标。
+    - 示例包括品牌知名度、潜在客户开发、销售增长或网站流量。
+    - 明确定义您的产品或服务与竞争对手的区别。
+    - 强调为目标受众提供的价值主张和独特优势。
+    - 定义活动信息所需的基调和个性。
+    - 确定您将用于接触目标受众的具体渠道。
+    - 清楚地说明您希望观众采取的期望行动。
+    - 使其具体、引人注目且易于理解。
+    - 识别并分析市场上的主要竞争对手。
+    - 了解他们的优势和劣势、目标受众和营销策略。
+    - 制定差异化战略以在竞争中脱颖而出。
+    - 定义您将如何跟踪活动的成功。
+    - 利用相关的 KPI 来衡量绩效和投资回报 (ROI)。
+    为营销活动提供适当的要点和标题。 不要产生任何空行。
+    非常简洁并切中要点。
     """
     config = {
         "temperature": 0.8,
         "max_output_tokens": 2048,
     }
-    generate_t2t = st.button("Generate my campaign", key="generate_campaign")
+    generate_t2t = st.button("生成我的活动", key="generate_campaign")
     if generate_t2t and prompt:
-        second_tab1, second_tab2 = st.tabs(["Campaign", "Prompt"])
-        with st.spinner("Generating your marketing campaign using Gemini..."):
+        second_tab1, second_tab2, second_tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
+        with st.spinner("使用 Gemini 生成您的营销活动..."):
             with second_tab1:
                 response = get_gemini_pro_text_response(
                     st.session_state.text_model_pro,
@@ -250,6 +242,8 @@ with tab2:
                     view_stream_response(response, placeholder)
             with second_tab2:
                 st.text(prompt)
+            with second_tab3:
+                st.write(config)
 
 with tab3:
     st.write("Using Gemini Pro Vision - Multimodal model")
