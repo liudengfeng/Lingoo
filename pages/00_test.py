@@ -2,7 +2,8 @@ import mimetypes
 from pathlib import Path
 
 import streamlit as st
-from PIL import Image
+
+# from PIL import Image
 from vertexai.preview.generative_models import Part
 from vertexai.preview.generative_models import Image as GImage
 
