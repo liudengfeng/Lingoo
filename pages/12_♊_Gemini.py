@@ -275,7 +275,9 @@ with tab2:
                 )
                 if response:
                     st.write("Your marketing campaign:")
-                    st.write(response)
+                    placeholder = st.empty()
+                    # st.write(response)
+                    view_stream_response(response, placeholder)
             with second_tab2:
                 st.text(prompt)
 
