@@ -22,7 +22,7 @@ vertexai_configure(st.secrets)
 
 def get_gemini_pro_text_response(
     model: GenerativeModel,
-    contents: List[Any],
+    contents: Any,
     generation_config: GenerationConfig,
     stream=True,
 ):
