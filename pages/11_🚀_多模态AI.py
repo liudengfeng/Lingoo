@@ -7,7 +7,7 @@ from PIL import Image as PImage
 
 from vertexai.preview.generative_models import Part, GenerationConfig
 
-from mypylib.google_gemini import NORMAL_SAFETY_SETTINGS
+from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 from mypylib.st_utils import (
     authenticate_and_configure_services,
     check_and_force_logout,
@@ -166,7 +166,7 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
     responses = model.generate_content(
         contents,
         generation_config=generation_config,
-        safety_settings=NORMAL_SAFETY_SETTINGS,
+        safety_settings=DEFAULT_SAFETY_SETTINGS,
         stream=True,
     )
 

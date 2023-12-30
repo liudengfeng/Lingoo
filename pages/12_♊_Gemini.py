@@ -1,49 +1,37 @@
 import os
+
 import streamlit as st
+import vertexai
 from vertexai.preview.generative_models import (
     Content,
     GenerationConfig,
     GenerativeModel,
     GenerationResponse,
     Image,
-    HarmCategory,
-    HarmBlockThreshold,
     Part,
 )
-import vertexai
-from mypylib.google_cloud_configuration import vertexai_configure
-# PROJECT_ID = os.environ.get("GCP_PROJECT")  # Your Google Cloud Project ID
-# LOCATION = os.environ.get("GCP_REGION")  # Your Google Cloud Project Region
-# vertexai.init(project=PROJECT_ID, location=LOCATION)
-vertexai_configure(st.secrets)
+from typing import List, Optional, Union, Any
+from mypylib.google_cloud_configuration import (
+    vertexai_configure,
+    DEFAULT_SAFETY_SETTINGS,
+)
+from mypylib.st_utils import authenticate_and_configure_services, load_vertex_model
 
-@st.cache_resource
-def load_models():
-    text_model_pro = GenerativeModel("gemini-pro")
-    multimodal_model_pro = GenerativeModel("gemini-pro-vision")
-    return text_model_pro, multimodal_model_pro
+vertexai_configure(st.secrets)
 
 
 def get_gemini_pro_text_response(
     model: GenerativeModel,
-    contents: str,
+    contents: List[Any],
     generation_config: GenerationConfig,
     stream=True,
 ):
-    safety_settings = {
-        HarmCategory.HARM_CATEGORY_HARASSMENT: HarmBlockThreshold.BLOCK_NONE,
-        HarmCategory.HARM_CATEGORY_HATE_SPEECH: HarmBlockThreshold.BLOCK_NONE,
-        HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT: HarmBlockThreshold.BLOCK_NONE,
-        HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT: HarmBlockThreshold.BLOCK_NONE,
-    }
-
     responses = model.generate_content(
-        prompt,
+        contents,
         generation_config=generation_config,
-        safety_settings=safety_settings,
-        stream=True,
+        safety_settings=DEFAULT_SAFETY_SETTINGS,
+        stream=stream,
     )
-
     final_response = []
     for response in responses:
         try:
@@ -59,9 +47,12 @@ def get_gemini_pro_text_response(
 def get_gemini_pro_vision_response(
     model, prompt_list, generation_config={}, stream=True
 ):
-    generation_config = {"temperature": 0.1, "max_output_tokens": 2048}
+    # generation_config = {"temperature": 0.1, "max_output_tokens": 2048}
     responses = model.generate_content(
-        prompt_list, generation_config=generation_config, stream=True
+        prompt_list,
+        generation_config=generation_config,
+        safety_settings=DEFAULT_SAFETY_SETTINGS,
+        stream=stream,
     )
     final_response = []
     for response in responses:
@@ -73,7 +64,13 @@ def get_gemini_pro_vision_response(
 
 
 st.header("Vertex AI Gemini API", divider="rainbow")
-text_model_pro, multimodal_model_pro = load_models()
+
+if "text_model_pro" not in st.session_state:
+    st.session_state["text_model_pro"] = load_vertex_model("gemini-pro")
+
+if "multimodal_model_pro" not in st.session_state:
+    st.session_state["multimodal_model_pro"] = load_vertex_model("gemini-pro-vision")
+
 
 tab1, tab2, tab3, tab4 = st.tabs(
     ["Generate story", "Marketing campaign", "Image Playground", "Video Playground"]
@@ -164,7 +161,7 @@ with tab1:
             first_tab1, first_tab2 = st.tabs(["Story", "Prompt"])
             with first_tab1:
                 response = get_gemini_pro_text_response(
-                    text_model_pro,
+                    st.session_state.text_model_pro,
                     prompt,
                     generation_config=config,
                 )
@@ -269,7 +266,7 @@ with tab2:
         with st.spinner("Generating your marketing campaign using Gemini..."):
             with second_tab1:
                 response = get_gemini_pro_text_response(
-                    text_model_pro,
+                    st.session_state.text_model_pro,
                     prompt,
                     generation_config=config,
                 )
@@ -375,7 +372,7 @@ with tab3:
             if generate_image_description and content:
                 with st.spinner("Generating recommendation using Gemini..."):
                     response = get_gemini_pro_vision_response(
-                        multimodal_model_pro, content
+                        st.session_state.multimodal_model_pro, content
                     )
                     st.markdown(response)
         with tab2:
@@ -410,7 +407,8 @@ If instructions include buttons, also explain where those buttons are physically
             if generate_instructions_description and prompt:
                 with st.spinner("Generating instructions using Gemini..."):
                     response = get_gemini_pro_vision_response(
-                        multimodal_model_pro, [stove_screen_img, prompt]
+                        st.session_state.multimodal_model_pro,
+                        [stove_screen_img, prompt],
                     )
                     st.markdown(response)
         with tab2:
@@ -439,7 +437,7 @@ If instructions include buttons, also explain where those buttons are physically
             if er_diag_img_description and prompt:
                 with st.spinner("Generating..."):
                     response = get_gemini_pro_vision_response(
-                        multimodal_model_pro, [er_diag_img, prompt]
+                        st.session_state.multimodal_model_pro, [er_diag_img, prompt]
                     )
                     st.markdown(response)
         with tab2:
@@ -508,7 +506,7 @@ If instructions include buttons, also explain where those buttons are physically
             if compare_img_description and content:
                 with st.spinner("Generating recommendations using Gemini..."):
                     response = get_gemini_pro_vision_response(
-                        multimodal_model_pro, content
+                        st.session_state.multimodal_model_pro, content
                     )
                     st.markdown(response)
         with tab2:
@@ -551,7 +549,8 @@ INSTRUCTIONS:
             if math_image_description and prompt:
                 with st.spinner("Generating answers for formula using Gemini..."):
                     response = get_gemini_pro_vision_response(
-                        multimodal_model_pro, [math_image_img, prompt]
+                        st.session_state.multimodal_model_pro,
+                        [math_image_img, prompt],
                     )
                     st.markdown(response)
                     st.markdown("\n\n\n")
@@ -591,7 +590,8 @@ with tab4:
                 if vide_desc_description and prompt:
                     with st.spinner("Generating video description using Gemini..."):
                         response = get_gemini_pro_vision_response(
-                            multimodal_model_pro, [prompt, vide_desc_img]
+                            st.session_state.multimodal_model_pro,
+                            [prompt, vide_desc_img],
                         )
                         st.markdown(response)
                         st.markdown("\n\n\n")
@@ -626,7 +626,8 @@ with tab4:
                 if video_tags_description and prompt:
                     with st.spinner("Generating video description using Gemini..."):
                         response = get_gemini_pro_vision_response(
-                            multimodal_model_pro, [prompt, video_tags_img]
+                            st.session_state.multimodal_model_pro,
+                            [prompt, video_tags_img],
                         )
                         st.markdown(response)
                         st.markdown("\n\n\n")
@@ -663,7 +664,8 @@ Provide the answer in table format.
                 if video_highlights_description and prompt:
                     with st.spinner("Generating video highlights using Gemini..."):
                         response = get_gemini_pro_vision_response(
-                            multimodal_model_pro, [prompt, video_highlights_img]
+                            st.session_state.multimodal_model_pro,
+                            [prompt, video_highlights_img],
                         )
                         st.markdown(response)
                         st.markdown("\n\n\n")
@@ -710,7 +712,8 @@ Provide the answer in table format.
                 if video_geoloaction_description and prompt:
                     with st.spinner("Generating location tags using Gemini..."):
                         response = get_gemini_pro_vision_response(
-                            multimodal_model_pro, [prompt, video_geoloaction_img]
+                            st.session_state.multimodal_model_pro,
+                            [prompt, video_geoloaction_img],
                         )
                         st.markdown(response)
                         st.markdown("\n\n\n")
