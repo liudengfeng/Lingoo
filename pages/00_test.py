@@ -51,7 +51,5 @@ if st.button("提交", key="2"):
     generate()
 
 
-st.subheader("分部 1 test", anchor=True, divider="rainbow")
-st.image(image, caption="Image", use_column_width=True)
-st.subheader("分部 2 test", anchor=True, divider="rainbow")
+st.subheader("分部 1 test", anchor=False, divider="rainbow")
 st.image(image, caption="Image", use_column_width=True)
