@@ -62,46 +62,33 @@ with tab1:
     st.subheader("生成一个故事")
 
     # Story premise
-    character_name = st.text_input(
-        "输入角色名称：", key="character_name", value="七七"
-    )
-    character_type = st.text_input(
-        "What type of character is it? \n\n", key="character_type", value="Cat"
-    )
+    character_name = st.text_input("输入角色名称：", key="character_name", value="七七")
+    character_type = st.text_input("它是什么类型的角色？ ", key="character_type", value="狗")
     character_persona = st.text_input(
-        "What personality does the character have? \n\n",
+        "这个角色有什么性格？",
         key="character_persona",
-        value="Mitten is a very friendly cat.",
+        value="七七是一只非常黏人的比熊犬。",
     )
     character_location = st.text_input(
-        "Where does the character live? \n\n",
+        "角色住在哪里？",
         key="character_location",
-        value="Andromeda Galaxy",
+        value="山城重庆",
     )
     story_premise = st.multiselect(
-        "What is the story premise? (can select multiple) \n\n",
-        [
-            "Love",
-            "Adventure",
-            "Mystery",
-            "Horror",
-            "Comedy",
-            "Sci-Fi",
-            "Fantasy",
-            "Thriller",
-        ],
+        "故事前提是什么？ (可以选择多个)",
+        ["爱", "冒险", "神秘", "恐怖", "喜剧", "科幻", "幻想", "惊悚片"],
         key="story_premise",
-        default=["Love", "Adventure"],
+        default=["神秘", "喜剧"],
     )
     creative_control = st.radio(
-        "Select the creativity level: \n\n",
-        ["Low", "High"],
+        "选择创意级别：",
+        ["低", "高"],
         key="creative_control",
         horizontal=True,
     )
     length_of_story = st.radio(
-        "Select the length of the story: \n\n",
-        ["Short", "Long"],
+        "选择故事的长度:",
+        ["短", "长"],
         key="length_of_story",
         horizontal=True,
     )
@@ -113,16 +100,16 @@ with tab1:
 
     max_output_tokens = 2048
 
-    prompt = f"""Write a {length_of_story} story based on the following premise: \n
-    character_name: {character_name} \n
-    character_type: {character_type} \n
-    character_persona: {character_persona} \n
-    character_location: {character_location} \n
-    story_premise: {",".join(story_premise)} \n
-    If the story is "short", then make sure to have 5 chapters or else if it is "long" then 10 chapters. 
-    Important point is that each chapters should be generated based on the premise given above.
-    First start by giving the book introduction, chapter introductions and then each chapter. It should also have a proper ending.
-    The book should have prologue and epilogue.
+    prompt = f"""根据以下前提编写一个 {length_of_story} 故事：\n
+    角色名称: {character_name} \n
+    角色类型：{character_type} \n
+    角色性格：{character_persona} \n
+    角色位置：{character_location} \n
+    故事前提：{",".join(story_premise)} \n
+    如果故事“短”，则确保有 5 章，如果故事“长”，则确保有 10 章。
+    重要的一点是，每一章都应该基于上述前提生成。
+    首先介绍本书，然后介绍章节，之后逐一介绍每一章。 应该有一个合适的结局。
+    这本书应该有序言和结语。
     """
     # config = GenerationConfig(
     #     temperature=temperature,
@@ -135,11 +122,11 @@ with tab1:
         "max_output_tokens": 2048,
     }
 
-    generate_t2t = st.button("Generate my story", key="generate_t2t")
+    generate_t2t = st.button("生成我的故事", key="generate_t2t")
     if generate_t2t and prompt:
         # st.write(prompt)
-        with st.spinner("Generating your story using Gemini..."):
-            first_tab1, first_tab2 = st.tabs(["Story", "Prompt"])
+        with st.spinner("使用 Gemini 生成您的故事..."):
+            first_tab1, first_tab2, first_tab3 = st.tabs(["故事", "提示词", "参数设置"])
             with first_tab1:
                 response = get_gemini_pro_text_response(
                     st.session_state.text_model_pro,
@@ -147,12 +134,15 @@ with tab1:
                     generation_config=config,
                 )
                 if response:
-                    st.write("Your story:")
+                    st.write("生成的故事：")
                     placeholder = st.empty()
                     # st.write(response)
                     view_stream_response(response, placeholder)
             with first_tab2:
                 st.text(prompt)
+            with first_tab3:
+                st.write("参数设置：")
+                st.write(config)
 
 with tab2:
     st.write("Using Gemini Pro - Text only model")
