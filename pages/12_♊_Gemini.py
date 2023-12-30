@@ -432,19 +432,19 @@ with tab3:
         )
 
         st.write(
-            """Gemini is capable of image comparison and providing recommendations. This may be useful in industries like e-commerce and retail.
-                    Below is an example of choosing which pair of glasses would be better suited to various face types:"""
+            """Gemini 能够进行图像比较并提供建议。 这在电子商务和零售等行业可能很有用。
+            以下是选择哪副眼镜更适合不同脸型的示例："""
         )
         compare_img_1_img = Part.from_uri(compare_img_1_uri, mime_type="image/jpeg")
         compare_img_2_img = Part.from_uri(compare_img_2_uri, mime_type="image/jpeg")
         face_type = st.radio(
-            "What is your face shape?",
-            ["Oval", "Round", "Square", "Heart", "Diamond"],
+            "你是什么脸型？",
+            ["椭圆形", "圆形", "方形", "心形", "钻石形"],
             key="face_type",
             horizontal=True,
         )
         output_type = st.radio(
-            "Select the output type",
+            "选择输出类型",
             ["text", "table", "json"],
             key="output_type",
             horizontal=True,
@@ -452,31 +452,31 @@ with tab3:
         st.image(
             [compare_img_1_url, compare_img_2_url],
             width=350,
-            caption=["Glasses type 1", "Glasses type 2"],
+            caption=["眼镜类型 1", "眼镜类型 2"],
         )
         st.write(
-            f"Our expectation: Suggest which glasses type is better for the {face_type} face shape"
+            f"我们的期望：建议哪种眼镜类型更适合 {face_type} 脸型"
         )
         content = [
-            f"""Which of these glasses you recommend for me based on the shape of my face:{face_type}?
-           I have an {face_type} shape face.
-           Glasses 1: """,
+            f"""根据我的脸型，您为我推荐哪一款眼镜：{face_type}?
+           我有一张 {face_type} 形状的脸。
+           眼镜 1: """,
             compare_img_1_img,
             """
-           Glasses 2: """,
+           眼镜 2: """,
             compare_img_2_img,
             f"""
-           Explain how you reach out to this decision.
-           Provide your recommendation based on my face shape, and reasoning for each in {output_type} format.
+           解释一下你是如何做出这个决定的。
+           根据我的脸型提供您的建议，并以 {output_type} 格式对每个脸型进行推理。
            """,
         ]
-        tab1, tab2 = st.tabs(["Response", "Prompt"])
+        tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
         compare_img_description = st.button(
-            "Generate recommendation!", key="compare_img_description"
+            "生成推荐", key="compare_img_description"
         )
         with tab1:
             if compare_img_description and content:
-                with st.spinner("Generating recommendations using Gemini..."):
+                with st.spinner("使用 Gemini 生成推荐..."):
                     response = get_gemini_pro_vision_response(
                         st.session_state.multimodal_model_pro, content
                     )
@@ -484,8 +484,11 @@ with tab3:
                     # st.write(response)
                     view_stream_response(response, placeholder)
         with tab2:
-            st.write("Prompt used:")
+            st.write("使用的提示词：")
             st.text(content)
+        with tab3:
+            st.write("使用的参数：")
+            st.text("默认参数")
 
     with sim_diff:
         math_image_uri = "gs://github-repo/img/gemini/multimodality_usecases_overview/math_beauty.jpg"
