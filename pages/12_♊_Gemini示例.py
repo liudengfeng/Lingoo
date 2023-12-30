@@ -583,9 +583,7 @@ with tab4:
                 st.write("默认参数")
 
     with video_tags:
-        st.markdown(
-            """Gemini 还可以提取整个视频中的标签，如下所示："""
-        )
+        st.markdown("""Gemini 还可以提取整个视频中的标签，如下所示：""")
         video_tags_uri = "gs://github-repo/img/gemini/multimodality_usecases_overview/photography.mp4"
         video_tags_url = (
             "https://storage.googleapis.com/" + video_tags_uri.split("gs://")[1]
@@ -602,9 +600,7 @@ with tab4:
 以表格形式给出答案，问题和答案作为列。
             """
             tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
-            video_tags_description = st.button(
-                "生成标签", key="video_tags_description"
-            )
+            video_tags_description = st.button("生成标签", key="video_tags_description")
             with tab1:
                 if video_tags_description and prompt:
                     with st.spinner("使用 Gemini 生成视频描述..."):
@@ -622,11 +618,9 @@ with tab4:
             with tab3:
                 st.write("使用的参数：")
                 st.write("默认参数")
-    
+
     with video_highlights:
-        st.markdown(
-            """下面是使用 Gemini 询问有关物体、人或上下文的问题的另一个示例，如下面有关 Pixel 8 的视频所示："""
-        )
+        st.markdown("""下面是使用 Gemini 询问有关物体、人或上下文的问题的另一个示例，如下面有关 Pixel 8 的视频所示：""")
         video_highlights_uri = (
             "gs://github-repo/img/gemini/multimodality_usecases_overview/pixel8.mp4"
         )
@@ -668,9 +662,7 @@ with tab4:
                 st.write(gemini_pro_vision_generation_config)
 
     with video_geoloaction:
-        st.markdown(
-            """Even in short, detail-packed videos, Gemini can identify the locations."""
-        )
+        st.markdown("""即使在简短、细节丰富的视频中，Gemini 也能识别出位置。""")
         video_geoloaction_uri = (
             "gs://github-repo/img/gemini/multimodality_usecases_overview/bus.mp4"
         )
@@ -683,28 +675,30 @@ with tab4:
             )
             st.video(video_geoloaction_url)
             st.markdown(
-                """Our expectation: \n
-            Answer the following questions from the video:
-                - What is this video about?
-                - How do you know which city it is?
-                - What street is this?
-                - What is the nearest intersection?
+                """我们的期望：\n
+回答视频中的以下问题：
+- 这个视频是关于什么的？
+- 你怎么知道是哪个城市？
+- 这是哪条街？
+- 最近的十字路口是什么？
             """
             )
-            prompt = """Answer the following questions using the video only:
-            What is this video about?
-            How do you know which city it is?
-            What street is this?
-            What is the nearest intersection?
-            Answer the following questions in a table format with question and answer as columns. 
+            prompt = """仅使用视频回答以下问题：
+
+- 这个视频是关于什么的？
+- 你怎么知道是哪个城市？
+- 这是哪条街？
+- 最近的十字路口是什么？
+
+以表格形式回答以下问题，问题和答案作为列。
             """
             tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
             video_geoloaction_description = st.button(
-                "Generate", key="video_geoloaction_description"
+                "生成", key="video_geoloaction_description"
             )
             with tab1:
                 if video_geoloaction_description and prompt:
-                    with st.spinner("Generating location tags using Gemini..."):
+                    with st.spinner("使用 Gemini 生成位置标签..."):
                         response = get_gemini_pro_vision_response(
                             st.session_state.multimodal_model_pro,
                             [prompt, video_geoloaction_img],
@@ -714,7 +708,7 @@ with tab4:
                         view_stream_response(response, placeholder)
                         st.markdown("\n\n\n")
             with tab2:
-                st.write("Prompt used:")
+                st.write("使用的提示词：")
                 st.write(prompt, "\n", "{video_data}")
             with tab3:
                 st.write("使用的参数：")
