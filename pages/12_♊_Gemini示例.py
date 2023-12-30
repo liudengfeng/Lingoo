@@ -625,7 +625,7 @@ with tab4:
     
     with video_highlights:
         st.markdown(
-            """Below is another example of using Gemini to ask questions about objects, people or the context, as shown in the video about Pixel 8 below:"""
+            """下面是使用 Gemini 询问有关物体、人或上下文的问题的另一个示例，如下面有关 Pixel 8 的视频所示："""
         )
         video_highlights_uri = (
             "gs://github-repo/img/gemini/multimodality_usecases_overview/pixel8.mp4"
@@ -638,20 +638,20 @@ with tab4:
                 video_highlights_uri, mime_type="video/mp4"
             )
             st.video(video_highlights_url)
-            st.write("Our expectation: Generate the highlights for the video")
-            prompt = """Answer the following questions using the video only:
-What is the profession of the girl in this video?
-Which all features of the phone are highlighted here?
-Summarize the video in one paragraph.
-Provide the answer in table format. 
+            st.write("我们的期望：生成视频的亮点")
+            prompt = """仅使用视频回答以下问题：
+视频中的女孩是什么职业？
+这里重点介绍了手机的哪些功能？
+用一段总结视频。
+以表格形式提供答案。
             """
             tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
             video_highlights_description = st.button(
-                "Generate video highlights", key="video_highlights_description"
+                "生成视频精彩片段", key="video_highlights_description"
             )
             with tab1:
                 if video_highlights_description and prompt:
-                    with st.spinner("Generating video highlights using Gemini..."):
+                    with st.spinner("使用 Gemini 生成视频集锦..."):
                         response = get_gemini_pro_vision_response(
                             st.session_state.multimodal_model_pro,
                             [prompt, video_highlights_img],
@@ -661,7 +661,7 @@ Provide the answer in table format.
                         view_stream_response(response, placeholder)
                         st.markdown("\n\n\n")
             with tab2:
-                st.write("Prompt used:")
+                st.write("使用的提示词：")
                 st.write(prompt, "\n", "{video_data}")
             with tab3:
                 st.write("使用的参数：")
