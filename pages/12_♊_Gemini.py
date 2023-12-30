@@ -246,21 +246,21 @@ with tab2:
                 st.write(config)
 
 with tab3:
-    st.write("Using Gemini Pro Vision - Multimodal model")
+    st.write("使用 Gemini Pro Vision - 多模态模型")
     image_undst, screens_undst, diagrams_undst, recommendations, sim_diff = st.tabs(
         [
-            "Furniture recommendation",
-            "Oven instructions",
-            "ER diagrams",
-            "Glasses recommendation",
-            "Math reasoning",
+            "家具推荐",
+            "烤箱使用说明",
+            "ER图",
+            "眼镜推荐",
+            "数学推理",
         ]
     )
 
     with image_undst:
         st.markdown(
-            """In this demo, you will be presented with a scene (e.g., a living room) and will use the Gemini model to perform visual understanding. You will see how Gemini can be used to recommend an item (e.g., a chair) from a list of furniture options as input. You can use Gemini to recommend a chair that would complement the given scene and will be provided with its rationale for such selections from the provided list.
-                    """
+            """在此演示中，您将看到一个场景（例如客厅），并将使用 Gemini 模型来执行视觉理解。 您将看到如何使用 Gemini 从家具选项列表中推荐一个项目（例如一把椅子）作为输入。 您可以使用 Gemini 推荐一把可以补充给定场景的椅子，并将从提供的列表中提供其选择的理由。
+        """
         )
 
         room_image_uri = (
@@ -301,7 +301,7 @@ with tab3:
         chair_3_image = Part.from_uri(chair_3_image_uri, mime_type="image/jpeg")
         chair_4_image = Part.from_uri(chair_4_image_uri, mime_type="image/jpeg")
 
-        st.image(room_image_urls, width=350, caption="Image of a living room")
+        st.image(room_image_urls, width=350, caption="客厅的图像")
         st.image(
             [
                 chair_1_image_urls,
@@ -310,36 +310,33 @@ with tab3:
                 chair_4_image_urls,
             ],
             width=200,
-            caption=["Chair 1", "Chair 2", "Chair 3", "Chair 4"],
+            caption=["椅子 1", "椅子 2", "椅子 3", "椅子 4"],
         )
 
-        st.write(
-            "Our expectation: Recommend a chair that would complement the given image of a living room."
-        )
+        st.write("我们的期望：推荐一把与客厅既定形象相得益彰的椅子。")
         content = [
-            "Consider the following chairs:",
-            "chair 1:",
+            "考虑以下椅子：",
+            "椅子 1:",
             chair_1_image,
-            "chair 2:",
+            "椅子 2:",
             chair_2_image,
-            "chair 3:",
+            "椅子 3:",
             chair_3_image,
-            "and",
-            "chair 4:",
+            "以及",
+            "椅子 4:",
             chair_4_image,
-            "\n"
-            "For each chair, explain why it would be suitable or not suitable for the following room:",
+            "\n" "对于每把椅子，请解释为什么它适合或不适合以下房间：",
             room_image,
-            "Only recommend for the room provided and not other rooms. Provide your recommendation in a table format with chair name and reason as columns.",
+            "只推荐所提供的房间，不推荐其他房间。 以表格形式提供您的建议，并以椅子名称和理由为标题列。",
         ]
 
-        tab1, tab2 = st.tabs(["Response", "Prompt"])
+        tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
         generate_image_description = st.button(
-            "Generate recommendation....", key="generate_image_description"
+            "生成推荐", key="generate_image_description"
         )
         with tab1:
             if generate_image_description and content:
-                with st.spinner("Generating recommendation using Gemini..."):
+                with st.spinner("使用 Gemini 生成推荐..."):
                     response = get_gemini_pro_vision_response(
                         st.session_state.multimodal_model_pro, content
                     )
@@ -347,8 +344,11 @@ with tab3:
                     # st.write(response)
                     view_stream_response(response, placeholder)
         with tab2:
-            st.write("Prompt used:")
+            st.write("使用的提示词：")
             st.text(content)
+        with tab2:
+            st.write("使用的参数：")
+            st.write(None)
 
     with screens_undst:
         stove_screen_uri = (
