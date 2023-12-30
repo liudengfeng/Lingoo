@@ -454,9 +454,7 @@ with tab3:
             width=350,
             caption=["眼镜类型 1", "眼镜类型 2"],
         )
-        st.write(
-            f"我们的期望：建议哪种眼镜类型更适合 {face_type} 脸型"
-        )
+        st.write(f"我们的期望：建议哪种眼镜类型更适合 {face_type} 脸型")
         content = [
             f"""根据我的脸型，您为我推荐哪一款眼镜：{face_type}?
            我有一张 {face_type} 形状的脸。
@@ -471,9 +469,7 @@ with tab3:
            """,
         ]
         tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
-        compare_img_description = st.button(
-            "生成推荐", key="compare_img_description"
-        )
+        compare_img_description = st.button("生成推荐", key="compare_img_description")
         with tab1:
             if compare_img_description and content:
                 with st.spinner("使用 Gemini 生成推荐..."):
@@ -495,36 +491,33 @@ with tab3:
         math_image_url = (
             "https://storage.googleapis.com/" + math_image_uri.split("gs://")[1]
         )
-        st.write(
-            "Gemini can also recognize math formulas and equations and extract specific information from them. This capability is particularly useful for generating explanations for math problems, as shown below."
-        )
+        st.write("Gemini 还可以识别数学公式和方程，并从中提取特定信息。 此功能对于生成数学问题的解释特别有用，如下所示。")
         math_image_img = Part.from_uri(math_image_uri, mime_type="image/jpeg")
         st.image(math_image_url, width=350, caption="Image of a math equation")
         st.markdown(
             f"""
-                Our expectation: Ask questions about the math equation as follows: 
-                - Extract the formula.
-                - What is the symbol right before Pi? What does it mean?
-                - Is this a famous formula? Does it have a name?
-                    """
-        )
+我们的期望：提出有关数学方程的问题如下：
+- 提取公式。
+- Pi 前面的符号是什么？ 这是什么意思？
+- 这是一个著名的公式吗？ 它有名字吗？
+""")
         prompt = """
-Follow the instructions.
-Surround math expressions with $.
-Use a table with a row for each instruction and its result.
+按照说明进行操作。
+用 $ 将数学表达式括起来。
+使用一个表格，其中一行代表每条指令及其结果。
 
-INSTRUCTIONS:
-- Extract the formula.
-- What is the symbol right before Pi? What does it mean?
-- Is this a famous formula? Does it have a name?
+指示：
+- 提取公式。
+- Pi 前面的符号是什么？ 这是什么意思？
+- 这是一个著名的公式吗？ 它有名字吗？
 """
-        tab1, tab2 = st.tabs(["Response", "Prompt"])
+        tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
         math_image_description = st.button(
-            "Generate answers!", key="math_image_description"
+            "生成答案", key="math_image_description"
         )
         with tab1:
             if math_image_description and prompt:
-                with st.spinner("Generating answers for formula using Gemini..."):
+                with st.spinner("使用 Gemini 生成公式答案..."):
                     response = get_gemini_pro_vision_response(
                         st.session_state.multimodal_model_pro,
                         [math_image_img, prompt],
@@ -534,8 +527,11 @@ INSTRUCTIONS:
                     view_stream_response(response, placeholder)
                     st.markdown("\n\n\n")
         with tab2:
-            st.write("Prompt used:")
+            st.write("使用的提示词：")
             st.text(content)
+        with tab3:
+            st.write("使用的参数：")
+            st.text("默认参数")
 
 with tab4:
     st.write("Using Gemini Pro Vision - Multimodal model")
