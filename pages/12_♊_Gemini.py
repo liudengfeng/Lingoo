@@ -194,7 +194,7 @@ with tab2:
     目标位置是：{target_audience_location}。
     主要目标是实现{campaign_goal}。
     使用 {brand_voice} 的语气强调产品的独特销售主张。
-    分配总预算 {estimated_budget}。
+    分配总预算 {estimated_budget} 元【人民币】。
     遵循上述条件，请确保满足以下准则并生成具有正确标题的营销活动：\n
     - 简要描述公司、其价值观、使命和目标受众。
     - 突出显示任何相关的品牌指南或消息传递框架。
