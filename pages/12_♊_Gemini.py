@@ -500,7 +500,8 @@ with tab3:
 - 提取公式。
 - Pi 前面的符号是什么？ 这是什么意思？
 - 这是一个著名的公式吗？ 它有名字吗？
-""")
+"""
+        )
         prompt = """
 按照说明进行操作。
 用 $ 将数学表达式括起来。
@@ -512,9 +513,7 @@ with tab3:
 - 这是一个著名的公式吗？ 它有名字吗？
 """
         tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
-        math_image_description = st.button(
-            "生成答案", key="math_image_description"
-        )
+        math_image_description = st.button("生成答案", key="math_image_description")
         with tab1:
             if math_image_description and prompt:
                 with st.spinner("使用 Gemini 生成公式答案..."):
@@ -525,7 +524,10 @@ with tab3:
                     placeholder = st.empty()
                     # st.write(response)
                     view_stream_response(response, placeholder)
-                    st.markdown("\n\n\n")
+                    full = ""
+                    for chunk in response:
+                        full += chunk.text
+                    st.write(full)
         with tab2:
             st.write("使用的提示词：")
             st.text(content)
