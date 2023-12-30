@@ -25,7 +25,7 @@ st.header("Streamlit test", divider="rainbow")
 
 def _process_media(uploaded_file):
     # 用文件扩展名称形成 MIME 类型
-    return Image.from_bytes(uploaded_file.getvalue())
+    return GImage.from_bytes(uploaded_file.getvalue())
     # mime_type = mimetypes.guess_type(uploaded_file.name)[0]
     # return Part.from_data(data=uploaded_file.getvalue(), mime_type=mime_type)
 
