@@ -1,15 +1,15 @@
+import google.generativeai as genai
 import streamlit as st
 import vertexai
 from google.cloud import translate
 from google.oauth2.service_account import Credentials
-
 from vertexai.preview.generative_models import GenerativeModel
-import google.generativeai as genai
-
+from google.cloud import firestore
 from .db_interface import DbInterface
 from .google_cloud_configuration import (
-    vertexai_configure,
+    get_firestore_api_service_account_info,
     get_tran_api_service_account_info,
+    vertexai_configure,
 )
 
 PROJECT_ID = "gllm-409401"
@@ -87,6 +87,15 @@ def get_translation_client():
     credentials = Credentials.from_service_account_info(service_account_info)
     # 使用凭据初始化客户端
     return translate.TranslationServiceClient(credentials=credentials)
+
+
+@st.cache_resource
+def get_firestore_client():
+    service_account_info = get_firestore_api_service_account_info(st.secrets)
+    # 创建凭据
+    credentials = Credentials.from_service_account_info(service_account_info)
+    # 使用凭据初始化客户端
+    return firestore.Client(credentials=credentials, project=PROJECT_ID)
 
 
 @st.cache_resource
