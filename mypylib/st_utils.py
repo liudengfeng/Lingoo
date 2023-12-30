@@ -7,7 +7,10 @@ from vertexai.preview.generative_models import GenerativeModel
 import google.generativeai as genai
 
 from .db_interface import DbInterface
-from .google_cloud_configuration import vertexai_configure, get_service_account_info
+from .google_cloud_configuration import (
+    vertexai_configure,
+    get_tran_api_service_account_info,
+)
 
 PROJECT_ID = "gllm-409401"
 LOCATION = "asia-northeast1"
@@ -67,6 +70,30 @@ def check_and_force_logout(status):
                 st.stop()
 
 
+def authenticate_and_configure_services():
+    common_page_config()
+    if not st.session_state.dbi.is_service_active(st.session_state["user_info"]):
+        st.error("非付费用户，无法使用此功能。")
+        st.stop()
+    if "google_translate_client" not in st.session_state:
+        st.session_state["google_translate_client"] = get_translation_client()
+    configure_google_apis()
+
+
+@st.cache_resource
+def get_translation_client():
+    service_account_info = get_tran_api_service_account_info(st.secrets)
+    # 创建凭据
+    credentials = Credentials.from_service_account_info(service_account_info)
+    # 使用凭据初始化客户端
+    return translate.TranslationServiceClient(credentials=credentials)
+
+
+@st.cache_resource
+def load_vertex_model(model_name):
+    return GenerativeModel(model_name)
+
+
 def google_translate(text: str, target_language_code: str = "zh-CN"):
     """Translating Text."""
     if text is None or text == "":
@@ -94,32 +121,3 @@ def google_translate(text: str, target_language_code: str = "zh-CN"):
         res.append(translation.translated_text.encode("utf8").decode("utf8"))
     # google translate api 返回一个结果
     return res[0]
-
-
-def authenticate_and_configure_services():
-    common_page_config()
-    if not st.session_state.dbi.is_service_active(st.session_state["user_info"]):
-        st.error("非付费用户，无法使用此功能。")
-        st.stop()
-    if "google_translate_client" not in st.session_state:
-        st.session_state["google_translate_client"] = get_translation_client()
-    configure_google_apis()
-
-
-@st.cache_resource
-def get_translation_client():
-    service_account_info = get_service_account_info(st.secrets)
-    # 创建凭据
-    credentials = Credentials.from_service_account_info(service_account_info)
-    # 使用凭据初始化客户端
-    return translate.TranslationServiceClient(credentials=credentials)
-
-
-@st.cache_resource
-def load_model(model_name):
-    return genai.GenerativeModel(model_name)
-
-
-@st.cache_resource
-def load_vertex_model(model_name):
-    return GenerativeModel(model_name)

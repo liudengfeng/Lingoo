@@ -10,7 +10,7 @@ from mypylib.google_cloud_configuration import SAFETY_SETTINGS
 from mypylib.st_utils import (
     authenticate_and_configure_services,
     check_and_force_logout,
-    load_model,
+    load_vertex_model,
 )
 
 # region 页面设置
@@ -47,7 +47,7 @@ if st.session_state.get("clear_example"):
 
 
 def init_chat():
-    model = load_model("gemini-pro")
+    model = load_vertex_model("gemini-pro")
     history = []
     for user, ai in st.session_state["examples_pair"]:
         history.append({"role": "user", "parts": [user]})

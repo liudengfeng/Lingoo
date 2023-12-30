@@ -19,7 +19,7 @@ QUESTION_OPTIONS_AND_INSTRUCTIONS = """
 """
 
 
-def get_service_account_info(secrets):
+def get_tran_api_service_account_info(secrets):
     # 由于private_key含有大量的换行符号，所以单独存储
     service_account_info = json.loads(
         secrets["Google"]["GOOGLE_APPLICATION_CREDENTIALS"]
@@ -29,7 +29,7 @@ def get_service_account_info(secrets):
 
 
 def get_translation_client(secrets):
-    service_account_info = get_service_account_info(secrets)
+    service_account_info = get_tran_api_service_account_info(secrets)
     # 创建凭据
     credentials = Credentials.from_service_account_info(service_account_info)
     # 使用凭据初始化客户端
@@ -66,7 +66,7 @@ def google_translate(text: str, client, target_language_code: str = "zh-CN"):
 
 def init_vertex(secrets):
     # 完成认证及初始化
-    service_account_info = get_service_account_info(secrets)
+    service_account_info = get_tran_api_service_account_info(secrets)
     # 创建凭据
     credentials = Credentials.from_service_account_info(service_account_info)
     aiplatform.init(
