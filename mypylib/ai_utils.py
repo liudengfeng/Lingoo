@@ -1,4 +1,5 @@
 import time
+import streamlit as st
 
 
 def view_stream_response(responses, placeholder):
@@ -13,9 +14,10 @@ def view_stream_response(responses, placeholder):
     for chunk in responses:
         try:
             full_response += chunk.text
-        except (IndexError, ValueError):
-            # st.write(response)
-            continue
+        except (IndexError, ValueError) as e:
+            st.write(chunk)
+            st.error(e)
+            pass
         time.sleep(0.05)
         # Add a blinking cursor to simulate typing
         placeholder.markdown(full_response + "▌")
