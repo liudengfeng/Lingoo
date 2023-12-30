@@ -26,6 +26,7 @@ def get_gemini_pro_text_response(
     generation_config: GenerationConfig,
     stream=True,
 ):
+    st.write(contents)
     responses = model.generate_content(
         contents,
         generation_config=generation_config,
