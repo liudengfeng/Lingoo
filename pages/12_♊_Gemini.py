@@ -532,15 +532,15 @@ with tab3:
             st.text("默认参数")
 
 with tab4:
-    st.write("Using Gemini Pro Vision - Multimodal model")
+    st.write("使用 Gemini Pro Vision - 多模态模型")
 
     vide_desc, video_tags, video_highlights, video_geoloaction = st.tabs(
-        ["Video description", "Video tags", "Video highlights", "Video geolocation"]
+        ["视频描述", "视频标签", "视频亮点", "视频地理位置"]
     )
 
     with vide_desc:
         st.markdown(
-            """Gemini can also provide the description of what is going on in the video:"""
+            """Gemini 还可以提供视频中发生的情况的描述："""
         )
         vide_desc_uri = "gs://github-repo/img/gemini/multimodality_usecases_overview/mediterraneansea.mp4"
         video_desc_url = (
@@ -549,19 +549,19 @@ with tab4:
         if vide_desc_uri:
             vide_desc_img = Part.from_uri(vide_desc_uri, mime_type="video/mp4")
             st.video(video_desc_url)
-            st.write("Our expectation: Generate the description of the video")
-            prompt = """Describe what is happening in the video and answer the following questions: \n
-            - What am I looking at? \n
-            - Where should I go to see it? \n
-            - What are other top 5 places in the world that look like this? 
+            st.write("我们的期望：生成视频的描述")
+            prompt = """描述视频中发生的事情并回答以下问题：\n
+             - 我在看什么？ \n
+             - 我应该去哪里看？ \n
+             - 世界上还有哪些像这样的前 5 个地方？
             """
-            tab1, tab2 = st.tabs(["Response", "Prompt"])
+            tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
             vide_desc_description = st.button(
-                "Generate video description", key="vide_desc_description"
+                "生成视频描述", key="vide_desc_description"
             )
             with tab1:
                 if vide_desc_description and prompt:
-                    with st.spinner("Generating video description using Gemini..."):
+                    with st.spinner("使用 Gemini 生成视频描述..."):
                         response = get_gemini_pro_vision_response(
                             st.session_state.multimodal_model_pro,
                             [prompt, vide_desc_img],
@@ -571,8 +571,11 @@ with tab4:
                         view_stream_response(response, placeholder)
                         st.markdown("\n\n\n")
             with tab2:
-                st.write("Prompt used:")
+                st.write("使用的提示词：")
                 st.write(prompt, "\n", "{video_data}")
+            with tab3:
+                st.write("使用的参数：")
+                st.write("默认参数")
 
     with video_tags:
         st.markdown(
@@ -593,7 +596,7 @@ with tab4:
                         4. Provide 5 best tags for this video?
                         Give the answer in the table format with question and answer as columns.
             """
-            tab1, tab2 = st.tabs(["Response", "Prompt"])
+            tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
             video_tags_description = st.button(
                 "Generate video tags", key="video_tags_description"
             )
@@ -633,7 +636,7 @@ Which all features of the phone are highlighted here?
 Summarize the video in one paragraph.
 Provide the answer in table format. 
             """
-            tab1, tab2 = st.tabs(["Response", "Prompt"])
+            tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
             video_highlights_description = st.button(
                 "Generate video highlights", key="video_highlights_description"
             )
