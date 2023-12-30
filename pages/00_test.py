@@ -33,5 +33,5 @@ db = get_firestore_client()
 
 
 if st.button("提交", key="2"):
-    doc_ref = db.collection("users").document("alovelace")
+    doc_ref = db.collection("words").document("a lot of")
     doc_ref.set({"first": "Ada", "last": "Lovelace", "born": 1815})
