@@ -359,15 +359,15 @@ with tab3:
         )
 
         st.write(
-            "Equipped with the ability to extract information from visual elements on screens, Gemini can analyze screenshots, icons, and layouts to provide a holistic understanding of the depicted scene."
+            "Gemini 能够从屏幕上的视觉元素中提取信息，可以分析屏幕截图、图标和布局，以全面了解所描绘的场景。"
         )
         # cooking_what = st.radio("What are you cooking?",["Turkey","Pizza","Cake","Bread"],key="cooking_what",horizontal=True)
         stove_screen_img = Part.from_uri(stove_screen_uri, mime_type="image/jpeg")
         st.image(stove_screen_url, width=350, caption="烤箱的图像")
         st.write(
-            "我们的期望：提供有关重置此设备时钟的英文说明"
+            "我们的期望：提供有关重置此设备时钟的中文说明"
         )
-        prompt = """如何重置此设备上的时钟？ 提供英文说明。
+        prompt = """如何重置此设备上的时钟？ 提供中文说明。
 如果说明包含按钮，还要解释这些按钮的物理位置。
 """
         tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
