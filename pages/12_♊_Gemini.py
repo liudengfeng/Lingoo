@@ -539,9 +539,7 @@ with tab4:
     )
 
     with vide_desc:
-        st.markdown(
-            """Gemini 还可以提供视频中发生的情况的描述："""
-        )
+        st.markdown("""Gemini 还可以提供视频中发生的情况的描述：""")
         vide_desc_uri = "gs://github-repo/img/gemini/multimodality_usecases_overview/mediterraneansea.mp4"
         video_desc_url = (
             "https://storage.googleapis.com/" + vide_desc_uri.split("gs://")[1]
@@ -556,9 +554,7 @@ with tab4:
             - 世界上还有哪些像这样的前 5 个地方？
             """
             tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
-            vide_desc_description = st.button(
-                "生成视频描述", key="vide_desc_description"
-            )
+            vide_desc_description = st.button("生成视频描述", key="vide_desc_description")
             with tab1:
                 if vide_desc_description and prompt:
                     with st.spinner("使用 Gemini 生成视频描述..."):
@@ -572,7 +568,7 @@ with tab4:
                         st.markdown("\n\n\n")
             with tab2:
                 st.write("使用的提示词：")
-                st.markdown(prompt, "\n", "{video_data}")
+                st.markdown(prompt + "\n" + "{video_data}")
             with tab3:
                 st.write("使用的参数：")
                 st.write("默认参数")
