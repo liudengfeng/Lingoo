@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 
 import streamlit as st
-from PIL import Image
+from PIL import Image as PImage
 
 from vertexai.preview.generative_models import Part, GenerationConfig
 
@@ -56,10 +56,10 @@ st.sidebar.slider(
     "词元限制",
     key="max_output_tokens",
     min_value=32,
-    max_value=4096,
-    value=4096,
+    max_value=2048,
+    value=2048,
     step=32,
-    help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 4096""",
+    help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 2048""",
 )
 # 生成参数
 st.sidebar.slider(
@@ -360,7 +360,7 @@ with st.expander(":blue_book: 提示设计基础知识..."):
     cols_1[0].markdown("**提示**")
     cols_1[1].markdown("**模型响应**")
     cols_1[0].image(
-        Image.open(IMAGE_DIR / "timetable.png"),
+        PImage.open(IMAGE_DIR / "timetable.png"),
         use_column_width=True,
     )
     cols_1[1].text("此图片显示了机场到达和出发信息面板。")
@@ -372,7 +372,7 @@ with st.expander(":blue_book: 提示设计基础知识..."):
     cols_2[0].markdown(":blue[更新后的提示]")
     cols_2[1].markdown(":rainbow[改进了的响应]")
     cols_2[0].image(
-        Image.open(IMAGE_DIR / "timetable.png"),
+        PImage.open(IMAGE_DIR / "timetable.png"),
         use_column_width=True,
     )
     cols_2[1].markdown(
@@ -409,7 +409,7 @@ with st.expander(":blue_book: 提示设计基础知识..."):
     cols_3[0].markdown("**提示**")
     cols_3[1].markdown("**模型响应**")
     cols_3[0].image(
-        Image.open(IMAGE_DIR / "redeemer.png"),
+        PImage.open(IMAGE_DIR / "redeemer.png"),
         use_column_width=True,
     )
     cols_3[1].text("地标是巴西里约热内卢的基督救世主雕像。")
@@ -422,17 +422,17 @@ with st.expander(":blue_book: 提示设计基础知识..."):
     cols_4[1].markdown(":rainbow[改进了的响应]")
     cols_4[0].text("确定城市和地标。")
     cols_4[0].image(
-        Image.open(IMAGE_DIR / "colosseum.png"),
+        PImage.open(IMAGE_DIR / "colosseum.png"),
         use_column_width=True,
     )
     cols_4[0].text("城市：罗马 ，地标：罗马斗兽场。")
     cols_4[0].image(
-        Image.open(IMAGE_DIR / "forbidden-city.png"),
+        PImage.open(IMAGE_DIR / "forbidden-city.png"),
         use_column_width=True,
     )
     cols_4[0].text("城市：北京，地标：紫禁城")
     cols_4[0].image(
-        Image.open(IMAGE_DIR / "redeemer.png"),
+        PImage.open(IMAGE_DIR / "redeemer.png"),
         use_column_width=True,
     )
     cols_4[1].markdown("""城市：里约热内卢，地标：基督救世主雕像""")
@@ -449,7 +449,7 @@ with st.expander(":blue_book: 提示设计基础知识..."):
     cols_5[0].markdown("**提示**")
     cols_5[1].markdown("**模型响应**")
     cols_5[0].image(
-        Image.open(IMAGE_DIR / "toilet-paper.jpg"),
+        PImage.open(IMAGE_DIR / "toilet-paper.jpg"),
         use_column_width=True,
     )
     cols_5[1].text("您只剩下 3 卷了。")
@@ -462,7 +462,7 @@ with st.expander(":blue_book: 提示设计基础知识..."):
     cols_6[1].markdown(":rainbow[改进了的响应]")
 
     cols_6[0].image(
-        Image.open(IMAGE_DIR / "toilet-paper.jpg"),
+        PImage.open(IMAGE_DIR / "toilet-paper.jpg"),
         use_column_width=True,
     )
     cols_6[1].markdown(
@@ -485,7 +485,7 @@ with st.expander(":blue_book: 提示设计基础知识..."):
     cols_7[0].markdown("**提示**")
     cols_7[1].markdown("**模型响应**")
     cols_7[0].image(
-        Image.open(IMAGE_DIR / "math.jpg"),
+        PImage.open(IMAGE_DIR / "math.jpg"),
         use_column_width=True,
     )
     cols_7[1].text("-135")
@@ -498,7 +498,7 @@ with st.expander(":blue_book: 提示设计基础知识..."):
     cols_8[1].markdown(":rainbow[改进了的响应]")
 
     cols_8[0].image(
-        Image.open(IMAGE_DIR / "math.jpg"),
+        PImage.open(IMAGE_DIR / "math.jpg"),
         use_column_width=True,
     )
     cols_8[1].markdown(
@@ -556,7 +556,7 @@ $$ b(4) = -405 $$
     cols_9[1].markdown(":rainbow[改进了的响应]")
 
     cols_9[0].image(
-        Image.open(IMAGE_DIR / "math.jpg"),
+        PImage.open(IMAGE_DIR / "math.jpg"),
         use_column_width=True,
     )
     cols_9[0].markdown("序列中的第 4 项是什么？**循序渐进**地思考。")
@@ -583,7 +583,7 @@ $$ b(4) = -405 $$
     cols_10[0].markdown("**提示**")
     cols_10[1].markdown("**模型响应**")
     cols_10[0].image(
-        Image.open(IMAGE_DIR / "excel-example.png"),
+        PImage.open(IMAGE_DIR / "excel-example.png"),
         use_column_width=True,
     )
     cols_10[1].markdown(
@@ -602,7 +602,7 @@ $$ b(4) = -405 $$
     cols_10[0].markdown("**提示**")
     cols_10[1].markdown("**模型响应**")
     cols_10[0].image(
-        Image.open(IMAGE_DIR / "spanish-meal.png"),
+        PImage.open(IMAGE_DIR / "spanish-meal.png"),
         use_column_width=True,
     )
     cols_10[1].markdown(
@@ -660,7 +660,7 @@ with st.expander(":mag: 排查多模态提示问题..."):
     cols_11[0].markdown("**提示**")
     cols_11[1].markdown("**模型响应**")
     cols_11[0].image(
-        Image.open(IMAGE_DIR / "diapers.png"),
+        PImage.open(IMAGE_DIR / "diapers.png"),
         use_column_width=True,
     )
     cols_11[1].text("这些尿片可以使用 198 天。")
@@ -672,7 +672,7 @@ with st.expander(":mag: 排查多模态提示问题..."):
     cols_12[0].markdown(":blue[更新后的提示]")
     cols_12[1].markdown(":rainbow[改进了的响应]")
     cols_12[0].image(
-        Image.open(IMAGE_DIR / "diapers.png"),
+        PImage.open(IMAGE_DIR / "diapers.png"),
         use_column_width=True,
     )
     cols_12[0].markdown(
@@ -701,19 +701,19 @@ with st.expander(":mag: 排查多模态提示问题..."):
     cols_13[0].markdown("**提示**")
     cols_13[1].markdown("**模型响应**")
     cols_13[0].image(
-        Image.open(IMAGE_DIR / "packing.jpg"),
+        PImage.open(IMAGE_DIR / "packing.jpg"),
         use_column_width=True,
     )
     cols_13[0].image(
-        Image.open(IMAGE_DIR / "mall.jpg"),
+        PImage.open(IMAGE_DIR / "mall.jpg"),
         use_column_width=True,
     )
     cols_13[0].image(
-        Image.open(IMAGE_DIR / "toilet-paper.jpg"),
+        PImage.open(IMAGE_DIR / "toilet-paper.jpg"),
         use_column_width=True,
     )
     cols_13[0].image(
-        Image.open(IMAGE_DIR / "ocean.jpg"),
+        PImage.open(IMAGE_DIR / "ocean.jpg"),
         use_column_width=True,
     )
     cols_13[1].text("所有四张图片都是风景摄影的示例。")
@@ -725,19 +725,19 @@ with st.expander(":mag: 排查多模态提示问题..."):
     cols_14[0].markdown(":blue[更新后的提示]")
     cols_14[1].markdown(":rainbow[改进了的响应]")
     cols_14[0].image(
-        Image.open(IMAGE_DIR / "packing.jpg"),
+        PImage.open(IMAGE_DIR / "packing.jpg"),
         use_column_width=True,
     )
     cols_14[0].image(
-        Image.open(IMAGE_DIR / "mall.jpg"),
+        PImage.open(IMAGE_DIR / "mall.jpg"),
         use_column_width=True,
     )
     cols_14[0].image(
-        Image.open(IMAGE_DIR / "toilet-paper.jpg"),
+        PImage.open(IMAGE_DIR / "toilet-paper.jpg"),
         use_column_width=True,
     )
     cols_14[0].image(
-        Image.open(IMAGE_DIR / "ocean.jpg"),
+        PImage.open(IMAGE_DIR / "ocean.jpg"),
         use_column_width=True,
     )
     cols_14[0].markdown("""首先，请详细描述每张图片中的内容。这些图片有什么共同之处？""")
@@ -764,19 +764,19 @@ with st.expander(":mag: 排查多模态提示问题..."):
     cols_15[0].markdown(":blue[更新后的提示]")
     cols_15[1].markdown(":rainbow[改进了的响应]")
     cols_15[0].image(
-        Image.open(IMAGE_DIR / "packing.jpg"),
+        PImage.open(IMAGE_DIR / "packing.jpg"),
         use_column_width=True,
     )
     cols_15[0].image(
-        Image.open(IMAGE_DIR / "mall.jpg"),
+        PImage.open(IMAGE_DIR / "mall.jpg"),
         use_column_width=True,
     )
     cols_15[0].image(
-        Image.open(IMAGE_DIR / "toilet-paper.jpg"),
+        PImage.open(IMAGE_DIR / "toilet-paper.jpg"),
         use_column_width=True,
     )
     cols_15[0].image(
-        Image.open(IMAGE_DIR / "ocean.jpg"),
+        PImage.open(IMAGE_DIR / "ocean.jpg"),
         use_column_width=True,
     )
     cols_15[0].markdown("""这些图片有什么共同之处？请参阅回复中图片中的内容。""")
@@ -798,7 +798,7 @@ with st.expander(":mag: 排查多模态提示问题..."):
     cols_16[0].markdown("**提示**")
     cols_16[1].markdown("**模型响应**")
     cols_16[0].image(
-        Image.open(IMAGE_DIR / "rabbit.jpg"),
+        PImage.open(IMAGE_DIR / "rabbit.jpg"),
         use_column_width=True,
     )
     cols_16[1].markdown(
@@ -827,7 +827,7 @@ with st.expander(":mag: 排查多模态提示问题..."):
     cols_17[0].markdown(":blue[更新后的提示]")
     cols_17[1].markdown(":rainbow[改进了的响应]")
     cols_17[0].image(
-        Image.open(IMAGE_DIR / "rabbit.jpg"),
+        PImage.open(IMAGE_DIR / "rabbit.jpg"),
         use_column_width=True,
     )
     cols_17[1].markdown(
@@ -900,11 +900,11 @@ with st.expander(":mag: 排查多模态提示问题..."):
     cols_18[0].markdown("**提示**")
     cols_18[1].markdown("**提示排查问题**")
     cols_18[0].image(
-        Image.open(IMAGE_DIR / "tea-set.png"),
+        PImage.open(IMAGE_DIR / "tea-set.png"),
         use_column_width=True,
     )
     cols_18[1].image(
-        Image.open(IMAGE_DIR / "tea-set.png"),
+        PImage.open(IMAGE_DIR / "tea-set.png"),
         use_column_width=True,
     )
     cols_18[0].markdown(
@@ -922,11 +922,11 @@ with st.expander(":mag: 排查多模态提示问题..."):
     cols_19[0].markdown("**提示**")
     cols_19[1].markdown("**提示排查问题**")
     cols_19[0].image(
-        Image.open(IMAGE_DIR / "tea-set.png"),
+        PImage.open(IMAGE_DIR / "tea-set.png"),
         use_column_width=True,
     )
     cols_19[1].image(
-        Image.open(IMAGE_DIR / "tea-set.png"),
+        PImage.open(IMAGE_DIR / "tea-set.png"),
         use_column_width=True,
     )
     cols_19[0].markdown(
