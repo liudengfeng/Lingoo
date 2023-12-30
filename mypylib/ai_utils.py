@@ -13,7 +13,7 @@ def view_stream_response(responses, placeholder):
     for chunk in responses:
         try:
             full_response += chunk.text
-        except IndexError:
+        except (IndexError, ValueError):
             # st.write(response)
             continue
         time.sleep(0.05)
