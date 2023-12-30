@@ -46,22 +46,22 @@ def get_gemini_pro_text_response(
 
 
 def get_gemini_pro_vision_response(
-    model, prompt_list, generation_config={}, stream=True
+    model, prompt_list, generation_config=None, stream=True
 ):
     # generation_config = {"temperature": 0.1, "max_output_tokens": 2048}
-    responses = model.generate_content(
+    return model.generate_content(
         prompt_list,
         generation_config=generation_config,
         safety_settings=DEFAULT_SAFETY_SETTINGS,
         stream=stream,
     )
-    final_response = []
-    for response in responses:
-        try:
-            final_response.append(response.text)
-        except IndexError:
-            pass
-    return "".join(final_response)
+    # final_response = []
+    # for response in responses:
+    #     try:
+    #         final_response.append(response.text)
+    #     except IndexError:
+    #         pass
+    # return "".join(final_response)
 
 
 st.header("Vertex AI Gemini API", divider="rainbow")
