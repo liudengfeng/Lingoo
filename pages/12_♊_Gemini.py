@@ -379,7 +379,9 @@ with tab3:
                     response = get_gemini_pro_vision_response(
                         st.session_state.multimodal_model_pro, content
                     )
-                    st.markdown(response)
+                    placeholder = st.empty()
+                    # st.write(response)
+                    view_stream_response(response, placeholder)
         with tab2:
             st.write("Prompt used:")
             st.text(content)
@@ -415,7 +417,9 @@ If instructions include buttons, also explain where those buttons are physically
                         st.session_state.multimodal_model_pro,
                         [stove_screen_img, prompt],
                     )
-                    st.markdown(response)
+                    placeholder = st.empty()
+                    # st.write(response)
+                    view_stream_response(response, placeholder)
         with tab2:
             st.write("Prompt used:")
             st.text(prompt + "\n" + "input_image")
@@ -444,7 +448,9 @@ If instructions include buttons, also explain where those buttons are physically
                     response = get_gemini_pro_vision_response(
                         st.session_state.multimodal_model_pro, [er_diag_img, prompt]
                     )
-                    st.markdown(response)
+                    placeholder = st.empty()
+                    # st.write(response)
+                    view_stream_response(response, placeholder)
         with tab2:
             st.write("Prompt used:")
             st.text(prompt + "\n" + "input_image")
@@ -513,7 +519,9 @@ If instructions include buttons, also explain where those buttons are physically
                     response = get_gemini_pro_vision_response(
                         st.session_state.multimodal_model_pro, content
                     )
-                    st.markdown(response)
+                    placeholder = st.empty()
+                    # st.write(response)
+                    view_stream_response(response, placeholder)
         with tab2:
             st.write("Prompt used:")
             st.text(content)
@@ -557,7 +565,9 @@ INSTRUCTIONS:
                         st.session_state.multimodal_model_pro,
                         [math_image_img, prompt],
                     )
-                    st.markdown(response)
+                    placeholder = st.empty()
+                    # st.write(response)
+                    view_stream_response(response, placeholder)
                     st.markdown("\n\n\n")
         with tab2:
             st.write("Prompt used:")
@@ -598,7 +608,9 @@ with tab4:
                             st.session_state.multimodal_model_pro,
                             [prompt, vide_desc_img],
                         )
-                        st.markdown(response)
+                        placeholder = st.empty()
+                        # st.write(response)
+                        view_stream_response(response, placeholder)
                         st.markdown("\n\n\n")
             with tab2:
                 st.write("Prompt used:")
@@ -634,7 +646,9 @@ with tab4:
                             st.session_state.multimodal_model_pro,
                             [prompt, video_tags_img],
                         )
-                        st.markdown(response)
+                        placeholder = st.empty()
+                        # st.write(response)
+                        view_stream_response(response, placeholder)
                         st.markdown("\n\n\n")
             with tab2:
                 st.write("Prompt used:")
@@ -672,7 +686,9 @@ Provide the answer in table format.
                             st.session_state.multimodal_model_pro,
                             [prompt, video_highlights_img],
                         )
-                        st.markdown(response)
+                        placeholder = st.empty()
+                        # st.write(response)
+                        view_stream_response(response, placeholder)
                         st.markdown("\n\n\n")
             with tab2:
                 st.write("Prompt used:")
@@ -720,7 +736,9 @@ Provide the answer in table format.
                             st.session_state.multimodal_model_pro,
                             [prompt, video_geoloaction_img],
                         )
-                        st.markdown(response)
+                        placeholder = st.empty()
+                        # st.write(response)
+                        view_stream_response(response, placeholder)
                         st.markdown("\n\n\n")
             with tab2:
                 st.write("Prompt used:")
