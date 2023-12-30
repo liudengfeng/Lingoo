@@ -331,9 +331,7 @@ with tab3:
         ]
 
         tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
-        generate_image_description = st.button(
-            "生成推荐", key="generate_image_description"
-        )
+        generate_image_description = st.button("生成推荐", key="generate_image_description")
         with tab1:
             if generate_image_description and content:
                 with st.spinner("使用 Gemini 生成推荐..."):
@@ -358,15 +356,11 @@ with tab3:
             "https://storage.googleapis.com/" + stove_screen_uri.split("gs://")[1]
         )
 
-        st.write(
-            "Gemini 能够从屏幕上的视觉元素中提取信息，可以分析屏幕截图、图标和布局，以全面了解所描绘的场景。"
-        )
+        st.write("Gemini 能够从屏幕上的视觉元素中提取信息，可以分析屏幕截图、图标和布局，以全面了解所描绘的场景。")
         # cooking_what = st.radio("What are you cooking?",["Turkey","Pizza","Cake","Bread"],key="cooking_what",horizontal=True)
         stove_screen_img = Part.from_uri(stove_screen_uri, mime_type="image/jpeg")
         st.image(stove_screen_url, width=350, caption="烤箱的图像")
-        st.write(
-            "我们的期望：提供有关重置此设备时钟的中文说明"
-        )
+        st.write("我们的期望：提供有关重置此设备时钟的中文说明")
         prompt = """如何重置此设备上的时钟？ 提供中文说明。
 如果说明包含按钮，还要解释这些按钮的物理位置。
 """
@@ -398,20 +392,17 @@ with tab3:
         er_diag_url = "https://storage.googleapis.com/" + er_diag_uri.split("gs://")[1]
 
         st.write(
-            "Gemini's multimodal capabilities empower it to comprehend diagrams and take actionable steps, such as optimization or code generation. The following example demonstrates how Gemini can decipher an Entity Relationship (ER) diagram."
+            "Gemini 的多模式功能使其能够理解图表并采取可操作的步骤，例如优化或代码生成。 以下示例演示了 Gemini 如何解读实体关系 (ER) 图。"
         )
         er_diag_img = Part.from_uri(er_diag_uri, mime_type="image/jpeg")
         st.image(er_diag_url, width=350, caption="Image of a ER diagram")
-        st.write(
-            "Our expectation: Document the entities and relationships in this ER diagram."
-        )
-        prompt = """Document the entities and relationships in this ER diagram.
-                """
-        tab1, tab2 = st.tabs(["Response", "Prompt"])
-        er_diag_img_description = st.button("Generate!", key="er_diag_img_description")
+        st.write("我们的期望：记录此 ER 图中的实体和关系。")
+        prompt = """记录此 ER 图中的实体和关系。"""
+        tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
+        er_diag_img_description = st.button("生成！", key="er_diag_img_description")
         with tab1:
             if er_diag_img_description and prompt:
-                with st.spinner("Generating..."):
+                with st.spinner("生成..."):
                     response = get_gemini_pro_vision_response(
                         st.session_state.multimodal_model_pro, [er_diag_img, prompt]
                     )
@@ -419,8 +410,11 @@ with tab3:
                     # st.write(response)
                     view_stream_response(response, placeholder)
         with tab2:
-            st.write("Prompt used:")
+            st.write("使用的提示词：")
             st.text(prompt + "\n" + "input_image")
+        with tab3:
+            st.write("使用的参数：")
+            st.text("默认参数")
 
     with recommendations:
         compare_img_1_uri = (
