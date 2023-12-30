@@ -20,6 +20,13 @@ from mypylib.st_utils import authenticate_and_configure_services, load_vertex_mo
 
 vertexai_configure(st.secrets)
 
+gemini_pro_vision_generation_config = {
+    "max_output_tokens": 2048,
+    "temperature": 0.4,
+    "top_p": 1,
+    "top_k": 32,
+}
+
 
 def get_gemini_pro_text_response(
     model: GenerativeModel,
@@ -38,6 +45,8 @@ def get_gemini_pro_text_response(
 def get_gemini_pro_vision_response(
     model, prompt_list, generation_config=None, stream=True
 ):
+    if generation_config is None:
+        generation_config = gemini_pro_vision_generation_config
     return model.generate_content(
         prompt_list,
         generation_config=generation_config,
@@ -575,7 +584,7 @@ with tab4:
 
     with video_tags:
         st.markdown(
-            """Gemini can also extract tags throughout a video, as shown below:."""
+            """Gemini 还可以提取整个视频中的标签，如下所示："""
         )
         video_tags_uri = "gs://github-repo/img/gemini/multimodality_usecases_overview/photography.mp4"
         video_tags_url = (
@@ -584,21 +593,21 @@ with tab4:
         if video_tags_url:
             video_tags_img = Part.from_uri(video_tags_uri, mime_type="video/mp4")
             st.video(video_tags_url)
-            st.write("Our expectation: Generate the tags for the video")
-            prompt = """Answer the following questions using the video only:
-                        1. What is in the video?
-                        2. What objects are in the video?
-                        3. What is the action in the video?
-                        4. Provide 5 best tags for this video?
-                        Give the answer in the table format with question and answer as columns.
+            st.write("我们的期望：为视频生成标签")
+            prompt = """仅使用视频回答以下问题：
+1. 视频里讲了什么？
+2. 视频中有哪些物体？
+3. 视频中的动作是什么？
+4. 为该视频提供5个最佳标签？
+以表格形式给出答案，问题和答案作为列。
             """
             tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
             video_tags_description = st.button(
-                "Generate video tags", key="video_tags_description"
+                "生成标签", key="video_tags_description"
             )
             with tab1:
                 if video_tags_description and prompt:
-                    with st.spinner("Generating video description using Gemini..."):
+                    with st.spinner("使用 Gemini 生成视频描述..."):
                         response = get_gemini_pro_vision_response(
                             st.session_state.multimodal_model_pro,
                             [prompt, video_tags_img],
@@ -608,8 +617,12 @@ with tab4:
                         view_stream_response(response, placeholder)
                         st.markdown("\n\n\n")
             with tab2:
-                st.write("Prompt used:")
+                st.write("使用的提示词：")
                 st.write(prompt, "\n", "{video_data}")
+            with tab3:
+                st.write("使用的参数：")
+                st.write("默认参数")
+    
     with video_highlights:
         st.markdown(
             """Below is another example of using Gemini to ask questions about objects, people or the context, as shown in the video about Pixel 8 below:"""
@@ -650,6 +663,9 @@ Provide the answer in table format.
             with tab2:
                 st.write("Prompt used:")
                 st.write(prompt, "\n", "{video_data}")
+            with tab3:
+                st.write("使用的参数：")
+                st.write(gemini_pro_vision_generation_config)
 
     with video_geoloaction:
         st.markdown(
@@ -682,7 +698,7 @@ Provide the answer in table format.
             What is the nearest intersection?
             Answer the following questions in a table format with question and answer as columns. 
             """
-            tab1, tab2 = st.tabs(["Response", "Prompt"])
+            tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
             video_geoloaction_description = st.button(
                 "Generate", key="video_geoloaction_description"
             )
@@ -700,3 +716,6 @@ Provide the answer in table format.
             with tab2:
                 st.write("Prompt used:")
                 st.write(prompt, "\n", "{video_data}")
+            with tab3:
+                st.write("使用的参数：")
+                st.write(gemini_pro_vision_generation_config)
