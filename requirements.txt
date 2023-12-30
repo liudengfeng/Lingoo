@@ -19,7 +19,6 @@ faker
 bs4
 google-cloud-aiplatform
 google-cloud-storage
-google-generativeai
 google-cloud-translate
 google-cloud-texttospeech
 google-cloud-firestore

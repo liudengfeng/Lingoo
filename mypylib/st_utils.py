@@ -1,4 +1,3 @@
-import google.generativeai as genai
 import streamlit as st
 import vertexai
 from google.cloud import translate

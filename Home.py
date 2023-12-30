@@ -14,7 +14,6 @@ from mypylib.azure_speech import speech_synthesis_get_available_voices
 from mypylib.constants import LANGUAGES
 from mypylib.db_model import PaymentStatus, LoginEvent
 
-# from mypylib.st_helper import check_and_force_logout
 from mypylib.st_utils import check_and_force_logout
 
 

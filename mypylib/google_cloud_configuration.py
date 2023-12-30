@@ -1,6 +1,6 @@
 import json
 
-import google.generativeai as genai
+# import google.generativeai as genai
 import vertexai
 from google.cloud import aiplatform
 from google.oauth2.service_account import Credentials
@@ -30,9 +30,9 @@ DEFAULT_SAFETY_SETTINGS = {
 }
 
 
-def gemini_configure(secrets):
-    GOOGLE_API_KEY = secrets["Google"]["GEMINI_KEY"]
-    genai.configure(api_key=GOOGLE_API_KEY)
+# def gemini_configure(secrets):
+#     GOOGLE_API_KEY = secrets["Google"]["GEMINI_KEY"]
+#     genai.configure(api_key=GOOGLE_API_KEY)
 
 
 def get_tran_api_service_account_info(secrets):

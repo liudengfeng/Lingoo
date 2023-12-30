@@ -4,7 +4,6 @@ uuid
 gTTS
 zhon
 jieba
-google-generativeai
 azure-cognitiveservices-speech
 pymongo
 python-dotenv
@@ -19,8 +18,13 @@ streamlit-mic-recorder
 werkzeug
 faker
 bs4
+cryptography
 google-cloud-translate
 google-cloud-aiplatform
 google-cloud-texttospeech
-cryptography
-emoji
+google-cloud-storage
+google-generativeai
+google-cloud-firestore
+jupyter
+ipykernel
+ipywidgets

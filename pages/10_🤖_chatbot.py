@@ -1,10 +1,6 @@
 import time
 
-import google.generativeai as genai
 import streamlit as st
-from google.generativeai.types.generation_types import BlockedPromptException
-
-# from vertexai.preview.generative_models import GenerativeModel
 
 from mypylib.google_cloud_configuration import SAFETY_SETTINGS
 from mypylib.st_utils import (
@@ -239,11 +235,13 @@ if prompt := st.chat_input("输入提示以便开始对话"):
                 message_placeholder.markdown(full_response + "▌")
             message_placeholder.markdown(full_response)
             # 令牌数
-            st.session_state.current_token_count = st.session_state.chat_model.count_tokens(
-                prompt + full_response
-            ).total_tokens
+            st.session_state.current_token_count = (
+                st.session_state.chat_model.count_tokens(
+                    prompt + full_response
+                ).total_tokens
+            )
             st.session_state.total_token_count += st.session_state.current_token_count
-    except BlockedPromptException:
+    except Exception as e:
         # 处理被阻止的消息
         # st.toast("抱歉，您尝试发送的消息包含潜在不安全的内容，已被阻止。")
         #  删除最后一对会话
