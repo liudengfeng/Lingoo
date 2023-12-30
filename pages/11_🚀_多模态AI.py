@@ -49,7 +49,7 @@ if st.session_state.get("clear_prompt"):
 
 st.sidebar.markdown(
     """:rainbow[运行设置]\n
-:dotted_six-pointed_star: 模型：gemini-pro-vision            
+:gemini: 模型：gemini-pro-vision            
 """
 )
 st.sidebar.slider(
