@@ -551,9 +551,9 @@ with tab4:
             st.video(video_desc_url)
             st.write("我们的期望：生成视频的描述")
             prompt = """描述视频中发生的事情并回答以下问题：\n
-             - 我在看什么？ \n
-             - 我应该去哪里看？ \n
-             - 世界上还有哪些像这样的前 5 个地方？
+            - 我在看什么？ \n
+            - 我应该去哪里看？ \n
+            - 世界上还有哪些像这样的前 5 个地方？
             """
             tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
             vide_desc_description = st.button(
@@ -572,7 +572,7 @@ with tab4:
                         st.markdown("\n\n\n")
             with tab2:
                 st.write("使用的提示词：")
-                st.write(prompt, "\n", "{video_data}")
+                st.markdown(prompt, "\n", "{video_data}")
             with tab3:
                 st.write("使用的参数：")
                 st.write("默认参数")
