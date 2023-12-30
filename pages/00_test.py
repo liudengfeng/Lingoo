@@ -32,14 +32,6 @@ st.header("FireStore", divider="rainbow")
 db = get_firestore_client()
 
 
-src = st.text_input("Text input", "解析图片中的信息")
-
-
-placeholder = st.empty()
-
-slider_status = st.sidebar.empty()
-
-
 if st.button("提交", key="2"):
     doc_ref = db.collection("users").document("alovelace")
     doc_ref.set({"first": "Ada", "last": "Lovelace", "born": 1815})
