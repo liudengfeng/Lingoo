@@ -19,7 +19,7 @@ vertexai_configure(st.secrets)
 # import vertexai
 
 
-st.title("Streamlit test")
+st.header("Streamlit test", divider="rainbow")
 
 image = Image.open(CURRENT_CWD / "resource" / "multimodal" / "timetable.png")
 
@@ -49,3 +49,9 @@ def generate():
 
 if st.button("提交", key="2"):
     generate()
+
+
+st.subheader("分部 1 test", anchor=True, divider="rainbow")
+st.image(image, caption="Image", use_column_width=True)
+st.subheader("分部 2 test", anchor=True, divider="rainbow")
+st.image(image, caption="Image", use_column_width=True)
