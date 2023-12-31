@@ -224,6 +224,7 @@ with tabs[0]:
     ex_media_file = st.file_uploader(
         "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
         accept_multiple_files=True,
+        key="ex_media_file_key",
         type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
         help="""
 支持的格式
@@ -237,6 +238,7 @@ with tabs[0]:
     ex_text = col2.text_area(
         "期望的响应",
         placeholder="请输入期望的响应",
+        key="ex_text_key",
         help="✨ 期望模型响应或标识",
     )
 
@@ -244,6 +246,7 @@ with tabs[0]:
     uploaded_files = st.file_uploader(
         "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
         accept_multiple_files=True,
+        key="uploaded_files",
         type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
         help="""
 支持的格式
