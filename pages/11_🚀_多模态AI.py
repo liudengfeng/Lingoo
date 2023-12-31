@@ -14,14 +14,21 @@ from mypylib.st_utils import (
 
 # region 页面设置
 
-
 st.set_page_config(
     page_title="多模态AI",
     page_icon=":rocket:",
     layout="wide",
 )
 
+tab_emoji = [":globe_with_meridians:", ":speech_balloon:", ":bulb:"]
+tab_names = ["通用", "翻译", "解题"]
+tab_flags = [f"{e} {n}" for e, n in zip(tab_emoji, tab_names)]
+tabs = st.tabs(tab_flags, key="tabs")
+
 authenticate_and_configure_services()
+
+# if "multimodal_current_tab" not in st.session_state:
+#     st.session_state["multimodal_current_tab"] = tab_names[0]
 
 if "multimodal_examples_pair" not in st.session_state:
     st.session_state["multimodal_examples_pair"] = []
@@ -40,64 +47,7 @@ if st.session_state.get("clear_prompt"):
 
 # endregion
 
-# region 边栏
-
-st.sidebar.markdown(
-    """:rainbow[运行设置]\n
-:gemini: 模型：gemini-pro-vision            
-"""
-)
-st.sidebar.slider(
-    "词元限制",
-    key="max_output_tokens",
-    min_value=32,
-    max_value=2048,
-    value=2048,
-    step=32,
-    help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 2048""",
-)
-# 生成参数
-st.sidebar.slider(
-    "温度",
-    min_value=0.00,
-    max_value=1.0,
-    key="temperature",
-    value=0.0,
-    step=0.1,
-    help="温度可以控制词元选择的随机性。较低的温度适合希望获得真实或正确回复的提示，而较高的温度可能会引发更加多样化或意想不到的结果。如果温度为 0，系统始终会选择概率最高的词元。对于大多数应用场景，不妨先试着将温度设为 0.2。",
-)
-
-st.sidebar.slider(
-    "Top K",
-    key="top_k",
-    min_value=1,
-    max_value=40,
-    value=32,
-    step=1,
-    help="""Top-k 可更改模型选择输出词元的方式。
-- 如果 Top-k 设为 1，表示所选词元是模型词汇表的所有词元中概率最高的词元（也称为贪心解码）。
-- 如果 Top-k 设为 3，则表示系统将从 3 个概率最高的词元（通过温度确定）中选择下一个词元。
-- Top-k 的默认值为 40。""",
-)
-st.sidebar.slider(
-    "Top P",
-    key="top_p",
-    min_value=0.00,
-    max_value=1.0,
-    value=1.0,
-    step=0.05,
-    help="""Top-p 可更改模型选择输出词元的方式。系统会按照概率从最高到最低的顺序选择词元，直到所选词元的概率总和等于 Top-p 的值。
-- 例如，如果词元 A、B 和 C 的概率分别是 0.3、0.2 和 0.1，并且 Top-p 的值为 0.5，则模型将选择 A 或 B 作为下一个词元（通过温度确定）。
-- Top-p 的默认值为 0.8。""",
-)
-
-st.sidebar.text_input(
-    "添加停止序列",
-    key="stop_sequences",
-    max_chars=64,
-    help="停止序列是一连串字符（包括空格），如果模型中出现停止序列，则会停止生成回复。该序列不包含在回复中。您最多可以添加五个停止序列。",
-)
-
+# region 共同边栏
 
 st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。", icon="✨")
 sidebar_status = st.sidebar.empty()
@@ -194,65 +144,120 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
 
 # endregion
 
-# region 主页面
+# region 通用AI
 
-st.markdown(
-    """#### :rocket: :rainbow[多模态AI]
+with tabs[0]:
+    st.sidebar.markdown(
+        """:rainbow[运行设置]\n
+    :gemini: 模型：gemini-pro-vision            
+    """
+    )
+    st.sidebar.slider(
+        "词元限制",
+        key="max_output_tokens",
+        min_value=32,
+        max_value=2048,
+        value=2048,
+        step=32,
+        help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 2048""",
+    )
+    # 生成参数
+    st.sidebar.slider(
+        "温度",
+        min_value=0.00,
+        max_value=1.0,
+        key="temperature",
+        value=0.0,
+        step=0.1,
+        help="温度可以控制词元选择的随机性。较低的温度适合希望获得真实或正确回复的提示，而较高的温度可能会引发更加多样化或意想不到的结果。如果温度为 0，系统始终会选择概率最高的词元。对于大多数应用场景，不妨先试着将温度设为 0.2。",
+    )
 
-您可以向`Gemini`模型发送多模态提示信息。支持的模态包括文字、图片和视频。
-"""
-)
+    st.sidebar.slider(
+        "Top K",
+        key="top_k",
+        min_value=1,
+        max_value=40,
+        value=32,
+        step=1,
+        help="""Top-k 可更改模型选择输出词元的方式。
+    - 如果 Top-k 设为 1，表示所选词元是模型词汇表的所有词元中概率最高的词元（也称为贪心解码）。
+    - 如果 Top-k 设为 3，则表示系统将从 3 个概率最高的词元（通过温度确定）中选择下一个词元。
+    - Top-k 的默认值为 40。""",
+    )
+    st.sidebar.slider(
+        "Top P",
+        key="top_p",
+        min_value=0.00,
+        max_value=1.0,
+        value=1.0,
+        step=0.05,
+        help="""Top-p 可更改模型选择输出词元的方式。系统会按照概率从最高到最低的顺序选择词元，直到所选词元的概率总和等于 Top-p 的值。
+    - 例如，如果词元 A、B 和 C 的概率分别是 0.3、0.2 和 0.1，并且 Top-p 的值为 0.5，则模型将选择 A 或 B 作为下一个词元（通过温度确定）。
+    - Top-p 的默认值为 0.8。""",
+    )
 
-examples_container = st.container()
+    st.sidebar.text_input(
+        "添加停止序列",
+        key="stop_sequences",
+        max_chars=64,
+        help="停止序列是一连串字符（包括空格），如果模型中出现停止序列，则会停止生成回复。该序列不包含在回复中。您最多可以添加五个停止序列。",
+    )
 
-uploaded_files = st.file_uploader(
-    "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
-    accept_multiple_files=True,
-    type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
-    help="""
-支持的格式
-- 图片：PNG、JPG
-- 视频：
-    - 您可以上传视频，支持以下格式：MKV、MOV、MP4、WEBM（最大 7MB）
-    - 该模型将分析长达 2 分钟的视频。 请注意，它将处理从视频中获取的一组不连续的图像帧。
-""",
-)
+    st.header(":rocket: :rainbow[通用多模态AI]", divider="rainbow", anchor=False)
+    st.markdown("""您可以向`Gemini`模型发送多模态提示信息。支持的模态包括文字、图片和视频。""")
 
-prompt = st.text_area(
-    "您的提示词",
-    key="user_prompt_key",
-    value=st.session_state.get("user_prompt", ""),
-    placeholder="请输入关于多媒体的提示词，例如：'描述这张风景图片'",
-    max_chars=12288,
-    height=300,
-)
-cols = st.columns([1, 1, 1, 1, 1, 5])
-# help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。"
-add_btn = cols[0].button(
-    ":film_projector:",
-    help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。",
-)
-del_btn = cols[1].button(":heavy_minus_sign:", help="删除提示词尾部的分隔符")
-cls_btn = cols[2].button(":wastebasket:", help="清空提示词", key="clear_prompt")
-submitted = cols[3].button("提交", help="如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
+    examples_container = st.container()
 
-response_container = st.container()
+    uploaded_files = st.file_uploader(
+        "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
+        accept_multiple_files=True,
+        type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
+        help="""
+    支持的格式
+    - 图片：PNG、JPG
+    - 视频：
+        - 您可以上传视频，支持以下格式：MKV、MOV、MP4、WEBM（最大 7MB）
+        - 该模型将分析长达 2 分钟的视频。 请注意，它将处理从视频中获取的一组不连续的图像帧。
+    """,
+    )
 
-if add_btn:
-    st.session_state["user_prompt"] = prompt + "\n" + "<>"
-    st.rerun()
+    prompt = st.text_area(
+        "您的提示词",
+        key="user_prompt_key",
+        value=st.session_state.get("user_prompt", ""),
+        placeholder="请输入关于多媒体的提示词，例如：'描述这张风景图片'",
+        max_chars=12288,
+        height=300,
+    )
+    cols = st.columns([1, 1, 1, 1, 1, 5])
+    # help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。"
+    add_btn = cols[0].button(
+        ":film_projector:",
+        help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。",
+    )
+    del_btn = cols[1].button(":heavy_minus_sign:", help="删除提示词尾部的分隔符")
+    cls_btn = cols[2].button(":wastebasket:", help="清空提示词", key="clear_prompt")
+    submitted = cols[3].button("提交", help="如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
 
-if del_btn:
-    st.session_state["user_prompt"] = prompt.rstrip("<>\n")
-    st.rerun()
+    response_container = st.container()
 
-if submitted:
-    if len(uploaded_files) == 0:
-        st.error("请上传图片或视频")
-        st.stop()
-    if not prompt:
-        st.error("请添加提示词")
-        st.stop()
-    generate_content_from_files_and_prompt(uploaded_files, prompt, response_container)
+    if add_btn:
+        st.session_state["user_prompt"] = prompt + "\n" + "<>"
+        st.rerun()
+
+    if del_btn:
+        st.session_state["user_prompt"] = prompt.rstrip("<>\n")
+        st.rerun()
+
+    if submitted:
+        if len(uploaded_files) == 0:
+            st.error("请上传图片或视频")
+            st.stop()
+        if not prompt:
+            st.error("请添加提示词")
+            st.stop()
+        generate_content_from_files_and_prompt(
+            uploaded_files, prompt, response_container
+        )
 
 # endregion
