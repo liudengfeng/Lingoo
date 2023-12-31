@@ -23,7 +23,7 @@ st.set_page_config(
 tab_emoji = [":globe_with_meridians:", ":speech_balloon:", ":bulb:"]
 tab_names = ["通用", "翻译", "解题"]
 tab_flags = [f"{e} {n}" for e, n in zip(tab_emoji, tab_names)]
-tabs = st.tabs(tab_flags, key="tabs")
+tabs = st.tabs(tab_flags)
 
 authenticate_and_configure_services()
 
