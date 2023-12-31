@@ -217,11 +217,11 @@ with tabs[0]:
     st.markdown("""您可以向`Gemini`模型发送多模态提示信息。支持的模态包括文字、图片和视频。""")
 
     st.subheader(":rainbow[添加案例]", divider="rainbow", anchor=False)
-    col1, col2 = st.columns([6, 4])
+    tab0_col1, tab0_col2 = st.columns([6, 4])
 
     examples_container = st.container()
 
-    ex_media_file = st.file_uploader(
+    ex_media_file = tab0_col1.file_uploader(
         "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
         accept_multiple_files=True,
         key="ex_media_file_key",
@@ -235,7 +235,7 @@ with tabs[0]:
     """,
     )
 
-    ex_text = col2.text_area(
+    ex_text = tab0_col2.text_area(
         "期望的响应",
         placeholder="请输入期望的响应",
         key="ex_text_key",
