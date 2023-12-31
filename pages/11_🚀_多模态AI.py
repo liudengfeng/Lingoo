@@ -68,7 +68,7 @@ check_and_force_logout(sidebar_status)
 if st.session_state["multimodal_current_tab"] == tab_names[0]:
     st.sidebar.markdown(
         """:rainbow[运行设置]\n
-    :gemini: 模型：gemini-pro-vision            
+:gemini: 模型：gemini-pro-vision            
     """
     )
     st.sidebar.slider(
@@ -268,14 +268,14 @@ with tabs[0]:
 
     # endregion
 
-# region 翻译AI
+    # region 翻译AI
 
     with tabs[1]:
         st.session_state["multimodal_current_tab"] = tab_names[1]
 
-# endregion
-        
-# region 解题AI
+    # endregion
+
+    # region 解题AI
 
     with tabs[2]:
         st.session_state["multimodal_current_tab"] = tab_names[2]
