@@ -210,7 +210,7 @@ with tabs[0]:
     # endregion
 
 # region 通用边栏
-if st.session_state["multimodal_current_tab"] <= 0:
+if st.session_state["multimodal_current_tab"] == 0:
     st.sidebar.markdown(
         """:rainbow[运行设置]\n
 :gemini: 模型：gemini-pro-vision            
