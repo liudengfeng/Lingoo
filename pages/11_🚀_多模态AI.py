@@ -216,7 +216,7 @@ with tabs[0]:
     st.header(":rocket: :rainbow[通用多模态AI]", divider="rainbow", anchor=False)
     st.markdown("""您可以向`Gemini`模型发送多模态提示信息。支持的模态包括文字、图片和视频。""")
 
-    st.subheader(":rainbow[添加案例]", divider="rainbow", anchor=False)
+    st.subheader(":clipboard: :rainbow[添加案例]", divider="rainbow", anchor=False)
     tab0_col1, tab0_col2 = st.columns([6, 4])
 
     examples_container = st.container()
