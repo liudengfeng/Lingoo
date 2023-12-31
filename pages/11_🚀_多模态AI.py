@@ -42,6 +42,9 @@ if "user_prompt" not in st.session_state:
 if st.session_state.get("clear_prompt"):
     st.session_state["user_prompt"] = ""
 
+if "multimodal_ex_text" not in st.session_state:
+    st.session_state["multimodal_ex_text"] = ""
+
 # endregion
 
 # region 边栏
@@ -241,7 +244,8 @@ with tabs[0]:
 
     ex_text = tab0_col2.text_area(
         "期望的响应",
-        placeholder="请输入期望的响应",
+        placeholder="输入期望的响应",
+        value=st.session_state.get("multimodal_ex_text", ""),
         key="ex_text_key",
         help="✨ 期望模型响应或标识",
     )
@@ -284,9 +288,14 @@ with tabs[0]:
     if add_btn:
         if ex_media_file:
             st.session_state.multimodal_examples.append(ex_media_file)
+            ex_media_file = None
+
         if ex_text:
             st.session_state.multimodal_examples.append(ex_text)
+            st.session_state.multimodal_ex_text = ""
+
         view_example(examples_container)
+        st.rerun()
 
     if del_btn:
         st.session_state["user_prompt"] = prompt.rstrip("<>\n")
