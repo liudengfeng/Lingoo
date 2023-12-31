@@ -28,7 +28,7 @@ tabs = st.tabs(tab_flags)
 authenticate_and_configure_services()
 
 if "multimodal_current_tab" not in st.session_state:
-    st.session_state["multimodal_current_tab"] = tab_names[0]
+    st.session_state["multimodal_current_tab"] = 0
 
 if "multimodal_examples_pair" not in st.session_state:
     st.session_state["multimodal_examples_pair"] = []
@@ -65,7 +65,7 @@ check_and_force_logout(sidebar_status)
 # endregion
 
 # region 通用边栏
-if st.session_state["multimodal_current_tab"] == tab_names[0]:
+if st.session_state["multimodal_current_tab"] <= 0:
     st.sidebar.markdown(
         """:rainbow[运行设置]\n
 :gemini: 模型：gemini-pro-vision            
@@ -207,7 +207,7 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
 # region 通用AI
 
 with tabs[0]:
-    st.session_state["multimodal_current_tab"] = tab_names[0]
+    st.session_state["multimodal_current_tab"] = 0
 
     st.header(":rocket: :rainbow[通用多模态AI]", divider="rainbow", anchor=False)
     st.markdown("""您可以向`Gemini`模型发送多模态提示信息。支持的模态包括文字、图片和视频。""")
@@ -271,13 +271,13 @@ with tabs[0]:
     # region 翻译AI
 
     with tabs[1]:
-        st.session_state["multimodal_current_tab"] = tab_names[1]
+        st.session_state["multimodal_current_tab"] = 1
 
     # endregion
 
     # region 解题AI
 
     with tabs[2]:
-        st.session_state["multimodal_current_tab"] = tab_names[2]
+        st.session_state["multimodal_current_tab"] = 2
 
 # endregion
