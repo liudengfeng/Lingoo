@@ -221,7 +221,7 @@ with tabs[0]:
     st.text(
         "输入案例可丰富模型响应内容。`Gemini`模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。"
     )
-    tab0_col1, tab0_col2 = st.columns([6, 4])
+    tab0_col1, tab0_col2 = st.columns([1, 1])
 
     examples_container = st.container()
 
