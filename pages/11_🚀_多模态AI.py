@@ -239,8 +239,21 @@ with tabs[0]:
     response_container = st.container()
 
     if add_btn:
-        st.session_state["user_prompt"] = prompt + "\n" + "<>"
-        st.rerun()
+        video_file = st.file_uploader(
+            "插入多媒体文件【点击`Browse file`按钮，从本地上传视频文件】",
+            accept_multiple_files=False,
+            type=["mkv", "mov", "mp4", "webm"],
+            help="""
+支持的格式
+- 视频：
+    - 您可以上传视频，支持以下格式：MKV、MOV、MP4、WEBM（最大 7MB）
+    - 该模型将分析长达 2 分钟的视频。 请注意，它将处理从视频中获取的一组不连续的图像帧。
+    """,
+        )
+        if video_file:
+            st.session_state.multimodal_examples_pair.append(_process_media(video_file))
+            examples_container.video(video_file)
+            st.rerun()
 
     if del_btn:
         st.session_state["user_prompt"] = prompt.rstrip("<>\n")
