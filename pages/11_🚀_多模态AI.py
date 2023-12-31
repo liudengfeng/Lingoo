@@ -27,8 +27,8 @@ tabs = st.tabs(tab_flags)
 
 authenticate_and_configure_services()
 
-if "multimodal_examples_pair" not in st.session_state:
-    st.session_state["multimodal_examples_pair"] = []
+if "multimodal_examples" not in st.session_state:
+    st.session_state["multimodal_examples"] = []
 
 if "current_token_count" not in st.session_state:
     st.session_state["current_token_count"] = 0
@@ -197,7 +197,7 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
 
 def view_example(container):
     col1, col2 = container.columns([1, 1])
-    for e in st.session_state.multimodal_examples_pair:
+    for e in st.session_state.multimodal_examples:
         if isinstance(e, str):
             col2.markdown(e)
         else:
@@ -282,10 +282,9 @@ with tabs[0]:
 
     if add_btn:
         if ex_media_file:
-            st.session_state.multimodal_examples_pair.append(ex_media_file)
+            st.session_state.multimodal_examples.append(ex_media_file)
         if ex_text:
-            st.session_state.multimodal_examples_pair.append(ex_text)
-
+            st.session_state.multimodal_examples.append(ex_text)
         view_example(examples_container)
 
     if del_btn:
