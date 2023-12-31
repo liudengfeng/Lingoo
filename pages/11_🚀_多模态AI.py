@@ -251,8 +251,9 @@ with tabs[0]:
     """,
         )
         if video_file:
+            mime_type = mimetypes.guess_type(video_file.name)[0]
             st.session_state.multimodal_examples_pair.append(_process_media(video_file))
-            examples_container.video(video_file)
+            examples_container.video(video_file, mime_type)
             st.rerun()
 
     if del_btn:
