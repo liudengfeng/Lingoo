@@ -230,7 +230,7 @@ with tabs[0]:
     # help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。"
     add_btn = cols[0].button(
         ":film_projector:",
-        help="✨ 模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。",
+        help="✨ 模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。",
     )
     del_btn = cols[1].button(":heavy_minus_sign:", help="✨ 删除提示词尾部的分隔符")
     cls_btn = cols[2].button(":wastebasket:", help="✨ 清空提示词", key="clear_prompt")
@@ -253,8 +253,9 @@ with tabs[0]:
         if video_file:
             mime_type = mimetypes.guess_type(video_file.name)[0]
             st.session_state.multimodal_examples_pair.append(_process_media(video_file))
-            examples_container.video(video_file, mime_type)
-            st.rerun()
+            # examples_container.video(video_file, mime_type)
+            # st.rerun()
+            st.write("案例数量", len(st.session_state.multimodal_examples_pair))
 
     if del_btn:
         st.session_state["user_prompt"] = prompt.rstrip("<>\n")
