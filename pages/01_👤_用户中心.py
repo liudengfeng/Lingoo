@@ -70,11 +70,11 @@ with tabs[items.index(":bust_in_silhouette: 用户注册")]:
         phone_number = col1.text_input(
             "手机号码",
             key="phone_number",
-            help="请输入有效手机号码",
+            help="✨ 请输入有效手机号码",
             placeholder="必须",
         )
         email = col2.text_input(
-            "邮箱", key="email", help="请输入您常用的电子邮件地址", placeholder="可选。请输入您常用的电子邮件地址"
+            "邮箱", key="email", help="✨ 请输入您常用的电子邮件地址", placeholder="可选。请输入您常用的电子邮件地址"
         )
         real_name = col1.text_input(
             "真实姓名",
@@ -83,21 +83,21 @@ with tabs[items.index(":bust_in_silhouette: 用户注册")]:
             placeholder="可选。如果您希望展示您的成就（例如：获得的奖项、完成的项目等），请在此处填写。",
         )
         display_name = col2.text_input(
-            "显示名称", key="display_name", help="登录显示名称", placeholder="必须。请输入您希望使用的用户名"
+            "显示名称", key="display_name", help="✨ 登录显示名称", placeholder="必须。请输入您希望使用的用户名"
         )
         current_level = col1.selectbox(
             "当前英语水平",
             ["A1", "A2", "B1", "B2", "C1", "C2"],
             index=0,
             key="current_level",
-            help="如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
+            help="✨ 如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
         )
         target_level = col2.selectbox(
             "期望达到的英语水平",
             ["A1", "A2", "B1", "B2", "C1", "C2"],
             index=5,
             key="target_level",
-            help="如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
+            help="✨ 如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
         )
         country = col1.selectbox(
             "所在国家",
@@ -110,14 +110,14 @@ with tabs[items.index(":bust_in_silhouette: 用户注册")]:
             "密码",
             type="password",
             key="password_reg",
-            help="密码长度至少为8位",
+            help="✨ 密码长度至少为8位",
             placeholder="请输入您希望使用的密码，至少为8位",
         )
         password_reg_repeat = st.text_input(
             "密码",
             type="password",
             key="password_reg_repeat",
-            # help="请再次输入密码",
+            # help="✨ 请再次输入密码",
             placeholder="为了确认，再次输入您刚才输入的密码",
         )
         tz = col1.selectbox(
@@ -125,13 +125,13 @@ with tabs[items.index(":bust_in_silhouette: 用户注册")]:
             pytz.common_timezones,
             index=pytz.common_timezones.index("Asia/Shanghai"),
             key="timezone",
-            help="请根据您当前所在的时区选择。如果您在中国，请使用默认值。",
+            help="✨ 请根据您当前所在的时区选择。如果您在中国，请使用默认值。",
         )
         agree = st.checkbox(
             "我同意《服务条款》",
             key="agree",
             value=False,
-            help="请仔细阅读《服务条款》，并勾选此项。",
+            help="✨ 请仔细阅读《服务条款》，并勾选此项。",
         )
         status = st.empty()
         if st.form_submit_button(label="注册"):
@@ -462,33 +462,33 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
         col1.text_input(
             "手机号码",
             key="phone_number-3",
-            help="请输入有效手机号码",
+            help="✨ 请输入有效手机号码",
             value=user.phone_number,
             disabled=True,
         )
-        email = col2.text_input("邮箱", key="email-3", help="请输入有效邮箱地址", value=user.email)
+        email = col2.text_input("邮箱", key="email-3", help="✨ 请输入有效邮箱地址", value=user.email)
         real_name = col1.text_input(
             "真实姓名",
             key="real_name-3",
-            help="成绩册上的姓名",
+            help="✨ 成绩册上的姓名",
             value=user.real_name,
         )
         display_name = col2.text_input(
-            "显示名称", key="display_name-3", help="登录显示名称", value=user.display_name
+            "显示名称", key="display_name-3", help="✨ 登录显示名称", value=user.display_name
         )
         current_level = col1.selectbox(
             "当前英语水平",
             CEFR,
             index=CEFR.index(user.current_level),
             key="current_level-3",
-            help="如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
+            help="✨ 如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
         )
         target_level = col2.selectbox(
             "期望达到的英语水平",
             CEFR,
             index=CEFR.index(user.target_level),
             key="target_level-3",
-            help="如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
+            help="✨ 如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
         )
         country = col1.selectbox(
             "所在国家",
@@ -502,7 +502,7 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
             pytz.common_timezones,
             index=pytz.common_timezones.index(user.timezone),
             key="timezone-3",
-            help="请根据您当前所在的时区选择。如果您在中国，请使用默认值。",
+            help="✨ 请根据您当前所在的时区选择。如果您在中国，请使用默认值。",
         )
         status = st.empty()
         if st.form_submit_button(label="确认"):
@@ -547,10 +547,10 @@ with tabs[items.index(":key: 重置密码")]:
     user = User.from_doc(user_doc)
     with st.form(key="secret_form", clear_on_submit=True):
         password_reg = st.text_input(
-            "密码", type="password", key="password_reg-4", help="密码长度至少为8位"
+            "密码", type="password", key="password_reg-4", help="✨ 密码长度至少为8位"
         )
         password_reg_repeat = st.text_input(
-            "密码", type="password", key="password_reg_repeat-4", help="请再次输入密码"
+            "密码", type="password", key="password_reg_repeat-4", help="✨ 请再次输入密码"
         )
         status = st.empty()
         if st.form_submit_button(label="确认"):
@@ -594,12 +594,12 @@ with tabs[items.index(":memo: 问题反馈")]:
         st.stop()
 
     with st.form(key="feedback_form"):
-        title = st.text_input("标题", key="title", help="请输入标题")
-        content = st.text_area("问题描述", key="content", help="请输入内容")
+        title = st.text_input("标题", key="title", help="✨ 请输入标题")
+        content = st.text_area("问题描述", key="content", help="✨ 请输入内容")
         uploaded_file = st.file_uploader(
             f"{uploaded_emoji} 上传截屏视频",
             type=["webm"],
-            help="请按<<如何录制截屏视频>>指引，录制视频反馈给管理员。",
+            help="✨ 请按<<如何录制截屏视频>>指引，录制视频反馈给管理员。",
         )
         if st.form_submit_button(label="提交"):
             container_name = "feedback"

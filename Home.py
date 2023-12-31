@@ -67,7 +67,7 @@ login_btn = s_cols[0].button(
     type="primary" if not st.session_state["user_info"] else "secondary",
     disabled=len(st.session_state["user_info"]) >= 1,
 )
-logout_btn = s_cols[1].button("退出", help="在公共场所使用本产品时，请在离开前退出登录，以保护您的隐私和安全。")
+logout_btn = s_cols[1].button("退出", help="✨ 在公共场所使用本产品时，请在离开前退出登录，以保护您的隐私和安全。")
 
 # 获取当前的日期和时间
 current_datetime = datetime.now(timezone.utc)
@@ -110,7 +110,7 @@ if len(st.session_state["user_info"]) >= 1:
     extend_time_btn = s_cols[2].button(
         "免费🎁",
         disabled=extend_time_btn_disabled,
-        help="付费用户每天上午或下午6-8点打卡。奖励1小时。",
+        help="✨ 付费用户每天上午或下午6-8点打卡。奖励1小时。",
     )
 
     if extend_time_btn and payment_record:
@@ -165,14 +165,14 @@ if len(st.session_state["user_info"]) == 0:
             "手机号码",
             type="password",
             key="phone_number",
-            help="请输入手机号码",
+            help="✨ 请输入手机号码",
             placeholder="输入手机号码",
         )
         password = st.text_input(
             "密码",
             type="password",
             key="password",
-            help="输入个人登录密码",
+            help="✨ 输入个人登录密码",
             placeholder="输入个人登录密码",
         )
         sub_btn = st.form_submit_button(label="确认")

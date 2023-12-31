@@ -222,7 +222,7 @@ def view_md_badges():
         body = f"""{MD_BADGE_MAPS[t][1]}({num})"""
         cols[i].markdown(
             f""":{MD_BADGE_MAPS[t][0]}[{body}]""",
-            help=MD_BADGE_MAPS[t][2],
+            help=f"✨ {MD_BADGE_MAPS[t][2]}",
         )
 
 
@@ -374,14 +374,14 @@ level_selectbox = st.sidebar.selectbox(
     format_func=lambda x: CEFR_LEVEL_MAPS[x],
     on_change=reset_topics,
     key="ps_level",
-    help="场景话题会根据您的选择来匹配难度",
+    help="✨ 场景话题会根据您的选择来匹配难度",
 )
 topic_selectbox = st.sidebar.selectbox(
     "您喜欢讨论的领域",
     TOPICS["zh-CN"],
     key="ps_category",
     on_change=reset_topics,
-    help="选择领域，AI生成话题供您选择",
+    help="✨ 选择领域，AI生成话题供您选择",
 )
 
 
@@ -468,7 +468,7 @@ st.divider()
 
 message_placeholder = st.empty()
 st.info("要求：时长超过15秒，文字篇幅在50个字词和3个句子以上。")
-uploaded_file = st.file_uploader(":file_folder: 上传音频", type=["wav"], help="上传您录制的音频文件")
+uploaded_file = st.file_uploader(":file_folder: 上传音频", type=["wav"], help="✨ 上传您录制的音频文件")
 
 btn_num = 8
 btn_cols = st.columns(btn_num)
@@ -481,12 +481,12 @@ rep_btn = btn_cols[2].button(
     "回放[🎧]",
     key="rep_btn_tb1",
     disabled=not st.session_state.get("record_ready", False),
-    help="点击按钮，播放麦克风录音或您上传的音频文件。",
+    help="✨ 点击按钮，播放麦克风录音或您上传的音频文件。",
 )
 ass_btn = btn_cols[3].button(
     "评估[:mag:]",
     key="ass_btn_tb1",
-    help="生成口语评估报告。",
+    help="✨ 生成口语评估报告。",
     on_click=on_ass_btn_click,
     args=(topic,),
 )
@@ -495,9 +495,9 @@ syn_btn = btn_cols[4].button(
     key="syn_btn_tb1",
     on_click=on_ai_btn_click,
     args=(topic, level_selectbox, voice_style, message_placeholder),
-    help="点击按钮后，AI将生成示例文本，并根据用户选择的风格合成语音。",
+    help="✨ 点击按钮后，AI将生成示例文本，并根据用户选择的风格合成语音。",
 )
-lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
+lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="✨ 聆听合成语音。")
 
 
 if uploaded_file is not None:

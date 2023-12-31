@@ -78,7 +78,7 @@ if st.session_state["multimodal_current_tab"] <= 0:
         max_value=2048,
         value=2048,
         step=32,
-        help="""词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 2048""",
+        help="""✨ 词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 2048""",
     )
     # 生成参数
     st.sidebar.slider(
@@ -88,7 +88,7 @@ if st.session_state["multimodal_current_tab"] <= 0:
         key="temperature",
         value=0.0,
         step=0.1,
-        help="温度可以控制词元选择的随机性。较低的温度适合希望获得真实或正确回复的提示，而较高的温度可能会引发更加多样化或意想不到的结果。如果温度为 0，系统始终会选择概率最高的词元。对于大多数应用场景，不妨先试着将温度设为 0.2。",
+        help="✨ 温度可以控制词元选择的随机性。较低的温度适合希望获得真实或正确回复的提示，而较高的温度可能会引发更加多样化或意想不到的结果。如果温度为 0，系统始终会选择概率最高的词元。对于大多数应用场景，不妨先试着将温度设为 0.2。",
     )
 
     st.sidebar.slider(
@@ -98,7 +98,7 @@ if st.session_state["multimodal_current_tab"] <= 0:
         max_value=40,
         value=32,
         step=1,
-        help="""Top-k 可更改模型选择输出词元的方式。
+        help="""✨ Top-k 可更改模型选择输出词元的方式。
     - 如果 Top-k 设为 1，表示所选词元是模型词汇表的所有词元中概率最高的词元（也称为贪心解码）。
     - 如果 Top-k 设为 3，则表示系统将从 3 个概率最高的词元（通过温度确定）中选择下一个词元。
     - Top-k 的默认值为 40。""",
@@ -110,7 +110,7 @@ if st.session_state["multimodal_current_tab"] <= 0:
         max_value=1.0,
         value=1.0,
         step=0.05,
-        help="""Top-p 可更改模型选择输出词元的方式。系统会按照概率从最高到最低的顺序选择词元，直到所选词元的概率总和等于 Top-p 的值。
+        help="""✨ Top-p 可更改模型选择输出词元的方式。系统会按照概率从最高到最低的顺序选择词元，直到所选词元的概率总和等于 Top-p 的值。
     - 例如，如果词元 A、B 和 C 的概率分别是 0.3、0.2 和 0.1，并且 Top-p 的值为 0.5，则模型将选择 A 或 B 作为下一个词元（通过温度确定）。
     - Top-p 的默认值为 0.8。""",
     )
@@ -119,7 +119,7 @@ if st.session_state["multimodal_current_tab"] <= 0:
         "添加停止序列",
         key="stop_sequences",
         max_chars=64,
-        help="停止序列是一连串字符（包括空格），如果模型中出现停止序列，则会停止生成回复。该序列不包含在回复中。您最多可以添加五个停止序列。",
+        help="✨ 停止序列是一连串字符（包括空格），如果模型中出现停止序列，则会停止生成回复。该序列不包含在回复中。您最多可以添加五个停止序列。",
     )
 # endregion
 
@@ -239,11 +239,11 @@ with tabs[0]:
     # help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。"
     add_btn = cols[0].button(
         ":film_projector:",
-        help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。",
+        help="✨ 模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。",
     )
-    del_btn = cols[1].button(":heavy_minus_sign:", help="删除提示词尾部的分隔符")
-    cls_btn = cols[2].button(":wastebasket:", help="清空提示词", key="clear_prompt")
-    submitted = cols[3].button("提交", help="如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
+    del_btn = cols[1].button(":heavy_minus_sign:", help="✨ 删除提示词尾部的分隔符")
+    cls_btn = cols[2].button(":wastebasket:", help="✨ 清空提示词", key="clear_prompt")
+    submitted = cols[3].button("提交", help="✨ 如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
 
     response_container = st.container()
 

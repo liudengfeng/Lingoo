@@ -329,19 +329,19 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
     display_status_button = btn_cols[1].button(
         ":recycle:",
         key="mask",
-        help="点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。",
+        help="✨ 点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。",
     )
     prev_btn = btn_cols[2].button(
         ":leftwards_arrow_with_hook:",
         key="prev",
-        help="点击按钮，切换到上一个单词。",
+        help="✨ 点击按钮，切换到上一个单词。",
         on_click=on_prev_btn_click,
         disabled=st.session_state.current_flashcard_word_index <= 0,
     )
     next_btn = btn_cols[3].button(
         ":arrow_right_hook:",
         key="next",
-        help="点击按钮，切换到下一个单词。",
+        help="✨ 点击按钮，切换到下一个单词。",
         on_click=on_next_btn_click,
         disabled=len(st.session_state.flashcard_words)
         and st.session_state.current_flashcard_word_index
@@ -350,23 +350,23 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
     play_btn = btn_cols[4].button(
         ":sound:",
         key="play",
-        help="聆听单词发音",
+        help="✨ 聆听单词发音",
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
     add_btn = btn_cols[5].button(
         ":heavy_plus_sign:",
         key="add",
-        help="将当前单词添加到个人词库",
+        help="✨ 将当前单词添加到个人词库",
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
     del_btn = btn_cols[6].button(
         ":heavy_minus_sign:",
         key="del",
-        help="将当前单词从个人词库中删除",
+        help="✨ 将当前单词从个人词库中删除",
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
     update_flashcard_wordbank_button = btn_cols[7].button(
-        ":arrows_counterclockwise:", key="refresh", help="左侧菜单改变词库或记忆数量后，请重新生成闪卡单词"
+        ":arrows_counterclockwise:", key="refresh", help="✨ 左侧菜单改变词库或记忆数量后，请重新生成闪卡单词"
     )
 
     placeholder = st.empty()
@@ -487,7 +487,7 @@ def view_puzzle_word():
             ws[i],
             key=f"btn_{i}",
             disabled=st.session_state.clicked_character[i],
-            help="点击按钮，选择单词拼图中的字母。",
+            help="✨ 点击按钮，选择单词拼图中的字母。",
             type="primary",
         ):
             st.session_state.puzzle_answer_value += ws[i]
@@ -532,20 +532,20 @@ with tabs[tab_items.index(":jigsaw: 单词拼图")]:
     prev_puzzle_btn = puzzle_cols[1].button(
         ":leftwards_arrow_with_hook:",
         key="prev-puzzle",
-        help="点击按钮，切换到上一单词拼图。",
+        help="✨ 点击按钮，切换到上一单词拼图。",
         on_click=on_prev_puzzle_btn_click,
         disabled=st.session_state.puzzle_idx <= 0,
     )
     next_puzzle_btn = puzzle_cols[2].button(
         ":arrow_right_hook:",
         key="next-puzzle",
-        help="点击按钮，切换到下一单词拼图。",
+        help="✨ 点击按钮，切换到下一单词拼图。",
         on_click=on_next_puzzle_btn_click,
         disabled=st.session_state.puzzle_idx == st.session_state["num_words_key"] - 1,
     )
 
     update_puzzle_wordbank_button = puzzle_cols[3].button(
-        ":arrows_counterclockwise:", key="refresh-puzzle", help="重新生成单词列表"
+        ":arrows_counterclockwise:", key="refresh-puzzle", help="✨ 重新生成单词列表"
     )
 
     if prev_puzzle_btn:
@@ -580,11 +580,11 @@ with tabs[tab_items.index(":jigsaw: 单词拼图")]:
             puzzle_score = st.empty()
             sumbit_cols = st.columns(6)
 
-            if sumbit_cols[0].button("重试", help="恢复初始状态，重新开始。"):
+            if sumbit_cols[0].button("重试", help="✨ 恢复初始状态，重新开始。"):
                 prepare_puzzle()
                 st.rerun()
 
-            if sumbit_cols[1].button("检查", help="点击按钮，检查您的答案是否正确。"):
+            if sumbit_cols[1].button("检查", help="✨ 点击按钮，检查您的答案是否正确。"):
                 word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
                 if word not in st.session_state.flashcard_word_info:
                     st.session_state.flashcard_word_info[word] = get_word_info(word)
@@ -765,14 +765,14 @@ with tabs[tab_items.index(":frame_with_picture: 图片测词")]:
     # 创建按钮
     pic_test_cols[1].button(
         ":leftwards_arrow_with_hook:",
-        help="点击按钮，切换到上一题。",
+        help="✨ 点击按钮，切换到上一题。",
         on_click=on_prev_pic_btn_click,
         disabled=st.session_state.pic_idx <= 0,
     )
 
     pic_test_cols[2].button(
         ":arrow_right_hook:",
-        help="点击按钮，切换到下一题。",
+        help="✨ 点击按钮，切换到下一题。",
         on_click=on_next_pic_btn_click,
         disabled=st.session_state.pic_idx == pic_num - 1,
     )
@@ -782,11 +782,11 @@ with tabs[tab_items.index(":frame_with_picture: 图片测词")]:
         key="submit-pic",
         disabled=len(st.session_state.pic_tests) == 0
         or len(st.session_state.user_pic_answer) == 0,
-        help="至少完成一道测试题后，才可点击按钮，显示测验得分。",
+        help="✨ 至少完成一道测试题后，才可点击按钮，显示测验得分。",
     )
 
     if pic_test_cols[4].button(
-        ":arrows_counterclockwise:", key="refresh-pic", help="点击按钮，重新生成图片测试题。"
+        ":arrows_counterclockwise:", key="refresh-pic", help="✨ 点击按钮，重新生成图片测试题。"
     ):
         gen_pic_tests(category, pic_num)
         st.session_state.user_pic_answer = {}
@@ -814,7 +814,7 @@ with tabs[tab_items.index(":frame_with_picture: 图片测词")]:
 add_my_word_lib_column_config = {
     "添加": st.column_config.CheckboxColumn(
         "添加",
-        help="点击复选框，选中单词添加到个人词库",
+        help="✨ 点击复选框，选中单词添加到个人词库",
         width="small",
         required=True,
     )
@@ -823,7 +823,7 @@ add_my_word_lib_column_config = {
 del_my_word_lib_column_config = {
     "删除": st.column_config.CheckboxColumn(
         "删除",
-        help="点击复选框，从个人词库中删除该单词",
+        help="✨ 点击复选框，从个人词库中删除该单词",
         width="small",
         required=True,
     )
@@ -891,10 +891,10 @@ with tabs[tab_items.index(":books: 个人词库")]:
     lib_cols[1].markdown("#### 个人词库")
     mywords_placeholder = lib_cols[1].empty()
     add_lib_btn = lib_cols[0].button(
-        ":heavy_plus_sign:", key="add-lib-btn", help="点击按钮，将'基础词库'中已选单词添加到个人词库。"
+        ":heavy_plus_sign:", key="add-lib-btn", help="✨ 点击按钮，将'基础词库'中已选单词添加到个人词库。"
     )
     del_lib_btn = lib_cols[1].button(
-        ":heavy_minus_sign:", key="del-lib-btn", help="点击按钮，将已选单词从'个人词库'中删除。"
+        ":heavy_minus_sign:", key="del-lib-btn", help="✨ 点击按钮，将已选单词从'个人词库'中删除。"
     )
     df = gen_word_lib()
     edited_df = placeholder.data_editor(
@@ -1072,12 +1072,12 @@ with tabs[tab_items.index(":memo: 单词测验")]:
 
     test_btns = st.columns(6)
     gen_test_btn = test_btns[1].button(
-        ":arrows_counterclockwise:", key="gen-test", help="点击按钮，生成单词理解测试题。"
+        ":arrows_counterclockwise:", key="gen-test", help="✨ 点击按钮，生成单词理解测试题。"
     )
     prev_test_btn = test_btns[2].button(
         ":leftwards_arrow_with_hook:",
         key="prev-test",
-        help="点击按钮，切换到上一题。",
+        help="✨ 点击按钮，切换到上一题。",
         on_click=on_prev_test_btn_click,
         args=(test_container,),
         disabled=st.session_state.test_idx <= 0,
@@ -1085,7 +1085,7 @@ with tabs[tab_items.index(":memo: 单词测验")]:
     next_test_btn = test_btns[3].button(
         ":arrow_right_hook:",
         key="next-test",
-        help="点击按钮，切换到下一题。",
+        help="✨ 点击按钮，切换到下一题。",
         on_click=on_next_test_btn_click,
         args=(test_container,),
         disabled=st.session_state.test_idx == test_num - 1,
@@ -1096,7 +1096,7 @@ with tabs[tab_items.index(":memo: 单词测验")]:
         key="submit-test",
         disabled=len(st.session_state.tests) == 0
         or len(st.session_state.user_answer) == 0,
-        help="至少完成一道测试题后，才可点击按钮，显示测验得分。",
+        help="✨ 至少完成一道测试题后，才可点击按钮，显示测验得分。",
     )
 
     if gen_test_btn:

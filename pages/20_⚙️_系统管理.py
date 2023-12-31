@@ -46,7 +46,7 @@ COLUMN_CONFIG = {
     "phone_number": "手机号码",
     "purchase_type": st.column_config.SelectboxColumn(
         "套餐类型",
-        help="购买的套餐类型",
+        help="✨ 购买的套餐类型",
         width="small",
         options=list(PurchaseType),
         default=list(PurchaseType)[-1],
@@ -54,7 +54,7 @@ COLUMN_CONFIG = {
     ),
     "receivable": st.column_config.NumberColumn(
         "应收 (元)",
-        help="购买套餐应支付的金额",
+        help="✨ 购买套餐应支付的金额",
         min_value=0.01,
         max_value=10000.00,
         step=0.01,
@@ -62,7 +62,7 @@ COLUMN_CONFIG = {
     ),
     "payment_amount": st.column_config.NumberColumn(
         "实收 (元)",
-        help="购买套餐实际支付的金额",
+        help="✨ 购买套餐实际支付的金额",
         min_value=0.01,
         max_value=10000.00,
         step=0.01,
@@ -70,7 +70,7 @@ COLUMN_CONFIG = {
     ),
     "discount_rate": st.column_config.NumberColumn(
         "折扣率",
-        help="享受的折扣率",
+        help="✨ 享受的折扣率",
         min_value=0.0,
         max_value=1.0,
         step=0.01,
@@ -78,7 +78,7 @@ COLUMN_CONFIG = {
     ),
     "is_approved": st.column_config.CheckboxColumn(
         "是否批准",
-        help="选中表示允许用户使用系统",
+        help="✨ 选中表示允许用户使用系统",
         default=False,
     ),
     "expiry_time": st.column_config.DatetimeColumn(
@@ -86,7 +86,7 @@ COLUMN_CONFIG = {
     ),
     "user_role": st.column_config.SelectboxColumn(
         "权限",
-        help="用户权限",
+        help="✨ 用户权限",
         width="small",
         options=list(UserRole),
         default=list(UserRole)[0],
@@ -95,7 +95,7 @@ COLUMN_CONFIG = {
     "registration_time": "注册时间",
     "status": st.column_config.SelectboxColumn(
         "服务状态",
-        help="服务状态",
+        help="✨ 服务状态",
         width="small",
         options=PM_OPTS,
         default=PM_OPTS[-1],
@@ -343,27 +343,27 @@ with tabs[items.index("订阅登记")]:
         phone_number = cols[0].text_input(
             "手机号码",
             key="phone_number",
-            help="请输入有效手机号码",
+            help="✨ 请输入有效手机号码",
             placeholder="手机号码[必须]",
         )
         purchase_type = cols[1].selectbox(
             "套餐类型",
             key="purchase_type",
-            help="请选择套餐类型",
+            help="✨ 请选择套餐类型",
             options=list(PurchaseType),
             index=1,
             format_func=lambda x: x.value,
         )
         payment_method = cols[0].text_input(
-            "付款方式", key="payment_method", help="请输入付款方式", placeholder="必须。付款方式"
+            "付款方式", key="payment_method", help="✨ 请输入付款方式", placeholder="必须。付款方式"
         )
         payment_id = cols[1].text_input(
-            "付款编号", key="payment_id", help="请输入付款编号", placeholder="必须。请在付款凭证上查找付款编号"
+            "付款编号", key="payment_id", help="✨ 请输入付款编号", placeholder="必须。请在付款凭证上查找付款编号"
         )
         payment_amount = cols[0].number_input(
-            "实收金额", key="payment_amount", help="请输入实际收款金额", value=0.0
+            "实收金额", key="payment_amount", help="✨ 请输入实际收款金额", value=0.0
         )
-        remark = st.text_input("备注", key="remark", help="请输入备注信息", value="")
+        remark = st.text_input("备注", key="remark", help="✨ 请输入备注信息", value="")
         user = st.session_state.dbi.find_user_by(phone=phone_number)
         if st.form_submit_button(label="登记"):
             order_id = str(st.session_state.dbi.payments.count_documents({}) + 1).zfill(
@@ -634,7 +634,7 @@ with tabs[items.index("处理反馈")]:
 
         cols = st.columns(2)
         # 添加一个按钮来删除反馈
-        if cols[0].button("删除", help="删除选中的反馈"):
+        if cols[0].button("删除", help="✨ 删除选中的反馈"):
             # 获取要删除的反馈
             edited_rows = st.session_state["feedbacks"]["edited_rows"]
             for idx, vs in edited_rows.items():
@@ -652,7 +652,7 @@ with tabs[items.index("处理反馈")]:
                     except Exception as e:
                         pass
 
-        if cols[1].button("显示", help="显示选中的反馈"):
+        if cols[1].button("显示", help="✨ 显示选中的反馈"):
             # 显示反馈
             edited_rows = st.session_state["feedbacks"]["edited_rows"]
             for idx, vs in edited_rows.items():

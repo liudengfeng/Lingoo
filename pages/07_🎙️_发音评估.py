@@ -146,7 +146,7 @@ def view_md_badges():
         body = f"""{MD_BADGE_MAPS[t][1]}({num})"""
         cols[i].markdown(
             f""":{MD_BADGE_MAPS[t][0]}[{body}]""",
-            help=MD_BADGE_MAPS[t][2],
+            help=f"✨ {MD_BADGE_MAPS[t][2]}",
         )
 
 
@@ -375,7 +375,7 @@ text_to_be_evaluated_tb1 = st.text_area(
     label_visibility="collapsed",
     on_change=on_text_changed,
     placeholder="请在文本框中输入要评估的文本。请注意，您的文本要与左侧下拉列表中的“目标语言”一致。",
-    help="输入要评估的文本。",
+    help="✨ 输入要评估的文本。",
 )
 message_placeholder = st.empty()
 btn_num = 8
@@ -388,13 +388,13 @@ rep_btn = btn_cols[2].button(
     "回放[🎧]",
     key="rep_btn_tb1",
     disabled=not st.session_state.get("tb1_record_ready", False),
-    help="点击按钮，回放麦克风录音。",
+    help="✨ 点击按钮，回放麦克风录音。",
 )
 
 ass_btn = btn_cols[3].button(
     "评估[:mag:]",
     key="ass_btn_tb1",
-    help="生成发音评估报告。",
+    help="✨ 生成发音评估报告。",
     on_click=on_ass_btn_click,
     args=(text_to_be_evaluated_tb1,),
 )
@@ -404,13 +404,13 @@ syn_btn = btn_cols[4].button(
     on_click=on_syn_btn_click,
     args=(text_to_be_evaluated_tb1, voice_style, message_placeholder),
     disabled=len(text_to_be_evaluated_tb1) == 0,
-    help="点击合成按钮，合成选定风格的语音。",
+    help="✨ 点击合成按钮，合成选定风格的语音。",
 )
-lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="聆听合成语音。")
+lst_btn = btn_cols[5].button("聆听[👂]", key="lst_btn_tab1", help="✨ 聆听合成语音。")
 cls_btn = btn_cols[6].button(
     "重置[:arrows_counterclockwise:]",
     key="cls_btn_tb1",
-    help="重置发音评估文本。",
+    help="✨ 重置发音评估文本。",
     on_click=reset_page,
 )
 

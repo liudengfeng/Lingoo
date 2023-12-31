@@ -141,13 +141,13 @@ boy = sidebar_cols[0].selectbox(
     "男方",
     NAMES["en-US"]["male"],
     key="first_party",
-    help="男方姓名",
+    help="✨ 男方姓名",
 )
 m_voice_style: Tuple = sidebar_cols[0].selectbox(
     "合成男声风格",
     m_voices,
     on_change=on_voice_changed,
-    help="选择您喜欢的合成男声语音风格",
+    help="✨ 选择您喜欢的合成男声语音风格",
     format_func=lambda x: f"{x[2]}",  # type: ignore
 )
 
@@ -155,13 +155,13 @@ girl = sidebar_cols[1].selectbox(
     "女方",
     NAMES["en-US"]["female"],
     key="second_party",
-    help="女方姓名",
+    help="✨ 女方姓名",
 )
 fm_voice_style: Tuple = sidebar_cols[1].selectbox(
     "合成女声风格",
     fm_voices,
     on_change=on_voice_changed,
-    help="选择您喜欢的合成女声语音风格",
+    help="✨ 选择您喜欢的合成女声语音风格",
     format_func=lambda x: f"{x[2]}",  # type: ignore
 )
 
@@ -171,14 +171,14 @@ level = st.sidebar.selectbox(
     CEFR_LEVEL_MAPS.keys(),
     on_change=reset_session,
     key="dialogue_level",
-    help="根据选择的语言熟练程度,系统会生成匹配的不同难度对话场景进行练习",
+    help="✨ 根据选择的语言熟练程度,系统会生成匹配的不同难度对话场景进行练习",
 )
 topic = st.sidebar.selectbox(
     "主题",
     TOPICS["zh-CN"],
     key="topic",
     on_change=reset_session,
-    help="选择对话主题,系统会生成匹配的对话场景进行练习",
+    help="✨ 选择对话主题,系统会生成匹配的对话场景进行练习",
 )
 
 en_level = CEFR_LEVEL_MAPS.get(level, "中高级")  # type: ignore
@@ -189,10 +189,10 @@ en_topic = TOPICS["en-US"][TOPICS["zh-CN"].index(topic)]  # type: ignore
 btn_cols = st.sidebar.columns(3)
 gen_btn = btn_cols[0].button(
     "生成",
-    help="根据选择的语言熟练程度和主题,系统会生成匹配的对话场景进行练习",
+    help="✨ 根据选择的语言熟练程度和主题,系统会生成匹配的对话场景进行练习",
 )
-view_btn = btn_cols[1].button("查看", help="查看完整对话场景")
-cls_btn = btn_cols[2].button(":arrows_counterclockwise:", help="重置对话场景")
+view_btn = btn_cols[1].button("查看", help="✨ 查看完整对话场景")
+cls_btn = btn_cols[2].button(":arrows_counterclockwise:", help="✨ 重置对话场景")
 # endregion
 
 # region 事件
@@ -302,7 +302,7 @@ cols[1].button(
     # args=(placeholder,),
     key="translate",
     disabled=st.session_state["dialogue_idx"] < 0,
-    help="将对话内容翻译成中文",
+    help="✨ 将对话内容翻译成中文",
 )
 cols[2].button(
     "合成 :sound:",
@@ -310,14 +310,14 @@ cols[2].button(
     on_click=on_s_btn_click,
     # args=(placeholder,),
     disabled=st.session_state["dialogue_idx"] < 0,
-    help="将对话内容合成语音",
+    help="✨ 将对话内容合成语音",
 )
 cols[3].button(
     "向前 ⬅️",
     on_click=on_p_btn_click,
     key="prev",
     disabled=st.session_state["dialogue_idx"] <= 0,
-    help="上一条对话",
+    help="✨ 上一条对话",
 )
 cols[4].button(
     "向后 ➡️",
@@ -325,7 +325,7 @@ cols[4].button(
     on_click=on_n_btn_click,
     disabled=st.session_state["dialogue_idx"]
     == len(st.session_state["dialogue_context"]) - 1,
-    help="下一条对话",
+    help="✨ 下一条对话",
 )
 
 if view_btn:
