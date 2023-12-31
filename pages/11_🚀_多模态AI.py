@@ -226,7 +226,7 @@ with tabs[0]:
 
     ex_media_file = tab0_col1.file_uploader(
         "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
-        accept_multiple_files=True,
+        accept_multiple_files=False,
         key="ex_media_file_key",
         type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
         help="""
