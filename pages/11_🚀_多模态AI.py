@@ -196,6 +196,7 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
 
 
 def view_example(container):
+    container.divider()
     col1, col2 = container.columns([1, 1])
     for e in st.session_state.multimodal_examples:
         if isinstance(e, str):
