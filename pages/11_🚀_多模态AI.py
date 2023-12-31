@@ -49,10 +49,11 @@ if st.session_state.get("clear_prompt"):
 
 # region 共同边栏
 
-st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。", icon="✨")
+help_info = "✨ 对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。"
 sidebar_status = st.sidebar.empty()
 sidebar_status.markdown(
-    f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
+    f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}",
+    help=help_info,
 )
 
 # endregion
@@ -264,5 +265,19 @@ with tabs[0]:
         generate_content_from_files_and_prompt(
             uploaded_files, prompt, response_container
         )
+
+    # endregion
+
+# region 翻译AI
+
+    with tabs[1]:
+        st.session_state["multimodal_current_tab"] = tab_names[1]
+
+# endregion
+        
+# region 解题AI
+
+    with tabs[2]:
+        st.session_state["multimodal_current_tab"] = tab_names[2]
 
 # endregion
