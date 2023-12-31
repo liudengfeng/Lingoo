@@ -195,6 +195,19 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
     )
 
 
+def view_example(container):
+    col1, col2 = container.columns([1, 1])
+    for e in st.session_state.multimodal_examples_pair:
+        if isinstance(e, str):
+            col2.markdown(e)
+        else:
+            mime_type = mimetypes.guess_type(e.name)[0]
+            if mime_type.startswith("video"):
+                col1.video(e, format=mime_type)
+            else:
+                col1.image(e, use_column_width=True, caption=e.name)
+
+
 # endregion
 
 # region 通用 AI
@@ -204,53 +217,40 @@ with tabs[0]:
     st.markdown("""您可以向`Gemini`模型发送多模态提示信息。支持的模态包括文字、图片和视频。""")
 
     st.subheader(":rainbow[添加案例]", divider="rainbow", anchor=False)
-    col1, col2, col3 = st.columns([4, 4, 2])
+    col1, col2 = st.columns([6, 4])
+
     examples_container = st.container()
 
-    video_file = col1.file_uploader(
-        "插入多媒体文件【点击`Browse file`按钮，从本地上传视频文件】",
-        accept_multiple_files=False,
-        type=["mkv", "mov", "mp4", "webm"],
+    ex_media_file = st.file_uploader(
+        "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
+        accept_multiple_files=True,
+        type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
         help="""
 支持的格式
+- 图片：PNG、JPG
 - 视频：
     - 您可以上传视频，支持以下格式：MKV、MOV、MP4、WEBM（最大 7MB）
     - 该模型将分析长达 2 分钟的视频。 请注意，它将处理从视频中获取的一组不连续的图像帧。
     """,
     )
-    if video_file:
-        mime_type = mimetypes.guess_type(video_file.name)[0]
-        st.session_state.multimodal_examples_pair.append(_process_media(video_file))
-        # examples_container.video(video_file, mime_type)
-        # st.rerun()
-        st.write("案例数量", len(st.session_state.multimodal_examples_pair))
 
-    imgae_file = col2.file_uploader(
-        "插入多媒体文件【点击`Browse file`按钮，从本地上传视频文件】",
-        accept_multiple_files=False,
-        type=["png", "jpg"],
-        help="""
-支持的格式
-- 图片：PNG、JPG
-""",
+    ex_text = col2.text_area(
+        "期望的响应",
+        placeholder="请输入期望的响应",
+        help="✨ 期望模型响应或标识",
     )
-    if imgae_file:
-        mime_type = mimetypes.guess_type(imgae_file.name)[0]
-        st.session_state.multimodal_examples_pair.append(_process_media(imgae_file))
-        # examples_container.video(video_file, mime_type)
-        # st.rerun()
-        st.write("案例数量", len(st.session_state.multimodal_examples_pair))
 
+    st.subheader(":bulb: :rainbow[提示词]", divider="rainbow", anchor=False)
     uploaded_files = st.file_uploader(
         "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
         accept_multiple_files=True,
         type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
         help="""
-    支持的格式
-    - 图片：PNG、JPG
-    - 视频：
-        - 您可以上传视频，支持以下格式：MKV、MOV、MP4、WEBM（最大 7MB）
-        - 该模型将分析长达 2 分钟的视频。 请注意，它将处理从视频中获取的一组不连续的图像帧。
+支持的格式
+- 图片：PNG、JPG
+- 视频：
+    - 您可以上传视频，支持以下格式：MKV、MOV、MP4、WEBM（最大 7MB）
+    - 该模型将分析长达 2 分钟的视频。 请注意，它将处理从视频中获取的一组不连续的图像帧。
     """,
     )
 
@@ -275,7 +275,12 @@ with tabs[0]:
     response_container = st.container()
 
     if add_btn:
-        pass
+        if ex_media_file:
+            st.session_state.multimodal_examples_pair.append(ex_media_file)
+        if ex_text:
+            st.session_state.multimodal_examples_pair.append(ex_text)
+
+        view_example(examples_container)
 
     if del_btn:
         st.session_state["user_prompt"] = prompt.rstrip("<>\n")
