@@ -283,7 +283,7 @@ with tabs[0]:
         help="✨ 添加文本",
         key="add_text_btn",
     )
-    del_btn = tab0_btn_cols[2].button(
+    del_last_btn = tab0_btn_cols[2].button(
         ":rewind:", help="✨ 删除最后一条样本", key="del_last_example"
     )
     cls_btn = tab0_btn_cols[3].button(
@@ -294,22 +294,25 @@ with tabs[0]:
 
     response_container = st.container()
 
-    if add_media_btn:
-        if ex_media_file:
-            st.session_state.multimodal_examples.append(_process_media(ex_media_file))
-            ex_media_file = None
-
-        if ex_text:
-            st.session_state.multimodal_examples.append(Part.from_text(ex_text))
-            st.session_state.multimodal_ex_text = ""
-
+    if add_media_btn and ex_media_file:
+        st.session_state.multimodal_examples.append(_process_media(ex_media_file))
         view_example(examples_container)
-        st.rerun()
+        # st.rerun()
 
-    if del_btn:
+    if add_text_btn and ex_text:
+        st.session_state.multimodal_examples.append(Part.from_text(ex_text))
+        view_example(examples_container)
+        # st.rerun()
+
+    if del_last_btn:
+        if len(st.session_state["multimodal_examples"]) > 0:
+            st.session_state["multimodal_examples"].pop()
+            view_example(examples_container)
+            # st.rerun()
+
+    if cls_btn:
         st.session_state["multimodal_examples"] = []
-        st.session_state["user_prompt"] = []
-        st.rerun()
+        view_example(examples_container)
 
     if submitted:
         if len(uploaded_files) == 0:
