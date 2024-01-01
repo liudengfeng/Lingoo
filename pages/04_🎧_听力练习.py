@@ -10,7 +10,6 @@ from mypylib.google_vertex import generate_sub_scenes
 
 # "第二页"
 
-# st.markdown("""<a href="page1" target="_self">page 1</a>""", unsafe_allow_html=True)
 
 # region 页面设置
 
@@ -21,6 +20,7 @@ st.set_page_config(
 )
 
 authenticate_and_configure_services()
+st.markdown("""<a href="用户中心" target="_self">转移到用户中心</a>""", unsafe_allow_html=True)
 
 # 添加会话变量
 if "sub_scenes" not in st.session_state:

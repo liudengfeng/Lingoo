@@ -14,7 +14,7 @@ from PIL import Image
 from pymongo.errors import DuplicateKeyError
 
 from mypylib.auth_utils import is_valid_email, is_valid_phone_number
-from mypylib.constants import FAKE_EMAIL_DOMAIN, PROVINCES
+from mypylib.constants import FAKE_EMAIL_DOMAIN, PROVINCES, CEFR_LEVEL_MAPS
 from mypylib.db_interface import DbInterface
 from mypylib.db_model import User
 from mypylib.st_utils import check_and_force_logout
@@ -453,7 +453,8 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
     if not st.session_state.dbi.is_service_active(st.session_state.user_info):
         st.error("您的账号未登录，或者尚未缴费、激活，无法更新个人信息。")
         st.stop()
-    CEFR = ["A1", "A2", "B1", "B2", "C1", "C2"]
+    
+    CEFR = list(CEFR_LEVEL_MAPS.keys())
     COUNTRIES = ["中国"]
     user_doc = st.session_state.dbi.find_user(st.session_state.user_info["user_id"])
     user = User.from_doc(user_doc)
