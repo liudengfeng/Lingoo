@@ -202,11 +202,13 @@ def view_example(container):
     container.divider()
     col1, col2 = container.columns([1, 1])
     for p in st.session_state.multimodal_examples:
-        if p.mime_type == "text/plain":
+        mime_type = p.mime_type
+        st.write(mime_type)
+        if mime_type == "text/plain":
             col2.markdown(p.text)
-        elif p.mime_type.startswith("image"):
+        elif mime_type.startswith("image"):
             col1.image(p.data, use_column_width=True)
-        elif p.mime_type.startswith("video"):
+        elif mime_type.startswith("video"):
             col1.video(p.data)
 
 
