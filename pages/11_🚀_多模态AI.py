@@ -38,8 +38,8 @@ if "total_token_count" not in st.session_state:
         st.session_state.user_info["phone_number"]
     )
 
-if "user_prompt" not in st.session_state:
-    st.session_state["user_prompt"] = ""
+# if "user_prompt" not in st.session_state:
+#     st.session_state["user_prompt"] = ""
 
 if "multimodal_ex_text" not in st.session_state:
     st.session_state["multimodal_ex_text"] = ""
@@ -291,7 +291,7 @@ with tabs[0]:
 
     prompt = st.text_area(
         "您的提示词",
-        value=st.session_state["user_prompt"],
+        # value=st.session_state["user_prompt"],
         key="user_prompt_key",
         placeholder="请输入关于多媒体的提示词，例如：'描述这张风景图片'",
         max_chars=12288,
@@ -307,7 +307,7 @@ with tabs[0]:
     response_container = st.container()
 
     if cls_btn:
-        st.session_state.user_prompt = ""
+        st.session_state["user_prompt_key"] = ""
         st.rerun()
 
     if submitted:
