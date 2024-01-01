@@ -234,16 +234,17 @@ st.divider()
 
 step_cols = st.columns(5)
 with step_cols[1]:
-    st.markdown(
-        """<a href="用户中心#注册用户" target="_self">第一步 注册用户</a>""", unsafe_allow_html=True
-    )
-    st.link_button("订阅付费", "test#2")
+    # st.markdown(
+    #     """<a href="用户中心#注册用户" target="_self">第一步 注册用户</a>""", unsafe_allow_html=True
+    # )
+    st.link_button("注册用户", "注册订阅#用户注册")
 
 with step_cols[2]:
-    st.markdown(
-        """<a href="用户中心#选择套餐" target="_self">第二步 订阅付费</a>""", unsafe_allow_html=True
-    )
-    st.link_button("订阅付费", "test#2")
+    # st.markdown(
+    #     """<a href="用户中心#选择套餐" target="_self">第二步 订阅付费</a>""", unsafe_allow_html=True
+    # )
+    st.link_button("注册用户", "注册订阅#订阅套餐")
+    # st.link_button("订阅付费", "test#2")
 
 with step_cols[3]:
     st.markdown("""<a href="" target="_self">第三步 登录使用</a>""", unsafe_allow_html=True)
