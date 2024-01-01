@@ -205,9 +205,9 @@ def view_example(container):
         if mime_type == "text/plain":
             container.markdown(p.text)
         elif mime_type.startswith("image"):
-            container.image(p.data, use_column_width=True)
+            container.image(p.inline_data.data, use_column_width=True)
         elif mime_type.startswith("video"):
-            container.video(p.data)
+            container.video(p.inline_data.data)
     container.divider()
 
 
