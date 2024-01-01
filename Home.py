@@ -243,6 +243,8 @@ with step_cols[2]:
     st.markdown(
         """<a href="用户中心" target="_self">第二步 订阅付费</a>""", unsafe_allow_html=True
     )
+    st.link_button("订阅付费", "用户中心#选择套餐")
+
 with step_cols[3]:
     st.markdown("""<a href="" target="_self">第三步 登录使用</a>""", unsafe_allow_html=True)
 

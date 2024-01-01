@@ -377,7 +377,7 @@ DF studio 可能会使用用户的数据来提供本应用的服务，包括但�
 # region 创建缴费页面
 
 with tabs[items.index(":bento: 选择套餐")]:
-    st.subheader(":bento: 选择套餐")
+    st.subheader(":bento: 选择套餐", anchor="选择套餐")
 
     # Define pricing tiers
     pricing_tiers = [
