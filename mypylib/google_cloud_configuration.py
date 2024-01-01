@@ -81,8 +81,8 @@ def vertexai_configure(secrets):
         # encryption_spec_key_name=my_encryption_key_name,
         # the name of the experiment to use to track
         # logged metrics and parameters
-        experiment="lingoo-experiment",
+        # experiment="lingoo-experiment",
         # description of the experiment above
-        experiment_description="云端使用vertex ai",
+        # experiment_description="云端使用vertex ai",
     )
     vertexai.init(project=project, location=location)
