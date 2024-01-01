@@ -243,10 +243,11 @@ with step_cols[2]:
     st.markdown(
         """<a href="用户中心#选择套餐" target="_self">第二步 订阅付费</a>""", unsafe_allow_html=True
     )
-    st.link_button("订阅付费", "用户中心#选择套餐")
+    st.link_button("订阅付费", "test#2")
 
 with step_cols[3]:
     st.markdown("""<a href="" target="_self">第三步 登录使用</a>""", unsafe_allow_html=True)
+    st.link_button("订阅付费", "test#3")
 
 log_cols = st.columns(3)
 welcome_image = Image.open(LOGO_DIR / "welcome-1.jpg")
