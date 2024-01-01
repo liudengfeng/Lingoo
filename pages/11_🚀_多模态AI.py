@@ -202,7 +202,7 @@ def view_example(container):
     for p in st.session_state.multimodal_examples:
         mime_type = p.mime_type
         container.write(mime_type)
-        if mime_type == "text/plain":
+        if mime_type.startswith("text"):
             container.markdown(p.text)
         elif mime_type.startswith("image"):
             container.image(p.inline_data.data, use_column_width=True)
@@ -297,9 +297,8 @@ with tabs[0]:
 
     if add_media_btn and ex_media_file:
         p = _process_media(ex_media_file)
-        examples_container.write(p)
-        # st.session_state.multimodal_examples.append(p)
-        # view_example(examples_container)
+        st.session_state.multimodal_examples.append(p)
+        view_example(examples_container)
         # st.rerun()
 
     if add_text_btn and ex_text:
