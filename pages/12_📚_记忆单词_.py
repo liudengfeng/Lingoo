@@ -12,8 +12,11 @@ import streamlit.components.v1 as components
 from PIL import Image
 
 from mypylib.google_api import generate_word_memory_tip, generate_word_test
-from mypylib.st_utils import authenticate_and_configure_services, check_and_force_logout
-from mypylib.st_utils import google_translate
+from mypylib.st_utils import (
+    authenticate_and_configure_services,
+    check_and_force_logout,
+    google_translate,
+)
 from mypylib.word_utils import (
     audio_autoplay_elem,
     get_or_create_and_return_audio_data,
@@ -32,6 +35,7 @@ st.set_page_config(
 )
 
 authenticate_and_configure_services()
+
 # endregion
 
 # region 常量

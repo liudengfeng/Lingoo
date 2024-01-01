@@ -17,7 +17,7 @@ def view_stream_response(responses, placeholder):
         except (IndexError, ValueError) as e:
             st.write(chunk)
             st.error(e)
-            pass
+            # pass
         time.sleep(0.05)
         # Add a blinking cursor to simulate typing
         placeholder.markdown(full_response + "▌")
