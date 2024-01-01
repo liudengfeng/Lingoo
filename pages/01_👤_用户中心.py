@@ -179,19 +179,21 @@ with tabs[items.index(":bust_in_silhouette: 用户注册")]:
             try:
                 st.session_state.dbi.register_user(user)
             except DuplicateKeyError as e:
-                # 如果抛出 DuplicateKeyError 异常，从异常的消息中解析出字段的名称
-                field_name = str(e).split("index: ")[1].split(" dup key")[0]
-                msg = "邮箱" if field_name.startswith("f_email") else "电话号码"
-                status.markdown(
-                    f"""
-                **您输入的{msg}已被注册。**
-                如果您已完成付款，系统会自动为您注册，请使用以下方式直接登录：
-                1. 在左侧菜单“用户中心”的“登录”选项，输入您已注册的手机号码。
-                2. 输入默认密码：您的手机号码。
-                3. 点击“确定”按钮。
-                登录成功后，您可以在“用户中心”修改个人信息。"""
-                )
+                st.write(e)
                 st.stop()
+                # # 如果抛出 DuplicateKeyError 异常，从异常的消息中解析出字段的名称
+                # field_name = str(e).split("index: ")[1].split(" dup key")[0]
+                # msg = "邮箱" if field_name.startswith("f_email") else "电话号码"
+                # status.markdown(
+                #     f"""
+                # **您输入的{msg}已被注册。**
+                # 如果您已完成付款，系统会自动为您注册，请使用以下方式直接登录：
+                # 1. 在左侧菜单“用户中心”的“登录”选项，输入您已注册的手机号码。
+                # 2. 输入默认密码：您的手机号码。
+                # 3. 点击“确定”按钮。
+                # 登录成功后，您可以在“用户中心”修改个人信息。"""
+                # )
+                # st.stop()
             # 截至付款期限
             deadline = datetime.now(timezone.utc) + timedelta(days=3)
             # 创建一个时区对象
