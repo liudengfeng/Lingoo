@@ -292,7 +292,8 @@ with tabs[0]:
     response_container = st.container()
 
     if cls_btn:
-        st.session_state.multimodal_examples = []
+        st.session_state["user_prompt"] = ""
+        st.rerun()
 
     if submitted:
         if uploaded_files is None or len(uploaded_files) == 0:  # type: ignore
