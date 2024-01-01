@@ -81,11 +81,12 @@ class DbInterface:
         user_doc = self.users.find_one({"_id": user_id})
         if user_doc:
             user = User.from_doc(user_doc)
-            active_sessions = [
-                event for event in user.login_events if event.logout_time is None
-            ]
-            if len(active_sessions) > 1:
-                return active_sessions[:-1]  # 返回除最后一个登录事件外的所有未退出的登录事件
+            if user.login_events is not None:  # Add condition to check if login_events is not None
+                active_sessions = [
+                    event for event in user.login_events if event.logout_time is None
+                ]
+                if len(active_sessions) > 1:
+                    return active_sessions[:-1]  # 返回除最后一个登录事件外的所有未退出的登录事件
         return []
 
     def force_logout_session(self, user_id: ObjectId, session_id: str):

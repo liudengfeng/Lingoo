@@ -163,9 +163,9 @@ with tabs[items.index(":bust_in_silhouette: 用户注册")]:
                 # 加密字段
                 f_email=fernet.encrypt(email.encode()),
                 f_real_name=fernet.encrypt(real_name.encode()),
-                f_country=fernet.encrypt(country.encode()),
-                f_province=fernet.encrypt(province.encode()),
-                f_timezone=fernet.encrypt(tz.encode()),
+                f_country=fernet.encrypt(country.encode()) if country else None,
+                f_province=fernet.encrypt(province.encode()) if province else None,
+                f_timezone=fernet.encrypt(tz.encode()) if tz else None,
                 # 普通字段
                 phone_number=phone_number,
                 current_level=current_level,
