@@ -1,6 +1,7 @@
 import time
 
 import streamlit as st
+from vertexai.preview.generative_models import ResponseBlockedError
 
 from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 from mypylib.st_utils import (
@@ -243,13 +244,20 @@ if prompt := st.chat_input("输入提示以便开始对话"):
                 ).total_tokens
             )
             st.session_state.total_token_count += st.session_state.current_token_count
-    except Exception as e:
+            # 添加记录到数据库
+            st.session_state.dbi.add_token_record(
+                st.session_state.user_info["phone_number"],
+                "gemini-pro-chatbot",
+                st.session_state.current_token_count,
+            )
+    except ResponseBlockedError as e:
         # 处理被阻止的消息
-        # st.toast("抱歉，您尝试发送的消息包含潜在不安全的内容，已被阻止。")
-        # #  删除最后一对会话
-        # st.session_state.chat_session.rewind()
+        st.toast("抱歉，您尝试发送的消息包含潜在不安全的内容，已被阻止。")
+        # 删除最后一对会话
+        st.session_state.chat_session.rewind()
+    except Exception as e:
+        # 处理其他类型的异常
         st.write(e)
-        # pass
 
 
 msg = f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
