@@ -140,8 +140,7 @@ def view_example(container):
             container.video(p["part"].inline_data.data)
 
 
-def generate_content_from_files_and_prompt(response_container):
-    contents = [p["part"] for p in st.session_state.multimodal_examples]
+def generate_content_from_files_and_prompt(contents, response_container):
     model = load_vertex_model("gemini-pro-vision")
     generation_config = GenerationConfig(
         temperature=st.session_state["temperature"],
@@ -150,7 +149,7 @@ def generate_content_from_files_and_prompt(response_container):
         max_output_tokens=st.session_state["max_output_tokens"],
     )
     responses = model.generate_content(
-        contents,
+        [p["part"] for p in contents],
         generation_config=generation_config,
         safety_settings=DEFAULT_SAFETY_SETTINGS,
         stream=True,
@@ -168,9 +167,9 @@ def generate_content_from_files_and_prompt(response_container):
         message_placeholder.markdown(full_response + "▌")
 
     message_placeholder.markdown(full_response)
-    # 令牌数 TODO:需要考虑多媒体的令牌数
+    # 令牌数
     st.session_state.current_token_count = model.count_tokens(
-        prompt + full_response
+        [p["part"] for p in contents] + [Part.from_text(full_response)]
     ).total_tokens
     st.session_state.total_token_count += st.session_state.current_token_count
     sidebar_status.markdown(
@@ -297,17 +296,17 @@ with tabs[0]:
 
     if submitted:
         if uploaded_files is None or len(uploaded_files) == 0:  # type: ignore
-            st.error("请上传图片或视频")
-            st.stop()
+            st.warning("您是否忘记了上传图片或视频？")
         if not prompt:
             st.error("请添加提示词")
             st.stop()
-        for m in uploaded_files:
-            st.session_state.multimodal_examples.append(_process_media(m))
-        st.session_state.multimodal_examples.append(
-            {"mime_type": "text", "part": Part.from_text(prompt)}
-        )
-        generate_content_from_files_and_prompt(response_container)
+        contents = st.session_state.multimodal_examples.copy()
+        if uploaded_files is not None:
+            for m in uploaded_files:
+                contents.append(_process_media(m))
+
+        contents.append({"mime_type": "text", "part": Part.from_text(prompt)})
+        generate_content_from_files_and_prompt(contents, response_container)
 
     # endregion
 
