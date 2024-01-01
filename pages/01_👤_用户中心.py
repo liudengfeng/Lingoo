@@ -177,6 +177,7 @@ with tabs[items.index(":bust_in_silhouette: 用户注册")]:
 
             user.hash_password()
             try:
+                st.write(user.model_dump())
                 st.session_state.dbi.register_user(user)
             except DuplicateKeyError as e:
                 st.write(e)
@@ -468,7 +469,9 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
             value=user.phone_number,
             disabled=True,
         )
-        email = col2.text_input("邮箱", key="email-3", help="✨ 请输入有效邮箱地址", value=user.email)
+        email = col2.text_input(
+            "邮箱", key="email-3", help="✨ 请输入有效邮箱地址", value=user.email
+        )
         real_name = col1.text_input(
             "真实姓名",
             key="real_name-3",
