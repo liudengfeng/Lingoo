@@ -199,11 +199,6 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
 
 
 def view_example(container):
-    container.subheader(
-        f":clipboard: :rainbow[已添加的案例（{len(st.session_state.multimodal_examples)}）]",
-        divider="rainbow",
-        anchor=False,
-    )
     for p in st.session_state.multimodal_examples:
         mime_type = p.mime_type
         container.write(mime_type)
@@ -229,8 +224,6 @@ with tabs[0]:
     )
     tab0_col1, tab0_col2 = st.columns([1, 1])
 
-    examples_container = st.container()
-
     ex_media_file = tab0_col1.file_uploader(
         "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
         accept_multiple_files=False,
@@ -252,6 +245,14 @@ with tabs[0]:
         key="ex_text_key",
         help="✨ 期望模型响应或标识",
     )
+
+    st.subheader(
+        f":clipboard: :rainbow[已添加的案例（{len(st.session_state.multimodal_examples)}）]",
+        divider="rainbow",
+        anchor=False,
+    )
+
+    examples_container = st.container()
 
     st.subheader(":bulb: :rainbow[提示词]", divider="rainbow", anchor=False)
     uploaded_files = st.file_uploader(
