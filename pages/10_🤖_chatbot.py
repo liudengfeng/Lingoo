@@ -2,7 +2,7 @@ import time
 
 import streamlit as st
 
-from mypylib.google_cloud_configuration import SAFETY_SETTINGS
+from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 from mypylib.st_utils import (
     authenticate_and_configure_services,
     check_and_force_logout,
@@ -224,10 +224,9 @@ if prompt := st.chat_input("输入提示以便开始对话"):
         response = st.session_state.chat_session.send_message(
             prompt,
             generation_config=config,
-            safety_settings=SAFETY_SETTINGS,
+            safety_settings=DEFAULT_SAFETY_SETTINGS,
             stream=True,
         )
-        st.write("response", response)
         with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
             message_placeholder = st.empty()
             full_response = ""
