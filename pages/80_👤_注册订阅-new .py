@@ -29,8 +29,8 @@ st.set_page_config(
 if "user_info" not in st.session_state:
     st.session_state["user_info"] = {}
 
-if "dbi" not in st.session_state:
-    st.session_state["dbi"] = GoogleDbInterface()
+if "gdbi" not in st.session_state:
+    st.session_state["gdbi"] = GoogleDbInterface()
 
 # region 侧边栏
 
@@ -156,7 +156,7 @@ with st.form(key="registration_form"):
 
         user.hash_password()
         try:
-            st.session_state.dbi.register_user(user)
+            st.session_state.gdbi.register_user(user)
         except DuplicateKeyError as e:
             # st.write(e)
             # st.stop()
