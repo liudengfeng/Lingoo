@@ -119,7 +119,7 @@ with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
 
 sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
-check_and_force_logout(st, sidebar_status)
+check_and_force_logout(sidebar_status)
 
 # 让用户选择语音风格
 pronunciation = st.sidebar.radio("请选择发音标准", ("美式", "英式"))
