@@ -304,20 +304,16 @@ with tabs[0]:
         p = _process_media(ex_media_file)
         st.session_state.multimodal_examples.append(p)
         view_example(examples_container)
-        # st.rerun()
 
     if add_text_btn and ex_text:
         p = Part.from_text(ex_text)
-        st.write(p.mime_type)
         st.session_state.multimodal_examples.append(p)
         view_example(examples_container)
-        # st.rerun()
 
     if del_last_btn:
         if len(st.session_state["multimodal_examples"]) > 0:
             st.session_state["multimodal_examples"].pop()
             view_example(examples_container)
-            # st.rerun()
 
     if cls_btn:
         st.session_state["multimodal_examples"] = []
