@@ -61,9 +61,10 @@ class DbInterface:
         self.cache = TTLCache(maxsize=1000, ttl=86400)  # 24 hours cache
         self.users.create_indexes(
             [
-                IndexModel([("phone_number", ASCENDING)], unique=True),
-                IndexModel([("email", ASCENDING)], unique=True),
-            ]
+                ("phone_number", ASCENDING),
+                ("email", ASCENDING),
+            ],
+            unique=True,
         )
         self.payments.create_index(
             [
@@ -81,7 +82,9 @@ class DbInterface:
         user_doc = self.users.find_one({"_id": user_id})
         if user_doc:
             user = User.from_doc(user_doc)
-            if user.login_events is not None:  # Add condition to check if login_events is not None
+            if (
+                user.login_events is not None
+            ):  # Add condition to check if login_events is not None
                 active_sessions = [
                     event for event in user.login_events if event.logout_time is None
                 ]
