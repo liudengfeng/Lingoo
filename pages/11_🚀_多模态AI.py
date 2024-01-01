@@ -271,19 +271,30 @@ with tabs[0]:
         max_chars=12288,
         height=300,
     )
-    cols = st.columns([1, 1, 1, 1, 1, 5])
+    tab0_btn_cols = st.columns([1, 1, 1, 1, 1, 5])
     # help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。"
-    add_btn = cols[0].button(
+    add_media_btn = tab0_btn_cols[0].button(
         ":film_projector:",
-        help="✨ 模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。",
+        help="✨ 添加图片或视频",
+        key="add_media_btn",
     )
-    del_btn = cols[1].button(":heavy_minus_sign:", help="✨ 删除提示词尾部的分隔符")
-    cls_btn = cols[2].button(":wastebasket:", help="✨ 清空提示词", key="clear_prompt")
-    submitted = cols[3].button("提交", help="✨ 如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
+    add_text_btn = tab0_btn_cols[1].button(
+        ":memo:",
+        help="✨ 添加文本",
+        key="add_text_btn",
+    )
+    del_btn = tab0_btn_cols[2].button(
+        ":rewind:", help="✨ 删除最后一条样本", key="del_last_example"
+    )
+    cls_btn = tab0_btn_cols[3].button(
+        ":wastebasket:", help="✨ 清空提示词", key="clear_prompt"
+    )
+    # submitted = tab0_btn_cols[4].button("提交", help="✨ 如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
+    submitted = tab0_btn_cols[4].button("提交")
 
     response_container = st.container()
 
-    if add_btn:
+    if add_media_btn:
         if ex_media_file:
             st.session_state.multimodal_examples.append(_process_media(ex_media_file))
             ex_media_file = None
@@ -296,7 +307,8 @@ with tabs[0]:
         st.rerun()
 
     if del_btn:
-        st.session_state["user_prompt"] = prompt.rstrip("<>\n")
+        st.session_state["multimodal_examples"] = []
+        st.session_state["user_prompt"] = []
         st.rerun()
 
     if submitted:
