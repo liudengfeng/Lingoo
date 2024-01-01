@@ -59,13 +59,8 @@ class DbInterface:
         self.payments = self.db["payments"]
         self.words = self.db["words"]
         self.cache = TTLCache(maxsize=1000, ttl=86400)  # 24 hours cache
-        self.users.create_indexes(
-            [
-                ("phone_number", ASCENDING),
-                ("email", ASCENDING),
-            ],
-            unique=True,
-        )
+        self.users.create_index([("phone_number", ASCENDING)], unique=True)
+        self.users.create_index([("f_email", ASCENDING)], unique=True)
         self.payments.create_index(
             [
                 ("phone_number", ASCENDING),
