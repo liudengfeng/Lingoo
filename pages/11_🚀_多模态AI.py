@@ -223,7 +223,7 @@ with tabs[0]:
     st.header(":rocket: :rainbow[通用多模态AI]", divider="rainbow", anchor=False)
     st.markdown("""您可以向`Gemini`模型发送多模态提示信息。支持的模态包括文字、图片和视频。""")
 
-    st.subheader(":clipboard: :rainbow[案例]", divider="rainbow", anchor=False)
+    st.subheader(":clipboard: :rainbow[添加案例（可选）]", divider="rainbow", anchor=False)
     st.markdown(
         "输入案例可丰富模型响应内容。`Gemini`模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。"
     )
