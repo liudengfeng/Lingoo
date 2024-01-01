@@ -234,18 +234,21 @@ st.divider()
 
 log_cols = st.columns(5)
 welcome_image = Image.open(LOGO_DIR / "welcome-1.jpg")
+with log_cols[2]:
+    st.image(welcome_image, width=200)
 
-with log_cols[1]:
+step_cols = st.columns(5)
+with step_cols[1]:
     st.markdown(
         """<a href="用户中心" target="_self">step 1 用户注册</a>""", unsafe_allow_html=True
     )
+
+with step_cols[2]:
     st.markdown(
         """<a href="用户中心" target="_self">step 2 订阅付费</a>""", unsafe_allow_html=True
     )
+with step_cols[3]:
     st.markdown("""<a href="" target="_self">step 3 登录使用</a>""", unsafe_allow_html=True)
-
-with log_cols[2]:
-    st.image(welcome_image, width=200)
 
 
 st.markdown(
