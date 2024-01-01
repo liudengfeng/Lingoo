@@ -6,6 +6,9 @@ from google.cloud import aiplatform
 from google.oauth2.service_account import Credentials
 from vertexai.preview.generative_models import HarmBlockThreshold, HarmCategory
 
+PROJECT_ID = "gllm-409401"
+LOCATION = "asia-northeast1"
+
 # 屏蔽大部分
 SAFETY_SETTINGS = [
     {"category": "HARM_CATEGORY_HARASSMENT", "threshold": "BLOCK_LOW_AND_ABOVE"},
@@ -57,8 +60,6 @@ def get_vertextai_service_account_info(secrets):
 
 
 def vertexai_configure(secrets):
-    project = "gllm-409401"
-    location = "asia-northeast1"
     # 完成认证及初始化
     service_account_info = get_vertextai_service_account_info(secrets)
     # 创建凭据
@@ -66,10 +67,10 @@ def vertexai_configure(secrets):
     aiplatform.init(
         # your Google Cloud Project ID or number
         # environment default used is not set
-        # project=project,
+        project=PROJECT_ID,
         # the Vertex AI region you will use
         # defaults to us-central1
-        # location=location,
+        location=LOCATION,
         # Google Cloud Storage bucket in same region as location
         # used to stage artifacts
         # staging_bucket="gs://my_staging_bucket",
@@ -81,8 +82,8 @@ def vertexai_configure(secrets):
         # encryption_spec_key_name=my_encryption_key_name,
         # the name of the experiment to use to track
         # logged metrics and parameters
-        # experiment="lingoo-experiment",
+        experiment="gllm-experiment",
         # description of the experiment above
-        # experiment_description="云端使用vertex ai",
+        experiment_description="云端使用vertex ai",
     )
-    vertexai.init(project=project, location=location)
+    # vertexai.init(project=PROJECT_ID, location=LOCATION)

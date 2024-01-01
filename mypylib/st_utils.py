@@ -9,10 +9,9 @@ from .google_cloud_configuration import (
     get_firestore_api_service_account_info,
     get_tran_api_service_account_info,
     vertexai_configure,
+    PROJECT_ID,
+    LOCATION,
 )
-
-PROJECT_ID = "gllm-409401"
-LOCATION = "asia-northeast1"
 
 
 def common_page_config():
