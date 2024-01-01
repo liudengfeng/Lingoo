@@ -296,8 +296,10 @@ with tabs[0]:
     response_container = st.container()
 
     if add_media_btn and ex_media_file:
-        st.session_state.multimodal_examples.append(_process_media(ex_media_file))
-        view_example(examples_container)
+        p = _process_media(ex_media_file)
+        examples_container.write(p)
+        # st.session_state.multimodal_examples.append(p)
+        # view_example(examples_container)
         # st.rerun()
 
     if add_text_btn and ex_text:
