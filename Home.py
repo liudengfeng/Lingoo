@@ -232,16 +232,12 @@ with col2:
     st.image(logo_image, width=320)
 st.divider()
 
-log_cols = st.columns(3)
-welcome_image = Image.open(LOGO_DIR / "welcome-1.jpg")
-with log_cols[1]:
-    st.image(welcome_image, use_column_width=True)
-
 step_cols = st.columns(5)
 with step_cols[1]:
     st.markdown(
         """<a href="用户中心" target="_self">第一步 注册用户</a>""", unsafe_allow_html=True
     )
+    st.link_button("注册用户", "用户中心#注册用户")
 
 with step_cols[2]:
     st.markdown(
@@ -249,6 +245,11 @@ with step_cols[2]:
     )
 with step_cols[3]:
     st.markdown("""<a href="" target="_self">第三步 登录使用</a>""", unsafe_allow_html=True)
+
+log_cols = st.columns(3)
+welcome_image = Image.open(LOGO_DIR / "welcome-1.jpg")
+with log_cols[1]:
+    st.image(welcome_image, use_column_width=True)
 
 
 st.markdown(

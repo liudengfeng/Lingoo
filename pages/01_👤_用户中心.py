@@ -63,7 +63,7 @@ tabs = st.tabs(items)
 # region 创建注册页面
 
 with tabs[items.index(":bust_in_silhouette: 用户注册")]:
-    st.subheader(":bust_in_silhouette: 用户注册")
+    st.subheader(":bust_in_silhouette: 用户注册", anchor="用户注册")
 
     with st.form(key="registration_form"):
         col1, col2 = st.columns(2)
@@ -453,7 +453,7 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
     if not st.session_state.dbi.is_service_active(st.session_state.user_info):
         st.error("您的账号未登录，或者尚未缴费、激活，无法更新个人信息。")
         st.stop()
-    
+
     CEFR = list(CEFR_LEVEL_MAPS.keys())
     COUNTRIES = ["中国"]
     user_doc = st.session_state.dbi.find_user(st.session_state.user_info["user_id"])
