@@ -201,15 +201,13 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
 def view_example(container):
     container.divider()
     col1, col2 = container.columns([1, 1])
-    for e in st.session_state.multimodal_examples:
-        if isinstance(e, str):
-            col2.markdown(e)
-        else:
-            mime_type = mimetypes.guess_type(e.name)[0]
-            if mime_type.startswith("video"):
-                col1.video(e, format=mime_type)
-            else:
-                col1.image(e, use_column_width=True, caption=e.name)
+    for p in st.session_state.multimodal_examples:
+        if p.mime_type == "text/plain":
+            col2.markdown(p.text)
+        elif p.mime_type.startswith("image"):
+            col1.image(p.data, use_column_width=True)
+        elif p.mime_type.startswith("video"):
+            col1.video(p.data)
 
 
 # endregion
@@ -287,11 +285,11 @@ with tabs[0]:
 
     if add_btn:
         if ex_media_file:
-            st.session_state.multimodal_examples.append(ex_media_file)
+            st.session_state.multimodal_examples.append(_process_media(ex_media_file))
             ex_media_file = None
 
         if ex_text:
-            st.session_state.multimodal_examples.append(ex_text)
+            st.session_state.multimodal_examples.append(Part.from_text(ex_text))
             st.session_state.multimodal_ex_text = ""
 
         view_example(examples_container)
