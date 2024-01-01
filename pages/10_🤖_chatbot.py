@@ -31,7 +31,9 @@ if "current_token_count" not in st.session_state:
     st.session_state["current_token_count"] = 0
 
 if "total_token_count" not in st.session_state:
-    st.session_state["total_token_count"] = 0
+    st.session_state["total_token_count"] = st.session_state.dbi.get_token_count(
+        st.session_state.user_info["phone_number"]
+    )
 
 if st.session_state.get("clear_example"):
     st.session_state["user_text_area"] = ""
@@ -183,7 +185,7 @@ with st.sidebar.expander("查看当前样例..."):
     for his in st.session_state.chat_session.history[:num]:
         st.write(f"**{his.role}**：{his.parts[0].text}")
 
-st.sidebar.info("对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。", icon="✨")
+help_info = "✨ 对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。"
 sidebar_status = st.sidebar.empty()
 # endregion
 
@@ -251,7 +253,7 @@ if prompt := st.chat_input("输入提示以便开始对话"):
 
 
 msg = f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
-sidebar_status.markdown(msg)
+sidebar_status.markdown(msg, help=help_info)
 # st.write(st.session_state.chat_session.history)
 
 # endregion
