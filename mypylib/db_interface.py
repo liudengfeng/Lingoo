@@ -106,7 +106,9 @@ class DbInterface:
                     break
 
     # endregion
+                
     # region 用户管理
+                
     def register_user(self, user: User):
         self.users.insert_one(user.model_dump())
 
@@ -135,6 +137,7 @@ class DbInterface:
     # endregion
 
     # region 支付管理
+
     def update_payment(self, phone_number, order_id, update_fields: dict):
         result = self.payments.update_one(
             {"phone_number": phone_number, "order_id": order_id},
