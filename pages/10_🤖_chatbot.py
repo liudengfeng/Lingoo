@@ -246,9 +246,11 @@ if prompt := st.chat_input("输入提示以便开始对话"):
             st.session_state.total_token_count += st.session_state.current_token_count
     except Exception as e:
         # 处理被阻止的消息
-        st.toast("抱歉，您尝试发送的消息包含潜在不安全的内容，已被阻止。")
-        #  删除最后一对会话
-        st.session_state.chat_session.rewind()
+        # st.toast("抱歉，您尝试发送的消息包含潜在不安全的内容，已被阻止。")
+        # #  删除最后一对会话
+        # st.session_state.chat_session.rewind()
+        st.write(e)
+        # pass
 
 
 msg = f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
