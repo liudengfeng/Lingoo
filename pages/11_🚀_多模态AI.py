@@ -126,8 +126,7 @@ def _process_media(uploaded_file):
     # 用文件扩展名称形成 MIME 类型
     mime_type = mimetypes.guess_type(uploaded_file.name)[0]
     p = Part.from_data(data=uploaded_file.getvalue(), mime_type=mime_type)
-    st.write(p.mime_type)
-    return p
+    return {"mime_type": mime_type, "part": p}
 
 
 def _process_image_and_prompt(uploaded_files, prompt):
@@ -202,14 +201,13 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
 
 def view_example(container):
     for p in st.session_state.multimodal_examples:
-        mime_type = p.mime_type
-        container.write(mime_type)
+        mime_type = p["mime_type"]
         if mime_type.startswith("text"):
-            container.markdown(p.text)
+            container.markdown(p["part"].text)
         elif mime_type.startswith("image"):
-            container.image(p.inline_data.data, use_column_width=True)
+            container.image(p["part"].inline_data.data, use_column_width=True)
         elif mime_type.startswith("video"):
-            container.video(p.inline_data.data)
+            container.video(p["part"].inline_data.data)
 
 
 # endregion
