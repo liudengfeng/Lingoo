@@ -177,7 +177,6 @@ with tabs[items.index(":bust_in_silhouette: 用户注册")]:
 
             user.hash_password()
             try:
-                st.write(user.model_dump())
                 st.session_state.dbi.register_user(user)
             except DuplicateKeyError as e:
                 st.write(e)
