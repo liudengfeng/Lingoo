@@ -199,7 +199,6 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
 
 
 def view_example(container):
-    container.divider()
     for p in st.session_state.multimodal_examples:
         mime_type = p.mime_type
         st.write(mime_type)
@@ -209,6 +208,7 @@ def view_example(container):
             container.image(p.data, use_column_width=True)
         elif mime_type.startswith("video"):
             container.video(p.data)
+    container.divider()
 
 
 # endregion
