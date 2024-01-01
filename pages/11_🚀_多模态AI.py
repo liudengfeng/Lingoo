@@ -161,7 +161,7 @@ def generate_content_from_files_and_prompt(response_container):
 
     full_response = ""
     message_placeholder = col2.empty()
-    for chunk in responses:
+    for chunk in responses:  # type: ignore
         full_response += chunk.text
         time.sleep(0.05)
         # Add a blinking cursor to simulate typing
@@ -292,8 +292,11 @@ with tabs[0]:
 
     response_container = st.container()
 
+    if cls_btn:
+        st.session_state.multimodal_examples = []
+
     if submitted:
-        if len(uploaded_files) == 0:
+        if uploaded_files is None or len(uploaded_files) == 0:  # type: ignore
             st.error("请上传图片或视频")
             st.stop()
         if not prompt:
