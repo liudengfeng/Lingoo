@@ -39,9 +39,6 @@ if "total_token_count" not in st.session_state:
 if "user_prompt" not in st.session_state:
     st.session_state["user_prompt"] = ""
 
-if st.session_state.get("clear_prompt"):
-    st.session_state["user_prompt"] = ""
-
 if "multimodal_ex_text" not in st.session_state:
     st.session_state["multimodal_ex_text"] = ""
 
