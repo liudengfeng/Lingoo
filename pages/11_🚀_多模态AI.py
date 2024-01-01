@@ -129,35 +129,19 @@ def _process_media(uploaded_file):
     return {"mime_type": mime_type, "part": p}
 
 
-def _process_image_and_prompt(uploaded_files, prompt):
-    contents = []
-    separator = "<>"
-    if separator not in prompt:
-        # 如果没有分隔符，代表没有示例
-        for mf in uploaded_files:
-            contents.append(_process_media(mf))
-        contents.append(prompt)
-        return contents
-    ps = [p.strip() for p in prompt.split(separator)]
-    msg = f"错误：多媒体文件的数量应等于提示的数量加1。请检查你的输入并重试。"
-    if len(uploaded_files) != len(ps) + 1:
-        st.error(msg)
-        st.stop()
-    # To read file as bytes:
-    media_parts = [_process_media(m) for m in uploaded_files]
-    for m, p in zip(media_parts[:-1], ps):
-        contents.append(m)
-        contents.append(p)
-    contents.append(media_parts[-1])
-    return contents
+def view_example(container):
+    for p in st.session_state.multimodal_examples:
+        mime_type = p["mime_type"]
+        if mime_type.startswith("text"):
+            container.markdown(p["part"].text)
+        elif mime_type.startswith("image"):
+            container.image(p["part"].inline_data.data, use_column_width=True)
+        elif mime_type.startswith("video"):
+            container.video(p["part"].inline_data.data)
 
 
-def generate_content_from_files_and_prompt(uploaded_files, prompt, response_container):
-    try:
-        contents = _process_image_and_prompt(uploaded_files, prompt)
-    except Exception as e:
-        st.error(f"处理多媒体文件时出错：{e}")
-        return
+def generate_content_from_files_and_prompt(response_container):
+    contents = [p["part"] for p in st.session_state.multimodal_examples]
     model = load_vertex_model("gemini-pro-vision")
     generation_config = GenerationConfig(
         temperature=st.session_state["temperature"],
@@ -173,12 +157,7 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
     )
 
     col1, col2 = response_container.columns(2)
-    for m in uploaded_files:
-        mime_type = mimetypes.guess_type(m.name)[0]
-        if mime_type.startswith("image"):
-            col1.image(m, use_column_width=True)
-        elif mime_type.startswith("video"):
-            col1.video(m)
+    view_example(col1)
 
     full_response = ""
     message_placeholder = col2.empty()
@@ -199,17 +178,6 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
     )
 
 
-def view_example(container):
-    for p in st.session_state.multimodal_examples:
-        mime_type = p["mime_type"]
-        if mime_type.startswith("text"):
-            container.markdown(p["part"].text)
-        elif mime_type.startswith("image"):
-            container.image(p["part"].inline_data.data, use_column_width=True)
-        elif mime_type.startswith("video"):
-            container.video(p["part"].inline_data.data)
-
-
 # endregion
 
 # region 通用 AI
@@ -222,8 +190,8 @@ with tabs[0]:
     st.markdown(
         "输入案例可丰富模型响应内容。`Gemini`模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。"
     )
-    tab0_col1, tab0_col2 = st.columns([1, 1])
 
+    tab0_col1, tab0_col2 = st.columns([1, 1])
     ex_media_file = tab0_col1.file_uploader(
         "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
         accept_multiple_files=False,
@@ -246,6 +214,25 @@ with tabs[0]:
         help="✨ 期望模型响应或标识",
     )
 
+    tab0_ex_btn_cols = st.columns([1, 1, 1, 1, 6])
+
+    add_media_btn = tab0_ex_btn_cols[0].button(
+        ":film_projector:",
+        help="✨ 添加图片或视频",
+        key="add_media_btn",
+    )
+    add_text_btn = tab0_ex_btn_cols[1].button(
+        ":memo:",
+        help="✨ 添加文本",
+        key="add_text_btn",
+    )
+    del_last_btn = tab0_ex_btn_cols[2].button(
+        ":rewind:", help="✨ 删除最后一条样本", key="del_last_example"
+    )
+    cls_ex_btn = tab0_ex_btn_cols[3].button(
+        ":arrows_counterclockwise:", help="✨ 删除全部样本", key="clear_example"
+    )
+
     st.subheader(
         f":clipboard: :rainbow[已添加的案例（{len(st.session_state.multimodal_examples)}）]",
         divider="rainbow",
@@ -253,6 +240,25 @@ with tabs[0]:
     )
 
     examples_container = st.container()
+
+    if add_media_btn and ex_media_file:
+        p = _process_media(ex_media_file)
+        st.session_state.multimodal_examples.append(p)
+        view_example(examples_container)
+
+    if add_text_btn and ex_text:
+        p = Part.from_text(ex_text)
+        st.session_state.multimodal_examples.append({"mime_type": "text", "part": p})
+        view_example(examples_container)
+
+    if del_last_btn:
+        if len(st.session_state["multimodal_examples"]) > 0:
+            st.session_state["multimodal_examples"].pop()
+            view_example(examples_container)
+
+    if cls_ex_btn:
+        st.session_state["multimodal_examples"] = []
+        view_example(examples_container)
 
     st.subheader(":bulb: :rainbow[提示词]", divider="rainbow", anchor=False)
     uploaded_files = st.file_uploader(
@@ -277,47 +283,14 @@ with tabs[0]:
         max_chars=12288,
         height=300,
     )
-    tab0_btn_cols = st.columns([1, 1, 1, 1, 1, 5])
+    tab0_btn_cols = st.columns([1, 1, 8])
     # help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。"
-    add_media_btn = tab0_btn_cols[0].button(
-        ":film_projector:",
-        help="✨ 添加图片或视频",
-        key="add_media_btn",
-    )
-    add_text_btn = tab0_btn_cols[1].button(
-        ":memo:",
-        help="✨ 添加文本",
-        key="add_text_btn",
-    )
-    del_last_btn = tab0_btn_cols[2].button(
-        ":rewind:", help="✨ 删除最后一条样本", key="del_last_example"
-    )
-    cls_btn = tab0_btn_cols[3].button(
+    cls_btn = tab0_btn_cols[0].button(
         ":wastebasket:", help="✨ 清空提示词", key="clear_prompt"
     )
-    # submitted = tab0_btn_cols[4].button("提交", help="✨ 如果含有示例响应，在多个响应之间，添加 '<>' 符号进行分隔。")
-    submitted = tab0_btn_cols[4].button("提交")
+    submitted = tab0_btn_cols[1].button("提交")
 
     response_container = st.container()
-
-    if add_media_btn and ex_media_file:
-        p = _process_media(ex_media_file)
-        st.session_state.multimodal_examples.append(p)
-        view_example(examples_container)
-
-    if add_text_btn and ex_text:
-        p = Part.from_text(ex_text)
-        st.session_state.multimodal_examples.append({"mime_type": "text", "part": p})
-        view_example(examples_container)
-
-    if del_last_btn:
-        if len(st.session_state["multimodal_examples"]) > 0:
-            st.session_state["multimodal_examples"].pop()
-            view_example(examples_container)
-
-    if cls_btn:
-        st.session_state["multimodal_examples"] = []
-        view_example(examples_container)
 
     if submitted:
         if len(uploaded_files) == 0:
@@ -326,9 +299,12 @@ with tabs[0]:
         if not prompt:
             st.error("请添加提示词")
             st.stop()
-        generate_content_from_files_and_prompt(
-            uploaded_files, prompt, response_container
+        for m in uploaded_files:
+            st.session_state.multimodal_examples.append(_process_media(m))
+        st.session_state.multimodal_examples.append(
+            {"mime_type": "text", "part": Part.from_text(prompt)}
         )
+        generate_content_from_files_and_prompt(response_container)
 
     # endregion
 
