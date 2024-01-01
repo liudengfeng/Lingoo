@@ -1,14 +1,8 @@
-import locale
-import os
-import time
-import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import pytz
 import streamlit as st
-from azure.core.exceptions import ResourceNotFoundError
-from azure.storage.blob import BlobServiceClient
 from cryptography.fernet import Fernet
 from PIL import Image
 from pymongo.errors import DuplicateKeyError
@@ -72,14 +66,14 @@ with st.form(key="registration_form"):
     )
     current_level = col1.selectbox(
         "当前英语水平",
-        ["A1", "A2", "B1", "B2", "C1", "C2"],
+        CEFR_LEVEL_MAPS.keys(),
         index=0,
         key="current_level",
         help="✨ 如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
     )
     target_level = col2.selectbox(
         "期望达到的英语水平",
-        ["A1", "A2", "B1", "B2", "C1", "C2"],
+        CEFR_LEVEL_MAPS.keys(),
         index=5,
         key="target_level",
         help="✨ 如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
@@ -164,21 +158,21 @@ with st.form(key="registration_form"):
         try:
             st.session_state.dbi.register_user(user)
         except DuplicateKeyError as e:
-            st.write(e)
-            st.stop()
-            # # 如果抛出 DuplicateKeyError 异常，从异常的消息中解析出字段的名称
-            # field_name = str(e).split("index: ")[1].split(" dup key")[0]
-            # msg = "邮箱" if field_name.startswith("f_email") else "电话号码"
-            # status.markdown(
-            #     f"""
-            # **您输入的{msg}已被注册。**
-            # 如果您已完成付款，系统会自动为您注册，请使用以下方式直接登录：
-            # 1. 在左侧菜单“用户中心”的“登录”选项，输入您已注册的手机号码。
-            # 2. 输入默认密码：您的手机号码。
-            # 3. 点击“确定”按钮。
-            # 登录成功后，您可以在“用户中心”修改个人信息。"""
-            # )
+            # st.write(e)
             # st.stop()
+            # 如果抛出 DuplicateKeyError 异常，从异常的消息中解析出字段的名称
+            field_name = str(e).split("index: ")[1].split(" dup key")[0]
+            msg = "邮箱" if field_name.startswith("f_email") else "电话号码"
+            status.markdown(
+                f"""
+            **您输入的{msg}已被注册。**
+            如果您已完成付款，系统会自动为您注册，请使用以下方式直接登录：
+            1. 在左侧菜单“用户中心”的“登录”选项，输入您已注册的手机号码。
+            2. 输入默认密码：您的手机号码。
+            3. 点击“确定”按钮。
+            登录成功后，您可以在“用户中心”修改个人信息。"""
+            )
+            st.stop()
         # 截至付款期限
         deadline = datetime.now(timezone.utc) + timedelta(days=3)
         # 创建一个时区对象
