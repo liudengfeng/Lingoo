@@ -200,9 +200,7 @@ def create_registration_page():
             # 将 UTC 时间转换为特定的时区
             deadline = deadline.astimezone(tz)
             deadline_str = deadline.strftime("%Y-%m-%d %H:%M:%S")
-            st.success(
-                f"""恭喜{display_name}注册成功！为确保您能尽快体验我们的服务，请于{deadline_str}前完成付款。"""
-            )
+            st.toast(f"""恭喜{display_name}注册成功！为确保您能尽快体验我们的服务，请于{deadline_str}前完成付款。""")
 
         with st.expander("**服务条款**", expanded=False):
             st.markdown(
