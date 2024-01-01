@@ -199,6 +199,11 @@ def generate_content_from_files_and_prompt(uploaded_files, prompt, response_cont
 
 
 def view_example(container):
+    container.subheader(
+        f":clipboard: :rainbow[已添加的案例（{len(st.session_state.multimodal_examples)}）]",
+        divider="rainbow",
+        anchor=False,
+    )
     for p in st.session_state.multimodal_examples:
         mime_type = p.mime_type
         container.write(mime_type)
