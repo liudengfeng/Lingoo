@@ -38,12 +38,6 @@ if "total_token_count" not in st.session_state:
         st.session_state.user_info["phone_number"]
     )
 
-# if "user_prompt" not in st.session_state:
-#     st.session_state["user_prompt"] = ""
-
-if "multimodal_ex_text" not in st.session_state:
-    st.session_state["multimodal_ex_text"] = ""
-
 # endregion
 
 # region 边栏
@@ -186,6 +180,10 @@ def generate_content_from_files_and_prompt(contents, response_container):
     )
 
 
+def clear_prompt():
+    st.session_state["user_prompt_key"] = ""
+
+
 # endregion
 
 # region 通用 AI
@@ -217,7 +215,6 @@ with tabs[0]:
     ex_text = tab0_col2.text_area(
         "期望的响应",
         placeholder="输入期望的响应",
-        value=st.session_state.get("multimodal_ex_text", ""),
         key="ex_text_key",
         help="✨ 期望模型响应或标识",
     )
@@ -300,15 +297,15 @@ with tabs[0]:
     tab0_btn_cols = st.columns([1, 1, 8])
     # help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。"
     cls_btn = tab0_btn_cols[0].button(
-        ":wastebasket:", help="✨ 清空提示词", key="clear_prompt"
+        ":wastebasket:", help="✨ 清空提示词", key="clear_prompt", on_click=clear_prompt
     )
     submitted = tab0_btn_cols[1].button("提交")
 
     response_container = st.container()
 
-    if cls_btn:
-        st.session_state["user_prompt_key"] = ""
-        st.rerun()
+    # if cls_btn:
+    #     st.session_state["user_prompt_key"] = ""
+    #     st.rerun()
 
     if submitted:
         if uploaded_files is None or len(uploaded_files) == 0:  # type: ignore
