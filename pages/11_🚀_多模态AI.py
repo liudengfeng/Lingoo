@@ -274,7 +274,7 @@ with tabs[0]:
     prompt = st.text_area(
         "您的提示词",
         key="user_prompt_key",
-        value=st.session_state.get("user_prompt", ""),
+        value=st.session_state["user_prompt"],
         placeholder="请输入关于多媒体的提示词，例如：'描述这张风景图片'",
         max_chars=12288,
         height=300,
