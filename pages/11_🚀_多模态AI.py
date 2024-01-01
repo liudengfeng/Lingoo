@@ -213,7 +213,6 @@ def view_example(container):
             container.image(p.inline_data.data, use_column_width=True)
         elif mime_type.startswith("video"):
             container.video(p.inline_data.data)
-    container.divider()
 
 
 # endregion
@@ -307,7 +306,9 @@ with tabs[0]:
         # st.rerun()
 
     if add_text_btn and ex_text:
-        st.session_state.multimodal_examples.append(Part.from_text(ex_text))
+        p = Part.from_text(ex_text)
+        st.write(p.mime_type)
+        st.session_state.multimodal_examples.append(p)
         view_example(examples_container)
         # st.rerun()
 
