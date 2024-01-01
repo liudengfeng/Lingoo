@@ -307,7 +307,7 @@ with tabs[0]:
 
     if add_text_btn and ex_text:
         p = Part.from_text(ex_text)
-        st.session_state.multimodal_examples.append(p)
+        st.session_state.multimodal_examples.append({"mime_type": "text", "part": p})
         view_example(examples_container)
 
     if del_last_btn:
