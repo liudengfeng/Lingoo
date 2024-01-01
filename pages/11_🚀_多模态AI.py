@@ -307,7 +307,8 @@ with tabs[0]:
     response_container = st.container()
 
     if cls_btn:
-        st.session_state.user_prompt = ""
+        # st.session_state.user_prompt = ""
+        st.session_state.user_prompt_key = ""
         st.rerun()
 
     if submitted:
