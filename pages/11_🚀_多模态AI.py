@@ -37,7 +37,7 @@ if "total_token_count" not in st.session_state:
     st.session_state["total_token_count"] = 0
 
 if "user_prompt" not in st.session_state:
-    st.session_state["user_prompt"] = "默认值"
+    st.session_state["user_prompt"] = ""
 
 if "multimodal_ex_text" not in st.session_state:
     st.session_state["multimodal_ex_text"] = ""
@@ -289,7 +289,7 @@ with tabs[0]:
     response_container = st.container()
 
     if cls_btn:
-        st.session_state["user_prompt"] = ""
+        st.session_state.user_prompt = ""
         st.rerun()
 
     if submitted:
