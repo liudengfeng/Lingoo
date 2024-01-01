@@ -163,3 +163,4 @@ cython_debug/
 models/
 audio_data/
 tutorials/
+mypackages.txt

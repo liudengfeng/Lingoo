@@ -66,10 +66,10 @@ def vertexai_configure(secrets):
     aiplatform.init(
         # your Google Cloud Project ID or number
         # environment default used is not set
-        project=project,
+        # project=project,
         # the Vertex AI region you will use
         # defaults to us-central1
-        location=location,
+        # location=location,
         # Google Cloud Storage bucket in same region as location
         # used to stage artifacts
         # staging_bucket="gs://my_staging_bucket",
