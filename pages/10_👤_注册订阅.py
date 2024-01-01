@@ -361,7 +361,7 @@ DF studio 可能会使用用户的数据来提供本应用的服务，包括但�
 
 # region 订阅付费
 
-st.subheader(":bento: 订阅套餐", anchor="订阅套餐")
+st.subheader(":bento: 订阅套餐", anchor="pricing")
 
 # Define pricing tiers
 pricing_tiers = [

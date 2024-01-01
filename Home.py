@@ -237,7 +237,7 @@ with step_cols[1]:
     st.link_button(":bust_in_silhouette: 注册用户", "注册订阅#用户注册")
 
 with step_cols[2]:
-    st.link_button(":package: 订阅套餐", "注册订阅#订阅套餐")
+    st.link_button(":package: 订阅套餐", "注册订阅#pricing")
 
 with step_cols[3]:
     st.link_button(":key: 登录使用", "#")
