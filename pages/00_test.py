@@ -50,6 +50,17 @@ To add elements to the returned containers, you can use "with" notation (preferr
 Warning
 
 All the content of every tab is always sent to and rendered on the frontend. Conditional rendering is currently not supported.
+Streamlit Version
+Version 1.29.0
+Insert containers separated into tabs.
+
+Inserts a number of multi-element containers as tabs. Tabs are a navigational element that allows users to easily move between groups of related content.
+
+To add elements to the returned containers, you can use "with" notation (preferred) or just call methods directly on the returned object. See examples below.
+
+Warning
+
+All the content of every tab is always sent to and rendered on the frontend. Conditional rendering is currently not supported.
 """
 
 st.subheader(":bento: 1", anchor="1")
