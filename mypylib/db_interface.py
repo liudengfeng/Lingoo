@@ -17,6 +17,7 @@ from .db_model import (
     Payment,
     PaymentStatus,
     PurchaseType,
+    TokenUsageRecord,
     User,
     UserRole,
     str_to_enum,
@@ -410,5 +411,31 @@ class DbInterface:
     def find_word(self, word):
         word_data = self.words.find_one({"word": word})
         return word_data
+
+    # endregion
+
+    # region token
+
+    def get_token_count(self, phone_number):
+        user_doc = self.users.find_one({"phone_number": phone_number})
+        if user_doc:
+            return user_doc.get("total_tokens", 0)
+        else:
+            return 0
+
+    def add_token_record(self, phone_number, token_type, used_token_count):
+        used_token = TokenUsageRecord(
+            token_type=token_type,
+            used_token_count=used_token_count,
+            used_at=datetime.now(tz=timezone.utc),
+        )
+
+        self.users.update_one(
+            {"phone_number": phone_number},
+            {
+                "$push": {"used_tokens": used_token.model_dump()},
+                "$inc": {"total_tokens": used_token_count},
+            },
+        )
 
     # endregion

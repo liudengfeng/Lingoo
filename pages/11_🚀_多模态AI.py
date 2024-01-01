@@ -34,7 +34,9 @@ if "current_token_count" not in st.session_state:
     st.session_state["current_token_count"] = 0
 
 if "total_token_count" not in st.session_state:
-    st.session_state["total_token_count"] = 0
+    st.session_state["total_token_count"] = st.session_state.dbi.get_token_count(
+        st.session_state.user_info["phone_number"]
+    )
 
 if "user_prompt" not in st.session_state:
     st.session_state["user_prompt"] = ""
@@ -169,7 +171,16 @@ def generate_content_from_files_and_prompt(contents, response_container):
     st.session_state.current_token_count = model.count_tokens(
         [p["part"] for p in contents] + [Part.from_text(full_response)]
     ).total_tokens
+    # 添加记录到数据库
+    st.session_state.dbi.add_token_record(
+        st.session_state.user_info["phone_number"],
+        "gemini-pro-vision",
+        st.session_state.current_token_count,
+    )
     st.session_state.total_token_count += st.session_state.current_token_count
+    # total_token_count = st.session_state.dbi.get_token_count(
+    #     st.session_state.user_info["phone_number"]
+    # )
     sidebar_status.markdown(
         f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
     )
@@ -238,12 +249,18 @@ with tabs[0]:
 
     examples_container = st.container()
 
-    if add_media_btn and ex_media_file:
+    if add_media_btn:
+        if not ex_media_file:
+            st.error("请添加多媒体文件")
+            st.stop()
         p = _process_media(ex_media_file)
         st.session_state.multimodal_examples.append(p)
         view_example(st.session_state.multimodal_examples, examples_container)
 
-    if add_text_btn and ex_text:
+    if add_text_btn:
+        if not ex_text:
+            st.error("请输入文本")
+            st.stop()
         p = Part.from_text(ex_text)
         st.session_state.multimodal_examples.append({"mime_type": "text", "part": p})
         view_example(st.session_state.multimodal_examples, examples_container)

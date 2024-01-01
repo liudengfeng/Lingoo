@@ -35,9 +35,10 @@ class LoginEvent(BaseModel):
     session_id: str = Field("")
 
 
-class UsedToken(BaseModel):
+class TokenUsageRecord(BaseModel):
     token_type: str = Field(default="")
     used_token_count: int = Field(default=0)
+    used_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class LearningRecord(BaseModel):
@@ -97,7 +98,8 @@ class User(BaseModel):
     )  # 新增注册时间字段
     login_events: Optional[List[LoginEvent]] = Field(default_factory=list)
     learning_records: List[LearningRecord] = Field(default=[])
-    used_tokens: List[UsedToken] = Field(default=[])
+    used_tokens: List[TokenUsageRecord] = Field(default=[])
+    total_tokens: int = Field(default=0)
     memo: Optional[str] = Field("")  # 新增备注字段
 
     @classmethod
