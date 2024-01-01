@@ -122,12 +122,13 @@ check_and_force_logout(sidebar_status)
 def _process_media(uploaded_file):
     # 用文件扩展名称形成 MIME 类型
     mime_type = mimetypes.guess_type(uploaded_file.name)[0]
-    p = Part.from_data(data=uploaded_file.getvalue(), mime_type=mime_type)
+    p = Part.from_data(data=uploaded_file.getvalue(), mime_type=mime_type)  # type: ignore
     return {"mime_type": mime_type, "part": p}
 
 
-def view_example(container):
-    for p in st.session_state.multimodal_examples:
+def view_example(examples, container):
+    # for p in st.session_state.multimodal_examples:
+    for p in examples:
         mime_type = p["mime_type"]
         if mime_type.startswith("text"):
             container.markdown(p["part"].text)
@@ -153,7 +154,7 @@ def generate_content_from_files_and_prompt(contents, response_container):
     )
 
     col1, col2 = response_container.columns(2)
-    view_example(col1)
+    view_example(contents, col1)
 
     full_response = ""
     message_placeholder = col2.empty()
@@ -240,21 +241,21 @@ with tabs[0]:
     if add_media_btn and ex_media_file:
         p = _process_media(ex_media_file)
         st.session_state.multimodal_examples.append(p)
-        view_example(examples_container)
+        view_example(st.session_state.multimodal_examples, examples_container)
 
     if add_text_btn and ex_text:
         p = Part.from_text(ex_text)
         st.session_state.multimodal_examples.append({"mime_type": "text", "part": p})
-        view_example(examples_container)
+        view_example(st.session_state.multimodal_examples, examples_container)
 
     if del_last_btn:
         if len(st.session_state["multimodal_examples"]) > 0:
             st.session_state["multimodal_examples"].pop()
-            view_example(examples_container)
+            view_example(st.session_state.multimodal_examples, examples_container)
 
     if cls_ex_btn:
         st.session_state["multimodal_examples"] = []
-        view_example(examples_container)
+        view_example(st.session_state.multimodal_examples, examples_container)
 
     st.subheader(":bulb: :rainbow[提示词]", divider="rainbow", anchor=False)
     uploaded_files = st.file_uploader(
