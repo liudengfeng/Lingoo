@@ -232,23 +232,23 @@ with col2:
     st.image(logo_image, width=320)
 st.divider()
 
-log_cols = st.columns(5)
+log_cols = st.columns(3)
 welcome_image = Image.open(LOGO_DIR / "welcome-1.jpg")
-with log_cols[2]:
-    st.image(welcome_image, width=200)
+with log_cols[1]:
+    st.image(welcome_image, use_column_width=True)
 
 step_cols = st.columns(5)
 with step_cols[1]:
     st.markdown(
-        """<a href="用户中心" target="_self">step 1 用户注册</a>""", unsafe_allow_html=True
+        """<a href="用户中心" target="_self">第一步 注册用户</a>""", unsafe_allow_html=True
     )
 
 with step_cols[2]:
     st.markdown(
-        """<a href="用户中心" target="_self">step 2 订阅付费</a>""", unsafe_allow_html=True
+        """<a href="用户中心" target="_self">第二步 订阅付费</a>""", unsafe_allow_html=True
     )
 with step_cols[3]:
-    st.markdown("""<a href="" target="_self">step 3 登录使用</a>""", unsafe_allow_html=True)
+    st.markdown("""<a href="" target="_self">第三步 登录使用</a>""", unsafe_allow_html=True)
 
 
 st.markdown(
