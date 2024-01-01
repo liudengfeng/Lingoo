@@ -5,26 +5,18 @@ import streamlit as st
 import vertexai
 from PIL import Image as PImage
 from vertexai.generative_models._generative_models import ContentsType
-from vertexai.preview.generative_models import (
-    Content,
-    GenerationConfig,
-    GenerationResponse,
-    GenerativeModel,
-    Image,
-    Part,
-)
+from vertexai.preview.generative_models import (GenerationConfig,
+                                                GenerativeModel, Part)
 
 from mypylib.ai_utils import view_stream_response
-from mypylib.google_cloud_configuration import (
-    DEFAULT_SAFETY_SETTINGS,
-    vertexai_configure,
-)
-from mypylib.st_utils import authenticate_and_configure_services, load_vertex_model
+from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
+from mypylib.st_utils import (authenticate_and_configure_services,
+                              check_and_force_logout, load_vertex_model)
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 IMAGE_DIR: Path = CURRENT_CWD / "resource/multimodal"
 
-vertexai_configure(st.secrets)
+authenticate_and_configure_services()
 
 gemini_pro_vision_generation_config = {
     "max_output_tokens": 2048,
@@ -60,6 +52,19 @@ def get_gemini_pro_vision_response(
         stream=stream,
     )
 
+
+help_info = "✨ 对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。"
+sidebar_status = st.sidebar.empty()
+sidebar_status.markdown(
+    f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}",
+    help=help_info,
+)
+
+# region 认证及强制退出
+
+check_and_force_logout(sidebar_status)
+
+# endregion
 
 st.header("Vertex AI Gemini 示例", divider="rainbow")
 
