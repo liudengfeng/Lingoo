@@ -89,7 +89,7 @@ class GoogleDbInterface:
         return session_id
 
     def login(self, phone_number, password):
-        # 在缓存中查询是否已经正常登录 TODO：缓存内容
+        # 在缓存中查询是否已经正常登录
         if (
             phone_number in self.cache
             and self.cache[phone_number].get("status", "") == "success"
