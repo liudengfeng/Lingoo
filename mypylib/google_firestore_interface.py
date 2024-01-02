@@ -128,6 +128,11 @@ class GoogleDbInterface:
                     "timezone": user.timezone,
                     "message": f"嗨！{user.display_name}，又见面了。",
                 }
+            else:
+                return {
+                    "status": "error",
+                    "message": "密码错误，请重新输入",
+                }
         except Exception as e:
             # st.write(e)
             return {
