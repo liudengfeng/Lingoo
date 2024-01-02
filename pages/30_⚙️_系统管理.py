@@ -400,7 +400,7 @@ with tabs[items.index("订阅登记")]:
                 len(st.session_state.gdbi.db.collection("payments").get()) + 1
             ).zfill(10)
             receivable = PRICES[purchase_type]  # type: ignore
-            discount_rate = (payment_amount / receivable,)
+            discount_rate = payment_amount / receivable
             if discount_rate < 0.5:  # 你可以根据需要调整这个阈值
                 confirm = st.radio("折扣率较低，是否接受？", ("是", "否"))
                 if confirm == "否":
