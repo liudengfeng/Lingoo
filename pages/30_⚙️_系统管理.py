@@ -428,8 +428,8 @@ with tabs[items.index("支付管理")]:
                     }
                 )
 
-            # 删除字典中的空值部分
-            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            # 删除字典中的空值部分【None ""】
+            kwargs = {k: v for k, v in kwargs.items() if v}
             st.write(f"{kwargs=}")
 
             # 检查数据生成的参数及其类型
