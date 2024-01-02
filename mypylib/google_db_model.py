@@ -33,12 +33,20 @@ class LoginEvent(BaseModel):
     logout_time: Optional[datetime] = Field(default=None)
     session_id: str = Field("")
 
+    @classmethod
+    def from_doc(cls, doc: dict):
+        return cls(**doc)
+
 
 class TokenUsageRecord(BaseModel):
     phone_number: str = Field("", max_length=15)
     token_type: str = Field(default="")
     used_token_count: int = Field(default=0)
     used_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @classmethod
+    def from_doc(cls, doc: dict):
+        return cls(**doc)
 
 
 class LearningRecord(BaseModel):
@@ -51,6 +59,10 @@ class LearningRecord(BaseModel):
     performance: str = Field(default="")
     feedback: Optional[str] = Field(default=None)
     difficulty: Optional[str] = Field(default=None)
+
+    @classmethod
+    def from_doc(cls, doc: dict):
+        return cls(**doc)
 
 
 def str_to_enum(s: str, enum_type: Type[Enum]) -> Union[Enum, str]:
@@ -74,6 +86,10 @@ class Payment(BaseModel):
     is_approved: bool = Field(False)
     sales_representative: str = Field("")
     remark: str = Field("")
+
+    @classmethod
+    def from_doc(cls, doc: dict):
+        return cls(**doc)
 
 
 class User(BaseModel):
@@ -104,3 +120,7 @@ class User(BaseModel):
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
+
+    @classmethod
+    def from_doc(cls, doc: dict):
+        return cls(**doc)
