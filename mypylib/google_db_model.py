@@ -2,8 +2,8 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import List, Optional, Type, Union
 
-from bson import ObjectId
-from cryptography.fernet import Fernet
+# from cryptography.fernet import Fernet
+from google.cloud import firestore
 from pydantic import BaseModel, Field
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -90,7 +90,7 @@ class User(BaseModel):
     target_level: str = Field("C2")
     password: str = Field("")
     user_role: UserRole = Field(default=UserRole.USER)
-    registration_time: datetime = Field(
+    registration_time: Union[datetime, firestore.SERVER_TIMESTAMP] = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
     total_tokens: int = Field(default=0)
