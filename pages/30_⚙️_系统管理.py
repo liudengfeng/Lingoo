@@ -426,9 +426,8 @@ with tabs[items.index("支付管理")]:
     with st.form(key="query_form", clear_on_submit=True):
         payment_0_cols = st.columns(4)
         payment_0_cols[0].markdown(":rainbow[文本查询参数]")
-        payment_0_cols[1].checkbox(
+        payment_0_cols[1].toggle(
             label="是否包含",
-            key="title-1",
         )
         payment_0_cols[0].text_input(label="手机号码", key="phone_number-1")
         payment_0_cols[1].text_input(label="付款编号", key="payment_id-1")
