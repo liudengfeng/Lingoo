@@ -5,11 +5,11 @@ from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 
 import pandas as pd
+import pytz
 import streamlit as st
 from azure.storage.blob import BlobServiceClient
 from pandas import Timedelta
 
-from mypylib.google_firestore_interface import PRICES, GoogleDbInterface
 from mypylib.google_db_model import (
     Payment,
     PaymentStatus,
@@ -18,6 +18,7 @@ from mypylib.google_db_model import (
     UserRole,
     str_to_enum,
 )
+from mypylib.google_firestore_interface import PRICES, GoogleDbInterface
 from mypylib.st_utils import google_translate
 from mypylib.word_utils import get_lowest_cefr_level
 
@@ -315,6 +316,25 @@ def search(**kwargs):
     return result
 
 
+def generate_timestamp(key: str, type: str, idx: int, timezone: str):
+    # 获取日期和时间
+    date = st.session_state.get(f"{key}_{type}_date-{idx}")
+    time = st.session_state.get(f"{key}_{type}_time-{idx}")
+
+    # 将日期和时间组合成一个 datetime 对象
+    datetime_obj = datetime.combine(date, time)
+
+    # 设置时区
+    tz = pytz.timezone(timezone)
+    datetime_obj = tz.localize(datetime_obj)
+
+    # 转换为 UTC 时区
+    datetime_utc = datetime_obj.astimezone(pytz.UTC)
+
+    # 返回字典
+    return {f"{type}_" + key: datetime_utc}
+
+
 # endregion
 
 # region 会话状态
@@ -427,7 +447,7 @@ with tabs[items.index("支付管理")]:
         # 精确匹配
         t_0_cols = st.columns(4)
         t_0_cols[0].markdown(":rainbow[精确匹配查询]")
-        t_0_cols[1].toggle(
+        t0 = t_0_cols[1].toggle(
             label="包含",
             key="is_include-0",
             help="✨ 选中表示包含该查询条件，否则表示不包含",
@@ -440,7 +460,7 @@ with tabs[items.index("支付管理")]:
         # 选项查询
         t_1_cols = st.columns(4)
         t_1_cols[0].markdown(":rainbow[状态查询]")
-        t_1_cols[1].toggle(
+        t1 = t_1_cols[1].toggle(
             label="包含",
             key="is_include-1",
             help="✨ 选中表示包含该查询条件，否则表示不包含",
@@ -461,10 +481,11 @@ with tabs[items.index("支付管理")]:
             key="is_approved-1",
             options=["All", False, True],
         )
+
         # 支付时间
         t_2_cols = st.columns(4)
         t_2_cols[0].markdown(":rainbow[支付期间查询]")
-        t_2_cols[1].toggle(
+        t2 = t_2_cols[1].toggle(
             label="包含",
             key="is_include-2",
             help="✨ 选中表示包含该查询条件，否则表示不包含",
@@ -486,10 +507,11 @@ with tabs[items.index("支付管理")]:
         payment_2_cols[3].time_input(
             "支付【结束时间】", key="payment_time_end_time-1", value=time(23, 59, 59)
         )
+
         # 服务时间查询
         t_3_cols = st.columns(4)
         t_3_cols[0].markdown(":rainbow[服务期间查询]")
-        t_3_cols[1].toggle(
+        t3 = t_3_cols[1].toggle(
             label="包含",
             key="is_include-3",
             help="✨ 选中表示包含该查询条件，否则表示不包含",
@@ -511,10 +533,11 @@ with tabs[items.index("支付管理")]:
         payment_3_cols[3].time_input(
             "服务【结束时间】", key="expiry_time_end_time-1", value=time(23, 59, 59)
         )
-        # 服务时间查询
+
+        # 模糊查询
         t_4_cols = st.columns(4)
         t_4_cols[0].markdown(":rainbow[模糊查询]")
-        t_4_cols[1].toggle(
+        t4 = t_4_cols[1].toggle(
             label="包含",
             key="is_include-4",
             help="✨ 选中表示包含该查询条件，否则表示不包含",
@@ -533,7 +556,23 @@ with tabs[items.index("支付管理")]:
         query_button = st.form_submit_button(label="查询")
 
         if query_button:
-            pass
+            tz = "Asia/Shanghai"
+            kwargs = {}
+            if t0:
+                kwargs.update(
+                    {
+                        "phone_number": st.session_state.get("phone_number-1", None),
+                        "payment_id": st.session_state.get("payment_id-1", None),
+                        "order_id": st.session_state.get("order_id-1", None),
+                        "sales_representative": st.session_state.get(
+                            "sales_representative-1", None
+                        ),
+                    }
+                )
+            if t3:
+                kwargs.update(generate_timestamp("expiry_time", "start", 1, tz))
+                kwargs.update(generate_timestamp("expiry_time", "end", 1, tz))
+                st.write(f"{kwargs=}")
             # kwargs = get_query_dict(
             #     [
             #         "is_approved",

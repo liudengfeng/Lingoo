@@ -268,6 +268,11 @@ class GoogleDbInterface:
     # region 支付管理
 
     def query_payments(self, query_dict: dict):
+        # 检查所有的值是否有效
+        invalid_keys = [key for key, value in query_dict.items() if value is None]
+        if invalid_keys:
+            raise ValueError(f"在查询支付记录时传入的键值对参数 {', '.join(invalid_keys)} 无效。")
+
         query = self.payments
         for key in [
             "phone_number",
