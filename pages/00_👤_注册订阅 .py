@@ -138,7 +138,7 @@ with st.form(key="registration_form"):
 
         # 虚拟邮箱
         email = email if email else f"{phone_number}@{FAKE_EMAIL_DOMAIN}"
-        st.write(f"{tz=}")
+        # st.write(f"{tz=}")
         user = User(
             email=email,
             real_name=real_name,
@@ -362,7 +362,7 @@ DF studio 可能会使用用户的数据来提供本应用的服务，包括但�
 
 # region 订阅付费
 
-st.subheader(":package: 订阅套餐", anchor="订阅套餐")
+st.subheader(":package: 订阅套餐", anchor="订阅套餐", divider="rainbow")
 
 # Define pricing tiers
 pricing_tiers = [
