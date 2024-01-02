@@ -124,6 +124,7 @@ class GoogleDbInterface:
                     "display_name": user.display_name,
                     "session_id": session_id,
                     "status": "success",
+                    "user_role": user.user_role,
                     "message": f"嗨！{user.display_name}，又见面了。",
                 }
         except Exception as e:
