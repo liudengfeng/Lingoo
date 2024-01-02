@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from datetime import date, datetime, time, timedelta, timezone
+import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -416,8 +416,8 @@ with tabs[items.index("订阅登记")]:
             payment = Payment(
                 phone_number=phone_number,
                 payment_id=payment_id,
-                payment_time=datetime.now(timezone.utc),
-                expiry_time=datetime.now(timezone.utc),
+                payment_time=datetime.now(datetime.timezone.utc),
+                expiry_time=datetime.now(datetime.timezone.utc),
                 receivable=receivable,
                 payment_amount=payment_amount,  # type: ignore
                 purchase_type=purchase_type,  # type: ignore
@@ -494,18 +494,18 @@ with tabs[items.index("支付管理")]:
         payment_2_cols[0].date_input(
             "支付【开始日期】",
             key="payment_time_start_date-1",
-            value=datetime.now(timezone.utc).date(),
+            value=datetime.now(datetime.timezone.utc).date(),
         )
         payment_2_cols[1].time_input(
-            "支付【开始时间】", key="payment_time_start_time-1", value=time(23, 59, 59)
+            "支付【开始时间】", key="payment_time_start_time-1", value=datetime.time(23, 59, 59)
         )
         payment_2_cols[2].date_input(
             "支付【结束日期】",
             key="payment_time_end_date-1",
-            value=datetime.now(timezone.utc).date(),
+            value=datetime.now(datetime.timezone.utc).date(),
         )
         payment_2_cols[3].time_input(
-            "支付【结束时间】", key="payment_time_end_time-1", value=time(23, 59, 59)
+            "支付【结束时间】", key="payment_time_end_time-1", value=datetime.time(23, 59, 59)
         )
 
         # 服务时间查询
@@ -520,18 +520,18 @@ with tabs[items.index("支付管理")]:
         payment_3_cols[0].date_input(
             "服务【开始日期】",
             key="expiry_time_start_date-1",
-            value=datetime.now(timezone.utc).date(),
+            value=datetime.now(datetime.timezone.utc).date(),
         )
         payment_3_cols[1].time_input(
-            "服务【开始时间】", key="expiry_time_start_time-1", value=time(23, 59, 59)
+            "服务【开始时间】", key="expiry_time_start_time-1", value=datetime.time(23, 59, 59)
         )
         payment_3_cols[2].date_input(
             "服务【结束日期】",
             key="expiry_time_end_date-1",
-            value=datetime.now(timezone.utc).date(),
+            value=datetime.now(datetime.timezone.utc).date(),
         )
         payment_3_cols[3].time_input(
-            "服务【结束时间】", key="expiry_time_end_time-1", value=time(23, 59, 59)
+            "服务【结束时间】", key="expiry_time_end_time-1", value=datetime.time(23, 59, 59)
         )
 
         # 模糊查询
@@ -556,7 +556,7 @@ with tabs[items.index("支付管理")]:
         query_button = st.form_submit_button(label="查询")
 
         if query_button:
-            tz = "Asia/Shanghai"
+            tz = st.session_state.user_info.get("timezone", "Asia/Shanghai")
             kwargs = {}
             if t0:
                 kwargs.update(
@@ -569,42 +569,49 @@ with tabs[items.index("支付管理")]:
                         ),
                     }
                 )
+            if t1:
+                kwargs.update(
+                    {
+                        "purchase_type": None
+                        if st.session_state.get("purchase_type-1", None) == "ALL"
+                        else str_to_enum(
+                            st.session_state.get("purchase_type-1", None),
+                            PurchaseType,
+                        ),
+                        "status": None
+                        if st.session_state.get("status-1", None) == "ALL"
+                        else str_to_enum(
+                            st.session_state.get("status-1", None), PaymentStatus
+                        ),
+                        "is_approved": None
+                        if st.session_state.get("is_approved-1", None) == "ALL"
+                        else st.session_state.get("is_approved-1", None),
+                    }
+                )
+            
+            if t2:
+                kwargs.update(generate_timestamp("payment_time", "start", 1, tz))
+                kwargs.update(generate_timestamp("payment_time", "end", 1, tz))
+                st.write(f"{kwargs=}")
+            
             if t3:
                 kwargs.update(generate_timestamp("expiry_time", "start", 1, tz))
                 kwargs.update(generate_timestamp("expiry_time", "end", 1, tz))
-                st.write(f"{kwargs=}")
-            # kwargs = get_query_dict(
-            #     [
-            #         "is_approved",
-            #         "phone_number",
-            #         "email",
-            #         "real_name",
-            #         "display_name",
-            #         "user_role",
-            #         "registration_start_date",
-            #         "registration_start_time",
-            #         "registration_end_date",
-            #         "registration_end_time",
-            #         "order_id",
-            #         "payment_id",
-            #         "status",
-            #         "purchase_type",
-            #         "pay_start_date",
-            #         "pay_start_time",
-            #         "pay_end_date",
-            #         "pay_end_time",
-            #         "server_start_date",
-            #         "server_start_time",
-            #         "server_end_date",
-            #         "server_end_time",
-            #         "memo",
-            #         "remark",
-            #     ],
-            #     1,
-            #     registration_on,
-            #     payment_on,
-            #     server_on,
-            # )
+            
+            if t4:
+                kwargs.update(
+                    {
+                        "payment_method": st.session_state.get(
+                            "payment_method-1", None
+                        ),
+                        "remark": st.session_state.get("remark-1", None),
+                    }
+                )
+            
+            # 删除字典中的空值部分
+            kwargs = {k: v for k, v in kwargs.items() if v is not None}
+            st.write(f"{kwargs=}")
+
             # # 检查数据生成的参数及其类型
             # # st.write(kwargs)
             # # for k, v in kwargs.items():

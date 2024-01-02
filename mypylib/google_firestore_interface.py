@@ -125,6 +125,7 @@ class GoogleDbInterface:
                     "session_id": session_id,
                     "status": "success",
                     "user_role": user.user_role,
+                    "timezone": user.timezone,
                     "message": f"嗨！{user.display_name}，又见面了。",
                 }
         except Exception as e:
@@ -305,6 +306,13 @@ class GoogleDbInterface:
                 doc
                 for doc in results
                 if query_dict["remark"] in doc.to_dict().get("remark", "")
+            ]
+        if "payment_method" in query_dict:
+            results = [
+                doc
+                for doc in results
+                if query_dict["payment_method"]
+                in doc.to_dict().get("payment_method", "")
             ]
         return results
 
