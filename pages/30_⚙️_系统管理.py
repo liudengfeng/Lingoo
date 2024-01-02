@@ -436,7 +436,7 @@ with tabs[items.index("支付管理")]:
             # st.write(kwargs)
             # for k, v in kwargs.items():
             #     st.write(f"{k=}, {type(v)=}")
-            st.session_state["queried_payments"] = st.session_state.gbi.query_payments(
+            st.session_state["queried_payments"] = st.session_state.gdbi.query_payments(
                 kwargs
             )
 
