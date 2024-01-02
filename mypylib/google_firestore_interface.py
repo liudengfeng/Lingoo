@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 import streamlit as st
 from cachetools import TTLCache
 from faker import Faker
+from google.cloud import firestore
 from pymongo import ASCENDING, IndexModel, MongoClient
 
 from .constants import FAKE_EMAIL_DOMAIN
@@ -94,7 +95,9 @@ class GoogleDbInterface:
         users_ref = self.db.collection("users")
         st.write(phone_number)
         # try:
-        user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+        user_docs = users_ref.where(
+            firestore.FieldFilter("phone_number", "==", phone_number)
+        ).stream()
         if user_docs:
             first_user_doc = next(user_docs).to_dict()
         else:
