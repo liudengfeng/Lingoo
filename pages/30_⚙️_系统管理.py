@@ -345,7 +345,7 @@ def compute_discount():
 
 with tabs[items.index("订阅登记")]:
     st.subheader("登记收款")
-    with st.form(key="payment_form"):
+    with st.form(key="payment_form", clear_on_submit=True):
         cols = st.columns(2)
         phone_number = cols[0].text_input(
             "手机号码",
