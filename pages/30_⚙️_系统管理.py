@@ -519,8 +519,13 @@ with tabs[items.index("支付管理")]:
             key="is_include-4",
             help="✨ 选中表示包含该查询条件，否则表示不包含",
         )
-        payment_4_cols = st.columns(4)
+        payment_4_cols = st.columns(2)
         payment_4_cols[0].text_input(
+            "支付方式",
+            key="payment_method-1",
+            help="✨ 要查询的支付方式信息",
+        )
+        payment_4_cols[1].text_input(
             "备注",
             key="remark-1",
             help="✨ 要查询的备注信息",
