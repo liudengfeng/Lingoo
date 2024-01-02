@@ -10,7 +10,14 @@ from azure.storage.blob import BlobServiceClient
 from pandas import Timedelta
 
 from mypylib.google_firestore_interface import PRICES, GoogleDbInterface
-from mypylib.google_db_model import Payment, PaymentStatus, PurchaseType, User, UserRole
+from mypylib.google_db_model import (
+    Payment,
+    PaymentStatus,
+    PurchaseType,
+    User,
+    UserRole,
+    str_to_enum,
+)
 from mypylib.st_utils import google_translate
 from mypylib.word_utils import get_lowest_cefr_level
 
@@ -329,11 +336,9 @@ tabs = st.tabs(items)
 # region 创建收费登记页面
 
 
-def compute_discounted_price():
-    dtype = st.session_state["purchase_type"]
-    price = PRICES[dtype]
-    discount_rate = st.session_state["discount_rate"]
-    st.session_state["receivable"] = price * (1 - discount_rate)
+def compute_discount(purchase_type, payment_amount):
+    price = PRICES[purchase_type]
+    return (payment_amount / price) * 100
 
 
 with tabs[items.index("订阅登记")]:
@@ -369,7 +374,14 @@ with tabs[items.index("订阅登记")]:
         payment_id = cols[1].text_input(
             "付款编号", key="payment_id", help="✨ 请输入付款编号", placeholder="必填。请在付款凭证上查找付款编号"
         )
-        remark = st.text_input("备注", key="remark", help="✨ 请输入备注信息", value="")
+        remark = cols[0].text_input(
+            "备注",
+            key="remark",
+            help="✨ 请输入备注信息",
+            value=f"{compute_discount(purchase_type, payment_amount):.2f}%",
+        )
+        is_approved = cols[1].checkbox("是否批准", key="is_approved", value=False)
+
         # user = st.session_state.gdbi.get_user(phone_number=phone_number)
         if st.form_submit_button(label="登记"):
             order_id = str(
@@ -388,6 +400,7 @@ with tabs[items.index("订阅登记")]:
                 payment_method=payment_method,
                 discount_rate=payment_amount / receivable,
                 sales_representative=sales_representative,
+                is_approved=is_approved,
                 remark=remark,
             )
             # try:
@@ -402,7 +415,6 @@ with tabs[items.index("订阅登记")]:
 # endregion
 
 # region 创建用户管理页面
-
 
 with tabs[items.index("用户管理")]:
     st.markdown("#### 查询参数")
