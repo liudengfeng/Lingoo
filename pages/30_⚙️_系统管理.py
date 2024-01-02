@@ -45,13 +45,10 @@ tz = pytz.timezone(st.session_state.user_info.get("timezone", "Asia/Shanghai"))
 
 PM_OPTS = list(PaymentStatus)
 COLUMN_CONFIG = {
+    "phone_number": "手机号码",
     "payment_id": "付款编号",
     "order_id": "订单编号",
     "payment_time": "支付时间",
-    "payment_method": "付款方式",
-    "real_name": "姓名",
-    "display_name": "显示名称",
-    "phone_number": "手机号码",
     "purchase_type": st.column_config.SelectboxColumn(
         "套餐类型",
         help="✨ 购买的套餐类型",
@@ -63,15 +60,7 @@ COLUMN_CONFIG = {
     "receivable": st.column_config.NumberColumn(
         "应收 (元)",
         help="✨ 购买套餐应支付的金额",
-        min_value=0.01,
-        max_value=10000.00,
-        step=0.01,
-        format="￥%.2f",
-    ),
-    "payment_amount": st.column_config.NumberColumn(
-        "实收 (元)",
-        help="✨ 购买套餐实际支付的金额",
-        min_value=0.01,
+        min_value=0.00,
         max_value=10000.00,
         step=0.01,
         format="￥%.2f",
@@ -84,6 +73,17 @@ COLUMN_CONFIG = {
         step=0.01,
         format="%.2f",
     ),
+    "payment_method": "付款方式",
+    # "real_name": "姓名",
+    # "display_name": "显示名称",
+    "payment_amount": st.column_config.NumberColumn(
+        "实收 (元)",
+        help="✨ 购买套餐实际支付的金额",
+        min_value=0.01,
+        max_value=10000.00,
+        step=0.01,
+        format="￥%.2f",
+    ),
     "is_approved": st.column_config.CheckboxColumn(
         "是否批准",
         help="✨ 选中表示允许用户使用系统",
@@ -92,15 +92,15 @@ COLUMN_CONFIG = {
     "expiry_time": st.column_config.DatetimeColumn(
         "服务截至时间",
     ),
-    "user_role": st.column_config.SelectboxColumn(
-        "权限",
-        help="✨ 用户权限",
-        width="small",
-        options=list(UserRole),
-        default=list(UserRole)[0],
-        required=True,
-    ),
-    "registration_time": "注册时间",
+    # "user_role": st.column_config.SelectboxColumn(
+    #     "权限",
+    #     help="✨ 用户权限",
+    #     width="small",
+    #     options=list(UserRole),
+    #     default=list(UserRole)[0],
+    #     required=True,
+    # ),
+    # "registration_time": "注册时间",
     "status": st.column_config.SelectboxColumn(
         "服务状态",
         help="✨ 服务状态",
@@ -110,7 +110,7 @@ COLUMN_CONFIG = {
         required=True,
     ),
     "remark": "服务备注",
-    "memo": "用户备注",
+    # "memo": "用户备注",
 }
 
 TIME_COLS = ["payment_time", "expiry_time", "registration_time"]
@@ -139,183 +139,6 @@ PAYMENTS_FIELDS = [
 # region 函数
 
 
-def _normalized_query_params(
-    d: dict,
-    registration_on,
-    payment_on,
-    server_on,
-):
-    """
-    根据查询参数字典和三个开关参数，返回标准化的查询参数字典。
-    如果 registration_on 为 True，则将 registration_start_date 和 registration_start_time 合并为 registration_start_datetime，
-    将 registration_end_date 和 registration_end_time 合并为 registration_end_datetime。
-    如果 payment_on 为 True，则将 pay_start_date 和 pay_start_time 合并为 pay_start_datetime，
-    将 pay_end_date 和 pay_end_time 合并为 pay_end_datetime。
-    如果 server_on 为 True，则将 server_start_date 和 server_start_time 合并为 server_start_datetime，
-    将 server_end_date 和 server_end_time 合并为 server_end_datetime。
-    如果查询参数字典中的枚举值为 All，则忽略该查询条件。
-    返回标准化后的查询参数字典。
-    """
-
-    res = {}
-    if (
-        registration_on
-        and "registration_start_date" in d
-        and "registration_start_time" in d
-        and "registration_end_date" in d
-        and "registration_end_time" in d
-    ):
-        res["registration_start_datetime"] = datetime.combine(
-            d.pop("registration_start_date"), d.pop("registration_start_time")
-        )
-        res["registration_end_datetime"] = datetime.combine(
-            d.pop("registration_end_date"), d.pop("registration_end_time")
-        )
-    else:
-        d.pop("registration_start_date", None)
-        d.pop("registration_start_time", None)
-        d.pop("registration_end_date", None)
-        d.pop("registration_end_time", None)
-
-    if (
-        payment_on
-        and "pay_start_date" in d
-        and "pay_end_date" in d
-        and "pay_start_time" in d
-        and "pay_end_time" in d
-    ):
-        res["pay_start_datetime"] = datetime.combine(
-            d.pop("pay_start_date"), d.pop("pay_start_time")
-        )
-        res["pay_end_datetime"] = datetime.combine(
-            d.pop("pay_end_date"), d.pop("pay_end_time")
-        )
-    else:
-        d.pop("pay_start_date", None)
-        d.pop("pay_start_time", None)
-        d.pop("pay_end_date", None)
-        d.pop("pay_end_time", None)
-
-    if (
-        server_on
-        and "server_start_date" in d
-        and "server_end_date" in d
-        and "server_start_time" in d
-        and "server_end_time" in d
-    ):
-        res["server_start_datetime"] = datetime.combine(
-            d.pop("server_start_date"), d.pop("server_start_time")
-        )
-        res["server_end_datetime"] = datetime.combine(
-            d.pop("server_end_date"), d.pop("server_end_time")
-        )
-    else:
-        d.pop("server_start_date", None)
-        d.pop("server_start_time", None)
-        d.pop("server_end_date", None)
-        d.pop("server_end_time", None)
-
-    # 当枚举值为All时，忽略该查询条件
-    for k, v in d.items():
-        if v != "All":
-            res[k] = v
-
-    return res
-
-
-def get_query_dict(
-    names: list,
-    index: int,
-    registration_on,
-    payment_on,
-    server_on,
-):
-    res = {}
-    for n in names:
-        v = st.session_state.get(f"{n}-{index}", None)
-        # 忽略空值
-        if v == "":
-            continue
-        if v is not None:
-            res[n] = st.session_state[f"{n}-{index}"]
-
-    return _normalized_query_params(res, registration_on, payment_on, server_on)
-
-
-def search(**kwargs):
-    # 如果存在时间范围参数，创建一个新的字典来表示时间范围
-
-    # 限定注册期间
-    if (
-        "registration_start_datetime" in kwargs
-        and "registration_end_datetime" in kwargs
-    ):
-        kwargs["registration_time"] = {}
-        kwargs["registration_time"]["$gte"] = kwargs.pop("registration_start_datetime")
-        kwargs["registration_time"]["$lte"] = kwargs.pop("registration_end_datetime")
-
-    # 限定支付期间
-    if "pay_start_datetime" in kwargs and "pay_end_datetime" in kwargs:
-        kwargs["payments.payment_time"] = {}
-        kwargs["payments.payment_time"]["$gte"] = kwargs.pop("pay_start_datetime")
-        kwargs["payments.payment_time"]["$lte"] = kwargs.pop("pay_end_datetime")
-
-    if "server_start_datetime" in kwargs and "server_end_datetime" in kwargs:
-        kwargs["payments.expiry_time"] = {}
-        kwargs["payments.expiry_time"]["$gte"] = kwargs.pop("server_start_datetime")
-        kwargs["payments.expiry_time"]["$lte"] = kwargs.pop("server_end_datetime")
-
-    for field in PAYMENTS_FIELDS:
-        if field in kwargs and field != "remark":
-            kwargs[f"payments.{field}"] = kwargs.pop(field)
-
-    if "memo" in kwargs:
-        kwargs["memo"] = {"$regex": kwargs.pop("memo")}
-    if "remark" in kwargs:
-        kwargs["payments.remark"] = {"$regex": kwargs.pop("remark")}
-
-    # 创建一个聚合管道
-    pipeline = [
-        {
-            "$lookup": {
-                "from": "payments",
-                "localField": "phone_number",
-                "foreignField": "phone_number",
-                "as": "payments",
-            }
-        },
-        {"$unwind": "$payments"},
-        {"$match": kwargs},
-        {
-            "$project": {
-                "phone_number": 1,
-                "real_name": 1,
-                "display_name": 1,
-                "user_role": 1,
-                "registration_time": 1,
-                "order_id": "$payments.order_id",
-                "payment_id": "$payments.payment_id",
-                "payment_time": "$payments.payment_time",
-                "receivable": "$payments.receivable",
-                "payment_amount": "$payments.payment_amount",
-                "purchase_type": "$payments.purchase_type",
-                "discount_rate": "$payments.discount_rate",
-                "payment_method": "$payments.payment_method",
-                "is_approved": "$payments.is_approved",
-                "expiry_time": "$payments.expiry_time",
-                "status": "$payments.status",
-                "remark": "$payments.remark",
-                "memo": 1,
-                "_id": 0,
-            }
-        },
-    ]
-
-    result = list(st.session_state.gdbi.users.aggregate(pipeline))
-
-    return result
-
-
 def generate_timestamp(key: str, type: str, idx: int):
     # 获取日期和时间
     date = st.session_state.get(f"{key}_{type}_date-{idx}")
@@ -339,7 +162,7 @@ def generate_timestamp(key: str, type: str, idx: int):
 # region 会话状态
 
 if st.session_state.get("search"):
-    st.session_state["searched_data"] = []
+    st.session_state["queried_payments"] = []
 
 
 if "gdbi" not in st.session_state:
@@ -590,7 +413,6 @@ with tabs[items.index("支付管理")]:
             if t2:
                 kwargs.update(generate_timestamp("payment_time", "start", 1))
                 kwargs.update(generate_timestamp("payment_time", "end", 1))
-                st.write(f"{kwargs=}")
 
             if t3:
                 kwargs.update(generate_timestamp("expiry_time", "start", 1))
@@ -610,15 +432,17 @@ with tabs[items.index("支付管理")]:
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
             st.write(f"{kwargs=}")
 
-            # # 检查数据生成的参数及其类型
-            # # st.write(kwargs)
-            # # for k, v in kwargs.items():
-            # #     st.write(f"{k=}, {type(v)=}")
-            # st.session_state["searched_data"] = search(**kwargs)
+            # 检查数据生成的参数及其类型
+            # st.write(kwargs)
+            # for k, v in kwargs.items():
+            #     st.write(f"{k=}, {type(v)=}")
+            st.session_state["queried_payments"] = st.session_state.gbi.query_payments(
+                kwargs
+            )
 
-    st.markdown("#### 查询结果")
+    st.subheader("支付清单")
     df = pd.DataFrame.from_records(
-        st.session_state.get("searched_data", []), columns=COLUMN_CONFIG.keys()
+        st.session_state.get("queried_payments", []), columns=COLUMN_CONFIG.keys()
     )
 
     # if not df.empty:
