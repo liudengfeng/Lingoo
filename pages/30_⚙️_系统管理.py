@@ -461,9 +461,9 @@ with tabs[items.index("支付管理")]:
             key="is_approved-1",
             options=["All", False, True],
         )
-        # 时间查询参数
+        # 支付时间
         t_2_cols = st.columns(4)
-        t_2_cols[0].markdown(":rainbow[期间查询参数]")
+        t_2_cols[0].markdown(":rainbow[支付期间查询]")
         t_2_cols[1].toggle(
             label="包含",
             key="is_include-2",
@@ -486,7 +486,32 @@ with tabs[items.index("支付管理")]:
         payment_2_cols[3].time_input(
             "支付【结束时间】", key="payment_time_end_time-1", value=time(23, 59, 59)
         )
-        
+        # 服务时间查询
+        t_3_cols = st.columns(4)
+        t_3_cols[0].markdown(":rainbow[服务期间查询]")
+        t_3_cols[1].toggle(
+            label="包含",
+            key="is_include-2",
+            help="✨ 选中表示包含该查询条件，否则表示不包含",
+        )
+        payment_3_cols = st.columns(4)
+        payment_3_cols[0].date_input(
+            "服务【开始日期】",
+            key="expiry_time_start_date-1",
+            value=datetime.now(timezone.utc).date(),
+        )
+        payment_3_cols[1].time_input(
+            "服务【开始时间】", key="expiry_time_start_time-1", value=time(23, 59, 59)
+        )
+        payment_3_cols[2].date_input(
+            "服务【结束日期】",
+            key="expiry_time_end_date-1",
+            value=datetime.now(timezone.utc).date(),
+        )
+        payment_3_cols[3].time_input(
+            "服务【结束时间】", key="expiry_time_end_time-1", value=time(23, 59, 59)
+        )
+
         query_button = st.form_submit_button(label="查询")
 
         if query_button:
