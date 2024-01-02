@@ -322,7 +322,7 @@ def generate_timestamp(key: str, type: str, idx: int, timezone: str):
     time = st.session_state.get(f"{key}_{type}_time-{idx}")
 
     # 将日期和时间组合成一个 datetime 对象
-    datetime_obj = datetime.combine(date, time)
+    datetime_obj = datetime.datetime.combine(date, time)
 
     # 设置时区
     tz = pytz.timezone(timezone)
