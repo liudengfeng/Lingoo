@@ -424,6 +424,7 @@ with tabs[items.index("订阅登记")]:
 with tabs[items.index("支付管理")]:
     st.markdown("#### 查询参数")
     with st.form(key="query_form", clear_on_submit=True):
+        # 文本查询参数
         t_0_cols = st.columns(4)
         t_0_cols[0].markdown(":rainbow[文本查询参数]")
         t_0_cols[1].toggle(
@@ -436,7 +437,7 @@ with tabs[items.index("支付管理")]:
         payment_0_cols[1].text_input(label="付款编号", key="payment_id-1")
         payment_0_cols[2].text_input(label="订单编号", key="order_id-1")
         payment_0_cols[3].text_input(label="销售代表", key="sales_representative-1")
-
+        # 选项查询参数
         t_1_cols = st.columns(4)
         t_1_cols[0].markdown(":rainbow[选项查询参数]")
         t_1_cols[1].toggle(
@@ -460,7 +461,7 @@ with tabs[items.index("支付管理")]:
             key="is_approved-1",
             options=["All", False, True],
         )
-
+        # 时间查询参数
         t_2_cols = st.columns(4)
         t_2_cols[0].markdown(":rainbow[期间查询参数]")
         t_2_cols[1].toggle(
@@ -469,11 +470,6 @@ with tabs[items.index("支付管理")]:
             help="✨ 选中表示包含该查询条件，否则表示不包含",
         )
         payment_2_cols = st.columns(4)
-        payment_2_cols[0].selectbox(
-            label="套餐类型",
-            key="purchase_type-1",
-            options=["All"] + [x.value for x in PurchaseType],
-        )
         payment_2_cols[0].date_input(
             "支付【开始日期】",
             key="payment_time_start_date-1",
