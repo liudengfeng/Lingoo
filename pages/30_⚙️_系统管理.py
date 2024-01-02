@@ -8,11 +8,9 @@ import pandas as pd
 import streamlit as st
 from azure.storage.blob import BlobServiceClient
 from pandas import Timedelta
-from pymongo.errors import DuplicateKeyError
 
-# from mypylib.auth_utils import generate_unique_code
-from mypylib.db_interface import PRICES, DbInterface
-from mypylib.db_model import Payment, PaymentStatus, PurchaseType, User, UserRole
+from mypylib.google_firestore_interface import PRICES, GoogleDbInterface
+from mypylib.google_db_model import Payment, PaymentStatus, PurchaseType, User, UserRole
 from mypylib.st_utils import google_translate
 from mypylib.word_utils import get_lowest_cefr_level
 
@@ -26,7 +24,7 @@ CURRENT_CWD: Path = Path(__file__).parent.parent
 if "user_info" not in st.session_state:
     st.session_state["user_info"] = {}
 
-if not (st.session_state.dbi.is_admin(st.session_state.user_info)):
+if not st.session_state.user_info.get("role") == "admin":
     st.error("对不起，您没有权限访问该页面。该页面仅限系统管理员使用。")
     st.stop()
 
@@ -303,7 +301,7 @@ def search(**kwargs):
         },
     ]
 
-    result = list(st.session_state.dbi.users.aggregate(pipeline))
+    result = list(st.session_state.gdbi.users.aggregate(pipeline))
 
     return result
 
@@ -316,8 +314,8 @@ if st.session_state.get("search"):
     st.session_state["searched_data"] = []
 
 
-if "dbi" not in st.session_state:
-    st.session_state["dbi"] = DbInterface()
+if "gdbi" not in st.session_state:
+    st.session_state["gdbi"] = GoogleDbInterface()
 
 # endregion
 
@@ -363,12 +361,16 @@ with tabs[items.index("订阅登记")]:
         payment_amount = cols[0].number_input(
             "实收金额", key="payment_amount", help="✨ 请输入实际收款金额", value=0.0
         )
+        sales_representative = cols[1].text_input(
+            "销售代表",
+            key="sales_representative",
+            help="✨ 请输入销售代表的名称",
+            placeholder="请输入销售代表的名称",
+        )
         remark = st.text_input("备注", key="remark", help="✨ 请输入备注信息", value="")
-        user = st.session_state.dbi.find_user_by(phone=phone_number)
+        user = st.session_state.gdbi.find_user_by(phone=phone_number)
         if st.form_submit_button(label="登记"):
-            order_id = str(st.session_state.dbi.payments.count_documents({}) + 1).zfill(
-                10
-            )
+            order_id = str(st.session_state.gdbi.db.collection("payments").get().size() + 1).zfill(10)
             receivable = PRICES[purchase_type]  # type: ignore
             payment = Payment(
                 phone_number=phone_number,
@@ -381,16 +383,17 @@ with tabs[items.index("订阅登记")]:
                 order_id=order_id,
                 payment_method=payment_method,
                 discount_rate=payment_amount / receivable,
+                sales_representative=sales_representative,
                 remark=remark,
             )
-            try:
-                st.session_state.dbi.add_payment(payment)
-                st.toast(f"成功登记，订单号:{order_id}", icon="🎉")
-            except DuplicateKeyError:
-                st.error("付款编号已存在，请勿重复登记")
-                st.stop()
-            except Exception as e:
-                raise  # 重新抛出异常
+            # try:
+            st.session_state.gdbi.add_payment(payment)
+            st.toast(f"成功登记，订单号:{order_id}", icon="🎉")
+            # except DuplicateKeyError:
+            #     st.error("付款编号已存在，请勿重复登记")
+            #     st.stop()
+            # except Exception as e:
+            #     raise  # 重新抛出异常
 
 # endregion
 
@@ -572,10 +575,10 @@ with tabs[items.index("用户管理")]:
             order_id = df.iloc[idx]["order_id"]  # type: ignore
             # 修改权限
             if d.get("user_role", None):
-                st.session_state.dbi.update_user(phone_number, {"user_role": d["user_role"]})  # type: ignore
+                st.session_state.gdbi.update_user(phone_number, {"user_role": d["user_role"]})  # type: ignore
             # 批准
             if d.get("is_approved", False):
-                st.session_state.dbi.enable_service(
+                st.session_state.gdbi.enable_service(
                     phone_number, order_id, purchase_type
                 )
                 st.toast(f"批准用户：{phone_number} {order_id}", icon="🎉")
@@ -739,7 +742,7 @@ def init_word_db():
         cambridge_dict = json.load(f)
 
     # 获取集合中的所有单词
-    existing_words = [doc["word"] for doc in st.session_state.dbi.words.find()]
+    existing_words = [doc["word"] for doc in st.session_state.gdbi.words.find()]
 
     for doc in cambridge_dict:
         logger.info(f"单词：{doc['word']}...")
@@ -748,7 +751,7 @@ def init_word_db():
             doc["level"] = get_lowest_cefr_level(doc["word"])
             try:
                 logger.info(f"添加单词：{doc['word']}")
-                st.session_state.dbi.words.insert_one(doc)
+                st.session_state.gdbi.words.insert_one(doc)
                 added += (doc["word"],)
             except Exception as e:
                 logger.error(f"插入单词 {doc['word']} 时出现错误: {e}")
@@ -759,7 +762,7 @@ def init_word_db():
         if w not in added and w not in existing_words:
             try:
                 logger.info(f"添加单词：{w}")
-                st.session_state.dbi.words.insert_one(
+                st.session_state.gdbi.words.insert_one(
                     {
                         "word": w,
                         target_language_code: {
