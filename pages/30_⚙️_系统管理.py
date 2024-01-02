@@ -438,6 +438,11 @@ with tabs[items.index("支付管理")]:
             options=["All"] + [x.value for x in PurchaseType],
         )
         payment_1_cols[1].selectbox(
+            label="支付状态",
+            key="status-1",
+            options=["All"] + [x.value for x in PaymentStatus],
+        )
+        payment_1_cols[2].selectbox(
             label="是否批准",
             key="is_approved-1",
             options=["All", False, True],
