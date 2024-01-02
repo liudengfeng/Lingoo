@@ -416,8 +416,8 @@ with tabs[items.index("订阅登记")]:
             payment = Payment(
                 phone_number=phone_number,
                 payment_id=payment_id,
-                payment_time=datetime.now(datetime.timezone.utc),
-                expiry_time=datetime.now(datetime.timezone.utc),
+                payment_time=datetime.datetime.now(datetime.timezone.utc),
+                expiry_time=datetime.datetime.now(datetime.timezone.utc),
                 receivable=receivable,
                 payment_amount=payment_amount,  # type: ignore
                 purchase_type=purchase_type,  # type: ignore
@@ -494,7 +494,7 @@ with tabs[items.index("支付管理")]:
         payment_2_cols[0].date_input(
             "支付【开始日期】",
             key="payment_time_start_date-1",
-            value=datetime.now(datetime.timezone.utc).date(),
+            value=datetime.datetime.now(datetime.timezone.utc).date(),
         )
         payment_2_cols[1].time_input(
             "支付【开始时间】", key="payment_time_start_time-1", value=datetime.time(23, 59, 59)
@@ -502,7 +502,7 @@ with tabs[items.index("支付管理")]:
         payment_2_cols[2].date_input(
             "支付【结束日期】",
             key="payment_time_end_date-1",
-            value=datetime.now(datetime.timezone.utc).date(),
+            value=datetime.datetime.now(datetime.timezone.utc).date(),
         )
         payment_2_cols[3].time_input(
             "支付【结束时间】", key="payment_time_end_time-1", value=datetime.time(23, 59, 59)
@@ -520,7 +520,7 @@ with tabs[items.index("支付管理")]:
         payment_3_cols[0].date_input(
             "服务【开始日期】",
             key="expiry_time_start_date-1",
-            value=datetime.now(datetime.timezone.utc).date(),
+            value=datetime.datetime.now(datetime.timezone.utc).date(),
         )
         payment_3_cols[1].time_input(
             "服务【开始时间】", key="expiry_time_start_time-1", value=datetime.time(23, 59, 59)
@@ -528,7 +528,7 @@ with tabs[items.index("支付管理")]:
         payment_3_cols[2].date_input(
             "服务【结束日期】",
             key="expiry_time_end_date-1",
-            value=datetime.now(datetime.timezone.utc).date(),
+            value=datetime.datetime.now(datetime.timezone.utc).date(),
         )
         payment_3_cols[3].time_input(
             "服务【结束时间】", key="expiry_time_end_time-1", value=datetime.time(23, 59, 59)
@@ -588,16 +588,16 @@ with tabs[items.index("支付管理")]:
                         else st.session_state.get("is_approved-1", None),
                     }
                 )
-            
+
             if t2:
                 kwargs.update(generate_timestamp("payment_time", "start", 1, tz))
                 kwargs.update(generate_timestamp("payment_time", "end", 1, tz))
                 st.write(f"{kwargs=}")
-            
+
             if t3:
                 kwargs.update(generate_timestamp("expiry_time", "start", 1, tz))
                 kwargs.update(generate_timestamp("expiry_time", "end", 1, tz))
-            
+
             if t4:
                 kwargs.update(
                     {
@@ -607,7 +607,7 @@ with tabs[items.index("支付管理")]:
                         "remark": st.session_state.get("remark-1", None),
                     }
                 )
-            
+
             # 删除字典中的空值部分
             kwargs = {k: v for k, v in kwargs.items() if v is not None}
             st.write(f"{kwargs=}")
