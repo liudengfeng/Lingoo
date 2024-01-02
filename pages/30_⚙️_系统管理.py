@@ -475,109 +475,22 @@ with tabs[items.index("支付管理")]:
             options=["All"] + [x.value for x in PurchaseType],
         )
         payment_2_cols[0].date_input(
-            "支付开始日期",
+            "支付【开始日期】",
             key="payment_time_start_date-1",
             value=datetime.now(timezone.utc).date(),
         )
         payment_2_cols[1].time_input(
-            "支付开始时间", key="payment_time_start_time-1", value=time(23, 59, 59)
+            "支付【开始时间】", key="payment_time_start_time-1", value=time(23, 59, 59)
         )
         payment_2_cols[2].date_input(
-            "支付结束日期",
+            "支付【结束日期】",
             key="payment_time_end_date-1",
             value=datetime.now(timezone.utc).date(),
         )
         payment_2_cols[3].time_input(
-            "支付结束时间", key="payment_time_end_time-1", value=time(23, 59, 59)
+            "支付【结束时间】", key="payment_time_end_time-1", value=time(23, 59, 59)
         )
-        # user_cols[4].selectbox(
-        #     "用户权限",
-        #     key="user_role-1",
-        #     options=["All"] + [x.value for x in list(UserRole)],
-        #     # format_func=lambda x: x.value,
-        #     index=0,
-        # )
-
-        # user_time_cols = st.columns(5)
-
-        # user_time_cols[0].date_input(
-        #     "用户注册：开始日期",
-        #     key="registration_start_date-1",
-        #     value=(datetime.now(timezone.utc) - timedelta(days=365)).date(),
-        # )
-        # user_time_cols[1].time_input(
-        #     "时间", value=time(0, 0, 0), key="registration_start_time-1"
-        # )  # type: ignore
-        # user_time_cols[2].date_input(
-        #     "结束日期",
-        #     key="registration_end_date-1",
-        #     value=datetime.now(timezone.utc).date(),
-        # )
-        # user_time_cols[3].time_input(
-        #     "时间", key="registration_end_time-1", value=time(23, 59, 59)
-        # )
-
-        # pay_cols = st.columns(5)
-        # pay_cols[0].text_input(label="订单编号", key="order_id-1")
-        # pay_cols[1].text_input(label="付款编号", key="payment_id-1")
-        # pay_cols[2].selectbox(
-        #     "服务状态",
-        #     key="status-1",
-        #     options=["All"] + [x.value for x in list(PaymentStatus)],
-        #     index=0,
-        # )
-        # pay_cols[3].selectbox(
-        #     "套餐类型",
-        #     key="purchase_type-1",
-        #     # options=list(PurchaseType),
-        #     options=["All"] + [x.value for x in list(PurchaseType)],
-        #     index=0,
-        #     # format_func=lambda x: x.value,
-        # )
-        # pay_cols[4].selectbox(
-        #     "是否已批准", key="is_approved-1", options=["All", False, True], index=0
-        # )
-
-        # payment_time_cols = st.columns(5)
-        # payment_time_cols[0].date_input(
-        #     "支付查询：开始日期",
-        #     key="pay_start_date-1",
-        #     value=(datetime.now(timezone.utc) - timedelta(days=7)).date(),
-        # )
-        # payment_time_cols[1].time_input(
-        #     "时间", value=time(0, 0, 0), key="pay_start_time-1"
-        # )  # type: ignore
-        # payment_time_cols[2].date_input(
-        #     "结束日期", key="pay_end_date-1", value=datetime.now(timezone.utc).date()
-        # )
-        # payment_time_cols[3].time_input(
-        #     "时间", key="pay_end_time-1", value=time(23, 59, 59)
-        # )
-
-        # payment_time_cols[0].date_input(
-        #     "服务截至：开始日期",
-        #     key="server_start_date-1",
-        #     value=(datetime.now(timezone.utc) - timedelta(days=7)).date(),
-        # )
-        # payment_time_cols[1].time_input(
-        #     "时间", value=time(0, 0, 0), key="server_start_time-1"
-        # )  # type: ignore
-        # payment_time_cols[2].date_input(
-        #     "结束日期", key="server_end_date-1", value=datetime.now(timezone.utc).date()
-        # )
-        # payment_time_cols[3].time_input(
-        #     "时间", key="server_end_time-1", value=time(23, 59, 59)
-        # )
-        # memo_cols = st.columns(2)
-        # memo_cols[0].text_input(label="用户备注", key="memo-1")
-        # memo_cols[1].text_input(label="付款备注", key="remark-1")
-        # btn_cols = st.columns(5)
-        # # plus_arg_on = btn_cols[0].toggle("添加支付参数？", key="plu_pay_arg", value=False)
-        # registration_on = btn_cols[0].checkbox(
-        #     "限制注册时间", key="registration-1", value=False
-        # )
-        # payment_on = btn_cols[1].checkbox("限制支付时间", key="payment-1", value=False)
-        # server_on = btn_cols[2].checkbox("限制服务时间", key="server-1", value=False)
+        
         query_button = st.form_submit_button(label="查询")
 
         if query_button:
