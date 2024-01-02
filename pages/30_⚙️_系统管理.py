@@ -388,6 +388,9 @@ with tabs[items.index("订阅登记")]:
         payment_id = cols[1].text_input(
             "付款编号", key="payment_id", help="✨ 请输入付款编号", placeholder="必填。请在付款凭证上查找付款编号"
         )
+        receivable = cols[0].text_input(
+            "应收金额", key="receivable", help="✨ 请输入付款方式", placeholder="必填。付款方式",value=PRICES[purchase_type]
+        )
 
         # user = st.session_state.gdbi.get_user(phone_number=phone_number)
         if st.form_submit_button(label="登记"):
