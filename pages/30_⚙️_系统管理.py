@@ -44,6 +44,7 @@ tz = pytz.timezone(st.session_state.user_info.get("timezone", "Asia/Shanghai"))
 # region 常量配置
 
 PM_OPTS = list(PaymentStatus)
+
 COLUMN_CONFIG = {
     "phone_number": "手机号码",
     "payment_id": "付款编号",
@@ -462,10 +463,6 @@ with tabs[items.index("支付管理")]:
     st.subheader("支付清单")
     df = pd.DataFrame(st.session_state.get("queried_payments", {}))
 
-    # if not df.empty:
-    #     for col in TIME_COLS:
-    #         df[col] = df[col] + Timedelta(hours=8)
-
     placeholder = st.empty()
     status = st.empty()
     approve_btn = st.button("更新", key="approve_btn")
@@ -473,6 +470,9 @@ with tabs[items.index("支付管理")]:
     if df.empty:
         placeholder.info("没有记录")
     else:
+        # 将时间列转换为本地时区
+        for col in TIME_COLS:
+            df[col] = df[col].dt.tz_convert(tz)
         edited_df = placeholder.data_editor(
             df,
             column_config=COLUMN_CONFIG,
