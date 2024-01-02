@@ -183,7 +183,7 @@ with st.form(key="registration_form"):
         # 截至付款期限
         deadline = datetime.now(timezone.utc) + timedelta(days=3)
         # 创建一个时区对象
-        tz = pytz.timezone(tz)  # 请将 'Asia/Shanghai' 替换为你的时区
+        tz = pytz.timezone(tz)
         # 将 UTC 时间转换为特定的时区
         deadline = deadline.astimezone(tz)
         deadline_str = deadline.strftime("%Y-%m-%d %H:%M:%S")
