@@ -429,6 +429,7 @@ with tabs[items.index("支付管理")]:
         t_0_cols[1].toggle(
             label="包含",
             key="is_include-0",
+            help="✨ 选中表示包含该查询条件，否则表示不包含",
         )
         payment_0_cols = st.columns(4)
         payment_0_cols[0].text_input(label="手机号码", key="phone_number-1")
@@ -441,6 +442,7 @@ with tabs[items.index("支付管理")]:
         t_1_cols[1].toggle(
             label="包含",
             key="is_include-1",
+            help="✨ 选中表示包含该查询条件，否则表示不包含",
         )
         payment_1_cols = st.columns(4)
         payment_1_cols[0].selectbox(
@@ -463,7 +465,8 @@ with tabs[items.index("支付管理")]:
         t_2_cols[0].markdown(":rainbow[期间查询参数]")
         t_2_cols[1].toggle(
             label="包含",
-            key="is_include-1",
+            key="is_include-2",
+            help="✨ 选中表示包含该查询条件，否则表示不包含",
         )
         payment_2_cols = st.columns(4)
         payment_2_cols[0].selectbox(
