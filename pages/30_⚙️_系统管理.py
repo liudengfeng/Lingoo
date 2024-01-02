@@ -424,16 +424,22 @@ with tabs[items.index("订阅登记")]:
 with tabs[items.index("支付管理")]:
     st.markdown("#### 查询参数")
     with st.form(key="query_form", clear_on_submit=True):
-        payment_0_cols = st.columns(4)
-        payment_0_cols[0].markdown(":rainbow[文本查询参数]")
-        payment_0_cols[1].toggle(
+        t_0_cols = st.columns(4)
+        t_0_cols[0].markdown(":rainbow[文本查询参数]")
+        t_0_cols[1].toggle(
             label="是否包含",
         )
+        payment_0_cols = st.columns(4)
         payment_0_cols[0].text_input(label="手机号码", key="phone_number-1")
         payment_0_cols[1].text_input(label="付款编号", key="payment_id-1")
         payment_0_cols[2].text_input(label="订单编号", key="order_id-1")
         payment_0_cols[3].text_input(label="销售代表", key="sales_representative-1")
-        st.markdown(":rainbow[选项查询参数]")
+        
+        t_1_cols = st.columns(4)
+        t_1_cols[0].markdown(":rainbow[选项查询参数]")
+        t_1_cols[1].toggle(
+            label="是否包含",
+        )
         payment_1_cols = st.columns(4)
         payment_1_cols[0].selectbox(
             label="套餐类型",
