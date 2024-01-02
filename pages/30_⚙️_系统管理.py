@@ -49,6 +49,7 @@ COLUMN_CONFIG = {
     "payment_id": "付款编号",
     "order_id": "订单编号",
     "payment_time": "支付时间",
+    "sales_representative":"销售代表",
     "purchase_type": st.column_config.SelectboxColumn(
         "套餐类型",
         help="✨ 购买的套餐类型",
@@ -444,9 +445,6 @@ with tabs[items.index("支付管理")]:
             st.session_state["queried_payments"] = dicts
 
     st.subheader("支付清单")
-    # df = pd.DataFrame.from_records(
-    #     st.session_state.get("queried_payments", []), columns=COLUMN_CONFIG.keys()
-    # )
     df = pd.DataFrame(
         st.session_state.get("queried_payments", {})
     )
