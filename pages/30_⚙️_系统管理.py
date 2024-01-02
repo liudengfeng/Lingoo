@@ -38,7 +38,7 @@ if st.session_state.user_info.get("user_role") != "管理员":
     st.error("对不起，您没有权限访问该页面。该页面仅限系统管理员使用。")
     st.stop()
 
-
+tz = st.session_state.user_info.get("timezone", "Asia/Shanghai")
 # endregion
 
 # region 常量配置
@@ -494,15 +494,15 @@ with tabs[items.index("支付管理")]:
         payment_2_cols[0].date_input(
             "支付【开始日期】",
             key="payment_time_start_date-1",
-            value=datetime.datetime.now(datetime.timezone.utc).date(),
+            value=datetime.datetime.now(tz).date(),
         )
         payment_2_cols[1].time_input(
-            "支付【开始时间】", key="payment_time_start_time-1", value=datetime.time(23, 59, 59)
+            "支付【开始时间】", key="payment_time_start_time-1", value=datetime.time(0, 0, 0)
         )
         payment_2_cols[2].date_input(
             "支付【结束日期】",
             key="payment_time_end_date-1",
-            value=datetime.datetime.now(datetime.timezone.utc).date(),
+            value=datetime.datetime.now(tz).date(),
         )
         payment_2_cols[3].time_input(
             "支付【结束时间】", key="payment_time_end_time-1", value=datetime.time(23, 59, 59)
@@ -520,15 +520,15 @@ with tabs[items.index("支付管理")]:
         payment_3_cols[0].date_input(
             "服务【开始日期】",
             key="expiry_time_start_date-1",
-            value=datetime.datetime.now(datetime.timezone.utc).date(),
+            value=datetime.datetime.now(tz).date(),
         )
         payment_3_cols[1].time_input(
-            "服务【开始时间】", key="expiry_time_start_time-1", value=datetime.time(23, 59, 59)
+            "服务【开始时间】", key="expiry_time_start_time-1", value=datetime.time(0, 0, 0)
         )
         payment_3_cols[2].date_input(
             "服务【结束日期】",
             key="expiry_time_end_date-1",
-            value=datetime.datetime.now(datetime.timezone.utc).date(),
+            value=datetime.datetime.now(tz).date(),
         )
         payment_3_cols[3].time_input(
             "服务【结束时间】", key="expiry_time_end_time-1", value=datetime.time(23, 59, 59)
@@ -556,7 +556,6 @@ with tabs[items.index("支付管理")]:
         query_button = st.form_submit_button(label="查询")
 
         if query_button:
-            tz = st.session_state.user_info.get("timezone", "Asia/Shanghai")
             kwargs = {}
             if t0:
                 kwargs.update(
