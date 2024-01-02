@@ -24,7 +24,7 @@ fernet = Fernet(st.secrets["FERNET_KEY"].encode())
 
 st.set_page_config(
     page_title="用户管理",
-    page_icon=":bust_in_silhouette:",
+    page_icon=":busts_in_silhouette:",
     layout="wide",
 )
 
