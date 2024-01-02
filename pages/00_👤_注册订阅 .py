@@ -138,6 +138,7 @@ with st.form(key="registration_form"):
 
         # 虚拟邮箱
         email = email if email else f"{phone_number}@{FAKE_EMAIL_DOMAIN}"
+        st.write(f"{tz=}")
         user = User(
             email=email,
             real_name=real_name,

@@ -113,7 +113,6 @@ class GoogleDbInterface:
                 user_data = user_doc.to_dict()
                 user_data["phone_number"] = phone_number  # 添加手机号码
                 user = User.from_doc(user_data)
-                st.write(user)
             else:
                 raise Exception("用户不存在")
             # 验证密码
