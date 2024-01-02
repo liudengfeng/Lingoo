@@ -424,8 +424,12 @@ with tabs[items.index("订阅登记")]:
 with tabs[items.index("支付管理")]:
     st.markdown("#### 查询参数")
     with st.form(key="query_form", clear_on_submit=True):
-        st.markdown(":rainbow[文本查询参数]")
         payment_0_cols = st.columns(4)
+        payment_0_cols[0].markdown(":rainbow[文本查询参数]")
+        payment_0_cols[1].checkbox(
+            label="是否包含",
+            key="title-1",
+        )
         payment_0_cols[0].text_input(label="手机号码", key="phone_number-1")
         payment_0_cols[1].text_input(label="付款编号", key="payment_id-1")
         payment_0_cols[2].text_input(label="订单编号", key="order_id-1")
@@ -443,6 +447,28 @@ with tabs[items.index("支付管理")]:
             options=["All"] + [x.value for x in PaymentStatus],
         )
         payment_1_cols[2].selectbox(
+            label="是否批准",
+            key="is_approved-1",
+            options=["All", False, True],
+        )
+        st.markdown(":rainbow[期间查询参数]")
+        payment_2_cols = st.columns(4)
+        payment_2_cols[0].selectbox(
+            label="套餐类型",
+            key="purchase_type-1",
+            options=["All"] + [x.value for x in PurchaseType],
+        )
+        payment_2_cols[1].selectbox(
+            label="支付状态",
+            key="status-1",
+            options=["All"] + [x.value for x in PaymentStatus],
+        )
+        payment_2_cols[2].selectbox(
+            label="是否批准",
+            key="is_approved-1",
+            options=["All", False, True],
+        )
+        payment_2_cols[2].selectbox(
             label="是否批准",
             key="is_approved-1",
             options=["All", False, True],
