@@ -155,7 +155,7 @@ with st.form(key="registration_form"):
         user.hash_password()
         try:
             # 检查是否已经存在具有相同手机号码或电子邮件的用户
-            users_ref = st.session_state.gdbi.collection("users")
+            users_ref = st.session_state.gdbi.db.collection("users")
             existing_user = users_ref.where(
                 "phone_number", "==", user.phone_number
             ).get()
