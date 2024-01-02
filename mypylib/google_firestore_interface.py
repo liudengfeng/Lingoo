@@ -93,8 +93,11 @@ class GoogleDbInterface:
         # 检查用户的凭据
         users_ref = self.db.collection("users")
         try:
-            user_doc = users_ref.where("phone_number", "==", phone_number).get()
-            user_doc = user_doc.to_dict()
+            user_docs = users_ref.where("phone_number", "==", phone_number).get()
+            if len(user_docs) > 0:
+                user_doc = user_docs[0].to_dict()
+            else:
+                user_doc = None
             # 创建一个User实例
             user = User.from_doc(user_doc)
             # 验证密码
