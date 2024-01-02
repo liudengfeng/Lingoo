@@ -424,7 +424,7 @@ with tabs[items.index("订阅登记")]:
 with tabs[items.index("支付管理")]:
     st.markdown("#### 查询参数")
     with st.form(key="query_form", clear_on_submit=True):
-        st.title("精确查询参数")
+        st.markdown(":rainbow[文本查询参数]")
         user_cols = st.columns(5)
         user_cols[0].text_input(label="手机号码", key="phone_number-1")
         user_cols[1].text_input(label="付款编号", key="payment_id-1")
