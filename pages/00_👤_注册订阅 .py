@@ -44,7 +44,7 @@ check_and_force_logout(sidebar_status)
 
 st.subheader(":bust_in_silhouette: 用户注册", anchor="用户注册")
 
-with st.form(key="registration_form"):
+with st.form(key="registration_form", clear_on_submit=True):
     col1, col2 = st.columns(2)
     phone_number = col1.text_input(
         "手机号码",
