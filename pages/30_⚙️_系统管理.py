@@ -25,7 +25,7 @@ if "user_info" not in st.session_state:
     st.session_state["user_info"] = {}
 
 # logger.debug(st.session_state.user_info)
-# st.write(st.session_state.user_info)
+st.write(st.session_state.user_info)
 if not st.session_state.user_info.get("role") == "管理员":
     st.error("对不起，您没有权限访问该页面。该页面仅限系统管理员使用。")
     st.stop()
