@@ -425,12 +425,23 @@ with tabs[items.index("支付管理")]:
     st.markdown("#### 查询参数")
     with st.form(key="query_form", clear_on_submit=True):
         st.markdown(":rainbow[文本查询参数]")
-        user_cols = st.columns(5)
-        user_cols[0].text_input(label="手机号码", key="phone_number-1")
-        user_cols[1].text_input(label="付款编号", key="payment_id-1")
-        user_cols[2].text_input(label="订单编号", key="order_id-1")
-        user_cols[3].text_input(label="销售代表", key="sales_representative-1")
-
+        payment_0_cols = st.columns(4)
+        payment_0_cols[0].text_input(label="手机号码", key="phone_number-1")
+        payment_0_cols[1].text_input(label="付款编号", key="payment_id-1")
+        payment_0_cols[2].text_input(label="订单编号", key="order_id-1")
+        payment_0_cols[3].text_input(label="销售代表", key="sales_representative-1")
+        st.markdown(":rainbow[选项查询参数]")
+        payment_1_cols = st.columns(4)
+        payment_1_cols[0].selectbox(
+            label="套餐类型",
+            key="purchase_type-1",
+            options=["All"] + [x.value for x in PurchaseType],
+        )
+        payment_1_cols[1].selectbox(
+            label="是否批准",
+            key="is_approved-1",
+            options=["All", False, True],
+        )
         # user_cols[4].selectbox(
         #     "用户权限",
         #     key="user_role-1",
