@@ -329,22 +329,15 @@ if "gdbi" not in st.session_state:
 # endregion
 
 # 创建选项卡
-items = ["订阅登记", "用户管理", "处理反馈", "词典管理", "统计分析"]
+items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "统计分析"]
 tabs = st.tabs(items)
 
 
 # region 创建收费登记页面
 
 
-def compute_discount():
-    purchase_type = st.session_state["purchase_type"]
-    price = PRICES[purchase_type]
-    payment_amount = st.session_state["payment_amount"]
-    return (payment_amount / price) * 100
-
-
 with tabs[items.index("订阅登记")]:
-    st.subheader("登记收款")
+    st.subheader("订阅登记")
     with st.form(key="payment_form", clear_on_submit=True):
         cols = st.columns(2)
         phone_number = cols[0].text_input(
@@ -428,7 +421,7 @@ with tabs[items.index("订阅登记")]:
 
 # region 创建用户管理页面
 
-with tabs[items.index("用户管理")]:
+with tabs[items.index("支付管理")]:
     st.markdown("#### 查询参数")
     # with st.form(key="query_form", clear_on_submit=True):
     with st.form(key="query_form"):
