@@ -345,13 +345,6 @@ def compute_discount():
 
 with tabs[items.index("订阅登记")]:
     st.subheader("登记收款")
-    remark = st.text_input(
-        "备注",
-        key="remark",
-        help="✨ 请输入备注信息",
-        value=f"{compute_discount():.2f}%",
-    )
-    is_approved = st.toggle("是否批准")
     with st.form(key="payment_form"):
         cols = st.columns(2)
         phone_number = cols[0].text_input(
@@ -395,7 +388,13 @@ with tabs[items.index("订阅登记")]:
             placeholder="必填。付款方式",
             value=PRICES[purchase_type],
         )
-
+        remark = st.text_input(
+            "备注",
+            key="remark",
+            help="✨ 请输入备注信息",
+            value=f"{compute_discount():.2f}%",
+        )
+        is_approved = st.toggle("是否批准")
         # user = st.session_state.gdbi.get_user(phone_number=phone_number)
         if st.form_submit_button(label="登记"):
             order_id = str(
