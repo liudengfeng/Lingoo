@@ -58,6 +58,7 @@ class GoogleDbInterface:
     def cache_user(self, user):
         phone_number = user.phone_number
         self.cache[phone_number] = {
+            "status": "success",
             "display_name": user.display_name,
             "email": user.email,
             "user_role": user.user_role,
@@ -89,7 +90,10 @@ class GoogleDbInterface:
 
     def login(self, phone_number, password):
         # 在缓存中查询是否已经正常登录 TODO：缓存内容
-        if phone_number in self.cache and self.cache[phone_number]:
+        if (
+            phone_number in self.cache
+            and self.cache[phone_number].get("status", "") == "success"
+        ):
             return {"status": "warning", "message": "您已登录"}
         # 检查用户的凭据
         users_ref = self.db.collection("users")
