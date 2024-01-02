@@ -335,10 +335,15 @@ tabs = st.tabs(items)
 
 # region 创建收费登记页面
 
+if "discount" not in st.session_state:
+    st.session_state["discount"] = 0.0
 
-def compute_discount(purchase_type, payment_amount):
+
+def compute_discount():
+    purchase_type = st.session_state["purchase_type"]
     price = PRICES[purchase_type]
-    return (payment_amount / price) * 100
+    payment_amount = st.session_state["payment_amount"]
+    st.session_state["discount"] = (payment_amount / price) * 100
 
 
 with tabs[items.index("订阅登记")]:
@@ -364,9 +369,14 @@ with tabs[items.index("订阅登记")]:
             options=list(PurchaseType),
             index=1,
             format_func=lambda x: x.value,
+            on_change=compute_discount,
         )
         payment_amount = cols[1].number_input(
-            "实收金额", key="payment_amount", help="✨ 请输入实际收款金额", value=0.0
+            "实收金额",
+            key="payment_amount",
+            help="✨ 请输入实际收款金额",
+            value=0.0,
+            on_change=compute_discount,
         )
         payment_method = cols[0].text_input(
             "付款方式", key="payment_method", help="✨ 请输入付款方式", placeholder="必填。付款方式"
@@ -378,9 +388,9 @@ with tabs[items.index("订阅登记")]:
             "备注",
             key="remark",
             help="✨ 请输入备注信息",
-            value=f"{compute_discount(purchase_type, payment_amount):.2f}%",
+            value=f"{st.session_state.discount:.2f}%",
         )
-        is_approved =st.toggle("是否批准")
+        is_approved = st.toggle("是否批准")
 
         # user = st.session_state.gdbi.get_user(phone_number=phone_number)
         if st.form_submit_button(label="登记"):
