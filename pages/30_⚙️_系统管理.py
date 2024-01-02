@@ -316,7 +316,7 @@ def search(**kwargs):
     return result
 
 
-def generate_timestamp(key: str, type: str, idx: int, timezone: str):
+def generate_timestamp(key: str, type: str, idx: int):
     # 获取日期和时间
     date = st.session_state.get(f"{key}_{type}_date-{idx}")
     time = st.session_state.get(f"{key}_{type}_time-{idx}")
@@ -325,7 +325,6 @@ def generate_timestamp(key: str, type: str, idx: int, timezone: str):
     datetime_obj = datetime.datetime.combine(date, time)
 
     # 设置时区
-    tz = pytz.timezone(timezone)
     datetime_obj = tz.localize(datetime_obj)
 
     # 转换为 UTC 时区
@@ -589,13 +588,13 @@ with tabs[items.index("支付管理")]:
                 )
 
             if t2:
-                kwargs.update(generate_timestamp("payment_time", "start", 1, tz))
-                kwargs.update(generate_timestamp("payment_time", "end", 1, tz))
+                kwargs.update(generate_timestamp("payment_time", "start", 1))
+                kwargs.update(generate_timestamp("payment_time", "end", 1))
                 st.write(f"{kwargs=}")
 
             if t3:
-                kwargs.update(generate_timestamp("expiry_time", "start", 1, tz))
-                kwargs.update(generate_timestamp("expiry_time", "end", 1, tz))
+                kwargs.update(generate_timestamp("expiry_time", "start", 1))
+                kwargs.update(generate_timestamp("expiry_time", "end", 1))
 
             if t4:
                 kwargs.update(
