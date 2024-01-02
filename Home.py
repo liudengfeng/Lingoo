@@ -182,6 +182,7 @@ if len(st.session_state["user_info"]) == 0:
                 if info["status"] == "success":
                     display_name = info["display_name"]
                     sidebar_status.success(info["message"])
+                    st.session_state["user_info"] = {}
                     st.session_state["user_info"]["phone_number"] = phone_number
                     st.session_state["user_info"]["user_role"] = info["user_role"]
                     st.session_state["user_info"]["session_id"] = info["session_id"]
