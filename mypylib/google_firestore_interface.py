@@ -135,14 +135,14 @@ class GoogleDbInterface:
 
     # endregion
 
-    def logout(self, user_info, session_id):
+    def logout(self, user_info):
         # 从缓存中删除用户的登录状态
         if user_info["phone_number"] in self.cache:
             del self.cache[user_info["phone_number"]]
 
         # 更新指定的登录事件
         login_events_ref = self.db.collection("login_events")
-        login_event_doc_ref = login_events_ref.document(session_id)
+        login_event_doc_ref = login_events_ref.document(user_info["session_id"])
         login_event_doc = login_event_doc_ref.get()
         if (
             login_event_doc.exists
