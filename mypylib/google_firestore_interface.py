@@ -132,9 +132,11 @@ class GoogleDbInterface:
 
         # 找到最近的登录事件
         login_events_ref = self.db.collection("login_events")
-        login_events_docs = login_events_ref.where(
-            "phone_number", "==", user_info["phone_number"]
-        ).stream()
+        login_events_docs = (
+            login_events_ref.where("phone_number", "==", user_info["phone_number"])
+            .where("logout_time", "==", None)
+            .stream()
+        )
 
         last_login_event = None
         last_login_event_doc_ref = None
