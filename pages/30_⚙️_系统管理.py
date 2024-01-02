@@ -436,9 +436,12 @@ with tabs[items.index("支付管理")]:
             # st.write(kwargs)
             # for k, v in kwargs.items():
             #     st.write(f"{k=}, {type(v)=}")
-            st.session_state["queried_payments"] = st.session_state.gdbi.query_payments(
+            results = st.session_state.gdbi.query_payments(
                 kwargs
             )
+            # 将每个文档转换为字典
+            dicts = [doc.to_dict() for doc in results]
+            st.session_state["queried_payments"] = dicts
 
     st.subheader("支付清单")
     df = pd.DataFrame.from_records(
