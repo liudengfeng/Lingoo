@@ -149,8 +149,7 @@ with st.form(key="registration_form"):
             target_level=target_level,
             display_name=display_name,
             password=password_reg,
-            # registration_time=datetime.now(timezone.utc),
-            registration_time=firestore.SERVER_TIMESTAMP,
+            registration_time=datetime.now(timezone.utc),
         )  # type: ignore
         # 为用户密码加密
         user.hash_password()
