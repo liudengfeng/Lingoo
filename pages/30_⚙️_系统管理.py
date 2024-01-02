@@ -392,7 +392,6 @@ with tabs[items.index("订阅登记")]:
             "备注",
             key="remark",
             help="✨ 请输入备注信息",
-            value=f"{compute_discount():.2f}%",
         )
         is_approved = st.toggle("是否批准")
         # user = st.session_state.gdbi.get_user(phone_number=phone_number)
@@ -401,6 +400,12 @@ with tabs[items.index("订阅登记")]:
                 len(st.session_state.gdbi.db.collection("payments").get()) + 1
             ).zfill(10)
             receivable = PRICES[purchase_type]  # type: ignore
+            discount_rate = (payment_amount / receivable,)
+            if discount_rate < 0.5:  # 你可以根据需要调整这个阈值
+                confirm = st.radio("折扣率较低，是否接受？", ("是", "否"))
+                if confirm == "否":
+                    st.stop()
+
             payment = Payment(
                 phone_number=phone_number,
                 payment_id=payment_id,
@@ -411,7 +416,7 @@ with tabs[items.index("订阅登记")]:
                 purchase_type=purchase_type,  # type: ignore
                 order_id=order_id,
                 payment_method=payment_method,
-                discount_rate=payment_amount / receivable,
+                discount_rate=discount_rate,
                 sales_representative=sales_representative,
                 is_approved=is_approved,
                 remark=remark,
