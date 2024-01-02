@@ -472,7 +472,8 @@ with tabs[items.index("支付管理")]:
     else:
         # 将时间列转换为本地时区
         for col in TIME_COLS:
-            df[col] = df[col].dt.tz_convert(tz)
+            if col in df.columns:
+                df[col] = df[col].dt.tz_convert(tz)
         edited_df = placeholder.data_editor(
             df,
             column_config=COLUMN_CONFIG,
