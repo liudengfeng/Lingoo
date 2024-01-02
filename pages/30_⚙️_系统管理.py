@@ -444,8 +444,11 @@ with tabs[items.index("支付管理")]:
             st.session_state["queried_payments"] = dicts
 
     st.subheader("支付清单")
-    df = pd.DataFrame.from_records(
-        st.session_state.get("queried_payments", []), columns=COLUMN_CONFIG.keys()
+    # df = pd.DataFrame.from_records(
+    #     st.session_state.get("queried_payments", []), columns=COLUMN_CONFIG.keys()
+    # )
+    df = pd.DataFrame(
+        st.session_state.get("queried_payments", {})
     )
 
     # if not df.empty:
