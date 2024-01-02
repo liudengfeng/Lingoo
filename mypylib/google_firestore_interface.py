@@ -94,6 +94,7 @@ class GoogleDbInterface:
         users_ref = self.db.collection("users")
         try:
             user_docs = users_ref.where("phone_number", "==", phone_number).get()
+            st.write(user_docs)
             if len(user_docs) > 0:
                 user_doc = user_docs[0].to_dict()
             else:
