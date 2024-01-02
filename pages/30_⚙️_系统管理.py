@@ -370,7 +370,7 @@ with tabs[items.index("订阅登记")]:
             placeholder="请输入销售代表的名称",
         )
         remark = st.text_input("备注", key="remark", help="✨ 请输入备注信息", value="")
-        user = st.session_state.gdbi.find_user_by(phone=phone_number)
+        # user = st.session_state.gdbi.get_user(phone_number=phone_number)
         if st.form_submit_button(label="登记"):
             order_id = str(st.session_state.gdbi.db.collection("payments").get().size() + 1).zfill(10)
             receivable = PRICES[purchase_type]  # type: ignore
