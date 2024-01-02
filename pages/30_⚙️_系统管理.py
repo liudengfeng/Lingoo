@@ -427,18 +427,20 @@ with tabs[items.index("支付管理")]:
         t_0_cols = st.columns(4)
         t_0_cols[0].markdown(":rainbow[文本查询参数]")
         t_0_cols[1].toggle(
-            label="是否包含",
+            label="包含",
+            key="is_include-0",
         )
         payment_0_cols = st.columns(4)
         payment_0_cols[0].text_input(label="手机号码", key="phone_number-1")
         payment_0_cols[1].text_input(label="付款编号", key="payment_id-1")
         payment_0_cols[2].text_input(label="订单编号", key="order_id-1")
         payment_0_cols[3].text_input(label="销售代表", key="sales_representative-1")
-        
+
         t_1_cols = st.columns(4)
         t_1_cols[0].markdown(":rainbow[选项查询参数]")
         t_1_cols[1].toggle(
-            label="是否包含",
+            label="包含",
+            key="is_include-1",
         )
         payment_1_cols = st.columns(4)
         payment_1_cols[0].selectbox(
@@ -456,27 +458,34 @@ with tabs[items.index("支付管理")]:
             key="is_approved-1",
             options=["All", False, True],
         )
-        st.markdown(":rainbow[期间查询参数]")
+
+        t_2_cols = st.columns(4)
+        t_2_cols[0].markdown(":rainbow[期间查询参数]")
+        t_2_cols[1].toggle(
+            label="包含",
+            key="is_include-1",
+        )
         payment_2_cols = st.columns(4)
         payment_2_cols[0].selectbox(
             label="套餐类型",
             key="purchase_type-1",
             options=["All"] + [x.value for x in PurchaseType],
         )
-        payment_2_cols[1].selectbox(
-            label="支付状态",
-            key="status-1",
-            options=["All"] + [x.value for x in PaymentStatus],
+        payment_2_cols[0].date_input(
+            "支付开始日期",
+            key="payment_time_start_date-1",
+            value=datetime.now(timezone.utc).date(),
         )
-        payment_2_cols[2].selectbox(
-            label="是否批准",
-            key="is_approved-1",
-            options=["All", False, True],
+        payment_2_cols[1].time_input(
+            "支付开始时间", key="payment_time_start_time-1", value=time(23, 59, 59)
         )
-        payment_2_cols[2].selectbox(
-            label="是否批准",
-            key="is_approved-1",
-            options=["All", False, True],
+        payment_2_cols[2].date_input(
+            "支付结束日期",
+            key="payment_time_end_date-1",
+            value=datetime.now(timezone.utc).date(),
+        )
+        payment_2_cols[3].time_input(
+            "支付结束时间", key="payment_time_end_time-1", value=time(23, 59, 59)
         )
         # user_cols[4].selectbox(
         #     "用户权限",
