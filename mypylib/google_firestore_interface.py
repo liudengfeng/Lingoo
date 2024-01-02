@@ -140,15 +140,15 @@ class GoogleDbInterface:
         if user_info["phone_number"] in self.cache:
             del self.cache[user_info["phone_number"]]
 
-        # 更新指定的登录事件
         login_events_ref = self.db.collection("login_events")
-        login_event_doc_ref = login_events_ref.document(user_info["session_id"])
-        login_event_doc = login_event_doc_ref.get()
-        if (
-            login_event_doc.exists
-            and login_event_doc.to_dict()["phone_number"] == user_info["phone_number"]
-        ):
-            login_event_doc_ref.update({"logout_time": datetime.utcnow()})
+        login_events = (
+            login_events_ref.where("phone_number", "==", user_info["phone_number"])
+            .where("logout_time", "==", None)
+            .stream()
+        )
+
+        for login_event in login_events:
+            login_event.reference.update({"logout_time": datetime.now(tz=timezone.utc)})
 
         return "Logout successful"
 
