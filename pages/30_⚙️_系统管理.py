@@ -49,7 +49,7 @@ COLUMN_CONFIG = {
     "payment_id": "付款编号",
     "order_id": "订单编号",
     "payment_time": "支付时间",
-    "sales_representative":"销售代表",
+    "sales_representative": "销售代表",
     "purchase_type": st.column_config.SelectboxColumn(
         "套餐类型",
         help="✨ 购买的套餐类型",
@@ -113,6 +113,23 @@ COLUMN_CONFIG = {
     "remark": "服务备注",
     # "memo": "用户备注",
 }
+
+COLUMN_ORDER = [
+    "phone_number",
+    "payment_id",
+    "order_id",
+    "payment_time",
+    "sales_representative",
+    "purchase_type",
+    "receivable",
+    "discount_rate",
+    "payment_method",
+    "payment_amount",
+    "is_approved",
+    "expiry_time",
+    "status",
+    "remark",
+]
 
 TIME_COLS = ["payment_time", "expiry_time", "registration_time"]
 
@@ -437,17 +454,13 @@ with tabs[items.index("支付管理")]:
             # st.write(kwargs)
             # for k, v in kwargs.items():
             #     st.write(f"{k=}, {type(v)=}")
-            results = st.session_state.gdbi.query_payments(
-                kwargs
-            )
+            results = st.session_state.gdbi.query_payments(kwargs)
             # 将每个文档转换为字典
             dicts = [doc.to_dict() for doc in results]
             st.session_state["queried_payments"] = dicts
 
     st.subheader("支付清单")
-    df = pd.DataFrame(
-        st.session_state.get("queried_payments", {})
-    )
+    df = pd.DataFrame(st.session_state.get("queried_payments", {}))
 
     # if not df.empty:
     #     for col in TIME_COLS:
@@ -463,6 +476,7 @@ with tabs[items.index("支付管理")]:
         edited_df = placeholder.data_editor(
             df,
             column_config=COLUMN_CONFIG,
+            column_order=COLUMN_ORDER,
             hide_index=True,
             key="users_payments",
             disabled=[col for col in df.columns if col not in EDITABLE_COLS],
