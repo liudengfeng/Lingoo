@@ -424,9 +424,9 @@ with tabs[items.index("订阅登记")]:
 with tabs[items.index("支付管理")]:
     st.markdown("#### 查询参数")
     with st.form(key="query_form", clear_on_submit=True):
-        # 文本查询参数
+        # 精确匹配
         t_0_cols = st.columns(4)
-        t_0_cols[0].markdown(":rainbow[文本查询参数]")
+        t_0_cols[0].markdown(":rainbow[精确匹配查询]")
         t_0_cols[1].toggle(
             label="包含",
             key="is_include-0",
@@ -437,9 +437,9 @@ with tabs[items.index("支付管理")]:
         payment_0_cols[1].text_input(label="付款编号", key="payment_id-1")
         payment_0_cols[2].text_input(label="订单编号", key="order_id-1")
         payment_0_cols[3].text_input(label="销售代表", key="sales_representative-1")
-        # 选项查询参数
+        # 选项查询
         t_1_cols = st.columns(4)
-        t_1_cols[0].markdown(":rainbow[选项查询参数]")
+        t_1_cols[0].markdown(":rainbow[状态查询]")
         t_1_cols[1].toggle(
             label="包含",
             key="is_include-1",
@@ -511,7 +511,20 @@ with tabs[items.index("支付管理")]:
         payment_3_cols[3].time_input(
             "服务【结束时间】", key="expiry_time_end_time-1", value=time(23, 59, 59)
         )
-
+        # 服务时间查询
+        t_4_cols = st.columns(4)
+        t_4_cols[0].markdown(":rainbow[模糊查询]")
+        t_4_cols[1].toggle(
+            label="包含",
+            key="is_include-4",
+            help="✨ 选中表示包含该查询条件，否则表示不包含",
+        )
+        payment_4_cols = st.columns(4)
+        payment_4_cols[0].text_input(
+            "备注",
+            key="remark-1",
+            help="✨ 要查询的备注信息",
+        )
         query_button = st.form_submit_button(label="查询")
 
         if query_button:
