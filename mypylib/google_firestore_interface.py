@@ -267,6 +267,42 @@ class GoogleDbInterface:
 
     # region 支付管理
 
+    def query_payments(self, query_dict: dict):
+        query = self.payments
+        for key in [
+            "phone_number",
+            "payment_id",
+            "order_id",
+            "purchase_type",
+            "sales_representative",
+            "status",
+            "is_approved",
+        ]:
+            if key in query_dict:
+                query = query.where(key, "==", query_dict[key])
+
+        for key in [
+            "start_payment_time",
+            "end_payment_time",
+            "start_expiry_time",
+            "end_expiry_time",
+        ]:
+            if key in query_dict:
+                if "start" in key:
+                    query = query.where(
+                        key.replace("start_", ""), ">=", query_dict[key]
+                    )
+                else:
+                    query = query.where(key.replace("end_", ""), "<=", query_dict[key])
+        results = query.stream()
+        if "remark" in query_dict:
+            results = [
+                doc
+                for doc in results
+                if query_dict["remark"] in doc.to_dict().get("remark", "")
+            ]
+        return results
+
     def update_payment(self, phone_number, order_id, update_fields: dict):
         result = self.payments.update_one(
             {"phone_number": phone_number, "order_id": order_id},

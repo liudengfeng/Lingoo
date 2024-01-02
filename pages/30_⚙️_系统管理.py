@@ -423,143 +423,143 @@ with tabs[items.index("订阅登记")]:
 
 with tabs[items.index("支付管理")]:
     st.markdown("#### 查询参数")
-    # with st.form(key="query_form", clear_on_submit=True):
-    with st.form(key="query_form"):
-        # with st.form(key="query_form"):
+    with st.form(key="query_form", clear_on_submit=True):
+        st.title("精确查询参数")
         user_cols = st.columns(5)
         user_cols[0].text_input(label="手机号码", key="phone_number-1")
-        user_cols[1].text_input(label="邮箱", key="email-1")
-        user_cols[2].text_input(label="姓名", key="real_name-1")
-        user_cols[3].text_input(label="用户名称", key="display_name-1")
+        user_cols[1].text_input(label="付款编号", key="payment_id-1")
+        user_cols[2].text_input(label="订单编号", key="order_id-1")
+        user_cols[3].text_input(label="销售代表", key="sales_representative-1")
 
-        user_cols[4].selectbox(
-            "用户权限",
-            key="user_role-1",
-            options=["All"] + [x.value for x in list(UserRole)],
-            # format_func=lambda x: x.value,
-            index=0,
-        )
+        # user_cols[4].selectbox(
+        #     "用户权限",
+        #     key="user_role-1",
+        #     options=["All"] + [x.value for x in list(UserRole)],
+        #     # format_func=lambda x: x.value,
+        #     index=0,
+        # )
 
-        user_time_cols = st.columns(5)
+        # user_time_cols = st.columns(5)
 
-        user_time_cols[0].date_input(
-            "用户注册：开始日期",
-            key="registration_start_date-1",
-            value=(datetime.now(timezone.utc) - timedelta(days=365)).date(),
-        )
-        user_time_cols[1].time_input(
-            "时间", value=time(0, 0, 0), key="registration_start_time-1"
-        )  # type: ignore
-        user_time_cols[2].date_input(
-            "结束日期",
-            key="registration_end_date-1",
-            value=datetime.now(timezone.utc).date(),
-        )
-        user_time_cols[3].time_input(
-            "时间", key="registration_end_time-1", value=time(23, 59, 59)
-        )
+        # user_time_cols[0].date_input(
+        #     "用户注册：开始日期",
+        #     key="registration_start_date-1",
+        #     value=(datetime.now(timezone.utc) - timedelta(days=365)).date(),
+        # )
+        # user_time_cols[1].time_input(
+        #     "时间", value=time(0, 0, 0), key="registration_start_time-1"
+        # )  # type: ignore
+        # user_time_cols[2].date_input(
+        #     "结束日期",
+        #     key="registration_end_date-1",
+        #     value=datetime.now(timezone.utc).date(),
+        # )
+        # user_time_cols[3].time_input(
+        #     "时间", key="registration_end_time-1", value=time(23, 59, 59)
+        # )
 
-        pay_cols = st.columns(5)
-        pay_cols[0].text_input(label="订单编号", key="order_id-1")
-        pay_cols[1].text_input(label="付款编号", key="payment_id-1")
-        pay_cols[2].selectbox(
-            "服务状态",
-            key="status-1",
-            options=["All"] + [x.value for x in list(PaymentStatus)],
-            index=0,
-        )
-        pay_cols[3].selectbox(
-            "套餐类型",
-            key="purchase_type-1",
-            # options=list(PurchaseType),
-            options=["All"] + [x.value for x in list(PurchaseType)],
-            index=0,
-            # format_func=lambda x: x.value,
-        )
-        pay_cols[4].selectbox(
-            "是否已批准", key="is_approved-1", options=["All", False, True], index=0
-        )
+        # pay_cols = st.columns(5)
+        # pay_cols[0].text_input(label="订单编号", key="order_id-1")
+        # pay_cols[1].text_input(label="付款编号", key="payment_id-1")
+        # pay_cols[2].selectbox(
+        #     "服务状态",
+        #     key="status-1",
+        #     options=["All"] + [x.value for x in list(PaymentStatus)],
+        #     index=0,
+        # )
+        # pay_cols[3].selectbox(
+        #     "套餐类型",
+        #     key="purchase_type-1",
+        #     # options=list(PurchaseType),
+        #     options=["All"] + [x.value for x in list(PurchaseType)],
+        #     index=0,
+        #     # format_func=lambda x: x.value,
+        # )
+        # pay_cols[4].selectbox(
+        #     "是否已批准", key="is_approved-1", options=["All", False, True], index=0
+        # )
 
-        payment_time_cols = st.columns(5)
-        payment_time_cols[0].date_input(
-            "支付查询：开始日期",
-            key="pay_start_date-1",
-            value=(datetime.now(timezone.utc) - timedelta(days=7)).date(),
-        )
-        payment_time_cols[1].time_input(
-            "时间", value=time(0, 0, 0), key="pay_start_time-1"
-        )  # type: ignore
-        payment_time_cols[2].date_input(
-            "结束日期", key="pay_end_date-1", value=datetime.now(timezone.utc).date()
-        )
-        payment_time_cols[3].time_input(
-            "时间", key="pay_end_time-1", value=time(23, 59, 59)
-        )
+        # payment_time_cols = st.columns(5)
+        # payment_time_cols[0].date_input(
+        #     "支付查询：开始日期",
+        #     key="pay_start_date-1",
+        #     value=(datetime.now(timezone.utc) - timedelta(days=7)).date(),
+        # )
+        # payment_time_cols[1].time_input(
+        #     "时间", value=time(0, 0, 0), key="pay_start_time-1"
+        # )  # type: ignore
+        # payment_time_cols[2].date_input(
+        #     "结束日期", key="pay_end_date-1", value=datetime.now(timezone.utc).date()
+        # )
+        # payment_time_cols[3].time_input(
+        #     "时间", key="pay_end_time-1", value=time(23, 59, 59)
+        # )
 
-        payment_time_cols[0].date_input(
-            "服务截至：开始日期",
-            key="server_start_date-1",
-            value=(datetime.now(timezone.utc) - timedelta(days=7)).date(),
-        )
-        payment_time_cols[1].time_input(
-            "时间", value=time(0, 0, 0), key="server_start_time-1"
-        )  # type: ignore
-        payment_time_cols[2].date_input(
-            "结束日期", key="server_end_date-1", value=datetime.now(timezone.utc).date()
-        )
-        payment_time_cols[3].time_input(
-            "时间", key="server_end_time-1", value=time(23, 59, 59)
-        )
-        memo_cols = st.columns(2)
-        memo_cols[0].text_input(label="用户备注", key="memo-1")
-        memo_cols[1].text_input(label="付款备注", key="remark-1")
-        btn_cols = st.columns(5)
-        # plus_arg_on = btn_cols[0].toggle("添加支付参数？", key="plu_pay_arg", value=False)
-        registration_on = btn_cols[0].checkbox(
-            "限制注册时间", key="registration-1", value=False
-        )
-        payment_on = btn_cols[1].checkbox("限制支付时间", key="payment-1", value=False)
-        server_on = btn_cols[2].checkbox("限制服务时间", key="server-1", value=False)
-        query_button = btn_cols[3].form_submit_button(label="查询")
+        # payment_time_cols[0].date_input(
+        #     "服务截至：开始日期",
+        #     key="server_start_date-1",
+        #     value=(datetime.now(timezone.utc) - timedelta(days=7)).date(),
+        # )
+        # payment_time_cols[1].time_input(
+        #     "时间", value=time(0, 0, 0), key="server_start_time-1"
+        # )  # type: ignore
+        # payment_time_cols[2].date_input(
+        #     "结束日期", key="server_end_date-1", value=datetime.now(timezone.utc).date()
+        # )
+        # payment_time_cols[3].time_input(
+        #     "时间", key="server_end_time-1", value=time(23, 59, 59)
+        # )
+        # memo_cols = st.columns(2)
+        # memo_cols[0].text_input(label="用户备注", key="memo-1")
+        # memo_cols[1].text_input(label="付款备注", key="remark-1")
+        # btn_cols = st.columns(5)
+        # # plus_arg_on = btn_cols[0].toggle("添加支付参数？", key="plu_pay_arg", value=False)
+        # registration_on = btn_cols[0].checkbox(
+        #     "限制注册时间", key="registration-1", value=False
+        # )
+        # payment_on = btn_cols[1].checkbox("限制支付时间", key="payment-1", value=False)
+        # server_on = btn_cols[2].checkbox("限制服务时间", key="server-1", value=False)
+        query_button = st.form_submit_button(label="查询")
 
         if query_button:
-            kwargs = get_query_dict(
-                [
-                    "is_approved",
-                    "phone_number",
-                    "email",
-                    "real_name",
-                    "display_name",
-                    "user_role",
-                    "registration_start_date",
-                    "registration_start_time",
-                    "registration_end_date",
-                    "registration_end_time",
-                    "order_id",
-                    "payment_id",
-                    "status",
-                    "purchase_type",
-                    "pay_start_date",
-                    "pay_start_time",
-                    "pay_end_date",
-                    "pay_end_time",
-                    "server_start_date",
-                    "server_start_time",
-                    "server_end_date",
-                    "server_end_time",
-                    "memo",
-                    "remark",
-                ],
-                1,
-                registration_on,
-                payment_on,
-                server_on,
-            )
-            # 检查数据生成的参数及其类型
-            # st.write(kwargs)
-            # for k, v in kwargs.items():
-            #     st.write(f"{k=}, {type(v)=}")
-            st.session_state["searched_data"] = search(**kwargs)
+            pass
+            # kwargs = get_query_dict(
+            #     [
+            #         "is_approved",
+            #         "phone_number",
+            #         "email",
+            #         "real_name",
+            #         "display_name",
+            #         "user_role",
+            #         "registration_start_date",
+            #         "registration_start_time",
+            #         "registration_end_date",
+            #         "registration_end_time",
+            #         "order_id",
+            #         "payment_id",
+            #         "status",
+            #         "purchase_type",
+            #         "pay_start_date",
+            #         "pay_start_time",
+            #         "pay_end_date",
+            #         "pay_end_time",
+            #         "server_start_date",
+            #         "server_start_time",
+            #         "server_end_date",
+            #         "server_end_time",
+            #         "memo",
+            #         "remark",
+            #     ],
+            #     1,
+            #     registration_on,
+            #     payment_on,
+            #     server_on,
+            # )
+            # # 检查数据生成的参数及其类型
+            # # st.write(kwargs)
+            # # for k, v in kwargs.items():
+            # #     st.write(f"{k=}, {type(v)=}")
+            # st.session_state["searched_data"] = search(**kwargs)
 
     st.markdown("#### 查询结果")
     df = pd.DataFrame.from_records(
