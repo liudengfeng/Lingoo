@@ -97,31 +97,31 @@ class GoogleDbInterface:
             return {"status": "warning", "message": "您已登录"}
         # 检查用户的凭据
         users_ref = self.db.collection("users")
-        # try:
-        user_docs = users_ref.where("phone_number", "==", phone_number).stream()
-        if user_docs:
-            first_user_doc = next(user_docs).to_dict()
-        else:
-            first_user_doc = None
-        # 创建一个User实例
-        user = User.from_doc(first_user_doc)
-        # 验证密码
-        if user.check_password(password):
-            # 如果密码正确，将用户的登录状态存储到缓存中
-            self.cache_user(user)
-            session_id = self.create_login_event(phone_number)
+        try:
+            user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+            if user_docs:
+                first_user_doc = next(user_docs).to_dict()
+            else:
+                raise Exception("用户不存在")
+            # 创建一个User实例
+            user = User.from_doc(first_user_doc)
+            # 验证密码
+            if user.check_password(password):
+                # 如果密码正确，将用户的登录状态存储到缓存中
+                self.cache_user(user)
+                session_id = self.create_login_event(phone_number)
+                return {
+                    "display_name": user.display_name,
+                    "session_id": session_id,
+                    "status": "success",
+                    "message": f"嗨！{user.display_name}，又见面了。",
+                }
+        except Exception as e:
+            # st.write(e)
             return {
-                "display_name": user.display_name,
-                "session_id": session_id,
-                "status": "success",
-                "message": f"嗨！{user.display_name}，又见面了。",
+                "status": "error",
+                "message": "无效的手机号码，或者密码无效。请展开下面的帮助文档，查看如何注册账号或重置密码。",
             }
-        # except Exception as e:
-        #     st.write(e)
-        #     return {
-        #         "status": "error",
-        #         "message": "无效的手机号码，或者密码无效。请展开下面的帮助文档，查看如何注册账号或重置密码。",
-        #     }
 
     # endregion
 
