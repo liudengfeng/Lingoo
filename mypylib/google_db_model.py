@@ -103,6 +103,7 @@ class User(BaseModel):
     current_level: str = Field("A1")
     target_level: str = Field("C2")
     password: str = Field("")
+    personal_vocabulary: List[str] = Field(default_factory=list)
     user_role: UserRole = Field(default=UserRole.USER)
     registration_time: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)

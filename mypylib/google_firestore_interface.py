@@ -160,3 +160,76 @@ class GoogleDbInterface:
         return "Logout successful"
 
     # enddregion
+
+    # region 角色管理
+
+    def is_admin(self, user_info: dict):
+        if len(user_info) == 0:
+            return False
+        # 在缓存中查询用户是否已经正常登录
+        phone_number = user_info["phone_number"]
+        if phone_number in self.cache and self.cache[phone_number]:
+            # 检查用户是否为管理员
+            users_ref = self.db.collection("users")
+            user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+            if user_docs:
+                user_doc = next(user_docs).to_dict()
+                # 创建一个User实例
+                user = User.from_doc(user_doc)
+                # 检查permission属性
+                if user.user_role == UserRole.ADMIN:
+                    return True
+        return False
+
+    def is_vip_or_admin(self, user_info: dict):
+        # 在缓存中查询用户是否已经正常登录
+        phone_number = user_info["phone_number"]
+        if phone_number in self.cache and self.cache[phone_number]:
+            # 检查用户是否为 VIP 或管理员
+            users_ref = self.db.collection("users")
+            user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+            if user_docs:
+                user_doc = next(user_docs).to_dict()
+                # 创建一个User实例
+                user = User.from_doc(user_doc)
+                # 检查permission属性
+                if user.user_role in [UserRole.ADMIN, UserRole.VIP]:
+                    return True
+        return False
+
+    # endregion
+
+    # region 个人词库管理
+
+    def find_personal_dictionary(self, phone_number):
+        users_ref = self.db.collection("users")
+        user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+        if user_docs:
+            user_doc = next(user_docs).to_dict()
+            return user_doc.get("personal_vocabulary", [])
+        else:
+            return []
+
+    def add_word_to_personal_dictionary(self, phone_number, word):
+        users_ref = self.db.collection("users")
+        user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+        if user_docs:
+            user_doc_ref = next(user_docs).reference
+            user_doc = user_doc_ref.get().to_dict()
+            personal_vocabulary = user_doc.get("personal_vocabulary", [])
+            if word not in personal_vocabulary:
+                personal_vocabulary.append(word)
+                user_doc_ref.update({"personal_vocabulary": personal_vocabulary})
+
+    def remove_word_from_personal_dictionary(self, phone_number, word):
+        users_ref = self.db.collection("users")
+        user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+        if user_docs:
+            user_doc_ref = next(user_docs).reference
+            user_doc = user_doc_ref.get().to_dict()
+            personal_vocabulary = user_doc.get("personal_vocabulary", [])
+            if word in personal_vocabulary:
+                personal_vocabulary.remove(word)
+                user_doc_ref.update({"personal_vocabulary": personal_vocabulary})
+
+    # endregion
