@@ -183,10 +183,10 @@ if len(st.session_state["user_info"]) == 0:
                     display_name = info["display_name"]
                     sidebar_status.success(info["message"])
                     st.session_state["user_info"]["phone_number"] = phone_number
-                    # st.session_state["user_info"]["user_id"] = info["user_id"]
+                    st.session_state["user_info"]["user_role"] = info["user_role"]
                     st.session_state["user_info"]["session_id"] = info["session_id"]
                     st.session_state["user_info"]["display_name"] = display_name
-                    time.sleep(3)
+                    time.sleep(2)
                     st.rerun()
                 elif info["status"] == "warning":
                     sidebar_status.warning(info["message"])
