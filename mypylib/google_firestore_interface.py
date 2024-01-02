@@ -97,7 +97,6 @@ class GoogleDbInterface:
             return {"status": "warning", "message": "您已登录"}
         # 检查用户的凭据
         users_ref = self.db.collection("users")
-        logger.debug(f"{type(phone_number)=} {phone_number}")
         # try:
         user_docs = users_ref.where("phone_number", "==", phone_number).stream()
         if user_docs:
