@@ -179,7 +179,7 @@ if len(st.session_state["user_info"]) == 0:
                 info = st.session_state.gdbi.login(
                     phone_number=phone_number, password=password
                 )
-                if info["status"] == "success":
+                if info.get("status", "") == "success":
                     display_name = info["display_name"]
                     sidebar_status.success(info["message"])
                     st.session_state["user_info"] = {}
