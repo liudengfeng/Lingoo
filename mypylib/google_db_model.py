@@ -85,6 +85,7 @@ class Payment(BaseModel):
     status: PaymentStatus = Field(default=PaymentStatus.PENDING)
     is_approved: bool = Field(False)
     sales_representative: str = Field("")
+    expiry_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     remark: str = Field("")
 
     @classmethod
@@ -109,7 +110,6 @@ class User(BaseModel):
         default_factory=lambda: datetime.now(timezone.utc)
     )
     total_tokens: int = Field(default=0)
-    expiry_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     # used_tokens: List[TokenUsageRecord] = Field(default=[])
     # payments: Optional[List[Payment]] = Field(default_factory=list)
     # login_events: Optional[List[LoginEvent]] = Field(default_factory=list)

@@ -106,9 +106,9 @@ class DbInterface:
                     break
 
     # endregion
-                
+
     # region 用户管理
-                
+
     def register_user(self, user: User):
         self.users.insert_one(user.model_dump())
 
