@@ -4,13 +4,13 @@ from pathlib import Path
 import pytz
 import streamlit as st
 from cryptography.fernet import Fernet
+from google.cloud import firestore
 from PIL import Image
-from pymongo.errors import DuplicateKeyError
 
 from mypylib.auth_utils import is_valid_email, is_valid_phone_number
-from mypylib.constants import FAKE_EMAIL_DOMAIN, PROVINCES, CEFR_LEVEL_MAPS
+from mypylib.constants import CEFR_LEVEL_MAPS, FAKE_EMAIL_DOMAIN, PROVINCES
+from mypylib.google_db_model import User
 from mypylib.google_firestore_interface import GoogleDbInterface
-from mypylib.db_model import User
 from mypylib.st_utils import check_and_force_logout
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
@@ -136,36 +136,43 @@ with st.form(key="registration_form"):
             status.error("密码长度至少为8位")
             st.stop()
 
-        # 由于邮箱作为索引，有必要保证其唯一性
+        # 虚拟邮箱
         email = email if email else f"{phone_number}@{FAKE_EMAIL_DOMAIN}"
         user = User(
-            # 加密字段
-            f_email=fernet.encrypt(email.encode()),
-            f_real_name=fernet.encrypt(real_name.encode()),
-            f_country=fernet.encrypt(country.encode()) if country else None,
-            f_province=fernet.encrypt(province.encode()) if province else None,
-            f_timezone=fernet.encrypt(tz.encode()) if tz else None,
-            # 普通字段
+            email=email,
+            real_name=real_name,
+            country=country if country else None,
+            province=province if province else None,
+            timezone=tz if tz else None,
             phone_number=phone_number,
             current_level=current_level,
             target_level=target_level,
             display_name=display_name,
             password=password_reg,
-            registration_time=datetime.now(timezone.utc),
+            # registration_time=datetime.now(timezone.utc),
+            registration_time=firestore.SERVER_TIMESTAMP,
         )  # type: ignore
-
+        # 为用户密码加密
         user.hash_password()
         try:
+            # 检查是否已经存在具有相同手机号码或电子邮件的用户
+            users_ref = st.session_state.gdbi.collection("users")
+            existing_user = users_ref.where(
+                "phone_number", "==", user.phone_number
+            ).get()
+            if existing_user:
+                raise ValueError("电话号码已被注册")
+            existing_user = users_ref.where("email", "==", user.email).get()
+            if existing_user:
+                raise ValueError("邮箱已被注册")
+
+            # 如果没有找到现有的用户，那么注册新用户
             st.session_state.gdbi.register_user(user)
-        except DuplicateKeyError as e:
-            # st.write(e)
-            # st.stop()
-            # 如果抛出 DuplicateKeyError 异常，从异常的消息中解析出字段的名称
-            field_name = str(e).split("index: ")[1].split(" dup key")[0]
-            msg = "邮箱" if field_name.startswith("f_email") else "电话号码"
+        except ValueError as e:
+            msg = str(e)
             status.markdown(
                 f"""
-            **您输入的{msg}已被注册。**
+            **您输入的{msg}。**
             如果您已完成付款，系统会自动为您注册，请使用以下方式直接登录：
             1. 在左侧菜单“用户中心”的“登录”选项，输入您已注册的手机号码。
             2. 输入默认密码：您的手机号码。
