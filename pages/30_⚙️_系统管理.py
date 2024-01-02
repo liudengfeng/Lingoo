@@ -38,7 +38,7 @@ if st.session_state.user_info.get("user_role") != "管理员":
     st.error("对不起，您没有权限访问该页面。该页面仅限系统管理员使用。")
     st.stop()
 
-tz = st.session_state.user_info.get("timezone", "Asia/Shanghai")
+tz = pytz.timezone(st.session_state.user_info.get("timezone", "Asia/Shanghai"))
 # endregion
 
 # region 常量配置
