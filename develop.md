@@ -10,3 +10,7 @@
 #### session_state
 #### cache_data
 #### cache_resource
+
+### 代码更新
+
+除`Home`和`pages/`下的代码能立即更新外，其他处与app相关的代码修改后，需要重启动app。
