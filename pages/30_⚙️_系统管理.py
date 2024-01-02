@@ -343,10 +343,16 @@ with tabs[items.index("订阅登记")]:
         phone_number = cols[0].text_input(
             "手机号码",
             key="phone_number",
-            help="✨ 请输入有效手机号码",
+            help="✨ 请输入订阅者的有效手机号码",
             placeholder="手机号码[必须]",
         )
-        purchase_type = cols[1].selectbox(
+        sales_representative = cols[1].text_input(
+            "销售代表",
+            key="sales_representative",
+            help="✨ 请输入销售代表的名称",
+            placeholder="请输入销售代表的名称",
+        )
+        purchase_type = cols[0].selectbox(
             "套餐类型",
             key="purchase_type",
             help="✨ 请选择套餐类型",
@@ -354,20 +360,14 @@ with tabs[items.index("订阅登记")]:
             index=1,
             format_func=lambda x: x.value,
         )
+        payment_amount = cols[1].number_input(
+            "实收金额", key="payment_amount", help="✨ 请输入实际收款金额", value=0.0
+        )
         payment_method = cols[0].text_input(
             "付款方式", key="payment_method", help="✨ 请输入付款方式", placeholder="必须。付款方式"
         )
         payment_id = cols[1].text_input(
             "付款编号", key="payment_id", help="✨ 请输入付款编号", placeholder="必须。请在付款凭证上查找付款编号"
-        )
-        payment_amount = cols[0].number_input(
-            "实收金额", key="payment_amount", help="✨ 请输入实际收款金额", value=0.0
-        )
-        sales_representative = cols[1].text_input(
-            "销售代表",
-            key="sales_representative",
-            help="✨ 请输入销售代表的名称",
-            placeholder="请输入销售代表的名称",
         )
         remark = st.text_input("备注", key="remark", help="✨ 请输入备注信息", value="")
         # user = st.session_state.gdbi.get_user(phone_number=phone_number)
