@@ -20,18 +20,18 @@ LOGO_DIR: Path = CURRENT_CWD / "resource/logo"
 
 VOICES_FP = CURRENT_CWD / "resource/voices.json"
 
+st.set_page_config(
+    page_title="主页",
+    page_icon="🏠",
+    layout="wide",
+)
+
 if "gdbi" not in st.session_state:
     st.session_state["gdbi"] = GoogleDbInterface()
 
 if "user_info" not in st.session_state:
     st.session_state["user_info"] = {}
 
-
-st.set_page_config(
-    page_title="主页",
-    page_icon="🏠",
-    layout="wide",
-)
 
 need_update = False
 # 如果文件不存在，或者文件的最后修改时间距离当前时间超过120天
