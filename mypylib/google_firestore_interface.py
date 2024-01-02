@@ -279,7 +279,7 @@ class GoogleDbInterface:
         if invalid_keys:
             raise ValueError(f"在查询支付记录时传入的键值对参数 {', '.join(invalid_keys)} 无效。")
 
-        query = self.payments
+        query = self.db.collection("payments")
         for key in [
             "phone_number",
             "payment_id",
