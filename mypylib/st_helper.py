@@ -96,6 +96,19 @@ def load_vertex_model(model_name):
     return GenerativeModel(model_name)
 
 
+def check_access(is_admin_page):
+    if "dbi" not in st.session_state:
+        st.session_state["dbi"] = DbInterface(get_firestore_client())
+
+    if not st.session_state.dbi.is_logged_in():
+        st.error("您尚未登录。请前往首页左侧栏进行登录。")
+        st.stop()
+
+    if is_admin_page and st.session_state.dbi.cache.get("user_role") != "管理员":
+        st.error("您没有权限访问此页面。此页面仅供系统管理员使用。")
+        st.stop()
+
+
 def google_translate(text: str, target_language_code: str = "zh-CN"):
     """Translating Text."""
     if text is None or text == "":

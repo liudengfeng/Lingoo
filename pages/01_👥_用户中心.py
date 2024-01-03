@@ -141,7 +141,7 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
                 st.stop()
 
             try:
-                st.session_state.dbi.update_user(user.phone_number, update_fields)
+                st.session_state.dbi.update_user(update_fields)
                 st.toast(f"成功更新用户：{user.phone_number}的信息！")
                 st.rerun()
             except Exception as e:
@@ -154,7 +154,7 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
 
 with tabs[items.index(":key: 重置密码")]:
     st.subheader(":key: 重置密码")
-    user = st.session_state.dbi.get_user(st.session_state.user_info["phone_number"])
+    user = st.session_state.dbi.get_user()
     # user = User.from_doc(user_doc)
     with st.form(key="secret_form", clear_on_submit=True):
         password_reg = st.text_input(
@@ -180,7 +180,6 @@ with tabs[items.index(":key: 重置密码")]:
             # 必须加密
             user.hash_password()
             st.session_state.dbi.update_user(
-                st.session_state.user_info["phone_number"],
                 {
                     "password": user.password,
                 },

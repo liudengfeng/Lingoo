@@ -58,7 +58,8 @@ class DbInterface:
         else:
             return None
 
-    def update_user(self, phone_number: str, update_fields: dict):
+    def update_user(self, update_fields: dict):
+        phone_number = self.cache["phone_number"]
         doc_ref = self.db.collection("users").document(phone_number)
         try:
             del update_fields["phone_number"]  # 删除手机号码

@@ -18,8 +18,8 @@ from mypylib.db_model import (
     UserRole,
     str_to_enum,
 )
-from mypylib.db_interface import PRICES, DbInterface
-from mypylib.st_helper import get_firestore_client, google_translate
+from mypylib.db_interface import PRICES
+from mypylib.st_helper import check_access, google_translate
 from mypylib.word_utils import get_lowest_cefr_level
 
 # region 配置
@@ -29,16 +29,9 @@ logger = logging.getLogger("streamlit")
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 
-if "user_info" not in st.session_state:
-    st.session_state["user_info"] = {}
+check_access(True)
 
-logger.debug(st.session_state.user_info)
-# st.write(st.session_state.user_info)
-if st.session_state.user_info.get("user_role") != "管理员":
-    st.error("对不起，您没有权限访问该页面。该页面仅限系统管理员使用。")
-    st.stop()
-
-tz = pytz.timezone(st.session_state.user_info.get("timezone", "Asia/Shanghai"))
+tz = pytz.timezone(st.session_state.dbi.cache.get("timezone", "Asia/Shanghai"))
 # endregion
 
 # region 常量配置
@@ -218,9 +211,6 @@ if st.session_state.get("search"):
     st.session_state["queried_payments"] = []
 
 
-if "dbi" not in st.session_state:
-    st.session_state["dbi"] = DbInterface(get_firestore_client())
-
 # endregion
 
 # 创建选项卡
@@ -287,7 +277,6 @@ with tabs[items.index("订阅登记")]:
             help="✨ 请输入备注信息",
         )
         is_approved = st.toggle("是否批准")
-        # user = st.session_state.dbi.get_user(phone_number=phone_number)
         if st.form_submit_button(label="登记"):
             if not phone_number:
                 st.error("手机号码不能为空")
@@ -516,8 +505,8 @@ with tabs[items.index("支付管理")]:
     placeholder = st.empty()
     status = st.empty()
     pay_cols = st.columns([1, 1, 8])
-    upd_btn = pay_cols[0].button("更新", key="upd_btn",help="✨ 更新数据库中选中的支付记录")
-    del_btn = pay_cols[1].button("删除", key="del_btn",help="✨ 在数据库中删除选中的支付记录")
+    upd_btn = pay_cols[0].button("更新", key="upd_btn", help="✨ 更新数据库中选中的支付记录")
+    del_btn = pay_cols[1].button("删除", key="del_btn", help="✨ 在数据库中删除选中的支付记录")
     # # st.divider()
     if df.empty:
         placeholder.info("没有记录")
