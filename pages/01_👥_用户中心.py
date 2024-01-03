@@ -175,8 +175,8 @@ with tabs[items.index(":key: 重置密码")]:
         st.error("您的账号尚未缴费、激活，无法重置密码。")
         st.stop()
 
-    user_doc = st.session_state.dbi.get_user(st.session_state.user_info["phone_number"])
-    user = User.from_doc(user_doc)
+    user = st.session_state.dbi.get_user(st.session_state.user_info["phone_number"])
+    # user = User.from_doc(user_doc)
     with st.form(key="secret_form", clear_on_submit=True):
         password_reg = st.text_input(
             "密码", type="password", key="password_reg-4", help="✨ 密码长度至少为8位"
