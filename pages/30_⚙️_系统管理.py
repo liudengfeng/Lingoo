@@ -779,7 +779,7 @@ def transfer_data_from_mongodb_to_firestore():
 
     # 找出需要转移的文档 ID
     doc_ids_to_transfer = mongodb_doc_ids - firestore_doc_ids
-    
+
     # 显示需要转移的文档数量
     st.write(f"需要转移的文档数量：{len(doc_ids_to_transfer)}")
 
@@ -801,11 +801,34 @@ def transfer_data_from_mongodb_to_firestore():
     client.close()
 
 
+def rename_firestore_documents():
+    firestore_db = st.session_state.dbi.db
+    words_collection = firestore_db.collection("words")
+
+    # 遍历 Firestore 中的所有文档
+    for doc in words_collection.stream():
+        # 获取文档的数据
+        data = doc.to_dict()
+        # 获取文档的单词字段
+        word = data.get("word")
+        if word:
+            # 如果单词字段存在，将其删除
+            del data["word"]
+            # 将单词中的 "/" 字符替换为 " or "
+            new_doc_id = word.replace("/", " or ")
+            # 创建一个新的文档，其 ID 为新的单词，其数据为原文档的数据
+            words_collection.document(new_doc_id).set(data)
+            # 删除原文档
+            doc.reference.delete()
+
 with tabs[items.index("转移词典")]:
     st.subheader("转移词典", divider="rainbow")
     st.text("将 MongoDB 中的数据转移到 Firestore 中")
     if st.button("开始"):
         transfer_data_from_mongodb_to_firestore()
+    st.text("注意：全部转移完成后，才可重命名")
+    if st.button("重命名 Firestore 文档"):
+        rename_firestore_documents()
 
 # endregion
 
