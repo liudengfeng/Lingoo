@@ -801,12 +801,22 @@ def transfer_data_from_mongodb_to_firestore():
     client.close()
 
 
-def rename_firestore_documents():
+def rename_firestore_documents(num_docs_to_process):
     firestore_db = st.session_state.dbi.db
     words_collection = firestore_db.collection("words")
 
+    # 获取 Firestore 集合中的文档数量
+    num_docs_in_collection = len(list(words_collection.stream()))
+
+    # 取集合中的文档数量与用户指定的数量的最小值作为要处理的文档数量
+    num_docs_to_process = min(num_docs_to_process, num_docs_in_collection)
+
     # 遍历 Firestore 中的所有文档
-    for doc in words_collection.stream():
+    for i, doc in enumerate(words_collection.stream()):
+        # 如果已处理的文档数量达到了用户指定的数量，就停止处理
+        if i >= num_docs_to_process:
+            break
+
         # 获取文档的数据
         data = doc.to_dict()
         # 获取文档的单词字段
@@ -821,14 +831,18 @@ def rename_firestore_documents():
             # 删除原文档
             doc.reference.delete()
 
+
 with tabs[items.index("转移词典")]:
     st.subheader("转移词典", divider="rainbow")
     st.text("将 MongoDB 中的数据转移到 Firestore 中")
     if st.button("开始"):
         transfer_data_from_mongodb_to_firestore()
     st.text("注意：全部转移完成后，才可重命名")
+    num_docs_to_process = st.number_input(
+        "输入要处理的文档数量", min_value=10, max_value=21000, value=10
+    )
     if st.button("重命名 Firestore 文档"):
-        rename_firestore_documents()
+        rename_firestore_documents(num_docs_to_process)
 
 # endregion
 
