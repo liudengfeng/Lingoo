@@ -264,7 +264,7 @@ with tabs[items.index("订阅登记")]:
             value=datetime.datetime.now(tz).date(),
         )
         cols[1].time_input(
-            "开始时间", key="payment_time_time-0", value=datetime.time(0, 0, 0)
+            "时间", key="payment_time_time-0", value=datetime.time(0, 0, 0)
         )
         remark = st.text_input(
             "备注",
