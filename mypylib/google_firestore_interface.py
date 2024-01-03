@@ -403,7 +403,9 @@ class GoogleDbInterface:
         # 将字符串转换为 PurchaseType 枚举
         # purchase_type = str_to_enum(purchase_type, PurchaseType)  # type: ignore
         expiry_time = base_time + self.calculate_expiry(purchase_type)  # type: ignore
-        logger.debug(f"purchase_type: {purchase_type} Expiry time: {expiry_time}")
+        st.warning(
+            f"purchase_type: {purchase_type} delta:{self.calculate_expiry(purchase_type)} Expiry time: {expiry_time}"
+        )
 
         # 更新支付记录的状态和到期时间
         payment_docs = (
