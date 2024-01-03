@@ -542,6 +542,9 @@ with tabs[items.index("支付管理")]:
         # st.write(f"{users_payments=}")
         for idx, d in users_payments["edited_rows"].items():
             order_id = df.iloc[idx]["order_id"]  # type: ignore
+            for key in d.keys():
+                if key in TIME_COLS:
+                    d[key] = d[key].tz_convert(pytz.UTC)
             st.session_state.dbi.update_payment(order_id, d)
             st.toast(f"更新支付记录，订单号：{order_id}", icon="🎉")
 
