@@ -544,6 +544,8 @@ with tabs[items.index("支付管理")]:
             order_id = df.iloc[idx]["order_id"]  # type: ignore
             for key in d.keys():
                 if key in TIME_COLS:
+                    # 检查返回的对象的类型及其值
+                    st.write(f"{type(d[key])=}, {d[key]=}")
                     value = d[key]
                     # 将 'Z' 替换为 '+00:00'
                     value = value.replace("Z", "+00:00")
