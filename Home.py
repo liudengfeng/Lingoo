@@ -180,7 +180,8 @@ if not st.session_state.dbi.cache.get("is_logged_in", False):
                 info = st.session_state.dbi.login(
                     phone_number=phone_number, password=password
                 )
-                if st.session_state.dbi.cache.get("is_logged_in", False):
+                st.write(info)
+                if info["status"] == "success":
                     sidebar_status.success(info["message"])
                     time.sleep(2)
                     st.rerun()

@@ -111,17 +111,17 @@ class DbInterface:
                 # 如果密码正确，将用户的登录状态存储到缓存中
                 self.cache_user(user, session_id)
                 return {
-                    "is_logged_in": True,
+                    "status": "success",
                     "message": f"嗨！{user.display_name}，又见面了。",
                 }
             else:
                 return {
-                    "is_logged_in": False,
+                    "status": "warning",
                     "message": "密码错误，请重新输入",
                 }
         else:
             return {
-                "is_logged_in": False,
+                "status": "error",
                 "message": f"不存在与手机号码 {phone_number} 相关联的用户",
             }
 
