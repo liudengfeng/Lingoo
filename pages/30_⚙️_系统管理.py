@@ -1,9 +1,9 @@
+import datetime
 import json
 import logging
 import os
-import datetime
+import re
 from pathlib import Path
-
 
 import pandas as pd
 import pytz
@@ -11,6 +11,7 @@ import streamlit as st
 from azure.storage.blob import BlobServiceClient
 from pandas import Timedelta
 
+from mypylib.db_interface import PRICES
 from mypylib.db_model import (
     Payment,
     PaymentStatus,
@@ -19,7 +20,6 @@ from mypylib.db_model import (
     UserRole,
     str_to_enum,
 )
-from mypylib.db_interface import PRICES
 from mypylib.st_helper import check_access, google_translate
 from mypylib.word_utils import get_lowest_cefr_level
 
@@ -762,8 +762,8 @@ with tabs[items.index("词典管理")]:
 
 
 def transfer_data_from_mongodb_to_firestore():
-    from pymongo import MongoClient
     from bson import ObjectId
+    from pymongo import MongoClient
 
     mongodb_uri = st.secrets["Microsoft"]["COSMOS_CONNECTION_STRING"]
     client = MongoClient(mongodb_uri)
@@ -805,17 +805,27 @@ def rename_firestore_documents(num_docs_to_process):
     firestore_db = st.session_state.dbi.db
     words_collection = firestore_db.collection("words")
 
-    # 获取 Firestore 集合中的文档数量
-    num_docs_in_collection = len(list(words_collection.stream()))
+    # 创建一个正则表达式，用于匹配 MongoDB ObjectId
+    mongodb_objectid_regex = re.compile("^[0-9a-fA-F]{24}$")
 
-    # 取集合中的文档数量与用户指定的数量的最小值作为要处理的文档数量
-    num_docs_to_process = min(num_docs_to_process, num_docs_in_collection)
+    # 遍历 Firestore 中的所有文档，检查每个文档的 ID 是否符合特定的格式
+    num_docs_to_rename = sum(1 for doc in words_collection.stream() if mongodb_objectid_regex.match(doc.id))
+
+    # 取待处理的文档数量与用户指定的数量的最小值作为要处理的文档数量
+    num_docs_to_process = min(num_docs_to_process, num_docs_to_rename)
+
+    # 创建一个进度条
+    progress_bar = st.progress(0)
 
     # 遍历 Firestore 中的所有文档
     for i, doc in enumerate(words_collection.stream()):
         # 如果已处理的文档数量达到了用户指定的数量，就停止处理
         if i >= num_docs_to_process:
             break
+
+        # 如果文档的 ID 不符合特定的格式，就跳过这个文档
+        if not mongodb_objectid_regex.match(doc.id):
+            continue
 
         # 获取文档的数据
         data = doc.to_dict()
@@ -830,6 +840,12 @@ def rename_firestore_documents(num_docs_to_process):
             words_collection.document(new_doc_id).set(data)
             # 删除原文档
             doc.reference.delete()
+
+        # 更新进度条的值
+        progress_bar.progress((i + 1) / num_docs_to_process)
+
+    # 完成后，显示一条消息
+    st.success("完成！")
 
 
 with tabs[items.index("转移词典")]:
