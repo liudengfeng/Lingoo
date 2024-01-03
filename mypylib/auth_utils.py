@@ -10,6 +10,8 @@ def generate_unique_code(length=32):
 
 
 def is_valid_email(email):
+    if email is None or email == "":
+        return False
     # 正则表达式匹配电子邮件地址
     pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
     return bool(re.match(pattern, email))

@@ -124,7 +124,7 @@ with st.form(key="registration_form", clear_on_submit=True):
         if not display_name:
             status.error("必须输入有效的用户名")
             st.stop()
-        if not email:
+        if not is_valid_email(email):
             # st.write(f"{email=}")
             status.warning("为了确保您能及时收到最新产品信息，请提供有效的邮箱地址。您还可以稍后在“用户中心-更新信息”中添加邮箱。")
         elif not is_valid_email(email):
