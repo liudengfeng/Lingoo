@@ -548,10 +548,10 @@ with tabs[items.index("支付管理")]:
     if del_btn and st.session_state.get("users_payments", None):
         users_payments = st.session_state["users_payments"]
         # st.write(f"{users_payments=}")
-        for idx, d in users_payments["deleted_rows"].items():
+        for idx in users_payments["deleted_rows"]:
             order_id = df.iloc[idx]["order_id"]  # type: ignore
             st.session_state.gdbi.delete_payment(order_id)
-            st.toast(f"更新支付记录，订单号：{order_id}", icon="🎉")
+            st.toast(f"删除支付记录，订单号：{order_id}", icon="🎉")
 
 
 # endregion
