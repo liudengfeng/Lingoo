@@ -262,9 +262,13 @@ with tabs[items.index("订阅登记")]:
             "支付日期",
             key="payment_time_date-0",
             value=datetime.datetime.now(tz).date(),
+            help="✨ 请选择支付日期。登记日期默认为今天。",
         )
         cols[1].time_input(
-            "时间", key="payment_time_time-0", value=datetime.time(0, 0, 0)
+            "时间",
+            key="payment_time_time-0",
+            value=datetime.time(0, 0, 0),
+            help="✨ 请选择支付时间。登记时间默认为系统处理时间。",
         )
         remark = st.text_input(
             "备注",
