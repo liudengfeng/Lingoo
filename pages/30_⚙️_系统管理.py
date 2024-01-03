@@ -771,6 +771,9 @@ def transfer_data_from_mongodb_to_firestore(num_docs_to_transfer):
     # 创建一个进度条
     progress = st.progress(0)
 
+    # 获取要转移的文档数量和 MongoDB 集合中的文档数量之间的最小值
+    num_docs_to_transfer = min(num_docs_to_transfer, words.count_documents({}))
+
     # 遍历 MongoDB 中的文档
     for i, doc in enumerate(words.find().limit(num_docs_to_transfer)):
         # 检查 Firestore 中是否已经存在相应的文档
