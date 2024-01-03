@@ -792,6 +792,7 @@ def transfer_data_from_mongodb_to_firestore(num_docs_to_transfer):
 
 with tabs[items.index("转移词典")]:
     st.subheader("转移词典", divider="rainbow")
+    st.text("将 MongoDB 中的数据转移到 Firestore 中")
     num_docs_to_transfer = st.number_input("转移数量", min_value=100, max_value=30000, step=100)
     if st.button("开始"):
         transfer_data_from_mongodb_to_firestore(num_docs_to_transfer)
