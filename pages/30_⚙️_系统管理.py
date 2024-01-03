@@ -543,9 +543,13 @@ with tabs[items.index("支付管理")]:
         for idx, d in users_payments["edited_rows"].items():
             order_id = df.iloc[idx]["order_id"]  # type: ignore
             for key in d.keys():
-                st.write(f"{key=}, {type(d[key])=} {d[key]}")
                 if key in TIME_COLS:
-                    d[key] = d[key].tz_convert(pytz.UTC)
+                    value = d[key]
+                    # 将 'Z' 替换为 '+00:00'
+                    value = value.replace("Z", "+00:00")
+                    # 将字符串转换为 datetime 对象
+                    timestamp = datetime.datetime.fromisoformat(value).tz_convert(pytz.UTC)
+                    d[key] = timestamp
             st.session_state.dbi.update_payment(order_id, d)
             st.toast(f"更新支付记录，订单号：{order_id}", icon="🎉")
 
