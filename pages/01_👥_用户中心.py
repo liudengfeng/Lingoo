@@ -12,7 +12,7 @@ from pymongo.errors import DuplicateKeyError
 
 from mypylib.auth_utils import is_valid_email
 from mypylib.constants import PROVINCES, CEFR_LEVEL_MAPS
-from mypylib.db_interface import GoogleDbInterface
+from mypylib.db_interface import DbInterface
 from mypylib.db_model import User
 from mypylib.st_utils import check_and_force_logout
 
@@ -31,8 +31,8 @@ st.set_page_config(
 if "user_info" not in st.session_state:
     st.session_state["user_info"] = {}
 
-if "gdbi" not in st.session_state:
-    st.session_state["gdbi"] = GoogleDbInterface()
+if "dbi" not in st.session_state:
+    st.session_state["dbi"] = DbInterface()
 
 
 # region 侧边栏
@@ -41,7 +41,7 @@ sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
 check_and_force_logout(sidebar_status)
 
-if not st.session_state.gdbi.is_service_active(st.session_state.user_info):
+if not st.session_state.dbi.is_service_active(st.session_state.user_info):
     st.error("您的账号未登录，或者尚未缴费、激活，无法更新个人信息。")
     st.stop()
 
@@ -64,7 +64,7 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
     st.subheader(":arrows_counterclockwise: 更新个人信息")
     CEFR = list(CEFR_LEVEL_MAPS.keys())
     COUNTRIES = ["中国"]
-    user_doc = st.session_state.gdbi.find_user(st.session_state.user_info["user_id"])
+    user_doc = st.session_state.dbi.find_user(st.session_state.user_info["user_id"])
     user = User.from_doc(user_doc)
     user.set_secret_key(st.secrets["FERNET_KEY"])
 
@@ -120,7 +120,7 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
         status = st.empty()
         if st.form_submit_button(label="确认"):
             try:
-                st.session_state.gdbi.update_user(
+                st.session_state.dbi.update_user(
                     st.session_state.user_info["user_id"],
                     {
                         "f_email": fernet.encrypt(email.encode()),
@@ -152,11 +152,11 @@ with tabs[items.index(":key: 重置密码")]:
     st.subheader(":key: 重置密码")
     if len(
         st.session_state.user_info
-    ) == 0 or not st.session_state.gdbi.is_service_active(st.session_state.user_info):
+    ) == 0 or not st.session_state.dbi.is_service_active(st.session_state.user_info):
         st.error("您的账号尚未缴费、激活，无法重置密码。")
         st.stop()
 
-    user_doc = st.session_state.gdbi.find_user(st.session_state.user_info["user_id"])
+    user_doc = st.session_state.dbi.find_user(st.session_state.user_info["user_id"])
     user = User.from_doc(user_doc)
     with st.form(key="secret_form", clear_on_submit=True):
         password_reg = st.text_input(
@@ -172,7 +172,7 @@ with tabs[items.index(":key: 重置密码")]:
                 st.stop()
             user.password = password_reg
             st.write(
-                st.session_state.gdbi.update_user(
+                st.session_state.dbi.update_user(
                     st.session_state.user_info["user_id"],
                     {
                         "password": user.password,
@@ -180,7 +180,7 @@ with tabs[items.index(":key: 重置密码")]:
                 )
             )
             st.success("成功重置密码")
-            st.session_state.gdbi.logout(phone_number=user.phone_number)
+            st.session_state.dbi.logout(phone_number=user.phone_number)
 
 # endregion
 
@@ -189,7 +189,7 @@ with tabs[items.index(":key: 重置密码")]:
 with tabs[items.index(":bar_chart: 统计报表")]:
     st.subheader(":bar_chart: 统计报表")
 
-    if not st.session_state.gdbi.is_service_active(st.session_state.user_info):
+    if not st.session_state.dbi.is_service_active(st.session_state.user_info):
         st.error("您尚未登录，无法查阅统计报表。")
         st.stop()
 
@@ -200,7 +200,7 @@ with tabs[items.index(":bar_chart: 统计报表")]:
 uploaded_emoji = ":file_folder:"
 
 with tabs[items.index(":memo: 问题反馈")]:
-    if not st.session_state.gdbi.is_service_active(st.session_state.user_info):
+    if not st.session_state.dbi.is_service_active(st.session_state.user_info):
         st.error("您尚未登录，无法反馈问题。")
         st.stop()
 

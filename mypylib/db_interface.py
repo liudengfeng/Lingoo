@@ -32,7 +32,7 @@ PRICES = {
 }
 
 
-class GoogleDbInterface:
+class DbInterface:
     def __init__(self):
         self.faker = Faker("zh_CN")
         self.client = get_firestore_client()

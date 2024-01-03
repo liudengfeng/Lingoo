@@ -18,7 +18,7 @@ from mypylib.db_model import (
     UserRole,
     str_to_enum,
 )
-from mypylib.db_interface import PRICES, GoogleDbInterface
+from mypylib.db_interface import PRICES, DbInterface
 from mypylib.st_utils import google_translate
 from mypylib.word_utils import get_lowest_cefr_level
 
@@ -218,8 +218,8 @@ if st.session_state.get("search"):
     st.session_state["queried_payments"] = []
 
 
-if "gdbi" not in st.session_state:
-    st.session_state["gdbi"] = GoogleDbInterface()
+if "dbi" not in st.session_state:
+    st.session_state["dbi"] = DbInterface()
 
 # endregion
 
@@ -287,7 +287,7 @@ with tabs[items.index("订阅登记")]:
             help="✨ 请输入备注信息",
         )
         is_approved = st.toggle("是否批准")
-        # user = st.session_state.gdbi.get_user(phone_number=phone_number)
+        # user = st.session_state.dbi.get_user(phone_number=phone_number)
         if st.form_submit_button(label="登记"):
             if not phone_number:
                 st.error("手机号码不能为空")
@@ -296,7 +296,7 @@ with tabs[items.index("订阅登记")]:
                 st.error("付款编号不能为空")
                 st.stop()
             order_id = str(
-                len(st.session_state.gdbi.db.collection("payments").get()) + 1
+                len(st.session_state.dbi.db.collection("payments").get()) + 1
             ).zfill(10)
             receivable = PRICES[purchase_type]  # type: ignore
             discount_rate = payment_amount / receivable
@@ -319,7 +319,7 @@ with tabs[items.index("订阅登记")]:
                 remark=remark,
             )
             # try:
-            st.session_state.gdbi.add_payment(payment)
+            st.session_state.dbi.add_payment(payment)
             st.toast(f"成功登记，订单号:{order_id}", icon="🎉")
             # except DuplicateKeyError:
             #     st.error("付款编号已存在，请勿重复登记")
@@ -504,7 +504,7 @@ with tabs[items.index("支付管理")]:
             # st.write(kwargs)
             # for k, v in kwargs.items():
             #     st.write(f"{k=}, {type(v)=}")
-            results = st.session_state.gdbi.query_payments(kwargs)
+            results = st.session_state.dbi.query_payments(kwargs)
             # 将每个文档转换为字典
             dicts = [{"order_id": doc.id, **doc.to_dict()} for doc in results]
             st.write(f"{dicts=}")
@@ -542,7 +542,7 @@ with tabs[items.index("支付管理")]:
         # st.write(f"{users_payments=}")
         for idx, d in users_payments["edited_rows"].items():
             order_id = df.iloc[idx]["order_id"]  # type: ignore
-            st.session_state.gdbi.update_payment(order_id, d)
+            st.session_state.dbi.update_payment(order_id, d)
             st.toast(f"更新支付记录，订单号：{order_id}", icon="🎉")
 
     if del_btn and st.session_state.get("users_payments", None):
@@ -550,7 +550,7 @@ with tabs[items.index("支付管理")]:
         # st.write(f"{users_payments=}")
         for idx in users_payments["deleted_rows"]:
             order_id = df.iloc[idx]["order_id"]  # type: ignore
-            st.session_state.gdbi.delete_payment(order_id)
+            st.session_state.dbi.delete_payment(order_id)
             st.toast(f"删除支付记录，订单号：{order_id}", icon="⚠️")
         # 清除删除的行
         users_payments["deleted_rows"] = []
@@ -714,7 +714,7 @@ def init_word_db():
         cambridge_dict = json.load(f)
 
     # 获取集合中的所有单词
-    existing_words = [doc["word"] for doc in st.session_state.gdbi.words.find()]
+    existing_words = [doc["word"] for doc in st.session_state.dbi.words.find()]
 
     for doc in cambridge_dict:
         logger.info(f"单词：{doc['word']}...")
@@ -723,7 +723,7 @@ def init_word_db():
             doc["level"] = get_lowest_cefr_level(doc["word"])
             try:
                 logger.info(f"添加单词：{doc['word']}")
-                st.session_state.gdbi.words.insert_one(doc)
+                st.session_state.dbi.words.insert_one(doc)
                 added += (doc["word"],)
             except Exception as e:
                 logger.error(f"插入单词 {doc['word']} 时出现错误: {e}")
@@ -734,7 +734,7 @@ def init_word_db():
         if w not in added and w not in existing_words:
             try:
                 logger.info(f"添加单词：{w}")
-                st.session_state.gdbi.words.insert_one(
+                st.session_state.dbi.words.insert_one(
                     {
                         "word": w,
                         target_language_code: {

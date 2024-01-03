@@ -12,7 +12,7 @@ from mypylib.auth_utils import is_valid_phone_number
 from mypylib.azure_speech import speech_synthesis_get_available_voices
 from mypylib.constants import LANGUAGES
 from mypylib.db_model import PaymentStatus
-from mypylib.db_interface import GoogleDbInterface
+from mypylib.db_interface import DbInterface
 from mypylib.st_utils import check_and_force_logout
 
 CURRENT_CWD: Path = Path(__file__).parent
@@ -26,8 +26,8 @@ st.set_page_config(
     layout="wide",
 )
 
-if "gdbi" not in st.session_state:
-    st.session_state["gdbi"] = GoogleDbInterface()
+if "dbi" not in st.session_state:
+    st.session_state["dbi"] = DbInterface()
 
 if "user_info" not in st.session_state:
     st.session_state["user_info"] = {}
@@ -78,11 +78,11 @@ sidebar_status = st.sidebar.empty()
 
 # if len(st.session_state["user_info"]) >= 1:
 #     # 获取用户的数据
-#     user_data = st.session_state.gdbi.users.find_one(
+#     user_data = st.session_state.dbi.users.find_one(
 #         {"phone_number": st.session_state["user_info"]["phone_number"]}
 #     )
 #     # 查询在服务期内，处于服务状态的支付记录
-#     payment_record = st.session_state.gdbi.payments.find_one(
+#     payment_record = st.session_state.dbi.payments.find_one(
 #         {
 #             "phone_number": st.session_state["user_info"]["phone_number"],
 #             "status": PaymentStatus.IN_SERVICE,
@@ -122,13 +122,13 @@ sidebar_status = st.sidebar.empty()
 #         new_expiry_time = datetime.fromtimestamp(expiry_timestamp)
 
 #         # 更新用户的到期时间
-#         st.session_state.gdbi.payments.update_one(
+#         st.session_state.dbi.payments.update_one(
 #             {"phone_number": st.session_state["user_info"]["phone_number"]},
 #             {"$set": {"expiry_time": new_expiry_time}},
 #         )
 
 #         # 更新用户的最后领取日期
-#         st.session_state.gdbi.users.update_one(
+#         st.session_state.dbi.users.update_one(
 #             {"phone_number": st.session_state["user_info"]["phone_number"]},
 #             {"$set": {"last_received_date": current_datetime}},
 #         )
@@ -151,7 +151,7 @@ sidebar_status = st.sidebar.empty()
 #         )
 
 if len(st.session_state["user_info"]) == 0:
-    if st.session_state.user_info and st.session_state.gdbi.cache.get(
+    if st.session_state.user_info and st.session_state.dbi.cache.get(
         st.session_state.user_info["phone_number"]
     ):
         sidebar_status.success(f"您已登录，{st.session_state.user_info['display_name']} 您好！")
@@ -176,7 +176,7 @@ if len(st.session_state["user_info"]) == 0:
                 sidebar_status.error(f"请输入有效的手机号码。您输入的号码是：{phone_number}")
                 st.stop()
             else:
-                info = st.session_state.gdbi.login(
+                info = st.session_state.dbi.login(
                     phone_number=phone_number, password=password
                 )
                 if info.get("status", "") == "success":
@@ -257,7 +257,7 @@ LinGoo，让你学好英语，so easy！
 
 if len(st.session_state["user_info"]) >= 1:
     if logout_btn:
-        st.session_state.gdbi.logout(st.session_state.user_info)
+        st.session_state.dbi.logout(st.session_state.user_info)
         st.session_state["user_info"] = {}
         sidebar_status.success("已退出登录")
         st.rerun()

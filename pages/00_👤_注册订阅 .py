@@ -10,7 +10,7 @@ from PIL import Image
 from mypylib.auth_utils import is_valid_email, is_valid_phone_number
 from mypylib.constants import CEFR_LEVEL_MAPS, FAKE_EMAIL_DOMAIN, PROVINCES
 from mypylib.db_model import User
-from mypylib.db_interface import GoogleDbInterface
+from mypylib.db_interface import DbInterface
 from mypylib.st_utils import check_and_force_logout
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
@@ -29,8 +29,8 @@ st.set_page_config(
 if "user_info" not in st.session_state:
     st.session_state["user_info"] = {}
 
-if "gdbi" not in st.session_state:
-    st.session_state["gdbi"] = GoogleDbInterface()
+if "dbi" not in st.session_state:
+    st.session_state["dbi"] = DbInterface()
 
 # region 侧边栏
 
@@ -154,7 +154,7 @@ with st.form(key="registration_form", clear_on_submit=True):
         )  # type: ignore
         try:
             # 检查是否已经存在具有相同手机号码或电子邮件的用户
-            users_ref = st.session_state.gdbi.db.collection("users")
+            users_ref = st.session_state.dbi.db.collection("users")
             existing_user = users_ref.where(
                 filter=FieldFilter("phone_number", "==", user.phone_number)
             ).get()
@@ -167,7 +167,7 @@ with st.form(key="registration_form", clear_on_submit=True):
                 raise ValueError("邮箱已被注册")
 
             # 如果没有找到现有的用户，那么注册新用户
-            st.session_state.gdbi.register_user(user)
+            st.session_state.dbi.register_user(user)
         except ValueError as e:
             msg = str(e)
             status.markdown(
