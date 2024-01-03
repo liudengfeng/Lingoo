@@ -461,9 +461,9 @@ class DbInterface:
             .order_by("login_time", direction=firestore.Query.DESCENDING)
         )
         login_events_docs = login_events_query.stream()
-        active_sessions = [doc.to_dict() for doc in login_events_docs]
-        if len(active_sessions) > 1:
-            return active_sessions[:-1]  # 返回除最后一个登录事件外的所有未退出的登录事件
+        dicts = [{"session_id": doc.id, **doc.to_dict()} for doc in login_events_docs]
+        if len(dicts) > 1:
+            return dicts[:-1]  # 返回除最后一个登录事件外的所有未退出的登录事件
         return []
 
     def force_logout_session(self, phone_number: str, session_id: str):
