@@ -297,7 +297,6 @@ class GoogleDbInterface:
         for key in [
             "phone_number",
             "payment_id",
-            "order_id",
             "purchase_type",
             "sales_representative",
             "status",
@@ -305,6 +304,14 @@ class GoogleDbInterface:
         ]:
             if key in query_dict:
                 query = query.where(filter=FieldFilter(key, "==", query_dict[key]))
+
+        if "order_id" in query_dict:
+            doc_ref = self.db.collection("payments").document(query_dict["order_id"])
+            doc = doc_ref.get()
+            if doc.exists:
+                return [doc]
+            else:
+                return []
 
         for key in [
             "start_payment_time",
@@ -341,19 +348,16 @@ class GoogleDbInterface:
             ]
         return results
 
-    def update_payment(self, phone_number, order_id, update_fields: dict):
-        result = self.payments.update_one(
-            {"phone_number": phone_number, "order_id": order_id},
-            {"$set": update_fields},
-        )
-        # print(f"Update result: {result.raw_result}")
-        return result.modified_count
+    def update_payment(self, order_id, update_fields: dict):
+        payments_ref = self.db.collection("payments")
+        payment_doc_ref = payments_ref.document(order_id)
+        payment_doc_ref.update(update_fields)
 
     def is_service_active(self, user_info: dict):
         if len(user_info) == 0:
             return False
         # 查询用户
-        user_ref = self.db.collection("users").document(user_info["user_id"])
+        user_ref = self.db.collection("users").document(user_info["phone_number"])
         user = user_ref.get()
         # 如果用户是管理员，直接返回True
         if user.exists and user.to_dict()["user_role"] == "管理员":
