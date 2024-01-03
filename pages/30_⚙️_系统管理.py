@@ -777,8 +777,8 @@ def transfer_data_from_mongodb_to_firestore(num_docs_to_transfer):
     # 遍历 MongoDB 中的文档
     for i, doc in enumerate(words.find().limit(num_docs_to_transfer)):
         # 检查 Firestore 中是否已经存在相应的文档
-        if not firestore_db.collection("words").document(doc["_id"]).get().exists:
-            doc_id = doc["_id"]
+        doc_id = str(doc["_id"])
+        if not firestore_db.collection("words").document(doc_id).get().exists:
             # 如果不存在，将它添加到 Firestore 中
             del doc["_id"]
             firestore_db.collection("words").document(doc_id).set(doc)
