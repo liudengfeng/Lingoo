@@ -547,7 +547,7 @@ with tabs[items.index("支付管理")]:
 
     if del_btn and st.session_state.get("users_payments", None):
         users_payments = st.session_state["users_payments"]
-        # st.write(f"{users_payments=}")
+        st.write(f'{users_payments["deleted_rows"]=}')
         for idx in users_payments["deleted_rows"]:
             order_id = df.iloc[idx]["order_id"]  # type: ignore
             st.session_state.dbi.delete_payment(order_id)
