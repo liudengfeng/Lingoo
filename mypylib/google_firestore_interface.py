@@ -106,15 +106,12 @@ class GoogleDbInterface:
             return {"status": "warning", "message": "您已登录"}
         # 检查用户的凭据
         users_ref = self.db.collection("users")
-        try:
-            user_doc_ref = users_ref.document(phone_number)
-            user_doc = user_doc_ref.get()
-            if user_doc.exists:
-                user_data = user_doc.to_dict()
-                user_data["phone_number"] = phone_number  # 添加手机号码
-                user = User.from_doc(user_data)
-            else:
-                raise Exception("用户不存在")
+        user_doc_ref = users_ref.document(phone_number)
+        user_doc = user_doc_ref.get()
+        if user_doc.exists:
+            user_data = user_doc.to_dict()
+            user_data["phone_number"] = phone_number  # 添加手机号码
+            user = User.from_doc(user_data)
             # 验证密码
             if user.check_password(password):
                 # 如果密码正确，将用户的登录状态存储到缓存中
@@ -133,11 +130,10 @@ class GoogleDbInterface:
                     "status": "error",
                     "message": "密码错误，请重新输入",
                 }
-        except Exception as e:
-            # st.write(e)
+        else:
             return {
                 "status": "error",
-                "message": "无效的手机号码，或者密码无效。请展开下面的帮助文档，查看如何注册账号或重置密码。",
+                "message": f"不存在与手机号码 {phone_number} 相关联的用户",
             }
 
     # endregion
