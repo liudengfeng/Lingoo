@@ -6,7 +6,8 @@ import pytz
 import streamlit as st
 from azure.core.exceptions import ResourceNotFoundError
 from azure.storage.blob import BlobServiceClient
-from cryptography.fernet import Fernet
+
+# from cryptography.fernet import Fernet
 from PIL import Image
 from pymongo.errors import DuplicateKeyError
 
@@ -20,7 +21,7 @@ CURRENT_CWD: Path = Path(__file__).parent.parent
 FEEDBACK_DIR = CURRENT_CWD / "resource" / "feedback"
 
 # 创建 Fernet 实例【必须将key转换为bytes类型】
-fernet = Fernet(st.secrets["FERNET_KEY"].encode())
+# fernet = Fernet(st.secrets["FERNET_KEY"].encode())
 
 st.set_page_config(
     page_title="用户管理",
@@ -64,11 +65,8 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
     st.subheader(":arrows_counterclockwise: 更新个人信息")
     CEFR = list(CEFR_LEVEL_MAPS.keys())
     COUNTRIES = ["中国"]
-    user_doc = st.session_state.dbi.get_user(
-        st.session_state.user_info["phone_number"]
-    )
-    user = User.from_doc(user_doc)
-    user.set_secret_key(st.secrets["FERNET_KEY"])
+    user = st.session_state.dbi.get_user(st.session_state.user_info["phone_number"])
+    # user.set_secret_key(st.secrets["FERNET_KEY"])
 
     with st.form(key="update_form"):
         col1, col2 = st.columns(2)
@@ -80,30 +78,30 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
             disabled=True,
         )
         email = col2.text_input(
-            "邮箱", key="email-3", help="✨ 请输入有效邮箱地址", value=user.email
+            "邮箱", key="email-3", help="✨ 请输入您常用的电子邮件地址", value=user.email
         )
         real_name = col1.text_input(
             "真实姓名",
             key="real_name-3",
-            help="✨ 成绩册上的姓名",
+            help="✨ 请输入您在成绩册上的姓名。",
             value=user.real_name,
         )
         display_name = col2.text_input(
-            "显示名称", key="display_name-3", help="✨ 登录显示名称", value=user.display_name
+            "显示名称", key="display_name-3", help="✨ 请输入您的登录显示名称。", value=user.display_name
         )
         current_level = col1.selectbox(
             "当前英语水平",
             CEFR,
             index=CEFR.index(user.current_level),
             key="current_level-3",
-            help="✨ 如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
+            help="✨ 请选择您当前的英语水平。如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明。",
         )
         target_level = col2.selectbox(
             "期望达到的英语水平",
             CEFR,
             index=CEFR.index(user.target_level),
             key="target_level-3",
-            help="✨ 如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
+            help="✨ 请选择您期望达到的英语水平。如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明。",
         )
         country = col1.selectbox(
             "所在国家",
@@ -111,32 +109,51 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
             index=COUNTRIES.index(user.country),
             key="country-3",
         )
-        province = col2.selectbox("所在省份", PROVINCES, index=0, key="province-3")
+        province = col2.selectbox(
+            "所在省份", PROVINCES, index=PROVINCES.index(user.province), key="province-3"
+        )
         tz = col1.selectbox(
             "所在时区",
             pytz.common_timezones,
             index=pytz.common_timezones.index(user.timezone),
             key="timezone-3",
-            help="✨ 请根据您当前所在的时区选择。如果您在中国，请使用默认值。",
+            help="✨ 请选择您当前所在的时区。如果您在中国，请使用默认值。",
         )
         status = st.empty()
         if st.form_submit_button(label="确认"):
+            # 以下部分更新用户信息
+            if not email:
+                user.email = email
+            if not real_name:
+                user.real_name = real_name
+            if not display_name:
+                user.display_name = display_name
+            if not current_level:
+                user.current_level = current_level
+            if not target_level:
+                user.target_level = target_level
+            if not country:
+                user.country = country
+            if not province:
+                user.province = province
+            if not tz:
+                user.timezone = tz
+            if (
+                not email
+                and not real_name
+                and not display_name
+                and not current_level
+                and not target_level
+                and not country
+                and not province
+                and not tz
+            ):
+                status.error("您没有修改任何信息")
+                st.stop()
             try:
-                st.session_state.dbi.update_user(
-                    st.session_state.user_info["phone_number"],
-                    {
-                        "f_email": fernet.encrypt(email.encode()),
-                        "f_real_name": fernet.encrypt(real_name.encode()),
-                        "f_country": fernet.encrypt(country.encode()),
-                        "f_province": fernet.encrypt(province.encode()),
-                        "f_timezone": fernet.encrypt(tz.encode()),
-                        "display_name": display_name,
-                        "current_level": current_level,
-                        "target_level": target_level,
-                    },
-                )
-                status.success("更新成功")
-                time.sleep(3)
+                st.session_state.dbi.update_user(user)
+                st.toast("更新成功")
+                # time.sleep(3)
                 st.rerun()
             except DuplicateKeyError:
                 if email and not is_valid_email(email):
@@ -158,9 +175,7 @@ with tabs[items.index(":key: 重置密码")]:
         st.error("您的账号尚未缴费、激活，无法重置密码。")
         st.stop()
 
-    user_doc = st.session_state.dbi.get_user(
-        st.session_state.user_info["phone_number"]
-    )
+    user_doc = st.session_state.dbi.get_user(st.session_state.user_info["phone_number"])
     user = User.from_doc(user_doc)
     with st.form(key="secret_form", clear_on_submit=True):
         password_reg = st.text_input(

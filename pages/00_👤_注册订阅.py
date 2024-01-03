@@ -59,7 +59,7 @@ with st.form(key="registration_form"):
     real_name = col1.text_input(
         "真实姓名",
         key="real_name",
-        help="请输入您在成绩册上的姓名。",
+        help="✨ 请输入您在成绩册上的姓名。",
         placeholder="请输入真实姓名（可选）",
     )
     display_name = col2.text_input(
