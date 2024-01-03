@@ -1,6 +1,8 @@
+import base64
 import datetime
 import json
 import logging
+# import mimetypes
 import os
 import re
 from pathlib import Path
@@ -9,18 +11,18 @@ import pandas as pd
 import pytz
 import streamlit as st
 from azure.storage.blob import BlobServiceClient
+from google.cloud import storage
 from pandas import Timedelta
+from vertexai.preview.generative_models import GenerationConfig, Part
 
 from mypylib.db_interface import PRICES
-from mypylib.db_model import (
-    Payment,
-    PaymentStatus,
-    PurchaseType,
-    str_to_enum,
-)
+from mypylib.db_model import Payment, PaymentStatus, PurchaseType, str_to_enum
+from mypylib.google_cloud_configuration import PROJECT_ID
 from mypylib.st_helper import (
     check_access,
+    configure_ais,
     google_translate,
+    load_vertex_model,
     update_and_display_progress,
 )
 from mypylib.word_utils import get_lowest_cefr_level
@@ -33,6 +35,7 @@ logger = logging.getLogger("streamlit")
 CURRENT_CWD: Path = Path(__file__).parent.parent
 
 check_access(True)
+configure_ais()
 
 tz = pytz.timezone(st.session_state.dbi.cache.get("timezone", "Asia/Shanghai"))
 # endregion
@@ -214,7 +217,7 @@ def generate_timestamp(key: str, type: str, idx: int):
 # endregion
 
 # 创建选项卡
-items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "转移词典", "统计分析"]
+items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "转移词典", "单词图片", "统计分析"]
 tabs = st.tabs(items)
 
 
@@ -865,6 +868,72 @@ with tabs[items.index("转移词典")]:
     )
     if st.button("重命名 Firestore 文档"):
         rename_firestore_documents(num_docs_to_process)
+
+# endregion
+
+# region 创建单词图片页面
+
+
+def generate(word, images: list):
+    model = load_vertex_model("gemini-pro-vision")
+    prompt = f"单词：{word}\n输入的图片是否能形象解释单词含义，挑选出最合适的前4张图片。结果用输入图片的自然序号（从0开始）列表表达，如果没有合适的，返回空列表。以JSON格式输出。"
+    contents = [prompt] + [
+        Part.from_data(
+            img,
+        )
+        for img in images
+    ]
+    responses = model.generate_content(
+        contents,
+        generation_config={
+            "max_output_tokens": 2048,
+            "temperature": 0.1,
+            "top_p": 1,
+            "top_k": 32,
+        },
+        stream=True,
+    )
+
+
+def f0():
+    # 创建一个存储客户端
+    storage_client = storage.Client(project=PROJECT_ID)
+
+
+def get_word_images(storage_client, word):
+    # 获取存储桶
+    bucket = storage_client.get_bucket("bucket-ldf")
+    # 创建一个前缀，用于获取与单词相关的所有图片
+    prefix = f"word_images/{word}-"
+    # 获取与单词相关的所有图片
+    blobs = bucket.list_blobs(prefix=prefix)
+    # 创建一个列表，用于存储图片的内容
+    image_data = []
+    # 遍历所有的图片
+    for blob in blobs:
+        # 下载图片的内容
+        image_content = blob.download_as_bytes()
+        # 获取图片的 mime 类型
+        mime_type = blob.content_type
+        # # 将图片的内容转换为 base64 编码的字符串
+        # image_base64 = base64.b64encode(image_content).decode("utf-8")
+        # 将图片的内容添加到列表中
+        image_data.append({"image": image_content, "mime_type": mime_type})
+    # 返回图片的内容列表
+    return image_data
+
+
+with tabs[items.index("单词图片")]:
+    st.subheader("单词图片", divider="rainbow")
+    st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
+    word = st.text_input("请输入单词")
+    if st.button("开始"):
+        storage_client = storage.Client(project=PROJECT_ID)
+        image_data = get_word_images(storage_client, word)
+        for i in range(0, len(image_data), 4):
+            images = image_data[i:i+4]
+            st.image([img["image"] for img in images], caption=[img["mime_type"] for img in images], width=200)
+
 
 # endregion
 

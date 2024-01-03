@@ -479,3 +479,17 @@ class DbInterface:
             login_event_doc_ref.update({"logout_time": datetime.now(timezone.utc)})
 
     # endregion
+
+    # region 单词管理
+
+    def find_word(self, word):
+        # 将单词中的 "/" 字符替换为 " or "
+        word = word.replace("/", " or ")
+
+        # 获取指定 ID 的文档
+        doc = self.db.collection("words").document(word).get()
+
+        # 如果文档存在，将其转换为字典，否则返回一个空字典
+        return doc.to_dict() if doc.exists else {}
+
+    # endregion
