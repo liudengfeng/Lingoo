@@ -31,18 +31,24 @@ class DbInterface:
         self.db = firestore_client
         self.cache = TTLCache(maxsize=1000, ttl=86400)  # 24 hours cache
 
-    def cache_user(self, user):
+    def cache_user(self, user, session_id):
         phone_number = user.phone_number
-        self.cache[phone_number] = {
-            "status": "success",
+        self.cache = {
+            "is_logged_in": True,
+            "phone_number": phone_number,
             "display_name": user.display_name,
             "email": user.email,
             "user_role": user.user_role,
+            "timezone": user.timezone,
+            "session_id": session_id,
         }
 
     # region 用户管理
 
-    def get_user(self, phone_number: str):
+    def get_user(self):
+        phone_number = self.cache.get("phone_number", "")
+        if not phone_number:
+            return None
         doc_ref = self.db.collection("users").document(phone_number)
         doc = doc_ref.get()
         if doc.exists:
@@ -89,10 +95,7 @@ class DbInterface:
 
     def login(self, phone_number, password):
         # 在缓存中查询是否已经正常登录
-        if (
-            phone_number in self.cache
-            and self.cache[phone_number].get("status", "") == "success"
-        ):
+        if self.cache[phone_number].get("is_logged_in", False):
             return {"status": "warning", "message": "您已登录"}
         # 检查用户的凭据
         users_ref = self.db.collection("users")
@@ -104,25 +107,21 @@ class DbInterface:
             user = User.from_doc(user_data)
             # 验证密码
             if user.check_password(password):
-                # 如果密码正确，将用户的登录状态存储到缓存中
-                self.cache_user(user)
                 session_id = self.create_login_event(phone_number)
+                # 如果密码正确，将用户的登录状态存储到缓存中
+                self.cache_user(user, session_id)
                 return {
-                    "display_name": user.display_name,
-                    "session_id": session_id,
-                    "status": "success",
-                    "user_role": user.user_role,
-                    "timezone": user.timezone,
+                    "is_logged_in": True,
                     "message": f"嗨！{user.display_name}，又见面了。",
                 }
             else:
                 return {
-                    "status": "error",
+                    "is_logged_in": False,
                     "message": "密码错误，请重新输入",
                 }
         else:
             return {
-                "status": "error",
+                "is_logged_in": False,
                 "message": f"不存在与手机号码 {phone_number} 相关联的用户",
             }
 
@@ -410,10 +409,7 @@ class DbInterface:
 
     def login_with_verification_code(self, phone_number: str, verification_code: str):
         # 在缓存中查询是否已经正常登录
-        if (
-            phone_number in self.cache
-            and self.cache[phone_number].get("status", "") == "success"
-        ):
+        if self.cache[phone_number].get("is_logged_in", False):
             return {"status": "warning", "message": "您已登录"}
 
         # 获取用户文档的引用
@@ -429,13 +425,13 @@ class DbInterface:
                 if user_data.get("verification_code_time") + timedelta(
                     minutes=30
                 ) > datetime.now(timezone.utc):
-                    # 如果验证码正确且在有效期内，将用户的登录状态存储到缓存中
-                    self.cache_user(user)
                     session_id = self.create_login_event(phone_number)
+                    # 如果验证码正确且在有效期内，将用户的登录状态存储到缓存中
+                    self.cache_user(user, session_id)
                     return {
                         "display_name": user.display_name,
                         "session_id": session_id,
-                        "status": "success",
+                        "is_logged_in": True,
                         "user_role": user.user_role,
                         "timezone": user.timezone,
                         "message": f"嗨！{user.display_name}，又见面了。",

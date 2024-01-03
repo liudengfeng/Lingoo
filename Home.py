@@ -29,9 +29,6 @@ st.set_page_config(
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface(get_firestore_client())
 
-if "user_info" not in st.session_state:
-    st.session_state["user_info"] = {}
-
 
 need_update = False
 # 如果文件不存在，或者文件的最后修改时间距离当前时间超过120天
@@ -61,9 +58,13 @@ if need_update:
 
 s_cols = st.sidebar.columns(3)
 login_btn = s_cols[0].button(
-    label="登录" if not st.session_state["user_info"] else ":bust_in_silhouette: 已登录",
-    type="primary" if not st.session_state["user_info"] else "secondary",
-    disabled=len(st.session_state["user_info"]) >= 1,
+    label="登录"
+    if not st.session_state.dbi.cache.get("is_logged_in", False)
+    else ":bust_in_silhouette: 已登录",
+    type="primary"
+    if not st.session_state.dbi.cache.get("is_logged_in", False)
+    else "secondary",
+    disabled=st.session_state.dbi.cache.get("is_logged_in", False),
 )
 logout_btn = s_cols[1].button("退出", help="✨ 在公共场所使用本产品时，请在离开前退出登录，以保护您的隐私和安全。")
 
@@ -76,18 +77,17 @@ sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
 # check_and_force_logout(sidebar_status)
 
-# if len(st.session_state["user_info"]) >= 1:
-#     # 获取用户的数据
-#     user_data = st.session_state.dbi.users.find_one(
-#         {"phone_number": st.session_state["user_info"]["phone_number"]}
-#     )
-#     # 查询在服务期内，处于服务状态的支付记录
-#     payment_record = st.session_state.dbi.payments.find_one(
-#         {
-#             "phone_number": st.session_state["user_info"]["phone_number"],
-#             "status": PaymentStatus.IN_SERVICE,
-#         }
-#     )
+# 登录用户才能使用免费功能
+if st.session_state.dbi.cache.get("is_logged_in", False):
+    # 获取用户的数据
+    user = st.session_state.dbi.get_user()
+    # 查询在服务期内，处于服务状态的支付记录
+    # payment_record = st.session_state.dbi.payments.find_one(
+    #     {
+    #         "phone_number": st.session_state["user_info"]["phone_number"],
+    #         "status": PaymentStatus.IN_SERVICE,
+    #     }
+    # )
 #     # 检查用户是否已经领取 TODO:使用 user tz
 #     if (current_datetime.hour + 8) < 6 or 20 <= (current_datetime.hour + 8):
 #         extend_time_btn_disabled = False
@@ -150,11 +150,12 @@ sidebar_status = st.sidebar.empty()
 #             f"剩余{remaining_days:.0f}天{remaining_hours:.0f}小时{remaining_minutes:.0f}分钟到期"
 #         )
 
-if len(st.session_state["user_info"]) == 0:
-    if st.session_state.user_info and st.session_state.dbi.cache.get(
-        st.session_state.user_info["phone_number"]
-    ):
-        sidebar_status.success(f"您已登录，{st.session_state.user_info['display_name']} 您好！")
+# 没有登录的用户，显示登录表单
+if not st.session_state.dbi.cache.get("is_logged_in", False):
+    # if st.session_state.user_info and st.session_state.dbi.cache.get(
+    #     st.session_state.user_info["phone_number"]
+    # ):
+    #     sidebar_status.success(f"您已登录，{st.session_state.user_info['display_name']} 您好！")
     with st.sidebar.form(key="login_form", clear_on_submit=True):
         phone_number = st.text_input(
             "手机号码",
@@ -179,14 +180,8 @@ if len(st.session_state["user_info"]) == 0:
                 info = st.session_state.dbi.login(
                     phone_number=phone_number, password=password
                 )
-                if info.get("status", "") == "success":
-                    display_name = info["display_name"]
+                if st.session_state.dbi.cache.get("is_logged_in", False):
                     sidebar_status.success(info["message"])
-                    st.session_state["user_info"] = {}
-                    st.session_state["user_info"]["phone_number"] = phone_number
-                    st.session_state["user_info"]["user_role"] = info["user_role"]
-                    st.session_state["user_info"]["session_id"] = info["session_id"]
-                    st.session_state["user_info"]["display_name"] = display_name
                     time.sleep(2)
                     st.rerun()
                 elif info["status"] == "warning":
