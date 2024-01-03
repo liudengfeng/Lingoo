@@ -295,7 +295,7 @@ with tabs[items.index("订阅登记")]:
                 expiry_time=datetime.datetime.now(datetime.timezone.utc),
                 receivable=receivable,
                 payment_amount=payment_amount,  # type: ignore
-                purchase_type=purchase_type,  # type: ignore
+                purchase_type=str_to_enum(purchase_type),  # type: ignore
                 order_id=order_id,
                 payment_method=payment_method,
                 discount_rate=discount_rate,

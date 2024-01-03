@@ -355,7 +355,7 @@ class GoogleDbInterface:
         # 如果没有找到符合条件的记录，返回False
         return False
 
-    def enable_service(self, phone_number: str, order_id: str, purchase_type: str):
+    def enable_service(self, phone_number: str, order_id: str, purchase_type: PurchaseType):
         # 查询用户的最后一个订阅记录
         payments_ref = self.db.collection("payments")
         payments_query = (
@@ -379,7 +379,7 @@ class GoogleDbInterface:
                 base_time = last_subscription_expiry_time
 
         # 将字符串转换为 PurchaseType 枚举
-        purchase_type = str_to_enum(purchase_type, PurchaseType)  # type: ignore
+        # purchase_type = str_to_enum(purchase_type, PurchaseType)  # type: ignore
         expiry_time = base_time + self.calculate_expiry(purchase_type)  # type: ignore
         logger.debug(f"purchase_type: {purchase_type} Expiry time: {expiry_time}")
 
