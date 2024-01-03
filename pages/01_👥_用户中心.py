@@ -179,10 +179,18 @@ with tabs[items.index(":key: 重置密码")]:
     # user = User.from_doc(user_doc)
     with st.form(key="secret_form", clear_on_submit=True):
         password_reg = st.text_input(
-            "密码", type="password", key="password_reg-4", help="✨ 密码长度至少为8位"
+            "密码",
+            type="password",
+            key="password_reg-4",
+            help="✨ 密码长度至少为8位",
+            placeholder="请输入密码，至少为8位",
         )
         password_reg_repeat = st.text_input(
-            "密码", type="password", key="password_reg_repeat-4", help="✨ 请再次输入密码"
+            "密码",
+            type="password",
+            key="password_reg_repeat-4",
+            help="✨ 请再次输入密码",
+            placeholder="请再次输入密码以确认",
         )
         status = st.empty()
         if st.form_submit_button(label="确认"):
