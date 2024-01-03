@@ -14,7 +14,7 @@ from mypylib.auth_utils import is_valid_email
 from mypylib.constants import PROVINCES, CEFR_LEVEL_MAPS
 from mypylib.db_interface import DbInterface
 from mypylib.db_model import User
-from mypylib.st_helper import check_and_force_logout, get_firestore_client
+from mypylib.st_helper import check_access, check_and_force_logout
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 FEEDBACK_DIR = CURRENT_CWD / "resource" / "feedback"
@@ -28,20 +28,13 @@ st.set_page_config(
     layout="wide",
 )
 
-
-if "dbi" not in st.session_state:
-    st.session_state["dbi"] = DbInterface(get_firestore_client())
-
-if not st.session_state.dbi.is_logged_in():
-    st.error("您的账号尚未激活，无法使用本页。")
-    st.stop()
+check_access(False)
 
 # region 侧边栏
 
 sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
 check_and_force_logout(sidebar_status)
-
 
 # endregion
 

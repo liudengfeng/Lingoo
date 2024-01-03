@@ -14,11 +14,6 @@ from .google_cloud_configuration import (
 )
 
 
-def common_page_config():
-    if "dbi" not in st.session_state:
-        st.session_state["dbi"] = DbInterface(get_firestore_client())
-
-
 def configure_google_apis():
     # 配置 AI 服务
     if st.secrets["env"] in ["streamlit", "azure"]:
@@ -66,10 +61,31 @@ def check_and_force_logout(status):
 
 
 def authenticate_and_configure_services():
-    common_page_config()
     if "google_translate_client" not in st.session_state:
         st.session_state["google_translate_client"] = get_translation_client()
     configure_google_apis()
+
+
+def configure_ais():
+    # 配置 AI 服务
+    if st.secrets["env"] in ["streamlit", "azure"]:
+        if "inited_google_ai" not in st.session_state:
+            vertexai_configure(st.secrets)
+            # vertexai.init(project=PROJECT_ID, location=LOCATION)
+            st.session_state["inited_google_ai"] = True
+        
+        if "google_translate_client" not in st.session_state:
+            st.session_state["google_translate_client"] = get_translation_client()
+            
+        # 配置 token 计数器
+        if "current_token_count" not in st.session_state:
+            st.session_state["current_token_count"] = 0
+
+        # 应该存放在数据库
+        if "total_token_count" not in st.session_state:
+            st.session_state["total_token_count"] = 0
+    else:
+        st.warning("非云端环境，无法使用 Google AI", icon="⚠️")
 
 
 @st.cache_resource
