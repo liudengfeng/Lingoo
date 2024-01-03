@@ -458,7 +458,7 @@ class DbInterface:
                 filter=FieldFilter("phone_number", "==", phone_number)
             )
             .where(filter=FieldFilter("logout_time", "==", None))
-            .order_by("login_time", direction=firestore.Query.DESCENDING)
+            .order_by("login_time", direction=firestore.Query.ASCENDING)
         )
         login_events_docs = login_events_query.stream()
         dicts = [{"session_id": doc.id, **doc.to_dict()} for doc in login_events_docs]
