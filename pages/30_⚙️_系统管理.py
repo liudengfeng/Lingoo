@@ -550,7 +550,9 @@ with tabs[items.index("支付管理")]:
                     # 将 'Z' 替换为 '+00:00'
                     value = value.replace("Z", "+00:00")
                     # 将字符串转换为 datetime 对象
-                    timestamp = datetime.datetime.fromisoformat(value).tz_convert(pytz.UTC)
+                    timestamp = datetime.datetime.fromisoformat(value).astimezone(
+                        datetime.timezone.utc
+                    )
                     d[key] = timestamp
             st.session_state.dbi.update_payment(order_id, d)
             st.toast(f"更新支付记录，订单号：{order_id}", icon="🎉")
