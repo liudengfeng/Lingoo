@@ -527,21 +527,19 @@ with tabs[items.index("支付管理")]:
     # # Access edited data
     if approve_btn and st.session_state.get("users_payments", None):
         users_payments = st.session_state["users_payments"]
+        st.write(f"{users_payments=}")
+        for idx, d in users_payments["edited_rows"].items():
+            order_id = df.iloc[idx]["order_id"]  # type: ignore
+            st.session_state.gdbi.update_payment(order_id, d)
+            st.toast(f"更新支付记录，订单号：{order_id}", icon="🎉")
+
+    if del_btn and st.session_state.get("users_payments", None):
+        users_payments = st.session_state["users_payments"]
         # st.write(f"{users_payments=}")
         for idx, d in users_payments["edited_rows"].items():
             order_id = df.iloc[idx]["order_id"]  # type: ignore
-            update_fields = {}
-            st.write(f"{idx=}, {d=} {order_id=}")
-            # phone_number = df.iloc[idx]["phone_number"]  # type: ignore
-            # purchase_type = df.iloc[idx]["purchase_type"]  # type: ignore
-            # order_id = df.iloc[idx]["order_id"]  # type: ignore
-            # # 批准
-            # # TODO:针对的支付对象
-            # if d.get("is_approved", False):
-            #     st.session_state.gdbi.enable_service(
-            #         phone_number, order_id, purchase_type
-            #     )
-            #     st.toast(f"批准用户：{phone_number} {order_id}", icon="🎉")
+            st.session_state.gdbi.update_payment(order_id, d)
+            st.toast(f"更新支付记录，订单号：{order_id}", icon="🎉")
 
 
 # endregion
