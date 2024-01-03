@@ -56,7 +56,10 @@ class DbInterface:
         phone_number = user.phone_number
         doc_ref = self.db.collection("users").document(phone_number)
         user_data = user.model_dump()
-        del user_data["phone_number"]  # 删除手机号码
+        try:
+            del user_data["phone_number"]  # 删除手机号码
+        except KeyError:
+            pass
         doc_ref.update(user_data)
 
     def register_user(self, user: User):

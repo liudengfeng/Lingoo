@@ -64,7 +64,9 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
     st.subheader(":arrows_counterclockwise: 更新个人信息")
     CEFR = list(CEFR_LEVEL_MAPS.keys())
     COUNTRIES = ["中国"]
-    user_doc = st.session_state.dbi.find_user(st.session_state.user_info["user_id"])
+    user_doc = st.session_state.dbi.find_user(
+        st.session_state.user_info["phone_number"]
+    )
     user = User.from_doc(user_doc)
     user.set_secret_key(st.secrets["FERNET_KEY"])
 
@@ -121,7 +123,7 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
         if st.form_submit_button(label="确认"):
             try:
                 st.session_state.dbi.update_user(
-                    st.session_state.user_info["user_id"],
+                    st.session_state.user_info["phone_number"],
                     {
                         "f_email": fernet.encrypt(email.encode()),
                         "f_real_name": fernet.encrypt(real_name.encode()),
@@ -156,7 +158,9 @@ with tabs[items.index(":key: 重置密码")]:
         st.error("您的账号尚未缴费、激活，无法重置密码。")
         st.stop()
 
-    user_doc = st.session_state.dbi.find_user(st.session_state.user_info["user_id"])
+    user_doc = st.session_state.dbi.find_user(
+        st.session_state.user_info["phone_number"]
+    )
     user = User.from_doc(user_doc)
     with st.form(key="secret_form", clear_on_submit=True):
         password_reg = st.text_input(
@@ -171,15 +175,15 @@ with tabs[items.index(":key: 重置密码")]:
                 status.error("两次输入的密码不一致")
                 st.stop()
             user.password = password_reg
-            st.write(
-                st.session_state.dbi.update_user(
-                    st.session_state.user_info["user_id"],
-                    {
-                        "password": user.password,
-                    },
-                )
+            # 必须加密
+            user.hash_password()
+            st.session_state.dbi.update_user(
+                st.session_state.user_info["phone_number"],
+                {
+                    "password": user.password,
+                },
             )
-            st.success("成功重置密码")
+            st.toast("密码重置成功！")
             st.session_state.dbi.logout(phone_number=user.phone_number)
 
 # endregion
@@ -225,7 +229,7 @@ with tabs[items.index(":memo: 问题反馈")]:
                 # print("Container does not exist.")
 
             # 将标题和内容存储为文本文件
-            text_data = f"用户：{st.session_state.user_info['user_id']}\n标题: {title}\n内容: {content}"
+            text_data = f"用户：{st.session_state.user_info['phone_number']}\n标题: {title}\n内容: {content}"
 
             blob_name = str(uuid.uuid4())
             text_blob_client = blob_service_client.get_blob_client(
