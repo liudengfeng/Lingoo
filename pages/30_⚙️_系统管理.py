@@ -49,8 +49,18 @@ COLUMN_CONFIG = {
     "phone_number": "手机号码",
     "payment_id": "付款编号",
     "order_id": "订单编号",
-    "payment_time": "支付时间",
-    "registration_time": "登记时间",
+    "payment_time": st.column_config.DatetimeColumn(
+        "支付时间",
+        min_value=datetime.datetime(2024, 1, 1),
+        max_value=datetime.datetime(2134, 1, 1),
+        step=60,
+    ),
+    "registration_time": st.column_config.DatetimeColumn(
+        "登记时间",
+        min_value=datetime.datetime(2024, 1, 1),
+        max_value=datetime.datetime(2134, 1, 1),
+        step=60,
+    ),
     "sales_representative": "销售代表",
     "purchase_type": st.column_config.SelectboxColumn(
         "套餐类型",
@@ -94,6 +104,9 @@ COLUMN_CONFIG = {
     ),
     "expiry_time": st.column_config.DatetimeColumn(
         "服务截至时间",
+        min_value=datetime.datetime(2024, 1, 1),
+        max_value=datetime.datetime(2134, 1, 1),
+        step=60,
     ),
     # "user_role": st.column_config.SelectboxColumn(
     #     "权限",
@@ -138,7 +151,8 @@ TIME_COLS = ["payment_time", "expiry_time", "registration_time"]
 
 EDITABLE_COLS: list[str] = [
     "is_approved",
-    "user_role",
+    "payment_time",
+    "expiry_time",
 ]
 
 PAYMENTS_FIELDS = [
