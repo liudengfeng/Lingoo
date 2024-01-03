@@ -504,7 +504,9 @@ with tabs[items.index("支付管理")]:
 
     placeholder = st.empty()
     status = st.empty()
-    approve_btn = st.button("更新", key="approve_btn")
+    pay_cols = st.columns([1, 1, 8])
+    approve_btn = pay_cols[0].button("更新", key="approve_btn")
+    del_btn = pay_cols[1].button("删除", key="del_btn")
     # # st.divider()
     if df.empty:
         placeholder.info("没有记录")
