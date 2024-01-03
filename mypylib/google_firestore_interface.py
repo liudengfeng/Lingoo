@@ -10,7 +10,6 @@ from cachetools import TTLCache
 from faker import Faker
 from google.cloud import firestore
 from google.cloud.firestore import FieldFilter
-from pymongo import ASCENDING, IndexModel, MongoClient
 
 from .constants import FAKE_EMAIL_DOMAIN
 from .google_db_model import (

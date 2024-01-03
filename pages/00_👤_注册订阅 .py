@@ -5,6 +5,7 @@ import pytz
 import streamlit as st
 from cryptography.fernet import Fernet
 from google.cloud import firestore
+from google.cloud.firestore import FieldFilter
 from PIL import Image
 
 from mypylib.auth_utils import is_valid_email, is_valid_phone_number
@@ -158,11 +159,13 @@ with st.form(key="registration_form", clear_on_submit=True):
             # 检查是否已经存在具有相同手机号码或电子邮件的用户
             users_ref = st.session_state.gdbi.db.collection("users")
             existing_user = users_ref.where(
-                "phone_number", "==", user.phone_number
+                filter=FieldFilter("phone_number", "==", user.phone_number)
             ).get()
             if existing_user:
                 raise ValueError("电话号码已被注册")
-            existing_user = users_ref.where("email", "==", user.email).get()
+            existing_user = users_ref.where(
+                filter=FieldFilter("email", "==", user.email)
+            ).get()
             if existing_user:
                 raise ValueError("邮箱已被注册")
 
