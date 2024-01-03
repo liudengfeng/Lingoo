@@ -112,12 +112,9 @@ def get_word_info(word):
 
 
 # 从集合中提取个人词库，添加到word_lists中
-if st.session_state["user_info"] is not None:
-    personal_word_list = st.session_state.dbi.find_personal_dictionary(
-        st.session_state["user_info"]
-    )
-    if len(personal_word_list) > 0:
-        st.session_state.word_dict["0-个人词库"] = personal_word_list
+personal_word_list = st.session_state.dbi.find_personal_dictionary()
+if len(personal_word_list) > 0:
+    st.session_state.word_dict["0-个人词库"] = personal_word_list
 
 with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
     voice_style_options = json.load(f)
@@ -403,18 +400,14 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
         word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
         ]
-        st.session_state.dbi.add_word_to_personal_dictionary(
-            st.session_state["user_info"], word
-        )
+        st.session_state.dbi.add_word_to_personal_dictionary(word)
         st.toast(f"已添加单词：{word}到个人词库。")
 
     if del_btn:
         word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
         ]
-        st.session_state.dbi.remove_word_from_personal_dictionary(
-            st.session_state["user_info"], word
-        )
+        st.session_state.dbi.remove_word_from_personal_dictionary(word)
         st.toast(f"已从个人词库中删除单词：{word}。")
 
     # 控制闪卡单词的显示
@@ -855,9 +848,7 @@ def gen_word_lib():
 
 
 def gen_my_word_lib():
-    my_words = st.session_state.dbi.find_personal_dictionary(
-        st.session_state["user_info"]
-    )
+    my_words = st.session_state.dbi.find_personal_dictionary()
     # st.write("个人词库：", my_words)
     for word in my_words:
         if word not in st.session_state.flashcard_word_info:
@@ -917,9 +908,7 @@ with tabs[tab_items.index(":books: 个人词库")]:
         for idx, d in edited_rows.items():
             word = df.iloc[idx]["单词"]  # type: ignore
             if d["添加"]:
-                st.session_state.dbi.add_word_to_personal_dictionary(
-                    st.session_state["user_info"], word
-                )
+                st.session_state.dbi.add_word_to_personal_dictionary(word)
                 st.toast(f"已添加到个人词库中：{word}。")
 
         word_lib["edited_rows"] = {}
@@ -941,9 +930,7 @@ with tabs[tab_items.index(":books: 个人词库")]:
         for idx, d in my_word_edited_rows.items():
             word = my_word_df.iloc[idx]["单词"]  # type: ignore
             if d["删除"]:
-                st.session_state.dbi.remove_word_from_personal_dictionary(
-                    st.session_state["user_info"], word
-                )
+                st.session_state.dbi.remove_word_from_personal_dictionary(word)
                 st.toast(f"已从个人词库中删除：{word}。")
         st.rerun()
 

@@ -175,7 +175,10 @@ class DbInterface:
 
     # region 个人词库管理
 
-    def find_personal_dictionary(self, phone_number):
+    def find_personal_dictionary(self):
+        phone_number = self.cache.get("phone_number", "")
+        if not phone_number:
+            return []
         # 获取用户文档的引用
         user_doc_ref = self.db.collection("users").document(phone_number)
         user_doc = user_doc_ref.get()
@@ -185,13 +188,15 @@ class DbInterface:
         else:
             return []
 
-    def add_word_to_personal_dictionary(self, phone_number, word):
+    def add_word_to_personal_dictionary(self, word):
+        phone_number = self.cache["phone_number"]
         # 获取用户文档的引用
         user_doc_ref = self.db.collection("users").document(phone_number)
         # 使用 arrayUnion 方法添加单词到个人词典
         user_doc_ref.update({"personal_vocabulary": firestore.ArrayUnion([word])})
 
-    def remove_word_from_personal_dictionary(self, phone_number, word):
+    def remove_word_from_personal_dictionary(self, word):
+        phone_number = self.cache["phone_number"]
         # 获取用户文档的引用
         user_doc_ref = self.db.collection("users").document(phone_number)
         # 使用 arrayRemove 方法从个人词典中移除单词
