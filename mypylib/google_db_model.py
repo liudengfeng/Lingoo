@@ -77,6 +77,7 @@ class Payment(BaseModel):
     payment_id: str
     order_id: str
     payment_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    registration_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     receivable: float = Field(gt=0.0, le=100000.0)
     discount_rate: float = Field(0.0, ge=0.0)
     payment_amount: float = Field(ge=0.0, le=100000.0)

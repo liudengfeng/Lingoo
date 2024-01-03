@@ -50,6 +50,7 @@ COLUMN_CONFIG = {
     "payment_id": "付款编号",
     "order_id": "订单编号",
     "payment_time": "支付时间",
+    "registration_time": "登记时间",
     "sales_representative": "销售代表",
     "purchase_type": st.column_config.SelectboxColumn(
         "套餐类型",
@@ -120,6 +121,7 @@ COLUMN_ORDER = [
     "payment_id",
     "order_id",
     "payment_time",
+    "registration_time",
     "sales_representative",
     "purchase_type",
     "receivable",
@@ -160,8 +162,12 @@ PAYMENTS_FIELDS = [
 
 def generate_timestamp(key: str, type: str, idx: int):
     # 获取日期和时间
-    date = st.session_state.get(f"{key}_{type}_date-{idx}")
-    time = st.session_state.get(f"{key}_{type}_time-{idx}")
+    if type:
+        date = st.session_state.get(f"{key}_{type}_date-{idx}")
+        time = st.session_state.get(f"{key}_{type}_time-{idx}")
+    else:
+        date = st.session_state.get(f"{key}_date-{idx}")
+        time = st.session_state.get(f"{key}_time-{idx}")
 
     # 将日期和时间组合成一个 datetime 对象
     datetime_obj = datetime.datetime.combine(date, time)
@@ -173,7 +179,10 @@ def generate_timestamp(key: str, type: str, idx: int):
     datetime_utc = datetime_obj.astimezone(pytz.UTC)
 
     # 返回字典
-    return {f"{type}_" + key: datetime_utc}
+    if type:
+        return {f"{type}_" + key: datetime_utc}
+    else:
+        return {key: datetime_utc}
 
 
 # endregion
@@ -235,6 +244,14 @@ with tabs[items.index("订阅登记")]:
         payment_id = cols[1].text_input(
             "付款编号", key="payment_id", help="✨ 请输入付款编号", placeholder="必填。请在付款凭证上查找付款编号"
         )
+        cols[0].date_input(
+            "支付日期",
+            key="payment_time_date-0",
+            value=datetime.datetime.now(tz).date(),
+        )
+        cols[1].time_input(
+            "开始时间", key="payment_time_time-0", value=datetime.time(0, 0, 0)
+        )
         remark = st.text_input(
             "备注",
             key="remark",
@@ -254,10 +271,13 @@ with tabs[items.index("订阅登记")]:
             ).zfill(10)
             receivable = PRICES[purchase_type]  # type: ignore
             discount_rate = payment_amount / receivable
+            key = "payment_time"
+            payment_time = generate_timestamp(key, "", 0)[key]
             payment = Payment(
                 phone_number=phone_number,
                 payment_id=payment_id,
-                payment_time=datetime.datetime.now(datetime.timezone.utc),
+                registration_time=datetime.datetime.now(datetime.timezone.utc),
+                payment_time=payment_time,
                 expiry_time=datetime.datetime.now(datetime.timezone.utc),
                 receivable=receivable,
                 payment_amount=payment_amount,  # type: ignore
