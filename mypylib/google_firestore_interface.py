@@ -448,7 +448,7 @@ class GoogleDbInterface:
             self.register_user(new_user)
 
         if payment.is_approved or (payment.receivable == payment.payment_amount):
-            # 如果支付成功，更新用户的权限
+            # 更新到期时间
             self.enable_service(payment)
         # 添加支付记录
         payments_ref = self.db.collection("payments")
