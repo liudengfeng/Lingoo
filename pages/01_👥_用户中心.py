@@ -9,7 +9,6 @@ from azure.storage.blob import BlobServiceClient
 
 # from cryptography.fernet import Fernet
 from PIL import Image
-from pymongo.errors import DuplicateKeyError
 
 from mypylib.auth_utils import is_valid_email
 from mypylib.constants import PROVINCES, CEFR_LEVEL_MAPS
@@ -152,13 +151,9 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
                 st.stop()
             try:
                 st.session_state.dbi.update_user(user)
-                st.toast("更新成功")
+                st.toast(f"成功更新用户：{user.phone_number}的信息！")
                 # time.sleep(3)
                 st.rerun()
-            except DuplicateKeyError:
-                if email and not is_valid_email(email):
-                    status.error("请输入有效的邮箱地址")
-                    st.stop()
             except Exception as e:
                 st.error(e)
                 raise e
