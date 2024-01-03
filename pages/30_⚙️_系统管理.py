@@ -16,11 +16,13 @@ from mypylib.db_model import (
     Payment,
     PaymentStatus,
     PurchaseType,
-    User,
-    UserRole,
     str_to_enum,
 )
-from mypylib.st_helper import check_access, google_translate
+from mypylib.st_helper import (
+    check_access,
+    google_translate,
+    update_and_display_progress,
+)
 from mypylib.word_utils import get_lowest_cefr_level
 
 # region 配置
@@ -807,7 +809,6 @@ def rename_firestore_documents(num_docs_to_process):
 
     # 创建一个正则表达式，用于匹配 MongoDB ObjectId
     mongodb_objectid_regex = re.compile("^[0-9a-fA-F]{24}$")
-    
 
     # 遍历 Firestore 中的所有文档，检查每个文档的 ID 是否符合特定的格式
     num_docs_to_rename = sum(
@@ -847,7 +848,7 @@ def rename_firestore_documents(num_docs_to_process):
             doc.reference.delete()
 
         # 更新进度条的值
-        progress_bar.progress((i + 1) / num_docs_to_process)
+        update_and_display_progress(i + 1, num_docs_to_process, progress_bar)
 
     # 完成后，显示一条消息
     st.success("完成！")

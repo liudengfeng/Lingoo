@@ -125,3 +125,25 @@ def google_translate(text: str, target_language_code: str = "zh-CN"):
         res.append(translation.translated_text.encode("utf8").decode("utf8"))
     # google translate api 返回一个结果
     return res[0]
+
+
+def update_and_display_progress(current_value: int, total_value: int, progress_bar):
+    """
+    更新并显示进度条。
+
+    Args:
+        current_value (int): 当前值。
+        total_value (int): 总值。
+        progress_bar: Streamlit progress bar object.
+
+    Returns:
+        None
+    """
+    # 计算进度
+    progress = current_value / total_value
+
+    # 显示进度百分比
+    text = f"{progress:.2%}"
+
+    # 更新进度条的值
+    progress_bar.progress(progress, text)
