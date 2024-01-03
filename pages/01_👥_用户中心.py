@@ -64,7 +64,7 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
     st.subheader(":arrows_counterclockwise: 更新个人信息")
     CEFR = list(CEFR_LEVEL_MAPS.keys())
     COUNTRIES = ["中国"]
-    user_doc = st.session_state.dbi.find_user(
+    user_doc = st.session_state.dbi.get_user(
         st.session_state.user_info["phone_number"]
     )
     user = User.from_doc(user_doc)
@@ -158,7 +158,7 @@ with tabs[items.index(":key: 重置密码")]:
         st.error("您的账号尚未缴费、激活，无法重置密码。")
         st.stop()
 
-    user_doc = st.session_state.dbi.find_user(
+    user_doc = st.session_state.dbi.get_user(
         st.session_state.user_info["phone_number"]
     )
     user = User.from_doc(user_doc)
