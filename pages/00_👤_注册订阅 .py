@@ -4,14 +4,13 @@ from pathlib import Path
 import pytz
 import streamlit as st
 from cryptography.fernet import Fernet
-from google.cloud import firestore
 from google.cloud.firestore import FieldFilter
 from PIL import Image
 
 from mypylib.auth_utils import is_valid_email, is_valid_phone_number
 from mypylib.constants import CEFR_LEVEL_MAPS, FAKE_EMAIL_DOMAIN, PROVINCES
-from mypylib.google_db_model import User
-from mypylib.google_firestore_interface import GoogleDbInterface
+from mypylib.db_model import User
+from mypylib.db_interface import GoogleDbInterface
 from mypylib.st_utils import check_and_force_logout
 
 CURRENT_CWD: Path = Path(__file__).parent.parent

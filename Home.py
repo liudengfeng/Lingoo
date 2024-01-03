@@ -11,8 +11,8 @@ from PIL import Image
 from mypylib.auth_utils import is_valid_phone_number
 from mypylib.azure_speech import speech_synthesis_get_available_voices
 from mypylib.constants import LANGUAGES
-from mypylib.google_db_model import PaymentStatus
-from mypylib.google_firestore_interface import GoogleDbInterface
+from mypylib.db_model import PaymentStatus
+from mypylib.db_interface import GoogleDbInterface
 from mypylib.st_utils import check_and_force_logout
 
 CURRENT_CWD: Path = Path(__file__).parent

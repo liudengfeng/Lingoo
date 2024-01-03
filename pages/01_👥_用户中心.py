@@ -12,8 +12,8 @@ from pymongo.errors import DuplicateKeyError
 
 from mypylib.auth_utils import is_valid_email
 from mypylib.constants import PROVINCES, CEFR_LEVEL_MAPS
-from mypylib.google_firestore_interface import GoogleDbInterface
-from mypylib.google_db_model import User
+from mypylib.db_interface import GoogleDbInterface
+from mypylib.db_model import User
 from mypylib.st_utils import check_and_force_logout
 
 CURRENT_CWD: Path = Path(__file__).parent.parent

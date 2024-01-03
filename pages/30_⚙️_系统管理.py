@@ -10,7 +10,7 @@ import streamlit as st
 from azure.storage.blob import BlobServiceClient
 from pandas import Timedelta
 
-from mypylib.google_db_model import (
+from mypylib.db_model import (
     Payment,
     PaymentStatus,
     PurchaseType,
@@ -18,7 +18,7 @@ from mypylib.google_db_model import (
     UserRole,
     str_to_enum,
 )
-from mypylib.google_firestore_interface import PRICES, GoogleDbInterface
+from mypylib.db_interface import PRICES, GoogleDbInterface
 from mypylib.st_utils import google_translate
 from mypylib.word_utils import get_lowest_cefr_level
 
@@ -539,7 +539,7 @@ with tabs[items.index("支付管理")]:
     # # Access edited data
     if approve_btn and st.session_state.get("users_payments", None):
         users_payments = st.session_state["users_payments"]
-        st.write(f"{users_payments=}")
+        # st.write(f"{users_payments=}")
         for idx, d in users_payments["edited_rows"].items():
             order_id = df.iloc[idx]["order_id"]  # type: ignore
             st.session_state.gdbi.update_payment(order_id, d)
@@ -551,7 +551,9 @@ with tabs[items.index("支付管理")]:
         for idx in users_payments["deleted_rows"]:
             order_id = df.iloc[idx]["order_id"]  # type: ignore
             st.session_state.gdbi.delete_payment(order_id)
-            st.toast(f"删除支付记录，订单号：{order_id}", icon="🎉")
+            st.toast(f"删除支付记录，订单号：{order_id}", icon="⚠️")
+        # 清除删除的行
+        users_payments["deleted_rows"] = []
 
 
 # endregion

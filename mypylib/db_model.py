@@ -2,8 +2,6 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import List, Optional, Type, Union
 
-from bson import ObjectId
-from cryptography.fernet import Fernet
 from pydantic import BaseModel, Field
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -30,18 +28,29 @@ class PaymentStatus(str, Enum):
 
 
 class LoginEvent(BaseModel):
+    phone_number: str = Field("", max_length=15)
     login_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     logout_time: Optional[datetime] = Field(default=None)
     session_id: str = Field("")
 
+    @classmethod
+    def from_doc(cls, doc: dict):
+        return cls(**doc)
+
 
 class TokenUsageRecord(BaseModel):
+    phone_number: str = Field("", max_length=15)
     token_type: str = Field(default="")
     used_token_count: int = Field(default=0)
     used_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+    @classmethod
+    def from_doc(cls, doc: dict):
+        return cls(**doc)
+
 
 class LearningRecord(BaseModel):
+    phone_number: str = Field("", max_length=15)
     project: str = Field(default="")
     start_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     end_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
@@ -50,6 +59,10 @@ class LearningRecord(BaseModel):
     performance: str = Field(default="")
     feedback: Optional[str] = Field(default=None)
     difficulty: Optional[str] = Field(default=None)
+
+    @classmethod
+    def from_doc(cls, doc: dict):
+        return cls(**doc)
 
 
 def str_to_enum(s: str, enum_type: Type[Enum]) -> Union[Enum, str]:
@@ -60,136 +73,56 @@ def str_to_enum(s: str, enum_type: Type[Enum]) -> Union[Enum, str]:
 
 
 class Payment(BaseModel):
-    phone_number: str = Field(max_length=15)
+    phone_number: str = Field("", max_length=15)
     payment_id: str
     order_id: str
     payment_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    registration_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     receivable: float = Field(gt=0.0, le=100000.0)
-    discount_rate: float = Field(0.0, ge=0.0)  # 新增折扣率字段
+    discount_rate: float = Field(0.0, ge=0.0)
     payment_amount: float = Field(ge=0.0, le=100000.0)
     purchase_type: PurchaseType = Field(default=PurchaseType.DAILY)
-    payment_method: str = Field("")  # 新增支付方式字段
+    payment_method: str = Field("")
     status: PaymentStatus = Field(default=PaymentStatus.PENDING)
     is_approved: bool = Field(False)
+    sales_representative: str = Field("")
     expiry_time: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    remark: str = Field("")  # 新增备注字段
-
-
-class User(BaseModel):
-    # 私有字段
-    _secret_key: bytes
-    _user_id: Optional[ObjectId]
-
-    # 加密字段
-    f_email: bytes = Field(b"")
-    f_real_name: bytes = Field(b"")
-    f_country: bytes = Field(b"")  # 新增国家字段
-    f_province: bytes = Field(b"")
-    f_timezone: bytes = Field(b"")  # 新增时区字段
-
-    phone_number: str = Field("", max_length=15)
-    display_name: str = Field("", max_length=100)
-    current_level: str = Field("A1")
-    target_level: str = Field("C1")
-    password: str = Field("")
-    user_role: UserRole = Field(default=UserRole.USER)
-    registration_time: datetime = Field(
-        default_factory=lambda: datetime.now(timezone.utc)
-    )  # 新增注册时间字段
-    login_events: Optional[List[LoginEvent]] = Field(default_factory=list)
-    learning_records: List[LearningRecord] = Field(default=[])
-    used_tokens: List[TokenUsageRecord] = Field(default=[])
-    total_tokens: int = Field(default=0)
-    memo: Optional[str] = Field("")  # 新增备注字段
+    remark: str = Field("")
 
     @classmethod
     def from_doc(cls, doc: dict):
-        cls._user_id = doc.pop("_id", None)
         return cls(**doc)
 
-    @classmethod
-    def encrypt(cls, value: str, key: bytes) -> bytes:
-        if isinstance(key, str):
-            key = key.encode()
-        cipher_suite = Fernet(key)
-        encrypted_bytes = cipher_suite.encrypt(value.encode())
-        return encrypted_bytes
 
-    @classmethod
-    def decrypt(cls, b_value: bytes, key: bytes) -> str:
-        if isinstance(key, str):
-            key = key.encode()
-        cipher_suite = Fernet(key)
-        decrypted_text = cipher_suite.decrypt(b_value)
-        return decrypted_text.decode()
-
-    @property
-    def user_id(self):
-        return self._user_id
-
-    def set_secret_key(self, key: bytes):
-        if isinstance(key, str):
-            key = key.encode()
-        self._secret_key = key
-
-    @property
-    def _cipher_suite(self):
-        if self._secret_key is None:
-            raise ValueError("Key is not set.")
-        return Fernet(self._secret_key)
-
-    @property
-    def email(self):
-        # 解密电子邮件地址
-        return self._cipher_suite.decrypt(self.f_email).decode()
-
-    @email.setter
-    def email(self, value):
-        # 加密电子邮件地址
-        self.f_email = self._cipher_suite.encrypt(value.encode())
-
-    @property
-    def real_name(self):
-        # 解密真实名字
-        return self._cipher_suite.decrypt(self.f_real_name).decode()
-
-    @real_name.setter
-    def real_name(self, value):
-        # 加密真实名字
-        self.f_real_name = self._cipher_suite.encrypt(value.encode())
-
-    @property
-    def country(self):
-        # 解密国家
-        return self._cipher_suite.decrypt(self.f_country).decode()
-
-    @country.setter
-    def country(self, value):
-        # 加密国家
-        self.f_country = self._cipher_suite.encrypt(value.encode())
-
-    @property
-    def province(self):
-        # 解密省份
-        return self._cipher_suite.decrypt.decrypt(self.f_province).decode()
-
-    @province.setter
-    def province(self, value):
-        # 加密省份
-        self.f_province = self._cipher_suite.encrypt(value.encode())
-
-    @property
-    def timezone(self):
-        # 解密时区
-        return self._cipher_suite.decrypt(self.f_timezone).decode()
-
-    @timezone.setter
-    def timezone(self, value):
-        # 加密时区
-        self.f_timezone = self._cipher_suite.encrypt(value.encode())
+class User(BaseModel):
+    email: str = Field("")
+    real_name: str = Field("")
+    country: str = Field("")
+    province: str = Field("")
+    timezone: str = Field("")
+    phone_number: str = Field("", max_length=15)
+    display_name: str = Field("", max_length=100)
+    current_level: str = Field("A1")
+    target_level: str = Field("C2")
+    password: str = Field("")
+    personal_vocabulary: List[str] = Field(default_factory=list)
+    user_role: UserRole = Field(default=UserRole.USER)
+    registration_time: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc)
+    )
+    total_tokens: int = Field(default=0)
+    # used_tokens: List[TokenUsageRecord] = Field(default=[])
+    # payments: Optional[List[Payment]] = Field(default_factory=list)
+    # login_events: Optional[List[LoginEvent]] = Field(default_factory=list)
+    # learning_records: List[LearningRecord] = Field(default=[])
+    memo: Optional[str] = Field("")  # 新增备注字段
 
     def hash_password(self):
         self.password = generate_password_hash(self.password)
 
     def check_password(self, password):
         return check_password_hash(self.password, password)
+
+    @classmethod
+    def from_doc(cls, doc: dict):
+        return cls(**doc)
