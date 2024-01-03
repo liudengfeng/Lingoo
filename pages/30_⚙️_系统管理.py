@@ -556,6 +556,7 @@ with tabs[items.index("支付管理")]:
                     d[key] = timestamp
             st.session_state.dbi.update_payment(order_id, d)
             st.toast(f"更新支付记录，订单号：{order_id}", icon="🎉")
+        users_payments["edited_rows"] = {}
 
     if del_btn and st.session_state.get("users_payments", None):
         users_payments = st.session_state["users_payments"]
