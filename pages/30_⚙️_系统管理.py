@@ -496,6 +496,7 @@ with tabs[items.index("支付管理")]:
             results = st.session_state.gdbi.query_payments(kwargs)
             # 将每个文档转换为字典
             dicts = [{"order_id": doc.id, **doc.to_dict()} for doc in results]
+            st.write(f"{dicts=}")
             st.session_state["queried_payments"] = dicts
 
     st.subheader("支付清单")
