@@ -15,8 +15,6 @@ from .google_cloud_configuration import (
 
 
 def common_page_config():
-    if "user_info" not in st.session_state:
-        st.session_state["user_info"] = {}
     if "dbi" not in st.session_state:
         st.session_state["dbi"] = DbInterface(get_firestore_client())
 
@@ -52,11 +50,9 @@ def check_and_force_logout(status):
     Returns:
         None
     """
-    if "user_info" in st.session_state and "session_id" in st.session_state.user_info:
+    if "session_id" in st.session_state.dbi.cache:
         # 获取除最后一个登录事件外的所有未退出的登录事件
-        active_sessions = st.session_state.dbi.get_active_sessions(
-            st.session_state.user_info["phone_number"]
-        )
+        active_sessions = st.session_state.dbi.get_active_sessions()
         for session in active_sessions:
             if session["session_id"] == st.session_state.user_info["session_id"]:
                 # 如果 st.session_state 中的会话ID在需要强制退出的列表中，处理强制退出

@@ -456,7 +456,10 @@ class DbInterface:
                 "message": f"不存在与手机号码 {phone_number} 相关联的用户",
             }
 
-    def get_active_sessions(self, phone_number: str):
+    def get_active_sessions(self):
+        phone_number = self.cache.get("phone_number", "")
+        if not phone_number:
+            return []
         login_events_ref = self.db.collection("login_events")
         login_events_query = (
             login_events_ref.where(
