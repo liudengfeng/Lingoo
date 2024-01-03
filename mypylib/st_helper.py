@@ -51,13 +51,15 @@ def check_and_force_logout(status):
         None
     """
     if "session_id" in st.session_state.dbi.cache:
+        # 存在会话id，说明用户已经登录
+        phone_number = st.session_state.dbi.cache["phone_number"]
         # 获取除最后一个登录事件外的所有未退出的登录事件
         active_sessions = st.session_state.dbi.get_active_sessions()
         for session in active_sessions:
-            if session["session_id"] == st.session_state.user_info["session_id"]:
+            if session["session_id"] == st.session_state.cache.get("session_id", ""):
                 # 如果 st.session_state 中的会话ID在需要强制退出的列表中，处理强制退出
                 st.session_state.dbi.force_logout_session(
-                    st.session_state.user_info["phone_number"], session["session_id"]
+                    phone_number, session["session_id"]
                 )
                 st.session_state.clear()
                 status.error("您的账号在其他设备上登录，您已被强制退出。")
@@ -66,9 +68,6 @@ def check_and_force_logout(status):
 
 def authenticate_and_configure_services():
     common_page_config()
-    if not st.session_state.dbi.is_service_active():
-        st.error("非付费用户，无法使用此功能。")
-        st.stop()
     if "google_translate_client" not in st.session_state:
         st.session_state["google_translate_client"] = get_translation_client()
     configure_google_apis()

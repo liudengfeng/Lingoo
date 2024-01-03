@@ -31,7 +31,7 @@ class DbInterface:
         self.db = firestore_client
         self.cache = TTLCache(maxsize=1000, ttl=86400)  # 24 hours cache
 
-    def cache_user(self, user, session_id):
+    def cache_user_login_info(self, user, session_id):
         phone_number = user.phone_number
         self.cache = {
             "is_logged_in": True,
@@ -93,6 +93,9 @@ class DbInterface:
         )
         return session_id
 
+    def is_logged_in(self):
+        return self.cache.get("is_logged_in", False)
+
     def login(self, phone_number, password):
         # 在缓存中查询是否已经正常登录
         if self.cache[phone_number].get("is_logged_in", False):
@@ -101,19 +104,42 @@ class DbInterface:
         users_ref = self.db.collection("users")
         user_doc_ref = users_ref.document(phone_number)
         user_doc = user_doc_ref.get()
+
         if user_doc.exists:
             user_data = user_doc.to_dict()
             user_data["phone_number"] = phone_number  # 添加手机号码
             user = User.from_doc(user_data)
             # 验证密码
             if user.check_password(password):
-                session_id = self.create_login_event(phone_number)
-                # 如果密码正确，将用户的登录状态存储到缓存中
-                self.cache_user(user, session_id)
-                return {
-                    "status": "success",
-                    "message": f"嗨！{user.display_name}，又见面了。",
-                }
+                # 验证服务活动状态
+                payments = (
+                    self.db.collection("payments")
+                    .where(filter=FieldFilter("phone_number", "==", phone_number))
+                    .stream()
+                )
+                now = datetime.now(timezone.utc)
+                is_expired = True
+                for payment in payments:
+                    payment_dict = payment.to_dict()
+                    expiry_time = payment_dict["expiry_time"].replace(
+                        tzinfo=timezone.utc
+                    )
+                    if payment_dict["is_approved"] and expiry_time > now:
+                        is_expired = False
+                        break
+                if not is_expired:
+                    session_id = self.create_login_event(phone_number)
+                    # 如果密码正确，将用户的登录状态存储到缓存中
+                    self.cache_user_login_info(user, session_id)
+                    return {
+                        "status": "success",
+                        "message": f"嗨！{user.display_name}，又见面了。",
+                    }
+                else:
+                    return {
+                        "status": "warning",
+                        "message": "您的服务账号已过期，请重新续费。",
+                    }
             else:
                 return {
                     "status": "warning",
@@ -280,39 +306,6 @@ class DbInterface:
         payment_doc_ref = payments_ref.document(order_id)
         payment_doc_ref.delete()
 
-    def is_service_active(self):
-        if not self.cache:
-            return False
-        if "is_service_active" in self.cache:
-            return self.cache["is_service_active"]
-        # 查询用户
-        phone_number = self.cache["phone_number"]
-        user_ref = self.db.collection("users").document(phone_number)
-        user = user_ref.get()
-        # 如果用户是管理员，直接返回True
-        if user.exists and user.to_dict()["user_role"] == "管理员":
-            self.cache["is_service_active"] = True
-            return True
-        # 查询用户的所有支付记录
-        payments = (
-            self.db.collection("payments")
-            .where(filter=FieldFilter("phone_number", "==", phone_number))
-            .stream()
-        )
-        # 遍历所有支付记录
-        now = datetime.now(timezone.utc)
-        for payment in payments:
-            payment_dict = payment.to_dict()
-            # 如果找到一条已经被批准且服务尚未到期的记录，返回True
-            expiry_time = payment_dict["expiry_time"].replace(tzinfo=timezone.utc)
-            if payment_dict["is_approved"] and expiry_time > now:
-                self.cache["is_service_active"] = True
-                return True
-        # 存在当天缴费的可能性，需要查询当天的支付记录
-        # self.cache["is_service_active"] = False
-        # 如果没有找到符合条件的记录，返回False
-        return False
-
     def enable_service(self, payment: Payment):
         # 查询用户的最后一个订阅记录
         payments_ref = self.db.collection("payments")
@@ -427,7 +420,7 @@ class DbInterface:
                 ) > datetime.now(timezone.utc):
                     session_id = self.create_login_event(phone_number)
                     # 如果验证码正确且在有效期内，将用户的登录状态存储到缓存中
-                    self.cache_user(user, session_id)
+                    self.cache_user_login_info(user, session_id)
                     return {
                         "display_name": user.display_name,
                         "session_id": session_id,

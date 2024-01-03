@@ -32,6 +32,9 @@ st.set_page_config(
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface(get_firestore_client())
 
+if not st.session_state.dbi.is_logged_in():
+    st.error("您的账号尚未激活，无法使用本页。")
+    st.stop()
 
 # region 侧边栏
 
@@ -39,9 +42,6 @@ sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
 check_and_force_logout(sidebar_status)
 
-if not st.session_state.dbi.is_service_active():
-    st.error("您的账号未登录，或者尚未缴费、激活，无法更新个人信息。")
-    st.stop()
 
 # endregion
 
@@ -62,7 +62,7 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
     st.subheader(":arrows_counterclockwise: 更新个人信息")
     CEFR = list(CEFR_LEVEL_MAPS.keys())
     COUNTRIES = ["中国"]
-    user = st.session_state.dbi.get_user(st.session_state.user_info["phone_number"])
+    user = st.session_state.dbi.get_user()
     # user.set_secret_key(st.secrets["FERNET_KEY"])
 
     with st.form(key="update_form"):
@@ -154,13 +154,6 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
 
 with tabs[items.index(":key: 重置密码")]:
     st.subheader(":key: 重置密码")
-    if (
-        len(st.session_state.user_info) == 0
-        or not st.session_state.dbi.is_service_active()
-    ):
-        st.error("您的账号尚未缴费、激活，无法重置密码。")
-        st.stop()
-
     user = st.session_state.dbi.get_user(st.session_state.user_info["phone_number"])
     # user = User.from_doc(user_doc)
     with st.form(key="secret_form", clear_on_submit=True):
@@ -203,26 +196,17 @@ with tabs[items.index(":key: 重置密码")]:
 with tabs[items.index(":bar_chart: 统计报表")]:
     st.subheader(":bar_chart: 统计报表")
 
-    if not st.session_state.dbi.is_service_active():
-        st.error("您尚未登录，无法查阅统计报表。")
-        st.stop()
-
 # endregion
 
 # region 创建反馈页面
 
-uploaded_emoji = ":file_folder:"
 
 with tabs[items.index(":memo: 问题反馈")]:
-    if not st.session_state.dbi.is_service_active():
-        st.error("您尚未登录，无法反馈问题。")
-        st.stop()
-
     with st.form(key="feedback_form"):
         title = st.text_input("标题", key="title", help="✨ 请输入标题")
         content = st.text_area("问题描述", key="content", help="✨ 请输入内容")
         uploaded_file = st.file_uploader(
-            f"{uploaded_emoji} 上传截屏视频",
+            ":file_folder: 上传截屏视频",
             type=["webm"],
             help="✨ 请按<<如何录制截屏视频>>指引，录制视频反馈给管理员。",
         )

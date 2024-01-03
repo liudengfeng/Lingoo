@@ -26,9 +26,6 @@ st.set_page_config(
     layout="wide",
 )
 
-if "user_info" not in st.session_state:
-    st.session_state["user_info"] = {}
-
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface(get_firestore_client())
 
