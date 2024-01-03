@@ -17,7 +17,7 @@ from .db_model import (
     TokenUsageRecord,
     User,
 )
-from .st_utils import get_firestore_client
+from .st_helper import get_firestore_client
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
