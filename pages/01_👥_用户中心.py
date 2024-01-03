@@ -171,8 +171,6 @@ with tabs[items.index(":key: 重置密码")]:
                 status.error("两次输入的密码不一致")
                 st.stop()
             user.password = password_reg
-            user.hash_password()
-            # TODO：查看返回结果
             st.write(
                 st.session_state.gdbi.update_user(
                     st.session_state.user_info["user_id"],

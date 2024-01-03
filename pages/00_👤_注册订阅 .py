@@ -153,8 +153,6 @@ with st.form(key="registration_form", clear_on_submit=True):
             password=password_reg,
             registration_time=datetime.now(timezone.utc),
         )  # type: ignore
-        # 为用户密码加密
-        user.hash_password()
         try:
             # 检查是否已经存在具有相同手机号码或电子邮件的用户
             users_ref = st.session_state.gdbi.db.collection("users")

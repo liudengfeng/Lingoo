@@ -75,6 +75,8 @@ class GoogleDbInterface:
     def register_user(self, user: User):
         phone_number = user.phone_number
         doc_ref = self.db.collection("users").document(phone_number)
+        # 为用户密码加密
+        user.hash_password()
         user_data = user.model_dump()
         del user_data["phone_number"]  # 删除手机号码
         doc_ref.set(user_data)
@@ -440,7 +442,6 @@ class GoogleDbInterface:
                 registration_time=datetime.now(timezone.utc),
                 memo=f"订单号：{payment.order_id}",
             )  # type: ignore
-            new_user.hash_password()
             self.register_user(new_user)
 
         if payment.is_approved or (payment.receivable == payment.payment_amount):
