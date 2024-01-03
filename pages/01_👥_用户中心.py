@@ -120,37 +120,30 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
         )
         status = st.empty()
         if st.form_submit_button(label="确认"):
-            # 以下部分更新用户信息
-            if not email:
-                user.email = email
-            if not real_name:
-                user.real_name = real_name
-            if not display_name:
-                user.display_name = display_name
-            if not current_level:
-                user.current_level = current_level
-            if not target_level:
-                user.target_level = target_level
-            if not country:
-                user.country = country
-            if not province:
-                user.province = province
-            if not tz:
-                user.timezone = tz
-            if (
-                not email
-                and not real_name
-                and not display_name
-                and not current_level
-                and not target_level
-                and not country
-                and not province
-                and not tz
-            ):
+            update_fields = {}
+            if email:
+                update_fields["email"] = email
+            if real_name:
+                update_fields["real_name"] = real_name
+            if display_name:
+                update_fields["display_name"] = display_name
+            if current_level:
+                update_fields["current_level"] = current_level
+            if target_level:
+                update_fields["target_level"] = target_level
+            if country:
+                update_fields["country"] = country
+            if province:
+                update_fields["province"] = province
+            if tz:
+                update_fields["timezone"] = tz
+
+            if not update_fields:
                 status.error("您没有修改任何信息")
                 st.stop()
+
             try:
-                st.session_state.dbi.update_user(user)
+                st.session_state.dbi.update_user(user.phone_number, update_fields)
                 st.toast(f"成功更新用户：{user.phone_number}的信息！")
                 # time.sleep(3)
                 st.rerun()
