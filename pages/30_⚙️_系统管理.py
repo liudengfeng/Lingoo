@@ -525,9 +525,9 @@ with tabs[items.index("支付管理")]:
     # # Access edited data
     if approve_btn and st.session_state.get("users_payments", None):
         users_payments = st.session_state["users_payments"]
-        # st.write(f"{users_payments=}")
+        st.write(f"{users_payments=}")
         for idx, d in users_payments["edited_rows"].items():
-            st.write(f"{idx=}, {d=} {users_payments=}")
+            st.write(f"{idx=}, {d=}")
             # phone_number = df.iloc[idx]["phone_number"]  # type: ignore
             # purchase_type = df.iloc[idx]["purchase_type"]  # type: ignore
             # order_id = df.iloc[idx]["order_id"]  # type: ignore
