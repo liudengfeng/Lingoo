@@ -9,6 +9,7 @@ import streamlit as st
 from cachetools import TTLCache
 from faker import Faker
 from google.cloud import firestore
+from google.cloud.firestore import FieldFilter
 from pymongo import ASCENDING, IndexModel, MongoClient
 
 from .constants import FAKE_EMAIL_DOMAIN
@@ -149,8 +150,10 @@ class GoogleDbInterface:
 
         login_events_ref = self.db.collection("login_events")
         login_events = (
-            login_events_ref.where("phone_number", "==", user_info["phone_number"])
-            .where("logout_time", "==", None)
+            login_events_ref.where(
+                filter=FieldFilter("phone_number", "==", user_info["phone_number"])
+            )
+            .where(filter=FieldFilter("logout_time", "==", None))
             .stream()
         )
 
@@ -187,7 +190,9 @@ class GoogleDbInterface:
         if phone_number in self.cache and self.cache[phone_number]:
             # 检查用户是否为 VIP 或管理员
             users_ref = self.db.collection("users")
-            user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+            user_docs = users_ref.where(
+                filter=FieldFilter("phone_number", "==", phone_number)
+            ).stream()
             if user_docs:
                 user_doc = next(user_docs).to_dict()
                 # 创建一个User实例
@@ -203,7 +208,9 @@ class GoogleDbInterface:
 
     def find_personal_dictionary(self, phone_number):
         users_ref = self.db.collection("users")
-        user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+        user_docs = users_ref.where(
+            filter=FieldFilter("phone_number", "==", phone_number)
+        ).stream()
         if user_docs:
             user_doc = next(user_docs).to_dict()
             return user_doc.get("personal_vocabulary", [])
@@ -212,7 +219,9 @@ class GoogleDbInterface:
 
     def add_word_to_personal_dictionary(self, phone_number, word):
         users_ref = self.db.collection("users")
-        user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+        user_docs = users_ref.where(
+            filter=FieldFilter("phone_number", "==", phone_number)
+        ).stream()
         if user_docs:
             user_doc_ref = next(user_docs).reference
             user_doc = user_doc_ref.get().to_dict()
@@ -223,7 +232,9 @@ class GoogleDbInterface:
 
     def remove_word_from_personal_dictionary(self, phone_number, word):
         users_ref = self.db.collection("users")
-        user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+        user_docs = users_ref.where(
+            filter=FieldFilter("phone_number", "==", phone_number)
+        ).stream()
         if user_docs:
             user_doc_ref = next(user_docs).reference
             user_doc = user_doc_ref.get().to_dict()
@@ -238,7 +249,9 @@ class GoogleDbInterface:
 
     def get_token_count(self, phone_number):
         users_ref = self.db.collection("users")
-        user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+        user_docs = users_ref.where(
+            filter=FieldFilter("phone_number", "==", phone_number)
+        ).stream()
         first_user_doc = next(user_docs, None)
         if first_user_doc:
             user_doc = first_user_doc.to_dict()
@@ -260,7 +273,9 @@ class GoogleDbInterface:
 
         # 更新用户的 'total_tokens' 属性
         users_ref = self.db.collection("users")
-        user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+        user_docs = users_ref.where(
+            filter=FieldFilter("phone_number", "==", phone_number)
+        ).stream()
         first_user_doc = next(user_docs, None)
         if first_user_doc:
             user_doc_ref = first_user_doc.reference
@@ -290,7 +305,7 @@ class GoogleDbInterface:
             "is_approved",
         ]:
             if key in query_dict:
-                query = query.where(key, "==", query_dict[key])
+                query = query.where(filter=FieldFilter(key, "==", query_dict[key]))
 
         for key in [
             "start_payment_time",
@@ -301,10 +316,16 @@ class GoogleDbInterface:
             if key in query_dict:
                 if "start" in key:
                     query = query.where(
-                        key.replace("start_", ""), ">=", query_dict[key]
+                        filter=FieldFilter(
+                            key.replace("start_", ""), ">=", query_dict[key]
+                        )
                     )
                 else:
-                    query = query.where(key.replace("end_", ""), "<=", query_dict[key])
+                    query = query.where(
+                        filter=FieldFilter(
+                            key.replace("end_", ""), "<=", query_dict[key]
+                        )
+                    )
         results = query.stream()
         if "remark" in query_dict:
             results = [
@@ -341,7 +362,7 @@ class GoogleDbInterface:
         # 查询用户的所有支付记录
         payments = (
             self.db.collection("payments")
-            .where("phone_number", "==", user_info["phone_number"])
+            .where(filter=FieldFilter("phone_number", "==", user_info["phone_number"]))
             .stream()
         )
         # 遍历所有支付记录
@@ -355,12 +376,14 @@ class GoogleDbInterface:
         # 如果没有找到符合条件的记录，返回False
         return False
 
-    def enable_service(self, phone_number: str, order_id: str, purchase_type: PurchaseType):
+    def enable_service(
+        self, phone_number: str, order_id: str, purchase_type: PurchaseType
+    ):
         # 查询用户的最后一个订阅记录
         payments_ref = self.db.collection("payments")
         payments_query = (
-            payments_ref.where("phone_number", "==", phone_number)
-            .where("status", "==", PaymentStatus.IN_SERVICE)
+            payments_ref.where(filter=FieldFilter("phone_number", "==", phone_number))
+            .where(filter=FieldFilter("status", "==", PaymentStatus.IN_SERVICE))
             .order_by("expiry_time", direction=firestore.Query.DESCENDING)
         )
         last_subscription_docs = payments_query.stream()
@@ -385,8 +408,8 @@ class GoogleDbInterface:
 
         # 更新支付记录的状态和到期时间
         payment_docs = (
-            payments_ref.where("phone_number", "==", phone_number)
-            .where("order_id", "==", order_id)
+            payments_ref.where(filter=FieldFilter("phone_number", "==", phone_number))
+            .where(filter=FieldFilter("order_id", "==", order_id))
             .stream()
         )
         payment_doc = next(payment_docs, None)
@@ -417,7 +440,9 @@ class GoogleDbInterface:
     def add_payment(self, payment: Payment):
         phone_number = payment.phone_number
         users_ref = self.db.collection("users")
-        user_docs = users_ref.where("phone_number", "==", phone_number).stream()
+        user_docs = users_ref.where(
+            filter=FieldFilter("phone_number", "==", phone_number)
+        ).stream()
         first_user_doc = next(user_docs, None)
         if not first_user_doc:
             # 如果用户不存在，则创建一个新用户
@@ -447,8 +472,10 @@ class GoogleDbInterface:
     def get_active_sessions(self, phone_number: str):
         login_events_ref = self.db.collection("login_events")
         login_events_query = (
-            login_events_ref.where("phone_number", "==", phone_number)
-            .where("logout_time", "==", None)
+            login_events_ref.where(
+                filter=FieldFilter("phone_number", "==", phone_number)
+            )
+            .where(filter=FieldFilter("logout_time", "==", None))
             .order_by("login_time", direction=firestore.Query.DESCENDING)
         )
         login_events_docs = login_events_query.stream()
