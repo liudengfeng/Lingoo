@@ -394,6 +394,7 @@ class GoogleDbInterface:
         # 如果存在未过期的订阅，以其到期时间为基准
         if last_subscription is not None:
             last_subscription = last_subscription.to_dict()
+            # 将字符串转换为 datetime 对象
             last_subscription_expiry_time = last_subscription["expiry_time"].replace(
                 tzinfo=timezone.utc
             )
@@ -401,28 +402,18 @@ class GoogleDbInterface:
                 base_time = last_subscription_expiry_time
 
         # 将字符串转换为 PurchaseType 枚举
-        # purchase_type = str_to_enum(purchase_type, PurchaseType)  # type: ignore
         expiry_time = base_time + self.calculate_expiry(purchase_type)  # type: ignore
-        st.warning(
-            f"purchase_type: {purchase_type} delta:{self.calculate_expiry(purchase_type)} Expiry time: {expiry_time}"
-        )
 
         # 更新支付记录的状态和到期时间
-        payment_docs = (
-            payments_ref.where(filter=FieldFilter("phone_number", "==", phone_number))
-            .where(filter=FieldFilter("order_id", "==", order_id))
-            .stream()
+        payment_doc_ref = payments_ref.document(order_id)
+        payment_doc_ref.set(
+            {
+                "is_approved": True,
+                "expiry_time": expiry_time,
+                "status": PaymentStatus.IN_SERVICE,
+            },
+            merge=True,
         )
-        payment_doc = next(payment_docs, None)
-        if payment_doc:
-            payment_doc_ref = payment_doc.reference
-            payment_doc_ref.update(
-                {
-                    "is_approved": True,
-                    "expiry_time": expiry_time,
-                    "status": PaymentStatus.IN_SERVICE,
-                }
-            )
 
     def calculate_expiry(self, purchase_type: PurchaseType):
         if purchase_type == PurchaseType.DAILY:
@@ -458,15 +449,17 @@ class GoogleDbInterface:
             new_user.hash_password()
             self.register_user(new_user)
 
-        st.warning(f"payment: {payment.model_dump()}")
-
         if payment.is_approved or (payment.receivable == payment.payment_amount):
             # 如果支付成功，更新用户的权限
             self.enable_service(phone_number, payment.order_id, payment.purchase_type)
             payment.status = PaymentStatus.IN_SERVICE
         # 添加支付记录
         payments_ref = self.db.collection("payments")
-        payments_ref.add(payment.model_dump())
+        payment_data = payment.model_dump()
+        # 从数据中删除 order_id
+        del payment_data["order_id"]
+        payment_doc_ref = payments_ref.document(payment.order_id)
+        payment_doc_ref.set(payment_data, merge=True)
 
     # endregion
 
