@@ -2,6 +2,7 @@ import base64
 import datetime
 import json
 import logging
+
 # import mimetypes
 import os
 import re
@@ -758,7 +759,7 @@ def init_word_db():
 
 with tabs[items.index("词典管理")]:
     st.subheader("词典管理")
-    if st.button("初始化词典"):
+    if st.button("初始化词典", key="init_btn-3"):
         init_word_db()
 
 # endregion
@@ -860,13 +861,13 @@ def rename_firestore_documents(num_docs_to_process):
 with tabs[items.index("转移词典")]:
     st.subheader("转移词典", divider="rainbow")
     st.text("将 MongoDB 中的数据转移到 Firestore 中")
-    if st.button("开始"):
+    if st.button("开始", key="start_btn-4"):
         transfer_data_from_mongodb_to_firestore()
     st.text("注意：全部转移完成后，才可重命名")
     num_docs_to_process = st.number_input(
         "输入要处理的文档数量", min_value=10, max_value=21000, value=10
     )
-    if st.button("重命名 Firestore 文档"):
+    if st.button("重命名 Firestore 文档", key="rename_btn"):
         rename_firestore_documents(num_docs_to_process)
 
 # endregion
@@ -927,12 +928,16 @@ with tabs[items.index("单词图片")]:
     st.subheader("单词图片", divider="rainbow")
     st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
     word = st.text_input("请输入单词")
-    if st.button("开始"):
+    if st.button("开始", key="start_btn-5"):
         storage_client = storage.Client(project=PROJECT_ID)
         image_data = get_word_images(storage_client, word)
         for i in range(0, len(image_data), 4):
-            images = image_data[i:i+4]
-            st.image([img["image"] for img in images], caption=[img["mime_type"] for img in images], width=200)
+            images = image_data[i : i + 4]
+            st.image(
+                [img["image"] for img in images],
+                caption=[img["mime_type"] for img in images],
+                width=200,
+            )
 
 
 # endregion
