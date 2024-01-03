@@ -207,14 +207,11 @@ def generate_timestamp(key: str, type: str, idx: int):
 
 # region 会话状态
 
-if st.session_state.get("search"):
-    st.session_state["queried_payments"] = []
-
 
 # endregion
 
 # 创建选项卡
-items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "统计分析"]
+items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "转移词典", "统计分析"]
 tabs = st.tabs(items)
 
 
@@ -661,7 +658,7 @@ with tabs[items.index("处理反馈")]:
 
 # endregion
 
-# region 创建词典管理页面
+# region 词典管理辅助函数
 
 
 def get_words():
@@ -749,10 +746,51 @@ def init_word_db():
                 logger.error(f"插入单词 {w} 时出现错误: {e}")
 
 
+# endregion
+
+# region 创建词典管理页面
+
 with tabs[items.index("词典管理")]:
     st.subheader("词典管理")
     if st.button("初始化词典"):
         init_word_db()
+
+# endregion
+
+# region 创建词典管理页面
+
+
+def transfer_data_from_mongodb_to_firestore(num_docs_to_transfer):
+    from pymongo import MongoClient
+
+    mongodb_uri = st.secrets["Microsoft"]["COSMOS_CONNECTION_STRING"]
+    client = MongoClient(mongodb_uri)
+    db = client["pg"]
+    words = db["words"]
+    firestore_db = st.session_state.dbi.db
+    # 创建一个进度条
+    progress = st.progress(0)
+
+    # 遍历 MongoDB 中的文档
+    for i, doc in enumerate(words.find().limit(num_docs_to_transfer)):
+        # 检查 Firestore 中是否已经存在相应的文档
+        if not firestore_db.collection("words").document(doc["_id"]).get().exists:
+            doc_id = doc["_id"]
+            # 如果不存在，将它添加到 Firestore 中
+            del doc["_id"]
+            firestore_db.collection("words").document(doc_id).set(doc)
+
+        # 更新进度条
+        progress.progress((i + 1) / num_docs_to_transfer)
+
+    # 完成后，关闭 MongoDB 客户端
+    client.close()
+
+
+with tabs[items.index("转移词典")]:
+    st.subheader("转移词典", divider="rainbow")
+    if st.button("开始"):
+        transfer_data_from_mongodb_to_firestore(10)
 
 # endregion
 
