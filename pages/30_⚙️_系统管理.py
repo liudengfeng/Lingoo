@@ -527,20 +527,17 @@ with tabs[items.index("支付管理")]:
         users_payments = st.session_state["users_payments"]
         # st.write(f"{users_payments=}")
         for idx, d in users_payments["edited_rows"].items():
-            # st.write(f"{idx=}, {d=} {users_payments=}")
-            phone_number = df.iloc[idx]["phone_number"]  # type: ignore
-            purchase_type = df.iloc[idx]["purchase_type"]  # type: ignore
-            order_id = df.iloc[idx]["order_id"]  # type: ignore
-            # 修改权限
-            if d.get("user_role", None):
-                st.session_state.gdbi.update_user(phone_number, {"user_role": d["user_role"]})  # type: ignore
-            # 批准
-            # TODO:针对的支付对象
-            if d.get("is_approved", False):
-                st.session_state.gdbi.enable_service(
-                    phone_number, order_id, purchase_type
-                )
-                st.toast(f"批准用户：{phone_number} {order_id}", icon="🎉")
+            st.write(f"{idx=}, {d=} {users_payments=}")
+            # phone_number = df.iloc[idx]["phone_number"]  # type: ignore
+            # purchase_type = df.iloc[idx]["purchase_type"]  # type: ignore
+            # order_id = df.iloc[idx]["order_id"]  # type: ignore
+            # # 批准
+            # # TODO:针对的支付对象
+            # if d.get("is_approved", False):
+            #     st.session_state.gdbi.enable_service(
+            #         phone_number, order_id, purchase_type
+            #     )
+            #     st.toast(f"批准用户：{phone_number} {order_id}", icon="🎉")
 
 
 # endregion
