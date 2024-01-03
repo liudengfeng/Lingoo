@@ -118,10 +118,10 @@ with st.form(key="registration_form", clear_on_submit=True):
         if not agree:
             status.error("请仔细阅读《服务条款》，并勾选同意。")
             st.stop()
-        if phone_number is None or not is_valid_phone_number(phone_number):
+        if not is_valid_phone_number(phone_number):
             status.error("必须输入有效的手机号码")
             st.stop()
-        if display_name is None:
+        if not display_name:
             status.error("必须输入有效的用户名")
             st.stop()
         if not email:

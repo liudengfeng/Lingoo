@@ -16,6 +16,8 @@ def is_valid_email(email):
 
 
 def is_valid_phone_number(phone_number):
+    if phone_number is None or phone_number == "":
+        return False
     # 正则表达式匹配中国大陆手机号码
     pattern = r"^1[3-9]\d{9}$"
     return bool(re.match(pattern, phone_number))
