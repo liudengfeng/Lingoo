@@ -807,11 +807,14 @@ def rename_firestore_documents(num_docs_to_process):
 
     # 创建一个正则表达式，用于匹配 MongoDB ObjectId
     mongodb_objectid_regex = re.compile("^[0-9a-fA-F]{24}$")
+    
 
     # 遍历 Firestore 中的所有文档，检查每个文档的 ID 是否符合特定的格式
     num_docs_to_rename = sum(
         1 for doc in words_collection.stream() if mongodb_objectid_regex.match(doc.id)
     )
+    # 显示待处理的文档数量
+    st.write(f"待处理的文档数量：{num_docs_to_rename}")
 
     # 取待处理的文档数量与用户指定的数量的最小值作为要处理的文档数量
     num_docs_to_process = min(num_docs_to_process, num_docs_to_rename)
