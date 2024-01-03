@@ -51,33 +51,33 @@ with st.form(key="registration_form", clear_on_submit=True):
         "手机号码",
         key="phone_number",
         help="✨ 请输入有效手机号码",
-        placeholder="必须",
+        placeholder="请输入手机号码",
     )
     email = col2.text_input(
-        "邮箱", key="email", help="✨ 请输入您常用的电子邮件地址", placeholder="可选。请输入您常用的电子邮件地址"
+        "邮箱", key="email", help="✨ 请输入您常用的电子邮件地址", placeholder="请输入电子邮件地址（可选）"
     )
     real_name = col1.text_input(
         "真实姓名",
         key="real_name",
-        help="成绩册上的姓名",
-        placeholder="可选。如果您希望展示您的成就（例如：获得的奖项、完成的项目等），请在此处填写。",
+        help="请输入您在成绩册上的姓名。",
+        placeholder="请输入真实姓名（可选）",
     )
     display_name = col2.text_input(
-        "显示名称", key="display_name", help="✨ 登录显示名称", placeholder="必须。请输入您希望使用的用户名"
+        "显示名称", key="display_name", help="✨ 请输入您的登录显示名称。", placeholder="请输入显示名称"
     )
     current_level = col1.selectbox(
         "当前英语水平",
         CEFR_LEVEL_MAPS.keys(),
         index=0,
         key="current_level",
-        help="✨ 如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
+        help="✨ 请选择您当前的英语水平。如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明。",
     )
     target_level = col2.selectbox(
         "期望达到的英语水平",
         CEFR_LEVEL_MAPS.keys(),
         index=5,
         key="target_level",
-        help="✨ 如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明",
+        help="✨ 请选择您期望达到的英语水平。如果您不了解如何分级，请参阅屏幕下方关于CEFR分级的说明。",
     )
     country = col1.selectbox(
         "所在国家",
@@ -90,28 +90,28 @@ with st.form(key="registration_form", clear_on_submit=True):
         "密码",
         type="password",
         key="password_reg",
-        help="✨ 密码长度至少为8位",
-        placeholder="请输入您希望使用的密码，至少为8位",
+        help="✨ 请输入您的密码。密码长度至少为8位。",
+        placeholder="请输入密码，至少为8位",
     )
     password_reg_repeat = st.text_input(
         "密码",
         type="password",
         key="password_reg_repeat",
-        # help="✨ 请再次输入密码",
-        placeholder="为了确认，再次输入您刚才输入的密码",
+        help="✨ 请再次输入密码以确认",
+        placeholder="请再次输入密码以确认",
     )
     tz = col1.selectbox(
         "所在时区",
         pytz.common_timezones,
         index=pytz.common_timezones.index("Asia/Shanghai"),
         key="timezone",
-        help="✨ 请根据您当前所在的时区选择。如果您在中国，请使用默认值。",
+        help="✨ 请选择您当前所在的时区。如果您在中国，请使用默认值。",
     )
     agree = st.checkbox(
         "我同意《服务条款》",
         key="agree",
         value=False,
-        help="✨ 请仔细阅读《服务条款》，并勾选此项。",
+        help="✨ 请仔细阅读并同意《服务条款》。",
     )
     status = st.empty()
     if st.form_submit_button(label="注册"):
@@ -122,7 +122,7 @@ with st.form(key="registration_form", clear_on_submit=True):
             status.error("必须输入有效的手机号码")
             st.stop()
         if not display_name:
-            status.error("必须输入有效的用户名")
+            status.error("必须输入有效的显示名称")
             st.stop()
         if not is_valid_email(email):
             # st.write(f"{email=}")
