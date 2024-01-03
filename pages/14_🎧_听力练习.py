@@ -1,8 +1,9 @@
 import streamlit as st
 
 from mypylib.st_helper import (
+    check_access,
     check_and_force_logout,
-    authenticate_and_configure_services,
+    configure_ais,
 )
 
 from mypylib.constants import CEFR_LEVEL_MAPS, rearrange_theme_scene
@@ -19,8 +20,9 @@ st.set_page_config(
     page_icon="🎧",
     layout="wide",
 )
+check_access(False)
+configure_ais()
 
-authenticate_and_configure_services()
 st.markdown("""<a href="用户中心" target="_self">转移到用户中心</a>""", unsafe_allow_html=True)
 
 # 添加会话变量

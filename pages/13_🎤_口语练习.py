@@ -12,7 +12,7 @@ from mypylib.azure_speech import synthesize_speech_to_file
 from mypylib.azure_translator import translate
 from mypylib.constants import CEFR_LEVEL_MAPS, NAMES, TOPICS
 from mypylib.google_api import generate_text
-from mypylib.st_helper import authenticate_and_configure_services
+from mypylib.st_helper import check_access, configure_ais
 
 # region 认证及初始化
 
@@ -22,7 +22,8 @@ st.set_page_config(
     layout="wide",
 )
 
-authenticate_and_configure_services()
+check_access(False)
+configure_ais()
 
 # endregion
 

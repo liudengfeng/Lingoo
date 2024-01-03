@@ -5,7 +5,8 @@ from vertexai.preview.generative_models import ResponseBlockedError
 
 from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 from mypylib.st_helper import (
-    authenticate_and_configure_services,
+    check_access,
+    configure_ais,
     check_and_force_logout,
     load_vertex_model,
 )
@@ -18,8 +19,8 @@ st.set_page_config(
     page_icon=":gemini:",
     layout="wide",
 )
-
-authenticate_and_configure_services()
+check_access(False)
+configure_ais()
 
 AVATAR_NAMES = ["user", "model"]
 AVATAR_EMOJIES = ["👨‍🎓", "🤖"]

@@ -5,7 +5,7 @@
 # st.markdown("""<a href="page1" target="_self">page 1</a>""", unsafe_allow_html=True)
 import streamlit as st
 
-from mypylib.st_helper import check_and_force_logout
+from mypylib.st_helper import check_access, check_and_force_logout, configure_ais
 
 
 st.set_page_config(
@@ -13,6 +13,9 @@ st.set_page_config(
     page_icon=":book:",
     layout="wide",
 )
+
+check_access(False)
+configure_ais()
 
 sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话

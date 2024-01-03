@@ -24,12 +24,13 @@ from mypylib.google_api import (
 )
 from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
-from mypylib.st_helper import authenticate_and_configure_services, check_and_force_logout
+from mypylib.st_helper import check_access, configure_ais, check_and_force_logout
 from mypylib.word_utils import audio_autoplay_elem
 
 # region 认证及初始化
 
-authenticate_and_configure_services()
+check_access(False)
+configure_ais()
 
 # endregion
 
@@ -468,7 +469,9 @@ st.divider()
 
 message_placeholder = st.empty()
 st.info("要求：时长超过15秒，文字篇幅在50个字词和3个句子以上。")
-uploaded_file = st.file_uploader(":file_folder: 上传音频", type=["wav"], help="✨ 上传您录制的音频文件")
+uploaded_file = st.file_uploader(
+    ":file_folder: 上传音频", type=["wav"], help="✨ 上传您录制的音频文件"
+)
 
 btn_num = 8
 btn_cols = st.columns(btn_num)

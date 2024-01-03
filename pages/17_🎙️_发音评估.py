@@ -21,13 +21,14 @@ from mypylib.azure_translator import language_detect
 from mypylib.constants import LAN_MAPS, LANGUAGES
 from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
-from mypylib.st_helper import authenticate_and_configure_services, check_and_force_logout
+from mypylib.st_helper import check_access, configure_ais, check_and_force_logout
 from mypylib.word_utils import audio_autoplay_elem
 
 
 # region 认证及初始化
 
-authenticate_and_configure_services()
+check_access(False)
+configure_ais()
 
 # endregion
 

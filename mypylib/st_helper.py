@@ -60,12 +60,6 @@ def check_and_force_logout(status):
                 st.stop()
 
 
-def authenticate_and_configure_services():
-    if "google_translate_client" not in st.session_state:
-        st.session_state["google_translate_client"] = get_translation_client()
-    configure_google_apis()
-
-
 def configure_ais():
     # 配置 AI 服务
     if st.secrets["env"] in ["streamlit", "azure"]:
@@ -73,10 +67,10 @@ def configure_ais():
             vertexai_configure(st.secrets)
             # vertexai.init(project=PROJECT_ID, location=LOCATION)
             st.session_state["inited_google_ai"] = True
-        
+
         if "google_translate_client" not in st.session_state:
             st.session_state["google_translate_client"] = get_translation_client()
-            
+
         # 配置 token 计数器
         if "current_token_count" not in st.session_state:
             st.session_state["current_token_count"] = 0

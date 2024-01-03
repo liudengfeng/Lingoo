@@ -10,7 +10,8 @@ from vertexai.preview.generative_models import GenerationConfig, GenerativeModel
 from mypylib.ai_utils import view_stream_response
 from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 from mypylib.st_helper import (
-    authenticate_and_configure_services,
+    check_access,
+    configure_ais,
     check_and_force_logout,
     load_vertex_model,
 )
@@ -18,7 +19,14 @@ from mypylib.st_helper import (
 CURRENT_CWD: Path = Path(__file__).parent.parent
 IMAGE_DIR: Path = CURRENT_CWD / "resource/multimodal"
 
-authenticate_and_configure_services()
+
+st.set_page_config(
+    page_title="多模态示例",
+    page_icon=":gemini:",
+    layout="wide",
+)
+check_access(False)
+configure_ais()
 
 gemini_pro_vision_generation_config = {
     "max_output_tokens": 2048,

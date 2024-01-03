@@ -7,7 +7,8 @@ from vertexai.preview.generative_models import GenerationConfig, Part
 
 from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 from mypylib.st_helper import (
-    authenticate_and_configure_services,
+    check_access,
+    configure_ais,
     check_and_force_logout,
     load_vertex_model,
 )
@@ -19,13 +20,14 @@ st.set_page_config(
     page_icon=":rocket:",
     layout="wide",
 )
+check_access(False)
+configure_ais()
 
 tab_emoji = [":globe_with_meridians:", ":speech_balloon:", ":bulb:"]
 tab_names = ["通用", "翻译", "解题"]
 tab_flags = [f"{e} {n}" for e, n in zip(tab_emoji, tab_names)]
 tabs = st.tabs(tab_flags)
 
-authenticate_and_configure_services()
 
 if "multimodal_examples" not in st.session_state:
     st.session_state["multimodal_examples"] = []
