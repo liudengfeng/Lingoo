@@ -779,6 +779,9 @@ def transfer_data_from_mongodb_to_firestore():
 
     # 找出需要转移的文档 ID
     doc_ids_to_transfer = mongodb_doc_ids - firestore_doc_ids
+    
+    # 显示需要转移的文档数量
+    st.write(f"需要转移的文档数量：{len(doc_ids_to_transfer)}")
 
     # 创建一个进度条
     progress = st.progress(0)
