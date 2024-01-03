@@ -153,6 +153,17 @@ EDITABLE_COLS: list[str] = [
     "is_approved",
     "payment_time",
     "expiry_time",
+    "phone_number",
+    "payment_id",
+    "registration_time",
+    "sales_representative",
+    "purchase_type",
+    "receivable",
+    "discount_rate",
+    "payment_method",
+    "payment_amount",
+    "status",
+    "remark",
 ]
 
 PAYMENTS_FIELDS = [
@@ -520,6 +531,7 @@ with tabs[items.index("支付管理")]:
             column_config=COLUMN_CONFIG,
             column_order=COLUMN_ORDER,
             hide_index=True,
+            num_rows="dynamic",
             key="users_payments",
             disabled=[col for col in df.columns if col not in EDITABLE_COLS],
         )
@@ -536,9 +548,9 @@ with tabs[items.index("支付管理")]:
     if del_btn and st.session_state.get("users_payments", None):
         users_payments = st.session_state["users_payments"]
         # st.write(f"{users_payments=}")
-        for idx, d in users_payments["edited_rows"].items():
+        for idx, d in users_payments["deleted_rows"].items():
             order_id = df.iloc[idx]["order_id"]  # type: ignore
-            st.session_state.gdbi.update_payment(order_id, d)
+            st.session_state.gdbi.delete_payment(order_id)
             st.toast(f"更新支付记录，订单号：{order_id}", icon="🎉")
 
 

@@ -351,6 +351,11 @@ class GoogleDbInterface:
         payment_doc_ref = payments_ref.document(order_id)
         payment_doc_ref.update(update_fields)
 
+    def delete_payment(self, order_id):
+        payments_ref = self.db.collection("payments")
+        payment_doc_ref = payments_ref.document(order_id)
+        payment_doc_ref.delete()
+
     def is_service_active(self, user_info: dict):
         if len(user_info) == 0:
             return False
