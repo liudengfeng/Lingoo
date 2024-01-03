@@ -406,7 +406,7 @@ class GoogleDbInterface:
                 base_time = last_subscription_expiry_time
 
         # 将字符串转换为 PurchaseType 枚举
-        expiry_time = base_time + self.calculate_expiry(purchase_type)  # type: ignore
+        expiry_time = base_time + self.calculate_expiry(payment.purchase_type)  # type: ignore
 
         # 更新支付记录对象的状态和到期时间
         payment.is_approved = True
