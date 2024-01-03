@@ -516,8 +516,8 @@ with tabs[items.index("支付管理")]:
     placeholder = st.empty()
     status = st.empty()
     pay_cols = st.columns([1, 1, 8])
-    approve_btn = pay_cols[0].button("更新", key="approve_btn")
-    del_btn = pay_cols[1].button("删除", key="del_btn")
+    upd_btn = pay_cols[0].button("更新", key="upd_btn",help="✨ 更新数据库中选中的支付记录")
+    del_btn = pay_cols[1].button("删除", key="del_btn",help="✨ 在数据库中删除选中的支付记录")
     # # st.divider()
     if df.empty:
         placeholder.info("没有记录")
@@ -537,7 +537,7 @@ with tabs[items.index("支付管理")]:
         )
 
     # # Access edited data
-    if approve_btn and st.session_state.get("users_payments", None):
+    if upd_btn and st.session_state.get("users_payments", None):
         users_payments = st.session_state["users_payments"]
         # st.write(f"{users_payments=}")
         for idx, d in users_payments["edited_rows"].items():
@@ -545,7 +545,7 @@ with tabs[items.index("支付管理")]:
             for key in d.keys():
                 if key in TIME_COLS:
                     # 检查返回的对象的类型及其值
-                    st.write(f"{type(d[key])=}, {d[key]=}")
+                    # st.write(f"{type(d[key])=}, {d[key]=}")
                     value = d[key]
                     # 将 'Z' 替换为 '+00:00'
                     value = value.replace("Z", "+00:00")
@@ -560,7 +560,7 @@ with tabs[items.index("支付管理")]:
 
     if del_btn and st.session_state.get("users_payments", None):
         users_payments = st.session_state["users_payments"]
-        st.write(f'{users_payments["deleted_rows"]=}')
+        # st.write(f'{users_payments["deleted_rows"]=}')
         for idx in users_payments["deleted_rows"]:
             order_id = df.iloc[idx]["order_id"]  # type: ignore
             st.session_state.dbi.delete_payment(order_id)
