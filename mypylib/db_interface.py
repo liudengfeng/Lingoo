@@ -99,7 +99,7 @@ class DbInterface:
 
     def login(self, phone_number, password):
         # 在缓存中查询是否已经正常登录
-        if self.cache[phone_number].get("is_logged_in", False):
+        if self.cache.get("is_logged_in", False):
             return {"status": "warning", "message": "您已登录"}
         # 检查用户的凭据
         users_ref = self.db.collection("users")
