@@ -333,18 +333,24 @@ class GoogleDbInterface:
         if len(user_info) == 0:
             return False
         # 查询用户
-        user = self.users.find_one({"_id": user_info["user_id"]})
+        user_ref = self.db.collection("users").document(user_info["user_id"])
+        user = user_ref.get()
         # 如果用户是管理员，直接返回True
-        if user and user["user_role"] == "管理员":
+        if user.exists and user.to_dict()["user_role"] == "管理员":
             return True
         # 查询用户的所有支付记录
-        payments = self.payments.find({"phone_number": user_info["phone_number"]})
+        payments = (
+            self.db.collection("payments")
+            .where("phone_number", "==", user_info["phone_number"])
+            .stream()
+        )
         # 遍历所有支付记录
         now = datetime.now(timezone.utc)
         for payment in payments:
+            payment_dict = payment.to_dict()
             # 如果找到一条已经被批准且服务尚未到期的记录，返回True
-            expiry_time = payment["expiry_time"].replace(tzinfo=timezone.utc)
-            if payment["is_approved"] and expiry_time > now:
+            expiry_time = payment_dict["expiry_time"].replace(tzinfo=timezone.utc)
+            if payment_dict["is_approved"] and expiry_time > now:
                 return True
         # 如果没有找到符合条件的记录，返回False
         return False
@@ -375,6 +381,7 @@ class GoogleDbInterface:
         # 将字符串转换为 PurchaseType 枚举
         purchase_type = str_to_enum(purchase_type, PurchaseType)  # type: ignore
         expiry_time = base_time + self.calculate_expiry(purchase_type)  # type: ignore
+        logger.debug(f"purchase_type: {purchase_type} Expiry time: {expiry_time}")
 
         # 更新支付记录的状态和到期时间
         payment_docs = (
