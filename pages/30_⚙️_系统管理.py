@@ -535,6 +535,7 @@ with tabs[items.index("支付管理")]:
             if d.get("user_role", None):
                 st.session_state.gdbi.update_user(phone_number, {"user_role": d["user_role"]})  # type: ignore
             # 批准
+            # TODO:针对的支付对象
             if d.get("is_approved", False):
                 st.session_state.gdbi.enable_service(
                     phone_number, order_id, purchase_type

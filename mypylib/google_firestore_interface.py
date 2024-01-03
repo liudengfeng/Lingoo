@@ -379,13 +379,13 @@ class GoogleDbInterface:
         # 如果没有找到符合条件的记录，返回False
         return False
 
-    def enable_service(
-        self, phone_number: str, order_id: str, purchase_type: PurchaseType
-    ):
+    def enable_service(self, payment: Payment):
         # 查询用户的最后一个订阅记录
         payments_ref = self.db.collection("payments")
         payments_query = (
-            payments_ref.where(filter=FieldFilter("phone_number", "==", phone_number))
+            payments_ref.where(
+                filter=FieldFilter("phone_number", "==", payment.phone_number)
+            )
             .where(filter=FieldFilter("status", "==", PaymentStatus.IN_SERVICE))
             .order_by("expiry_time", direction=firestore.Query.DESCENDING)
         )
@@ -408,16 +408,10 @@ class GoogleDbInterface:
         # 将字符串转换为 PurchaseType 枚举
         expiry_time = base_time + self.calculate_expiry(purchase_type)  # type: ignore
 
-        # 更新支付记录的状态和到期时间
-        payment_doc_ref = payments_ref.document(order_id)
-        payment_doc_ref.set(
-            {
-                "is_approved": True,
-                "expiry_time": expiry_time,
-                "status": PaymentStatus.IN_SERVICE,
-            },
-            merge=True,
-        )
+        # 更新支付记录对象的状态和到期时间
+        payment.is_approved = True
+        payment.expiry_time = expiry_time
+        payment.status = PaymentStatus.IN_SERVICE
 
     def calculate_expiry(self, purchase_type: PurchaseType):
         if purchase_type == PurchaseType.DAILY:
@@ -455,8 +449,7 @@ class GoogleDbInterface:
 
         if payment.is_approved or (payment.receivable == payment.payment_amount):
             # 如果支付成功，更新用户的权限
-            self.enable_service(phone_number, payment.order_id, payment.purchase_type)
-            payment.status = PaymentStatus.IN_SERVICE
+            self.enable_service(payment)
         # 添加支付记录
         payments_ref = self.db.collection("payments")
         payment_data = payment.model_dump()
