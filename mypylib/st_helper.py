@@ -70,7 +70,7 @@ def check_and_force_logout(status):
 
 def authenticate_and_configure_services():
     common_page_config()
-    if not st.session_state.dbi.is_service_active(st.session_state["user_info"]):
+    if not st.session_state.dbi.is_service_active():
         st.error("非付费用户，无法使用此功能。")
         st.stop()
     if "google_translate_client" not in st.session_state:

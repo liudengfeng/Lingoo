@@ -126,15 +126,15 @@ class DbInterface:
                 "message": f"不存在与手机号码 {phone_number} 相关联的用户",
             }
 
-    def logout(self, user_info):
+    def logout(self):
+        phone_number = self.cache["phone_number"]
         # 从缓存中删除用户的登录状态
-        if user_info["phone_number"] in self.cache:
-            del self.cache[user_info["phone_number"]]
+        self.cache = {}
 
         login_events_ref = self.db.collection("login_events")
         login_events = (
             login_events_ref.where(
-                filter=FieldFilter("phone_number", "==", user_info["phone_number"])
+                filter=FieldFilter("phone_number", "==", phone_number)
             )
             .where(filter=FieldFilter("logout_time", "==", None))
             .stream()
@@ -281,19 +281,23 @@ class DbInterface:
         payment_doc_ref = payments_ref.document(order_id)
         payment_doc_ref.delete()
 
-    def is_service_active(self, user_info: dict):
-        if len(user_info) == 0:
+    def is_service_active(self):
+        if not self.cache:
             return False
+        if "is_service_active" in self.cache:
+            return self.cache["is_service_active"]
         # 查询用户
-        user_ref = self.db.collection("users").document(user_info["phone_number"])
+        phone_number = self.cache["phone_number"]
+        user_ref = self.db.collection("users").document(phone_number)
         user = user_ref.get()
         # 如果用户是管理员，直接返回True
         if user.exists and user.to_dict()["user_role"] == "管理员":
+            self.cache["is_service_active"] = True
             return True
         # 查询用户的所有支付记录
         payments = (
             self.db.collection("payments")
-            .where(filter=FieldFilter("phone_number", "==", user_info["phone_number"]))
+            .where(filter=FieldFilter("phone_number", "==", phone_number))
             .stream()
         )
         # 遍历所有支付记录
@@ -303,7 +307,10 @@ class DbInterface:
             # 如果找到一条已经被批准且服务尚未到期的记录，返回True
             expiry_time = payment_dict["expiry_time"].replace(tzinfo=timezone.utc)
             if payment_dict["is_approved"] and expiry_time > now:
+                self.cache["is_service_active"] = True
                 return True
+        # 存在当天缴费的可能性，需要查询当天的支付记录
+        # self.cache["is_service_active"] = False
         # 如果没有找到符合条件的记录，返回False
         return False
 

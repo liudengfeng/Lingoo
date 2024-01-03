@@ -28,8 +28,6 @@ st.set_page_config(
     layout="wide",
 )
 
-if "user_info" not in st.session_state:
-    st.session_state["user_info"] = {}
 
 if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface(get_firestore_client())
@@ -41,7 +39,7 @@ sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
 check_and_force_logout(sidebar_status)
 
-if not st.session_state.dbi.is_service_active(st.session_state.user_info):
+if not st.session_state.dbi.is_service_active():
     st.error("您的账号未登录，或者尚未缴费、激活，无法更新个人信息。")
     st.stop()
 
@@ -145,7 +143,6 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
             try:
                 st.session_state.dbi.update_user(user.phone_number, update_fields)
                 st.toast(f"成功更新用户：{user.phone_number}的信息！")
-                # time.sleep(3)
                 st.rerun()
             except Exception as e:
                 st.error(e)
@@ -157,9 +154,10 @@ with tabs[items.index(":arrows_counterclockwise: 更新信息")]:
 
 with tabs[items.index(":key: 重置密码")]:
     st.subheader(":key: 重置密码")
-    if len(
-        st.session_state.user_info
-    ) == 0 or not st.session_state.dbi.is_service_active(st.session_state.user_info):
+    if (
+        len(st.session_state.user_info) == 0
+        or not st.session_state.dbi.is_service_active()
+    ):
         st.error("您的账号尚未缴费、激活，无法重置密码。")
         st.stop()
 
@@ -195,7 +193,8 @@ with tabs[items.index(":key: 重置密码")]:
                 },
             )
             st.toast("密码重置成功！")
-            st.session_state.dbi.logout(st.session_state.user_info)
+            st.session_state.dbi.logout()
+            st.info("请使用新密码重新登录。", icon="ℹ️")
 
 # endregion
 
@@ -204,7 +203,7 @@ with tabs[items.index(":key: 重置密码")]:
 with tabs[items.index(":bar_chart: 统计报表")]:
     st.subheader(":bar_chart: 统计报表")
 
-    if not st.session_state.dbi.is_service_active(st.session_state.user_info):
+    if not st.session_state.dbi.is_service_active():
         st.error("您尚未登录，无法查阅统计报表。")
         st.stop()
 
@@ -215,7 +214,7 @@ with tabs[items.index(":bar_chart: 统计报表")]:
 uploaded_emoji = ":file_folder:"
 
 with tabs[items.index(":memo: 问题反馈")]:
-    if not st.session_state.dbi.is_service_active(st.session_state.user_info):
+    if not st.session_state.dbi.is_service_active():
         st.error("您尚未登录，无法反馈问题。")
         st.stop()
 
