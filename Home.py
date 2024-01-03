@@ -251,9 +251,8 @@ LinGoo，让你学好英语，so easy！
     unsafe_allow_html=True,
 )
 
-if len(st.session_state["user_info"]) >= 1:
+if st.session_state.dbi.cache.get("is_logged_in", False):
     if logout_btn:
-        st.session_state.dbi.logout(st.session_state.user_info)
-        st.session_state["user_info"] = {}
+        st.session_state.dbi.logout()
         sidebar_status.success("已退出登录")
         st.rerun()
