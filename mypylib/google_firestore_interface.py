@@ -458,6 +458,8 @@ class GoogleDbInterface:
             new_user.hash_password()
             self.register_user(new_user)
 
+        st.warning(f"payment: {payment.model_dump()}")
+
         if payment.is_approved or (payment.receivable == payment.payment_amount):
             # 如果支付成功，更新用户的权限
             self.enable_service(phone_number, payment.order_id, payment.purchase_type)
