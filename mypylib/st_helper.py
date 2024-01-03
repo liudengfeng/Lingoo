@@ -56,7 +56,7 @@ def check_and_force_logout(status):
         # 获取除最后一个登录事件外的所有未退出的登录事件
         active_sessions = st.session_state.dbi.get_active_sessions()
         for session in active_sessions:
-            if session["session_id"] == st.session_state.cache.get("session_id", ""):
+            if session["session_id"] == st.session_state.dbi.cache.get("session_id", ""):
                 # 如果 st.session_state 中的会话ID在需要强制退出的列表中，处理强制退出
                 st.session_state.dbi.force_logout_session(
                     phone_number, session["session_id"]
