@@ -36,9 +36,7 @@ if "current_token_count" not in st.session_state:
     st.session_state["current_token_count"] = 0
 
 if "total_token_count" not in st.session_state:
-    st.session_state["total_token_count"] = st.session_state.dbi.get_token_count(
-        st.session_state.user_info["phone_number"]
-    )
+    st.session_state["total_token_count"] = st.session_state.dbi.get_token_count()
 
 # endregion
 
@@ -174,9 +172,6 @@ def generate_content_from_files_and_prompt(contents, response_container):
         st.session_state.current_token_count,
     )
     st.session_state.total_token_count += st.session_state.current_token_count
-    # total_token_count = st.session_state.dbi.get_token_count(
-    #     st.session_state.user_info["phone_number"]
-    # )
     sidebar_status.markdown(
         f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
     )

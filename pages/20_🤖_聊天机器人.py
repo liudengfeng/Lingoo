@@ -33,9 +33,7 @@ if "current_token_count" not in st.session_state:
     st.session_state["current_token_count"] = 0
 
 if "total_token_count" not in st.session_state:
-    st.session_state["total_token_count"] = st.session_state.dbi.get_token_count(
-        st.session_state.user_info["phone_number"]
-    )
+    st.session_state["total_token_count"] = st.session_state.dbi.get_token_count()
 
 if st.session_state.get("clear_example"):
     st.session_state["user_text_area"] = ""

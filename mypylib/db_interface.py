@@ -176,9 +176,7 @@ class DbInterface:
     # region 个人词库管理
 
     def find_personal_dictionary(self):
-        phone_number = self.cache.get("phone_number", "")
-        if not phone_number:
-            return []
+        phone_number = self.cache["phone_number"]
         # 获取用户文档的引用
         user_doc_ref = self.db.collection("users").document(phone_number)
         user_doc = user_doc_ref.get()
@@ -206,7 +204,8 @@ class DbInterface:
 
     # region token
 
-    def get_token_count(self, phone_number):
+    def get_token_count(self):
+        phone_number = self.cache["phone_number"]
         # 获取用户文档的引用
         user_doc_ref = self.db.collection("users").document(phone_number)
         user_doc = user_doc_ref.get()
