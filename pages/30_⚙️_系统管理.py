@@ -4,6 +4,7 @@ import os
 import datetime
 from pathlib import Path
 
+
 import pandas as pd
 import pytz
 import streamlit as st
@@ -760,31 +761,38 @@ with tabs[items.index("词典管理")]:
 # region 创建词典管理页面
 
 
-def transfer_data_from_mongodb_to_firestore(num_docs_to_transfer):
+def transfer_data_from_mongodb_to_firestore():
     from pymongo import MongoClient
+    from bson import ObjectId
 
     mongodb_uri = st.secrets["Microsoft"]["COSMOS_CONNECTION_STRING"]
     client = MongoClient(mongodb_uri)
     db = client["pg"]
     words = db["words"]
     firestore_db = st.session_state.dbi.db
+
+    # 查询 Firestore 中的所有文档 ID
+    firestore_doc_ids = set(doc.id for doc in firestore_db.collection("words").stream())
+
+    # 查询 MongoDB 中的所有文档 ID
+    mongodb_doc_ids = set(str(doc["_id"]) for doc in words.find())
+
+    # 找出需要转移的文档 ID
+    doc_ids_to_transfer = mongodb_doc_ids - firestore_doc_ids
+
     # 创建一个进度条
     progress = st.progress(0)
 
-    # 获取要转移的文档数量和 MongoDB 集合中的文档数量之间的最小值
-    num_docs_to_transfer = min(num_docs_to_transfer, words.count_documents({}))
-
-    # 遍历 MongoDB 中的文档
-    for i, doc in enumerate(words.find().limit(num_docs_to_transfer)):
-        # 检查 Firestore 中是否已经存在相应的文档
-        doc_id = str(doc["_id"])
-        if not firestore_db.collection("words").document(doc_id).get().exists:
-            # 如果不存在，将它添加到 Firestore 中
-            del doc["_id"]
-            firestore_db.collection("words").document(doc_id).set(doc)
+    # 遍历需要转移的文档 ID
+    for i, doc_id in enumerate(doc_ids_to_transfer):
+        # 从 MongoDB 中获取文档
+        doc = words.find_one({"_id": ObjectId(doc_id)})
+        # 将它添加到 Firestore 中
+        del doc["_id"]
+        firestore_db.collection("words").document(doc_id).set(doc)
 
         # 更新进度条
-        progress.progress((i + 1) / num_docs_to_transfer)
+        progress.progress((i + 1) / len(doc_ids_to_transfer))
 
     # 完成后，关闭 MongoDB 客户端
     client.close()
@@ -793,9 +801,8 @@ def transfer_data_from_mongodb_to_firestore(num_docs_to_transfer):
 with tabs[items.index("转移词典")]:
     st.subheader("转移词典", divider="rainbow")
     st.text("将 MongoDB 中的数据转移到 Firestore 中")
-    num_docs_to_transfer = st.number_input("转移数量", min_value=100, max_value=30000, step=100)
     if st.button("开始"):
-        transfer_data_from_mongodb_to_firestore(num_docs_to_transfer)
+        transfer_data_from_mongodb_to_firestore()
 
 # endregion
 
