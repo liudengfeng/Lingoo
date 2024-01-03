@@ -195,7 +195,7 @@ with tabs[items.index(":key: 重置密码")]:
                 },
             )
             st.toast("密码重置成功！")
-            st.session_state.dbi.logout(phone_number=user.phone_number)
+            st.session_state.dbi.logout(st.session_state.user_info)
 
 # endregion
 
