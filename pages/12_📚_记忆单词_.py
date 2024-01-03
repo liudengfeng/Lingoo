@@ -12,7 +12,7 @@ import streamlit.components.v1 as components
 from PIL import Image
 
 from mypylib.google_api import generate_word_memory_tip, generate_word_test
-from mypylib.st_utils import (
+from mypylib.st_helper import (
     authenticate_and_configure_services,
     check_and_force_logout,
     google_translate,

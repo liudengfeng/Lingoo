@@ -1,6 +1,6 @@
 import streamlit as st
 
-from mypylib.st_utils import check_and_force_logout
+from mypylib.st_helper import check_and_force_logout
 
 
 st.set_page_config(

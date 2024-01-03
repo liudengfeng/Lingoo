@@ -24,7 +24,7 @@ from mypylib.google_api import (
 )
 from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
-from mypylib.st_utils import authenticate_and_configure_services, check_and_force_logout
+from mypylib.st_helper import authenticate_and_configure_services, check_and_force_logout
 from mypylib.word_utils import audio_autoplay_elem
 
 # region 认证及初始化

@@ -1,16 +1,16 @@
 import streamlit as st
 import vertexai
-from google.cloud import translate
+from google.cloud import firestore, translate
 from google.oauth2.service_account import Credentials
 from vertexai.preview.generative_models import GenerativeModel
-from google.cloud import firestore
+
 from .db_interface import DbInterface
 from .google_cloud_configuration import (
+    LOCATION,
+    PROJECT_ID,
     get_firestore_api_service_account_info,
     get_tran_api_service_account_info,
     vertexai_configure,
-    PROJECT_ID,
-    LOCATION,
 )
 
 
@@ -18,7 +18,7 @@ def common_page_config():
     if "user_info" not in st.session_state:
         st.session_state["user_info"] = {}
     if "dbi" not in st.session_state:
-        st.session_state["dbi"] = DbInterface()
+        st.session_state["dbi"] = DbInterface(get_firestore_client())
 
 
 def configure_google_apis():

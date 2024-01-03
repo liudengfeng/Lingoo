@@ -4,7 +4,7 @@ import streamlit as st
 from vertexai.preview.generative_models import ResponseBlockedError
 
 from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
-from mypylib.st_utils import (
+from mypylib.st_helper import (
     authenticate_and_configure_services,
     check_and_force_logout,
     load_vertex_model,

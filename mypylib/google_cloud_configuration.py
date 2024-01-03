@@ -1,7 +1,6 @@
 import json
 
-# import google.generativeai as genai
-import vertexai
+# import vertexai
 from google.cloud import aiplatform
 from google.oauth2.service_account import Credentials
 from vertexai.preview.generative_models import HarmBlockThreshold, HarmCategory

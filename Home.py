@@ -13,7 +13,7 @@ from mypylib.azure_speech import speech_synthesis_get_available_voices
 from mypylib.constants import LANGUAGES
 from mypylib.db_model import PaymentStatus
 from mypylib.db_interface import DbInterface
-from mypylib.st_helper import check_and_force_logout
+from mypylib.st_helper import check_and_force_logout, get_firestore_client
 
 CURRENT_CWD: Path = Path(__file__).parent
 LOGO_DIR: Path = CURRENT_CWD / "resource/logo"
@@ -27,7 +27,7 @@ st.set_page_config(
 )
 
 if "dbi" not in st.session_state:
-    st.session_state["dbi"] = DbInterface()
+    st.session_state["dbi"] = DbInterface(get_firestore_client())
 
 if "user_info" not in st.session_state:
     st.session_state["user_info"] = {}

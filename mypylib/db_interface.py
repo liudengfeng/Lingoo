@@ -10,14 +10,7 @@ from google.cloud import firestore
 from google.cloud.firestore import FieldFilter
 
 from .constants import FAKE_EMAIL_DOMAIN
-from .db_model import (
-    Payment,
-    PaymentStatus,
-    PurchaseType,
-    TokenUsageRecord,
-    User,
-)
-from .st_helper import get_firestore_client
+from .db_model import Payment, PaymentStatus, PurchaseType, TokenUsageRecord, User
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
@@ -33,10 +26,9 @@ PRICES = {
 
 
 class DbInterface:
-    def __init__(self):
+    def __init__(self, firestore_client):
         self.faker = Faker("zh_CN")
-        self.client = get_firestore_client()
-        self.db = get_firestore_client()
+        self.db = firestore_client
         self.cache = TTLCache(maxsize=1000, ttl=86400)  # 24 hours cache
 
     def cache_user(self, user):

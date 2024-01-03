@@ -1,6 +1,6 @@
 import streamlit as st
 
-from mypylib.st_utils import (
+from mypylib.st_helper import (
     check_and_force_logout,
     authenticate_and_configure_services,
 )

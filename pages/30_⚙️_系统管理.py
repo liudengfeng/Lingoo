@@ -19,7 +19,7 @@ from mypylib.db_model import (
     str_to_enum,
 )
 from mypylib.db_interface import PRICES, DbInterface
-from mypylib.st_helper import google_translate
+from mypylib.st_helper import get_firestore_client, google_translate
 from mypylib.word_utils import get_lowest_cefr_level
 
 # region 配置
@@ -219,7 +219,7 @@ if st.session_state.get("search"):
 
 
 if "dbi" not in st.session_state:
-    st.session_state["dbi"] = DbInterface()
+    st.session_state["dbi"] = DbInterface(get_firestore_client())
 
 # endregion
 

@@ -14,7 +14,7 @@ from mypylib.auth_utils import is_valid_email
 from mypylib.constants import PROVINCES, CEFR_LEVEL_MAPS
 from mypylib.db_interface import DbInterface
 from mypylib.db_model import User
-from mypylib.st_helper import check_and_force_logout
+from mypylib.st_helper import check_and_force_logout, get_firestore_client
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 FEEDBACK_DIR = CURRENT_CWD / "resource" / "feedback"
@@ -32,7 +32,7 @@ if "user_info" not in st.session_state:
     st.session_state["user_info"] = {}
 
 if "dbi" not in st.session_state:
-    st.session_state["dbi"] = DbInterface()
+    st.session_state["dbi"] = DbInterface(get_firestore_client())
 
 
 # region 侧边栏
