@@ -898,6 +898,7 @@ def generate(word, images: List[Part]):
     return json.loads(responses.text.replace("```json", "").replace("```", ""))
 
 
+@st.spinner("使用 Gemini 挑选图片...")
 def fetch_and_update_word_image_indices(word):
     container_name = "word-images"
     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]

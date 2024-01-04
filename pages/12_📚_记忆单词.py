@@ -1097,7 +1097,7 @@ with tabs[tab_items.index(":memo: 单词测验")]:
         st.session_state.user_answer = {}
         st.session_state.tests = []
         test_container.empty()
-        gen_test(level, test_num)
+        # gen_test(level, test_num)
 
     if sumbit_test_btn:
         if len(st.session_state.user_answer) != len(st.session_state.tests):
