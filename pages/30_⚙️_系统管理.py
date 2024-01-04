@@ -915,7 +915,7 @@ def fetch_and_update_word_image_urls(word, container):
     images = [Image.from_bytes(img) for img in image_data]
     indices = generate(word, images)
     if indices:
-        container.write(f"挑选的图片序号：{indices}")
+        container.write(f"为单词 {word} 挑选的图片序号：{indices}")
         st.session_state.dbi.update_image_urls(word, [urls[i] for i in indices])
 
 
