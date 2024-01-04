@@ -900,12 +900,12 @@ def generate(word, images: List[Part]):
 def fetch_and_update_word_image_urls(word, container):
     urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
     image_data = []
-    for info in urls:
+    for url in urls:
         try:
-            image_bytes = load_image_bytes_from_url(info["url"])
+            image_bytes = load_image_bytes_from_url(url)
             image_data.append(image_bytes)
         except Exception as e:
-            logger.error(f'加载图片 {info["url"]} 时出现错误: {e}')
+            logger.error(f'加载图片 {url} 时出现错误: {e}')
     for i in range(0, len(image_data), 5):
         images = image_data[i : i + 5]
         container.image(
