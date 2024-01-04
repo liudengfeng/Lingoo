@@ -18,7 +18,7 @@ from vertexai.preview.generative_models import GenerationConfig, Part, Image
 
 from mypylib.db_interface import PRICES
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, str_to_enum
-from mypylib.google_cloud_configuration import PROJECT_ID, get_google_credentials
+from mypylib.google_cloud_configuration import PROJECT_ID
 from mypylib.st_helper import (
     check_access,
     configure_google_apis,
@@ -27,9 +27,9 @@ from mypylib.st_helper import (
     update_and_display_progress,
 )
 from mypylib.word_utils import (
-    get_image_bytes_from_url,
     get_lowest_cefr_level,
     get_word_image_urls,
+    load_image_bytes_from_url,
 )
 
 # region 配置
@@ -901,7 +901,7 @@ def generate(word, images: list):
 
 
 def load_image_from_url(image_url: str) -> Image:
-    image_bytes = get_image_bytes_from_url(image_url)
+    image_bytes = load_image_bytes_from_url(image_url)
     return Image.from_bytes(image_bytes)
 
 
@@ -915,7 +915,10 @@ with tabs[items.index("单词图片")]:
         for info in image_info:
             try:
                 image_data.append(
-                    {"title": info["title"], "image": load_image_from_url(info["url"])}
+                    {
+                        "title": info["title"],
+                        "image": load_image_bytes_from_url(info["url"]),
+                    }
                 )
             except Exception as e:
                 logger.error(f'加载图片 {info["url"]} 时出现错误: {e}')

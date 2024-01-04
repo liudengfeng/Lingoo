@@ -10,7 +10,8 @@ import urllib.request
 from io import BytesIO
 from pathlib import Path
 from typing import Union
-
+from PIL import Image
+import io
 import requests
 from azure.storage.blob import BlobClient, BlobServiceClient, ContainerClient
 from gtts import gTTS
@@ -201,13 +202,25 @@ def get_word_image_urls(word, api_key):
     data_dict = json.loads(response.text)
     # 缩略图确保可下载
     return [
-        {"title": img["title"], "url": img["thumbnailUrl"]}
-        for img in data_dict["images"]
+        {"title": img["title"], "url": img["imageUrl"]} for img in data_dict["images"]
     ]
 
 
-def get_image_bytes_from_url(image_url: str) -> bytes:
-    with urllib.request.urlopen(image_url) as response:
-        response = typing.cast(http.client.HTTPResponse, response)
-        image_bytes = response.read()
-    return image_bytes
+def load_image_bytes_from_url(img_url: str) -> bytes:
+    response = requests.get(img_url)
+    img = Image.open(io.BytesIO(response.content))
+
+    # 如果图像是 GIF，将其转换为 PNG
+    if img.format == "GIF":
+        # 创建一个新的 RGBA 图像以保存 GIF 图像的每一帧
+        png_img = Image.new("RGBA", img.size)
+        # 将 GIF 图像的第一帧复制到新图像中
+        png_img.paste(img)
+        img = png_img
+
+    # 将图像转换为字节
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format="PNG")
+    img_byte_arr = img_byte_arr.getvalue()
+
+    return img_byte_arr
