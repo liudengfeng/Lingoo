@@ -187,7 +187,6 @@ PAYMENTS_FIELDS = [
 
 # endregion
 
-
 # region 函数
 
 
@@ -220,15 +219,13 @@ def generate_timestamp(key: str, type: str, idx: int):
 
 # region 会话状态
 
-
 # endregion
 
 # 创建选项卡
 items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "转移词典", "单词图片", "统计分析"]
 tabs = st.tabs(items)
 
-
-# region 创建收费登记页面
+# region 收费登记
 
 
 with tabs[items.index("订阅登记")]:
@@ -328,7 +325,7 @@ with tabs[items.index("订阅登记")]:
 
 # endregion
 
-# region 创建用户管理页面
+# region 支付管理
 
 with tabs[items.index("支付管理")]:
     st.markdown("#### 查询参数")
@@ -570,7 +567,7 @@ with tabs[items.index("支付管理")]:
 
 # endregion
 
-# region 创建处理反馈页面
+# region 处理反馈
 
 
 @st.cache_data(ttl=60 * 60 * 1)  # 缓存有效期为1小时
@@ -761,7 +758,7 @@ def init_word_db():
 
 # endregion
 
-# region 创建词典管理页面
+# region 初始化词典
 
 with tabs[items.index("词典管理")]:
     st.subheader("词典管理")
@@ -770,7 +767,7 @@ with tabs[items.index("词典管理")]:
 
 # endregion
 
-# region 创建词典管理页面
+# region 词典管理
 
 
 def transfer_data_from_mongodb_to_firestore():
@@ -878,7 +875,7 @@ with tabs[items.index("转移词典")]:
 
 # endregion
 
-# region 创建单词图片页面
+# region 单词图片
 
 
 def generate(word, images: List[Part]):
@@ -930,7 +927,7 @@ with tabs[items.index("单词图片")]:
                 fetch_and_update_word_image_urls(word)
                 # 确保不超限
                 time.sleep(1)
-            update_and_display_progress(i + 1, len(words), progress_bar)
+            update_and_display_progress(i + 1, len(words), progress_bar, word)
 
 # endregion
 

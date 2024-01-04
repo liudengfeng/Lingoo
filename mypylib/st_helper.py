@@ -126,7 +126,9 @@ def google_translate(text: str, target_language_code: str = "zh-CN"):
     return res[0]
 
 
-def update_and_display_progress(current_value: int, total_value: int, progress_bar):
+def update_and_display_progress(
+    current_value: int, total_value: int, progress_bar, message=""
+):
     """
     更新并显示进度条。
 
@@ -142,7 +144,7 @@ def update_and_display_progress(current_value: int, total_value: int, progress_b
     progress = current_value / total_value
 
     # 显示进度百分比
-    text = f"{progress:.2%}"
+    text = f"{progress:.2%} {message}"
 
     # 更新进度条的值
     progress_bar.progress(progress, text)
