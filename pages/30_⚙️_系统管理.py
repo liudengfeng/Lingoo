@@ -905,7 +905,7 @@ def fetch_and_update_word_image_urls(word, container):
             image_bytes = load_image_bytes_from_url(url)
             image_data.append(image_bytes)
         except Exception as e:
-            logger.error(f'加载图片 {url} 时出现错误: {e}')
+            logger.error(f"加载图片 {url} 时出现错误: {e}")
     for i in range(0, len(image_data), 5):
         images = image_data[i : i + 5]
         container.image(
@@ -926,7 +926,8 @@ with tabs[items.index("单词图片")]:
     words = get_unique_words(
         CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json",
         False,
-    )[:10]
+    )
+    words = sorted(words)[:10]
     if st.button("挑选单词示例图", key="start_btn-5"):
         container = st.container()
         for word in words:
