@@ -922,12 +922,13 @@ def fetch_and_update_word_image_urls(word, container):
 with tabs[items.index("单词图片")]:
     st.subheader("单词图片", divider="rainbow")
     st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
+    num = st.number_input("输入要挑选的单词数量", min_value=1, max_value=21000, value=100)
     # 暂时测试 10 个
     words = get_unique_words(
         CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json",
         False,
     )
-    words = sorted(words)[:100]
+    words = sorted(words)[:num]
     if st.button("挑选单词示例图", key="start_btn-5"):
         container = st.container()
         for word in words:
