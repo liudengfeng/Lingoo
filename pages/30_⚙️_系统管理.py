@@ -910,17 +910,22 @@ with tabs[items.index("单词图片")]:
     st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
     word = st.text_input("请输入单词")
     if st.button("开始", key="start_btn-5"):
-        urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+        image_info = get_word_image_urls(word, st.secrets["SERPER_KEY"])
         image_data = []
-        for url in urls:
+        for info in image_info:
             try:
-                image_data.append(load_image_from_url(url))
+                image_data.append(
+                    {"title": info["title"], "image": load_image_from_url(info["url"])}
+                )
             except Exception as e:
-                logger.error(f"加载图片 {url} 时出现错误: {e}")
+                logger.error(f'加载图片 {info["url"]} 时出现错误: {e}')
         for i in range(0, len(image_data), 4):
             images = image_data[i : i + 4]
+            image = [im["image"] for im in images]
+            caption = [im["title"] for im in images]
             st.image(
-                images,
+                image,
+                caption,
                 width=200,
             )
 

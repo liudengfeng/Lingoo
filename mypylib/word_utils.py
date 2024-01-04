@@ -200,7 +200,10 @@ def get_word_image_urls(word, api_key):
     response = requests.request("POST", url, headers=headers, data=payload)
     data_dict = json.loads(response.text)
     # 缩略图确保可下载
-    return [img["thumbnailUrl"] for img in data_dict["images"]]
+    return [
+        {"title": img["title"], "url": img["thumbnailUrl"]}
+        for img in data_dict["images"]
+    ]
 
 
 def get_image_bytes_from_url(image_url: str) -> bytes:
