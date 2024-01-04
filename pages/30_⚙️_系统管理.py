@@ -942,10 +942,10 @@ with tabs[items.index("单词图片")]:
     )
     num = st.number_input("输入单词数量", min_value=1, max_value=len(words), value=100)
     words = sorted(words)[:num]
-    progress_bar = st.progress(0)
+    progress_pic_bar = st.progress(0)
     if st.button("挑选单词示例图", key="start_btn-5"):
         for i, word in enumerate(words):
-            update_and_display_progress(i + 1, len(words), progress_bar, word)
+            update_and_display_progress(i + 1, len(words), progress_pic_bar, word)
             if not st.session_state.dbi.word_has_image_indices(word):
                 fetch_and_update_word_image_indices(word)
                 # 确保不超限
