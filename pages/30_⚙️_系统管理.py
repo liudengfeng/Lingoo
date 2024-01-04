@@ -1,12 +1,12 @@
 import datetime
 import json
 import logging
-from typing import List
 
 # import mimetypes
 import os
 import re
 from pathlib import Path
+from typing import List
 
 import pandas as pd
 import pytz
@@ -14,7 +14,7 @@ import streamlit as st
 from azure.storage.blob import BlobServiceClient
 from google.cloud import storage
 from pandas import Timedelta
-from vertexai.preview.generative_models import GenerationConfig, Part, Image
+from vertexai.preview.generative_models import GenerationConfig, Image, Part
 
 from mypylib.db_interface import PRICES
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, str_to_enum
@@ -28,6 +28,7 @@ from mypylib.st_helper import (
 )
 from mypylib.word_utils import (
     get_lowest_cefr_level,
+    get_unique_words,
     get_word_image_urls,
     load_image_bytes_from_url,
 )
@@ -896,45 +897,40 @@ def generate(word, images: List[Part]):
     return json.loads(responses.text.replace("```json", "").replace("```", ""))
 
 
-def load_image_from_url(image_url: str) -> Image:
-    image_bytes = load_image_bytes_from_url(image_url)
-    return Image.from_bytes(image_bytes)
+def fetch_and_update_word_image_urls(word, container):
+    urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+    image_data = []
+    for info in urls:
+        try:
+            image_bytes = load_image_bytes_from_url(info["url"])
+            image_data.append(image_bytes)
+        except Exception as e:
+            logger.error(f'加载图片 {info["url"]} 时出现错误: {e}')
+    for i in range(0, len(image_data), 5):
+        images = image_data[i : i + 5]
+        container.image(
+            images,
+            width=300,
+        )
+    images = [Image.from_bytes(img) for img in image_data]
+    with st.spinner(f"使用 Gemini 为单词{word}挑选图片..."):
+        indices = generate(word, images)
+        if indices:
+            st.session_state.dbi.update_image_urls(word, urls[indices])
 
 
 with tabs[items.index("单词图片")]:
     st.subheader("单词图片", divider="rainbow")
     st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
-    word = st.text_input("请输入单词")
-    placeholder = st.empty()
+    # 暂时测试 10 个
+    words = get_unique_words(
+        CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json",
+        False,
+    )[:10]
+    container = st.container()
     if st.button("开始", key="start_btn-5"):
-        image_info = get_word_image_urls(word, st.secrets["SERPER_KEY"])
-        image_data = []
-        parts = []
-        for info in image_info:
-            try:
-                image_bytes = load_image_bytes_from_url(info["url"])
-                parts.append(Image.from_bytes(image_bytes))
-                image_data.append(
-                    {
-                        "title": info["title"],
-                        "image": image_bytes,
-                    }
-                )
-            except Exception as e:
-                logger.error(f'加载图片 {info["url"]} 时出现错误: {e}')
-        for i in range(0, len(image_data), 5):
-            images = image_data[i : i + 5]
-            image = [im["image"] for im in images]
-            caption = [im["title"] for im in images]
-            st.image(
-                image,
-                caption,
-                width=300,
-            )
-        placeholder.info("正在生成...")
-        res = generate(word, parts)
-        placeholder.empty()
-        st.write(f"{res=}")
+        for word in words:
+            fetch_and_update_word_image_urls(word, container)
 
 
 # endregion

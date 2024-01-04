@@ -1,24 +1,41 @@
 import base64
 import hashlib
-import http.client
+import io
 import json
 import os
 import random
 import string
-import typing
-import urllib.request
 from io import BytesIO
 from pathlib import Path
 from typing import Union
-from PIL import Image
-import io
+
 import requests
 from azure.storage.blob import BlobClient, BlobServiceClient, ContainerClient
 from gtts import gTTS
+from PIL import Image
 
 from .azure_speech import synthesize_speech_to_file
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
+
+
+def get_unique_words(word_file_path: str, include_phrases: bool) -> list:
+    # 加载 JSON 文件
+    with open(word_file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    # 合并所有的单词并去除重复的单词
+    unique_words = set()
+    for word_list in data.values():
+        for word in word_list:
+            # 根据 include_phrases 参数决定是否添加单词
+            if include_phrases or " " not in word:
+                unique_words.add(word)
+
+    # 将结果转换为列表
+    unique_words = list(unique_words)
+
+    return unique_words
 
 
 def remove_trailing_punctuation(s: str) -> str:
@@ -200,10 +217,7 @@ def get_word_image_urls(word, api_key):
 
     response = requests.request("POST", url, headers=headers, data=payload)
     data_dict = json.loads(response.text)
-    # 缩略图确保可下载
-    return [
-        {"title": img["title"], "url": img["imageUrl"]} for img in data_dict["images"]
-    ]
+    return [img["imageUrl"] for img in data_dict["images"]]
 
 
 def load_image_bytes_from_url(img_url: str) -> bytes:
