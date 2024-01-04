@@ -579,7 +579,7 @@ def get_feedbacks():
     blobs_list = container_client.list_blobs()
 
     # 获取一周前的日期
-    one_week_ago = datetime.now() - datetime.timedelta(weeks=1)
+    one_week_ago = datetime.datetime.now() - datetime.timedelta(weeks=1)
 
     feedbacks = {}
     for blob in blobs_list:
