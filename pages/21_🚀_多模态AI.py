@@ -8,8 +8,8 @@ from vertexai.preview.generative_models import GenerationConfig, Part
 from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 from mypylib.st_helper import (
     check_access,
-    configure_ais,
     check_and_force_logout,
+    configure_google_apis,
     load_vertex_model,
 )
 
@@ -21,7 +21,7 @@ st.set_page_config(
     layout="wide",
 )
 check_access(False)
-configure_ais()
+configure_google_apis()
 
 tab_emoji = [":globe_with_meridians:", ":speech_balloon:", ":bulb:"]
 tab_names = ["通用", "翻译", "解题"]

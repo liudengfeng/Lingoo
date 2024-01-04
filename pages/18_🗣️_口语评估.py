@@ -18,19 +18,18 @@ from mypylib.azure_speech import (
 
 from mypylib.constants import CEFR_LEVEL_MAPS, LAN_MAPS, TOPICS
 from mypylib.google_api import (
-    init_vertex,
     generate_english_topics,
     generate_short_discussion,
 )
 from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
-from mypylib.st_helper import check_access, configure_ais, check_and_force_logout
+from mypylib.st_helper import check_access, check_and_force_logout, configure_google_apis
 from mypylib.word_utils import audio_autoplay_elem
 
 # region 认证及初始化
 
 check_access(False)
-configure_ais()
+configure_google_apis()
 
 # endregion
 

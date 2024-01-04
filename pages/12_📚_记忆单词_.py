@@ -13,9 +13,9 @@ from PIL import Image
 
 from mypylib.google_api import generate_word_memory_tip, generate_word_test
 from mypylib.st_helper import (
-    configure_ais,
     check_access,
     check_and_force_logout,
+    configure_google_apis,
 )
 from mypylib.word_utils import (
     audio_autoplay_elem,
@@ -35,7 +35,7 @@ st.set_page_config(
 )
 
 check_access(False)
-configure_ais()
+configure_google_apis()
 
 # endregion
 

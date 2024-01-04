@@ -10,6 +10,7 @@ from .google_cloud_configuration import (
     PROJECT_ID,
     get_firestore_api_service_account_info,
     get_tran_api_service_account_info,
+    google_configure,
     vertexai_configure,
 )
 
@@ -96,6 +97,28 @@ def check_access(is_admin_page):
     if is_admin_page and st.session_state.dbi.cache.get("user_role") != "管理员":
         st.error("您没有权限访问此页面。此页面仅供系统管理员使用。")
         st.stop()
+
+
+def configure_google_apis():
+    # 配置 AI 服务
+    if st.secrets["env"] in ["streamlit", "azure"]:
+        if "inited_google_ai" not in st.session_state:
+            google_configure(st.secrets)
+            # vertexai.init(project=PROJECT_ID, location=LOCATION)
+            st.session_state["inited_google_ai"] = True
+
+        if "google_translate_client" not in st.session_state:
+            st.session_state["google_translate_client"] = get_translation_client()
+
+        # 配置 token 计数器
+        if "current_token_count" not in st.session_state:
+            st.session_state["current_token_count"] = 0
+
+        # 应该存放在数据库
+        if "total_token_count" not in st.session_state:
+            st.session_state["total_token_count"] = 0
+    else:
+        st.warning("非云端环境，无法使用 Google AI", icon="⚠️")
 
 
 def google_translate(text: str, target_language_code: str = "zh-CN"):

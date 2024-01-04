@@ -21,7 +21,7 @@ from mypylib.db_model import Payment, PaymentStatus, PurchaseType, str_to_enum
 from mypylib.google_cloud_configuration import PROJECT_ID
 from mypylib.st_helper import (
     check_access,
-    configure_ais,
+    configure_google_apis,
     google_translate,
     load_vertex_model,
     update_and_display_progress,
@@ -36,7 +36,7 @@ logger = logging.getLogger("streamlit")
 CURRENT_CWD: Path = Path(__file__).parent.parent
 
 check_access(True)
-configure_ais()
+configure_google_apis()
 
 tz = pytz.timezone(st.session_state.dbi.cache.get("timezone", "Asia/Shanghai"))
 # endregion
