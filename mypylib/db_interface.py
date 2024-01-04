@@ -505,7 +505,15 @@ class DbInterface:
         # 获取文档
         doc = self.db.collection("words").document(word).get()
 
-        # 检查文档是否存在并且包含 image_urls 字段
-        return doc.exists and doc.get("image_urls") is not None
+        # 如果文档不存在，返回 False
+        if not doc.exists:
+            return False
+
+        # 尝试获取 image_urls 字段
+        try:
+            doc["image_urls"]
+            return True
+        except KeyError:
+            return False
 
     # endregion

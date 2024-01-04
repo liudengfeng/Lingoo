@@ -67,7 +67,7 @@ def check_access(is_admin_page):
         st.session_state["dbi"] = DbInterface(get_firestore_client())
 
     if not st.session_state.dbi.is_logged_in():
-        st.error("您尚未登录。请前往首页左侧栏进行登录。")
+        st.error("您尚未登录。请先点击屏幕左侧的 `Home` 菜单进行登录。")
         st.stop()
 
     if is_admin_page and st.session_state.dbi.cache.get("user_role") != "管理员":

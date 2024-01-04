@@ -60,7 +60,7 @@ s_cols = st.sidebar.columns(3)
 login_btn = s_cols[0].button(
     label="登录"
     if not st.session_state.dbi.cache.get("is_logged_in", False)
-    else ":bust_in_silhouette: 已登录",
+    else ":bust_in_silhouette: 登入",
     type="primary"
     if not st.session_state.dbi.cache.get("is_logged_in", False)
     else "secondary",
