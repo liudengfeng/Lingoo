@@ -322,25 +322,25 @@ def view_flash_word(container, tip_placeholder):
 
 with tabs[tab_items.index(":book: 记忆闪卡")]:
     st.session_state["current_tab"] = "记忆闪卡"
-    btn_cols = st.columns(9)
+    btn_cols = st.columns(12)
     tip_placeholder = st.empty()
     container = st.container()
 
     # placeholder = st.container()
     # 创建前后选择的按钮
-    display_status_button = btn_cols[1].button(
+    display_status_button = btn_cols[0].button(
         ":recycle:",
         key="mask",
         help="✨ 点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。",
     )
-    prev_btn = btn_cols[2].button(
+    prev_btn = btn_cols[1].button(
         ":leftwards_arrow_with_hook:",
         key="prev",
         help="✨ 点击按钮，切换到上一个单词。",
         on_click=on_prev_btn_click,
         disabled=st.session_state.current_flashcard_word_index <= 0,
     )
-    next_btn = btn_cols[3].button(
+    next_btn = btn_cols[2].button(
         ":arrow_right_hook:",
         key="next",
         help="✨ 点击按钮，切换到下一个单词。",
@@ -349,25 +349,25 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
         and st.session_state.current_flashcard_word_index
         == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
-    play_btn = btn_cols[4].button(
+    play_btn = btn_cols[3].button(
         ":sound:",
         key="play",
         help="✨ 聆听单词发音",
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
-    add_btn = btn_cols[5].button(
+    add_btn = btn_cols[4].button(
         ":heavy_plus_sign:",
         key="add",
         help="✨ 将当前单词添加到个人词库",
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
-    del_btn = btn_cols[6].button(
+    del_btn = btn_cols[5].button(
         ":heavy_minus_sign:",
         key="del",
         help="✨ 将当前单词从个人词库中删除",
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
-    update_flashcard_wordbank_button = btn_cols[7].button(
+    update_flashcard_wordbank_button = btn_cols[6].button(
         ":arrows_counterclockwise:", key="refresh", help="✨ 左侧菜单改变词库或记忆数量后，请重新生成闪卡单词"
     )
 
@@ -401,14 +401,14 @@ with tabs[tab_items.index(":book: 记忆闪卡")]:
             st.session_state.current_flashcard_word_index
         ]
         st.session_state.dbi.add_word_to_personal_dictionary(word)
-        st.toast(f"已添加单词：{word}到个人词库。")
+        st.toast(f"添加单词：{word} 到个人词库。")
 
     if del_btn:
         word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
         ]
         st.session_state.dbi.remove_word_from_personal_dictionary(word)
-        st.toast(f"已从个人词库中删除单词：{word}。")
+        st.toast(f"从个人词库中删除单词：{word}。")
 
     # 控制闪卡单词的显示
     if st.session_state["current_tab"] == "记忆闪卡":
