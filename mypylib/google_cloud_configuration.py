@@ -39,11 +39,15 @@ def get_google_service_account_info(secrets):
     return service_account_info
 
 
-def google_configure(secrets):
-    # 完成认证及初始化
+def get_google_credentials(secrets):
     service_account_info = get_google_service_account_info(secrets)
     # 创建凭据
-    credentials = Credentials.from_service_account_info(service_account_info)
+    return Credentials.from_service_account_info(service_account_info)
+
+
+def google_configure(secrets):
+    # 创建凭据
+    credentials = get_google_credentials(secrets)
     aiplatform.init(
         # your Google Cloud Project ID or number
         # environment default used is not set

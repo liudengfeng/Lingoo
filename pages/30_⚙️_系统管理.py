@@ -14,11 +14,11 @@ import streamlit as st
 from azure.storage.blob import BlobServiceClient
 from google.cloud import storage
 from pandas import Timedelta
-from vertexai.preview.generative_models import GenerationConfig, Part
+from vertexai.preview.generative_models import GenerationConfig, Part, Image
 
 from mypylib.db_interface import PRICES
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, str_to_enum
-from mypylib.google_cloud_configuration import PROJECT_ID
+from mypylib.google_cloud_configuration import PROJECT_ID, get_google_credentials
 from mypylib.st_helper import (
     check_access,
     configure_google_apis,
@@ -26,7 +26,11 @@ from mypylib.st_helper import (
     load_vertex_model,
     update_and_display_progress,
 )
-from mypylib.word_utils import get_lowest_cefr_level
+from mypylib.word_utils import (
+    get_image_bytes_from_url,
+    get_lowest_cefr_level,
+    get_word_image_urls,
+)
 
 # region 配置
 
@@ -896,32 +900,9 @@ def generate(word, images: list):
     )
 
 
-def f0():
-    # 创建一个存储客户端
-    storage_client = storage.Client(project=PROJECT_ID)
-
-
-def get_word_images(storage_client, word):
-    # 获取存储桶
-    bucket = storage_client.get_bucket("bucket-ldf")
-    # 创建一个前缀，用于获取与单词相关的所有图片
-    prefix = f"word_images/{word}-"
-    # 获取与单词相关的所有图片
-    blobs = bucket.list_blobs(prefix=prefix)
-    # 创建一个列表，用于存储图片的内容
-    image_data = []
-    # 遍历所有的图片
-    for blob in blobs:
-        # 下载图片的内容
-        image_content = blob.download_as_bytes()
-        # 获取图片的 mime 类型
-        mime_type = blob.content_type
-        # # 将图片的内容转换为 base64 编码的字符串
-        # image_base64 = base64.b64encode(image_content).decode("utf-8")
-        # 将图片的内容添加到列表中
-        image_data.append({"image": image_content, "mime_type": mime_type})
-    # 返回图片的内容列表
-    return image_data
+def load_image_from_url(image_url: str) -> Image:
+    image_bytes = get_image_bytes_from_url(image_url)
+    return Image.from_bytes(image_bytes)
 
 
 with tabs[items.index("单词图片")]:
@@ -929,13 +910,12 @@ with tabs[items.index("单词图片")]:
     st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
     word = st.text_input("请输入单词")
     if st.button("开始", key="start_btn-5"):
-        storage_client = storage.Client(project=PROJECT_ID)
-        image_data = get_word_images(storage_client, word)
+        urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+        image_data = [get_image_bytes_from_url(url) for url in urls]
         for i in range(0, len(image_data), 4):
             images = image_data[i : i + 4]
             st.image(
-                [img["image"] for img in images],
-                caption=[img["mime_type"] for img in images],
+                images,
                 width=200,
             )
 

@@ -1,15 +1,19 @@
 import base64
 import hashlib
+import http.client
 import json
 import os
 import random
+import string
+import typing
+import urllib.request
 from io import BytesIO
 from pathlib import Path
 from typing import Union
 
+import requests
 from azure.storage.blob import BlobClient, BlobServiceClient, ContainerClient
 from gtts import gTTS
-import string
 
 from .azure_speech import synthesize_speech_to_file
 
@@ -176,3 +180,30 @@ def get_or_create_and_return_audio_data(word: str, style: str, secrets: dict):
     audio_data = blob_client.download_blob().readall()
 
     return audio_data
+
+
+def _normalize_english_word(word):
+    """规范化单词"""
+    word = word.strip()
+    # 当"/"在单词中以" or "代替
+    if "/" in word:
+        word = word.replace("/", " or ")
+    return word
+
+
+def get_word_image_urls(word, api_key):
+    url = "https://google.serper.dev/images"
+
+    payload = json.dumps({"q": _normalize_english_word(word)})
+    headers = {"X-API-KEY": api_key, "Content-Type": "application/json"}
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    data_dict = json.loads(response.text)
+    return [img["imageUrl"] for img in data_dict["images"]]
+
+
+def get_image_bytes_from_url(image_url: str) -> bytes:
+    with urllib.request.urlopen(image_url) as response:
+        response = typing.cast(http.client.HTTPResponse, response)
+        image_bytes = response.read()
+    return image_bytes
