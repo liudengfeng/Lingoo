@@ -929,7 +929,7 @@ with tabs[items.index("单词图片")]:
             st.image(
                 image,
                 caption,
-                # width=200,
+                width=300,
             )
 
 
