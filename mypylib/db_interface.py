@@ -128,7 +128,7 @@ class DbInterface:
                     if payment_dict["is_approved"] and expiry_time > now:
                         is_expired = False
                         break
-                if not is_expired:
+                if not is_expired or (user.user_role in ("管理员", "超级成员")):
                     session_id = self.create_login_event(phone_number)
                     # 如果密码正确，将用户的登录状态存储到缓存中
                     self.cache_user_login_info(user, session_id)
