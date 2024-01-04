@@ -509,11 +509,10 @@ class DbInterface:
         if not doc.exists:
             return False
 
-        # 尝试获取 image_urls 字段
-        try:
-            doc["image_urls"]
-            return True
-        except KeyError:
-            return False
+        # 将 DocumentSnapshot 对象转换为字典
+        doc_dict = doc.to_dict()
+
+        # 检查 image_urls 字段是否存在
+        return "image_urls" in doc_dict
 
     # endregion
