@@ -8,11 +8,8 @@ from .db_interface import DbInterface
 from .google_cloud_configuration import (
     LOCATION,
     PROJECT_ID,
-    # get_firestore_api_service_account_info,
     get_google_service_account_info,
-    # get_tran_api_service_account_info,
     google_configure,
-    # vertexai_configure,
 )
 
 
@@ -42,31 +39,8 @@ def check_and_force_logout(status):
                 st.stop()
 
 
-# def configure_ais():
-#     # 配置 AI 服务
-#     if st.secrets["env"] in ["streamlit", "azure"]:
-#         if "inited_google_ai" not in st.session_state:
-#             vertexai_configure(st.secrets)
-#             # vertexai.init(project=PROJECT_ID, location=LOCATION)
-#             st.session_state["inited_google_ai"] = True
-
-#         if "google_translate_client" not in st.session_state:
-#             st.session_state["google_translate_client"] = get_translation_client()
-
-#         # 配置 token 计数器
-#         if "current_token_count" not in st.session_state:
-#             st.session_state["current_token_count"] = 0
-
-#         # 应该存放在数据库
-#         if "total_token_count" not in st.session_state:
-#             st.session_state["total_token_count"] = 0
-#     else:
-#         st.warning("非云端环境，无法使用 Google AI", icon="⚠️")
-
-
 @st.cache_resource
 def get_translation_client():
-    # service_account_info = get_tran_api_service_account_info(st.secrets)
     service_account_info = get_google_service_account_info(st.secrets)
     # 创建凭据
     credentials = Credentials.from_service_account_info(service_account_info)
@@ -76,7 +50,6 @@ def get_translation_client():
 
 @st.cache_resource
 def get_firestore_client():
-    # service_account_info = get_firestore_api_service_account_info(st.secrets)
     service_account_info = get_google_service_account_info(st.secrets)
     # 创建凭据
     credentials = Credentials.from_service_account_info(service_account_info)

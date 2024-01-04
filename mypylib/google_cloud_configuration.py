@@ -32,62 +32,11 @@ DEFAULT_SAFETY_SETTINGS = {
 }
 
 
-def get_tran_api_service_account_info(secrets):
-    # 由于private_key含有大量的换行符号，所以单独存储
-    service_account_info = json.loads(secrets["Google"]["TRANSLATE_API_CREDENTIALS"])
-    service_account_info["private_key"] = secrets["Google"]["TRANSLATE_API_PRIVATE_KEY"]
-    return service_account_info
-
-
 def get_google_service_account_info(secrets):
     # 由于private_key含有大量的换行符号，所以单独存储
     service_account_info = json.loads(secrets["Google"]["GOOGLE_CREDENTIALS"])
     service_account_info["private_key"] = secrets["Google"]["GOOGLE_PRIVATE_KEY"]
     return service_account_info
-
-
-def get_firestore_api_service_account_info(secrets):
-    # 由于private_key含有大量的换行符号，所以单独存储
-    service_account_info = json.loads(secrets["Google"]["FIRESTORE_API_CREDENTIALS"])
-    service_account_info["private_key"] = secrets["Google"]["FIRESTORE_API_PRIVATE_KEY"]
-    return service_account_info
-
-
-def get_vertextai_service_account_info(secrets):
-    # 由于private_key含有大量的换行符号，所以单独存储
-    service_account_info = json.loads(secrets["Google"]["GLLM"])
-    service_account_info["private_key"] = secrets["Google"]["GLLM_PRIVATE_KEY"]
-    return service_account_info
-
-
-# def vertexai_configure(secrets):
-#     # 完成认证及初始化
-#     service_account_info = get_vertextai_service_account_info(secrets)
-#     # 创建凭据
-#     credentials = Credentials.from_service_account_info(service_account_info)
-#     aiplatform.init(
-#         # your Google Cloud Project ID or number
-#         # environment default used is not set
-#         project=PROJECT_ID,
-#         # the Vertex AI region you will use
-#         # defaults to us-central1
-#         location=LOCATION,
-#         # Google Cloud Storage bucket in same region as location
-#         # used to stage artifacts
-#         # staging_bucket="gs://my_staging_bucket",
-#         # custom google.auth.credentials.Credentials
-#         # environment default credentials used if not set
-#         credentials=credentials,
-#         # customer managed encryption key resource name
-#         # will be applied to all Vertex AI resources if set
-#         # encryption_spec_key_name=my_encryption_key_name,
-#         # the name of the experiment to use to track
-#         # logged metrics and parameters
-#         experiment="gllm-experiment",
-#         # description of the experiment above
-#         experiment_description="云端使用vertex ai",
-#     )
-#     # vertexai.init(project=PROJECT_ID, location=LOCATION)
 
 
 def google_configure(secrets):
