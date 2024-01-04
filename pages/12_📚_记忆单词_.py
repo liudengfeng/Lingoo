@@ -11,7 +11,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
 
-from mypylib.google_api import generate_word_memory_tip, generate_word_test
+# from mypylib.google_api import generate_word_memory_tip, generate_word_test
 from mypylib.st_helper import (
     check_access,
     check_and_force_logout,
@@ -241,9 +241,9 @@ def view_pos(container, word_info, word):
         _view_pos(container, key, en[key], zh[key], word)
 
 
-@st.cache_data(ttl=timedelta(hours=12), max_entries=1000, show_spinner="获取 Ai 提示...")
-def _memory_tip(word):
-    return generate_word_memory_tip(word)
+# @st.cache_data(ttl=timedelta(hours=12), max_entries=1000, show_spinner="获取 Ai 提示...")
+# def _memory_tip(word):
+#     return generate_word_memory_tip(word)
 
 
 @st.cache_data(ttl=timedelta(hours=12), max_entries=1000, show_spinner="获取音频元素...")
@@ -288,11 +288,11 @@ def view_flash_word(container, tip_placeholder):
         st.error(f"没有该单词：“{word}”的信息。TODO：添加到单词库。")
         st.stop()
 
-    if st.secrets.get("dev", "") in ["streamlit", "azure"]:
-        with tip_placeholder.expander("记忆提示"):
-            # 生成记忆提示
-            memory_tip = _memory_tip(word)
-            st.markdown(memory_tip)
+    # if st.secrets.get("dev", "") in ["streamlit", "azure"]:
+    #     with tip_placeholder.expander("记忆提示"):
+    #         # 生成记忆提示
+    #         memory_tip = _memory_tip(word)
+    #         st.markdown(memory_tip)
 
     v_word = word
     t_word = ""
@@ -957,11 +957,11 @@ def on_next_test_btn_click():
     st.session_state["test_idx"] += 1
 
 
-@st.spinner("AI🤖正在生成单词理解测试题，请稍候...")
-def gen_test(level, test_num):
-    words = random.sample(st.session_state.flashcard_words, test_num)
-    for word in words:
-        st.session_state.tests.append(generate_word_test(word, level))
+# @st.spinner("AI🤖正在生成单词理解测试题，请稍候...")
+# def gen_test(level, test_num):
+#     words = random.sample(st.session_state.flashcard_words, test_num)
+#     for word in words:
+#         st.session_state.tests.append(generate_word_test(word, level))
 
 
 def check_answer(test_container):
