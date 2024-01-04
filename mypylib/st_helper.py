@@ -12,7 +12,7 @@ from .google_cloud_configuration import (
     get_google_service_account_info,
     # get_tran_api_service_account_info,
     google_configure,
-    vertexai_configure,
+    # vertexai_configure,
 )
 
 
