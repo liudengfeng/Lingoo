@@ -501,4 +501,11 @@ class DbInterface:
             {"image_urls": image_urls}, merge=True
         )
 
+    def word_has_image_urls(self, word: str) -> bool:
+        # 获取文档
+        doc = self.db.collection("words").document(word).get()
+
+        # 检查文档是否存在并且包含 image_urls 字段
+        return doc.exists and doc.get("image_urls") is not None
+
     # endregion

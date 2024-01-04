@@ -931,8 +931,9 @@ with tabs[items.index("单词图片")]:
     if st.button("挑选单词示例图", key="start_btn-5"):
         container = st.container()
         for word in words:
-            with st.spinner(f"使用 Gemini 为单词{word}挑选图片..."):
-                fetch_and_update_word_image_urls(word, container)
+            if not st.session_state.dbi.word_has_image_urls(word):
+                with st.spinner(f"使用 Gemini 为单词{word}挑选图片..."):
+                    fetch_and_update_word_image_urls(word, container)
 
 
 # endregion
