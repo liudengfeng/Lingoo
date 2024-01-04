@@ -6,6 +6,7 @@ import logging
 import os
 import re
 from pathlib import Path
+import time
 from typing import List
 
 import pandas as pd
@@ -930,12 +931,13 @@ with tabs[items.index("单词图片")]:
     )
     words = sorted(words)[:num]
     if st.button("挑选单词示例图", key="start_btn-5"):
-        container = st.container()
-        for word in words:
+        progress_bar = st.progress(0)
+        for i, word in enumerate(words):
+            container = st.container()
             if not st.session_state.dbi.word_has_image_urls(word):
-                with st.spinner(f"使用 Gemini 为单词{word}挑选图片..."):
-                    fetch_and_update_word_image_urls(word, container)
-
+                fetch_and_update_word_image_urls(word, container)
+                time.sleep(1)
+            update_and_display_progress(i + 1, len(words), progress_bar)
 
 # endregion
 
