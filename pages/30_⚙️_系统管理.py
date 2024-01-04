@@ -918,6 +918,8 @@ def fetch_and_update_word_image_urls(word, container):
     if indices:
         container.write(f"为单词 {word} 挑选的图片序号：{indices}")
         st.session_state.dbi.update_image_urls(word, [urls[i] for i in indices])
+    else:
+        st.session_state.dbi.update_image_urls(word, [])
 
 
 with tabs[items.index("单词图片")]:
@@ -930,13 +932,15 @@ with tabs[items.index("单词图片")]:
         False,
     )
     words = sorted(words)[:num]
+    progress_bar = st.progress(0)
     if st.button("挑选单词示例图", key="start_btn-5"):
-        progress_bar = st.progress(0)
+        image_container = st.container()
         for i, word in enumerate(words):
-            container = st.container()
             if not st.session_state.dbi.word_has_image_urls(word):
-                fetch_and_update_word_image_urls(word, container)
+                fetch_and_update_word_image_urls(word, image_container)
                 time.sleep(1)
+                # 清空图片容器
+                image_container.clear()
             update_and_display_progress(i + 1, len(words), progress_bar)
 
 # endregion
