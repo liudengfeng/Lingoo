@@ -913,10 +913,10 @@ def fetch_and_update_word_image_urls(word, container):
             width=300,
         )
     images = [Image.from_bytes(img) for img in image_data]
-    with st.spinner(f"使用 Gemini 为单词{word}挑选图片..."):
-        indices = generate(word, images)
-        if indices:
-            st.session_state.dbi.update_image_urls(word, [urls[i] for i in indices])
+    indices = generate(word, images)
+    if indices:
+        container.write(f"挑选的图片序号：{indices}")
+        st.session_state.dbi.update_image_urls(word, [urls[i] for i in indices])
 
 
 with tabs[items.index("单词图片")]:
@@ -927,10 +927,11 @@ with tabs[items.index("单词图片")]:
         CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json",
         False,
     )[:10]
-    container = st.container()
     if st.button("挑选单词示例图", key="start_btn-5"):
+        container = st.container()
         for word in words:
-            fetch_and_update_word_image_urls(word, container)
+            with st.spinner(f"使用 Gemini 为单词{word}挑选图片..."):
+                fetch_and_update_word_image_urls(word, container)
 
 
 # endregion
