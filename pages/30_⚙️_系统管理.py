@@ -13,8 +13,6 @@ import pandas as pd
 import pytz
 import streamlit as st
 from azure.storage.blob import BlobServiceClient
-from google.cloud import storage
-from pandas import Timedelta
 from vertexai.preview.generative_models import GenerationConfig, Image, Part
 
 from mypylib.db_interface import PRICES
@@ -580,20 +578,25 @@ def get_feedbacks():
     # 获取blob列表
     blobs_list = container_client.list_blobs()
 
+    # 获取一周前的日期
+    one_week_ago = datetime.now() - datetime.timedelta(weeks=1)
+
     feedbacks = {}
     for blob in blobs_list:
-        name, ext = os.path.splitext(blob.name)
-        if name not in feedbacks:
-            feedbacks[name] = {
-                "txt": None,
-                "webm": None,
-                "delete": False,
-                "view": False,
-            }
-        if ext == ".txt":
-            feedbacks[name]["txt"] = blob.name
-        elif ext == ".webm":
-            feedbacks[name]["webm"] = blob.name
+        # 检查 blob 是否在最近一周内创建
+        if blob.last_modified >= one_week_ago:
+            name, ext = os.path.splitext(blob.name)
+            if name not in feedbacks:
+                feedbacks[name] = {
+                    "txt": None,
+                    "webm": None,
+                    "delete": False,
+                    "view": False,
+                }
+            if ext == ".txt":
+                feedbacks[name]["txt"] = blob.name
+            elif ext == ".webm":
+                feedbacks[name]["webm"] = blob.name
 
     return feedbacks
 
@@ -895,20 +898,39 @@ def generate(word, images: List[Part]):
     return json.loads(responses.text.replace("```json", "").replace("```", ""))
 
 
-def fetch_and_update_word_image_urls(word):
-    urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+def fetch_and_update_word_image_indices(word):
+    container_name = "word-images"
+    connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+
+    # 创建 BlobServiceClient 对象
+    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+
+    # 获取 ContainerClient 对象
+    container_client = blob_service_client.get_container_client(container_name)
+
+    # 获取名称以 "abbreviated_" 开始的所有 blob
+    blobs_list = container_client.list_blobs(name_starts_with=f"{word}_")
+
     images = []
-    for url in urls:
+    for blob_name in blobs_list:
         try:
-            image_bytes = load_image_bytes_from_url(url)
+            blob_client = blob_service_client.get_blob_client(container_name, blob_name)
+            image_bytes = blob_client.download_blob().readall()
             images.append(Image.from_bytes(image_bytes))
         except Exception as e:
-            logger.error(f"加载图片 {url} 时出现错误: {e}")
+            logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
+    
     indices = generate(word, images)
-    to_add = []
     if indices:
-        to_add = [urls[i] for i in indices]
-    st.session_state.dbi.update_image_urls(word, to_add)
+        # 检查 indices 是否为列表
+        if not isinstance(indices, list):
+            st.error(f"{word} indices 必须是一个列表")
+            return
+        # 检查列表中的每个元素是否都是整数
+        if not all(isinstance(i, int) for i in indices):
+            st.error(f"{word} indices 列表中的每个元素都必须是整数")
+            return
+        st.session_state.dbi.update_image_indices(word, indices)
 
 
 with tabs[items.index("单词图片")]:
@@ -925,7 +947,7 @@ with tabs[items.index("单词图片")]:
         for i, word in enumerate(words):
             update_and_display_progress(i + 1, len(words), progress_bar, word)
             if not st.session_state.dbi.word_has_image_urls(word):
-                fetch_and_update_word_image_urls(word)
+                fetch_and_update_word_image_indices(word)
                 # 确保不超限
                 time.sleep(1)
 

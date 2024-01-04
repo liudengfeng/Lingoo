@@ -492,13 +492,13 @@ class DbInterface:
         # 如果文档存在，将其转换为字典，否则返回一个空字典
         return doc.to_dict() if doc.exists else {}
 
-    def update_image_urls(self, word: str, image_urls: list):
+    def update_image_indices(self, word: str, indices: list):
         # 将单词中的 "/" 字符替换为 " or "
         word = word.replace("/", " or ")
 
         # 更新或添加 image_urls 字段
         self.db.collection("words").document(word).set(
-            {"image_urls": image_urls}, merge=True
+            {"image_indices": indices}, merge=True
         )
 
     def word_has_image_urls(self, word: str) -> bool:
@@ -513,6 +513,6 @@ class DbInterface:
         doc_dict = doc.to_dict()
 
         # 检查 image_urls 字段是否存在
-        return "image_urls" in doc_dict
+        return "image_indices" in doc_dict
 
     # endregion
