@@ -898,49 +898,38 @@ def generate(word, images: List[Part]):
     return json.loads(responses.text.replace("```json", "").replace("```", ""))
 
 
-def fetch_and_update_word_image_urls(word, container):
+def fetch_and_update_word_image_urls(word):
     urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
-    image_data = []
+    images = []
     for url in urls:
         try:
             image_bytes = load_image_bytes_from_url(url)
-            image_data.append(image_bytes)
+            images.append(Image.from_bytes(image_bytes))
         except Exception as e:
             logger.error(f"加载图片 {url} 时出现错误: {e}")
-    for i in range(0, len(image_data), 5):
-        images = image_data[i : i + 5]
-        container.image(
-            images,
-            width=300,
-        )
-    images = [Image.from_bytes(img) for img in image_data]
     indices = generate(word, images)
+    to_add = []
     if indices:
-        container.write(f"为单词 {word} 挑选的图片序号：{indices}")
-        st.session_state.dbi.update_image_urls(word, [urls[i] for i in indices])
-    else:
-        st.session_state.dbi.update_image_urls(word, [])
+        to_add = [urls[i] for i in indices]
+    st.session_state.dbi.update_image_urls(word, to_add)
 
 
 with tabs[items.index("单词图片")]:
     st.subheader("单词图片", divider="rainbow")
     st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
-    num = st.number_input("输入要挑选的单词数量", min_value=1, max_value=21000, value=100)
-    # 暂时测试 10 个
     words = get_unique_words(
         CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json",
         False,
     )
+    num = st.number_input("输入单词数量", min_value=1, max_value=len(words), value=100)
     words = sorted(words)[:num]
     progress_bar = st.progress(0)
     if st.button("挑选单词示例图", key="start_btn-5"):
-        image_container = st.container()
         for i, word in enumerate(words):
             if not st.session_state.dbi.word_has_image_urls(word):
-                fetch_and_update_word_image_urls(word, image_container)
+                fetch_and_update_word_image_urls(word)
+                # 确保不超限
                 time.sleep(1)
-                # 清空图片容器
-                image_container.clear()
             update_and_display_progress(i + 1, len(words), progress_bar)
 
 # endregion
