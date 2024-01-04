@@ -928,7 +928,7 @@ with tabs[items.index("单词图片")]:
         False,
     )[:10]
     container = st.container()
-    if st.button("开始", key="start_btn-5"):
+    if st.button("挑选单词示例图", key="start_btn-5"):
         for word in words:
             fetch_and_update_word_image_urls(word, container)
 
