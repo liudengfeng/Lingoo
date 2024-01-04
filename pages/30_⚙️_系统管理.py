@@ -911,6 +911,7 @@ with tabs[items.index("单词图片")]:
     word = st.text_input("请输入单词")
     if st.button("开始", key="start_btn-5"):
         urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+        st.write(f"{urls=}")
         image_data = [get_image_bytes_from_url(url) for url in urls]
         for i in range(0, len(image_data), 4):
             images = image_data[i : i + 4]
