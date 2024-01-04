@@ -923,11 +923,11 @@ with tabs[items.index("单词图片")]:
     progress_bar = st.progress(0)
     if st.button("挑选单词示例图", key="start_btn-5"):
         for i, word in enumerate(words):
+            update_and_display_progress(i + 1, len(words), progress_bar, word)
             if not st.session_state.dbi.word_has_image_urls(word):
                 fetch_and_update_word_image_urls(word)
                 # 确保不超限
                 time.sleep(1)
-            update_and_display_progress(i + 1, len(words), progress_bar, word)
 
 # endregion
 
