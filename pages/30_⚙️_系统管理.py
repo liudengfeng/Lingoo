@@ -927,7 +927,7 @@ with tabs[items.index("单词图片")]:
         CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json",
         False,
     )
-    words = sorted(words)[:50]
+    words = sorted(words)[:100]
     if st.button("挑选单词示例图", key="start_btn-5"):
         container = st.container()
         for word in words:
