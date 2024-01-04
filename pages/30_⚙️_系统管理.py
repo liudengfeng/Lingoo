@@ -916,7 +916,7 @@ def fetch_and_update_word_image_urls(word, container):
     with st.spinner(f"使用 Gemini 为单词{word}挑选图片..."):
         indices = generate(word, images)
         if indices:
-            st.session_state.dbi.update_image_urls(word, urls[indices])
+            st.session_state.dbi.update_image_urls(word, [urls[i] for i in indices])
 
 
 with tabs[items.index("单词图片")]:
