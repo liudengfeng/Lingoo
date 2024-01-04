@@ -501,7 +501,7 @@ class DbInterface:
             {"image_indices": indices}, merge=True
         )
 
-    def word_has_image_urls(self, word: str) -> bool:
+    def word_has_image_indices(self, word: str) -> bool:
         # 获取文档
         doc = self.db.collection("words").document(word).get()
 
