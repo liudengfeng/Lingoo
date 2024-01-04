@@ -1,7 +1,7 @@
-import base64
 import datetime
 import json
 import logging
+from typing import List
 
 # import mimetypes
 import os
@@ -879,15 +879,10 @@ with tabs[items.index("转移词典")]:
 # region 创建单词图片页面
 
 
-def generate(word, images: list):
+def generate(word, images: List[Part]):
     model = load_vertex_model("gemini-pro-vision")
     prompt = f"单词：{word}\n输入的图片是否能形象解释单词含义，挑选出最合适的前4张图片。结果用输入图片的自然序号（从0开始）列表表达，如果没有合适的，返回空列表。以JSON格式输出。"
-    contents = [prompt] + [
-        Part.from_data(
-            img,
-        )
-        for img in images
-    ]
+    contents = [prompt] + images
     responses = model.generate_content(
         contents,
         generation_config={
@@ -896,8 +891,9 @@ def generate(word, images: list):
             "top_p": 1,
             "top_k": 32,
         },
-        stream=True,
+        stream=False,
     )
+    return json.loads(responses.text.replace("```json", "").replace("```", ""))
 
 
 def load_image_from_url(image_url: str) -> Image:
@@ -909,21 +905,25 @@ with tabs[items.index("单词图片")]:
     st.subheader("单词图片", divider="rainbow")
     st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
     word = st.text_input("请输入单词")
+    placeholder = st.empty()
     if st.button("开始", key="start_btn-5"):
         image_info = get_word_image_urls(word, st.secrets["SERPER_KEY"])
         image_data = []
+        parts = []
         for info in image_info:
             try:
+                image_bytes = load_image_bytes_from_url(info["url"])
+                parts.append(Image.from_bytes(image_bytes))
                 image_data.append(
                     {
                         "title": info["title"],
-                        "image": load_image_bytes_from_url(info["url"]),
+                        "image": image_bytes,
                     }
                 )
             except Exception as e:
                 logger.error(f'加载图片 {info["url"]} 时出现错误: {e}')
-        for i in range(0, len(image_data), 4):
-            images = image_data[i : i + 4]
+        for i in range(0, len(image_data), 5):
+            images = image_data[i : i + 5]
             image = [im["image"] for im in images]
             caption = [im["title"] for im in images]
             st.image(
@@ -931,6 +931,10 @@ with tabs[items.index("单词图片")]:
                 caption,
                 width=300,
             )
+        placeholder.info("正在生成...")
+        res = generate(word, parts)
+        placeholder.empty()
+        st.write(f"{res=}")
 
 
 # endregion
