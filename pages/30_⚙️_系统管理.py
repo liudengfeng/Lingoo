@@ -919,7 +919,7 @@ def fetch_and_update_word_image_indices(word):
             images.append(Image.from_bytes(image_bytes))
         except Exception as e:
             logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
-    
+
     indices = generate(word, images)
     if indices:
         # 检查 indices 是否为列表
