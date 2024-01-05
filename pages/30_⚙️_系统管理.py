@@ -372,6 +372,20 @@ def _add_to_words(mini_dict_ref, words_ref, doc_name, target_language_code):
 # region 简版词典辅助函数
 
 
+@st.cache_data
+def get_mini_dict_dataframe():
+    db = st.session_state.dbi.db
+    collection = db.collection("mini_dict")
+
+    # 从 Firestore 获取数据
+    docs = collection.get()
+
+    # 将数据转换为 DataFrame
+    data = [{"word": doc.id, **doc.to_dict()} for doc in docs]
+
+    return pd.DataFrame(data)
+
+
 def display_mini_dict_changes(current_df, elem):
     # 获取已编辑的行
     edited_rows = st.session_state["mini_dict_df"]["edited_rows"]
@@ -394,7 +408,9 @@ def display_mini_dict_changes(current_df, elem):
             elem.write(f"{key}: {original_value} -> {new_value}")
 
 
-def save_dataframe_changes_to_database(current_df, collection):
+def save_dataframe_changes_to_database(current_df):
+    db = st.session_state.dbi.db
+    collection = db.collection("mini_dict")
     # 获取已编辑的行
     edited_rows = st.session_state["mini_dict_df"]["edited_rows"]
 
@@ -889,30 +905,22 @@ elif menu == "词典管理":
 
         btn_cols = st.columns(10)
 
-        db = st.session_state.dbi.db
-        collection = db.collection("mini_dict")
-
-        # 从 Firestore 获取数据
-        docs = collection.get()
-
-        # 将数据转换为 DataFrame
-        data = [{"word": doc.id, **doc.to_dict()} for doc in docs]
-        mini_dict_ddataframe = pd.DataFrame(data)
+        mini_dict_dataframe = get_mini_dict_dataframe()
 
         # 显示可编辑的 DataFrame
         edited_elem.data_editor(
-            mini_dict_ddataframe,
+            mini_dict_dataframe,
             key="mini_dict_df",
             column_config=MINI_DICT_COLUMN_CONFIG,
             hide_index=True,
             disabled=["word"],
         )
 
-        if btn_cols[0].button("显示", key="view-btn-4", help="✨ 显示编辑后的简版词典变动部分"):
-            display_mini_dict_changes(mini_dict_ddataframe, view_elem)
+        if btn_cols[0].button("显示变动", key="view-btn-4", help="✨ 显示编辑后的简版词典变动部分"):
+            display_mini_dict_changes(mini_dict_dataframe, view_elem)
 
-        if btn_cols[1].button("保存", key="save-btn-4", help="✨ 将编辑后的简版词典变动部分保存到数据库"):
-            save_dataframe_changes_to_database(mini_dict_ddataframe, collection)
+        if btn_cols[1].button("提交保存", key="save-btn-4", help="✨ 将编辑后的简版词典变动部分保存到数据库"):
+            save_dataframe_changes_to_database(mini_dict_dataframe)
             st.session_state["mini_dict_df"]["edited_rows"] = {}
 
 # endregion
