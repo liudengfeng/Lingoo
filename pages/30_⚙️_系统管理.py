@@ -816,31 +816,23 @@ MINI_DICT_COLUMN_CONFIG = {
 
 
 def display_mini_dict_changes(elem):
-    # # 获取当前的 mini_dict_df
-    # current_mini_dict_df = st.session_state.mini_dict_df
-
     # 获取已编辑的行
     edited_rows = st.session_state["mini_dict_df"]["edited_rows"]
-
-    # 创建一个空的 DataFrame 来存储变动的部分
-    changes = pd.DataFrame()
+    current_mini_dict_df = st.session_state.mini_dict_df
 
     # 遍历已编辑的行
     for idx, new_values in edited_rows.items():
-        # # 获取原始的行
-        # original_row = current_mini_dict_df.iloc[idx]
+        # 获取原始的行
+        original_row = current_mini_dict_df.iloc[idx]
 
-        # 获取新的行
-        new_row = pd.Series(new_values, name=idx)
+        # 获取单词
+        word = original_row['word']
 
-        # # 比较原始的行和新的行，找出变动的部分
-        # change = original_row[original_row != new_row]
+        # 显示变动
+        elem.write(f"单词：{word} 的变动：")
+        for key, value in new_values.items():
+            elem.write(f"{key}: {value}")
 
-        # 将变动的部分添加到 changes DataFrame 中
-        changes = changes.append(new_row)
-
-    # 将所有的变动部分列出来
-    elem.write(changes)
 
 
 def save_changes_to_database(collection):
@@ -892,8 +884,8 @@ with tabs[items.index("编辑微型词典")]:
         disabled=["word"],
     )
 
-    if btn_cols[0].button("显示", key="view-btn-4", help="✨ 显示简版词典变动"):
-        display_mini_dict_changes(view_elem)
+    display_mini_dict_changes(view_elem)
+
 
     if btn_cols[1].button("保存", key="save-btn-4", help="✨ 编辑简版词典，并保存到数据库"):
         save_changes_to_database(collection)
