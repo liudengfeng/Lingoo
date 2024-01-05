@@ -886,8 +886,6 @@ elif menu == "词典管理":
         "translation": "译文",
     }
 
-
-
     with tabs[items.index("词典管理")]:
         st.subheader("词典管理", divider="rainbow", anchor=False)
         btn_cols = st.columns(10)
