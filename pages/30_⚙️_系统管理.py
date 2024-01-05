@@ -724,10 +724,10 @@ def init_mini_dict():
     words = get_unique_words(wp, True)
     st.write(f"单词总数：{len(words)}")
     mini_progress = st.progress(0)
-    
+
     # 获取 mini_dict 集合中所有的文档名称
     mini_dict_docs = [doc.id for doc in mini_dict_ref.stream()]
-    
+
     for i, w in enumerate(words):
         update_and_display_progress(i + 1, len(words), mini_progress)
         logger.info(f"单词：{w}...")
@@ -741,20 +741,63 @@ def init_mini_dict():
         word_doc_ref = words_ref.document(doc_name)
         word_doc = word_doc_ref.get()
         translation = ""
-        
+
         if word_doc.exists:
             p = word_doc.to_dict()
             if "zh-CN" in p and "translation" in p["zh-CN"]:
                 translation = p["zh-CN"]["translation"]
-        
+
         if not translation:
             translation = translate_text(w, target_language_code)
+
         p = {
             "translation": translation,
             "level": get_lowest_cefr_level(w),
         }
         mini_dict_ref.document(doc_name).set(p)
         logger.info(f"🎇 单词：{w} 完成")
+        # 每次写入操作后休眠 0.5 秒
+        time.sleep(0.5)
+
+
+def add_to_words():
+    target_language_code = "zh-CN"
+    db = st.session_state.dbi.db
+    words_ref = db.collection("words")
+    mini_dict_ref = db.collection("mini_dict")
+    wp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
+    words = get_unique_words(wp, True)
+    st.write(f"单词总数：{len(words)}")
+    mini_progress = st.progress(0)
+
+    # 获取 words 集合中所有的文档名称
+    words_docs = [doc.id for doc in words_ref.stream()]
+
+    for i, w in enumerate(words):
+        update_and_display_progress(i + 1, len(words), mini_progress)
+        logger.info(f"单词：{w}...")
+        # 将单词作为文档名称，将其内容存档
+        doc_name = w.replace("/", " or ")
+
+        if doc_name in words_docs:
+            logger.info(f"单词：{w} 已存在，跳过")
+            continue
+
+        _add_to_words(mini_dict_ref, words_ref, doc_name, target_language_code)
+
+
+def _add_to_words(mini_dict_ref, words_ref, doc_name, target_language_code):
+    mini_dict_doc_ref = mini_dict_ref.document(doc_name)
+    mini_dict_doc = mini_dict_doc_ref.get()
+
+    if mini_dict_doc.exists:
+        p = mini_dict_doc.to_dict()
+        d = {
+            "level": p["level"],
+            target_language_code: {"translation": p["translation"]},
+        }
+        words_ref.document(doc_name).set(d)
+        logger.info(f"🎇 单词：{doc_name} 完成")
         # 每次写入操作后休眠 0.5 秒
         time.sleep(0.5)
 
@@ -788,7 +831,10 @@ with tabs[items.index("词典管理")]:
     if btn_cols[0].button("整理", key="init_btn-3", help="✨ 整理编辑简版词典"):
         init_mini_dict()
 
-    if btn_cols[1].button("编辑", key="btn-3", help="✨ 编辑简版词典"):
+    if btn_cols[1].button("添加", key="btn-3", help="✨ 将所有单词添加到词典"):
+        add_to_words()
+
+    if btn_cols[2].button("编辑", key="btn-3", help="✨ 编辑简版词典"):
         configure_editable_mini_dict(edited_elem)
 
 
