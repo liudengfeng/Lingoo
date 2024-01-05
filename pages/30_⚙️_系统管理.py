@@ -1036,10 +1036,14 @@ elif menu == "词典管理":
         progress_pic_bar = st.progress(0)
         if st.button("挑选单词示例图", key="start_btn-5"):
             for i, word in enumerate(to_do):
+                start_time = time.time()  # 记录开始时间
                 update_and_display_progress(i + 1, len(words), progress_pic_bar, word)
                 fetch_and_update_word_image_indices(word, sidebar_status)
+                end_time = time.time()  # 记录结束时间
+                elapsed_time = end_time - start_time  # 计算运行时间
                 # 确保不超限
-                time.sleep(1)
+                sleep_time = max(6 - elapsed_time, 0)  # 如果运行时间小于6秒，等待剩余的时间
+                time.sleep(sleep_time)
 
     # endregion
 
