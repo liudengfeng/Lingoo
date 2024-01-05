@@ -213,18 +213,17 @@ check_and_force_logout(sidebar_status)
 
 # region 选项卡
 
-items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "编辑微型词典", "单词图片", "统计分析"]
-tabs = st.tabs(items)
+# items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "编辑微型词典", "单词图片", "统计分析"]
+# tabs = st.tabs(items)
 
 # endregion
 
 # region 支付管理
 
-items = ["订阅登记", "支付管理"]
-tabs = st.tabs(items)
 
 if menu == "支付管理":
-
+    items = ["订阅登记", "支付管理"]
+    tabs = st.tabs(items)
     with tabs[items.index("订阅登记")]:
         st.subheader("订阅登记")
         with st.form(key="payment_form", clear_on_submit=True):
