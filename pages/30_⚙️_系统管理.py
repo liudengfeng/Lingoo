@@ -13,6 +13,7 @@ import pandas as pd
 import pytz
 import streamlit as st
 from azure.storage.blob import BlobServiceClient
+from google.cloud import firestore
 from vertexai.preview.generative_models import GenerationConfig, Image, Part
 
 from mypylib.constants import CEFR_LEVEL_MAPS
@@ -177,29 +178,41 @@ PAYMENT_EDITABLE_COLS: list[str] = [
 
 # region 支付管理辅助函数
 
+
 def get_new_order_id():
     db = st.session_state.dbi.db
 
     # 获取用于生成订单编号的文档
     doc_ref = db.collection("system").document("order_id_generator")
 
-    # 获取文档的内容
-    doc = doc_ref.get()
+    # 定义一个事务函数
+    @firestore.transactional
+    def update_order_id(transaction):
+        # 在事务中获取文档的内容
+        doc = doc_ref.get(transaction=transaction)
 
-    # 如果文档不存在，创建一个新的文档，设置 "last_order_id" 为 0
-    if not doc.exists:
-        doc_ref.set({"last_order_id": 0})
+        # 如果文档不存在，创建一个新的文档，设置 "last_order_id" 为 0
+        if not doc.exists:
+            transaction.set(doc_ref, {"last_order_id": 0})
+            last_order_id = 0
+        else:
+            # 获取 "last_order_id" 的值
+            last_order_id = doc.get("last_order_id")
 
-    # 获取 "last_order_id" 的值
-    last_order_id = doc.get("last_order_id")
+        # 生成新的订单编号
+        new_order_id = str(last_order_id + 1).zfill(10)
 
-    # 生成新的订单编号
-    new_order_id = str(last_order_id + 1).zfill(10)
+        # 在事务中更新文档，设置 "last_order_id" 为新的订单编号
+        transaction.update(doc_ref, {"last_order_id": new_order_id})
 
-    # 更新文档，设置 "last_order_id" 为新的订单编号
-    doc_ref.update({"last_order_id": new_order_id})
+        return new_order_id
+
+    # 开始事务
+    transaction = db.transaction()
+    new_order_id = update_order_id(transaction)
 
     return new_order_id
+
 
 def generate_timestamp(key: str, type: str, idx: int):
     # 获取日期和时间
@@ -595,9 +608,9 @@ if menu == "支付管理":
                 if not payment_id:
                     st.error("付款编号不能为空")
                     st.stop()
-                
+
                 order_id = get_new_order_id()
-                
+
                 receivable = PRICES[purchase_type]  # type: ignore
                 discount_rate = payment_amount / receivable
                 key = "payment_time"
@@ -983,7 +996,7 @@ elif menu == "词典管理":
     # endregion
 
     # region 编辑微型词典
-    
+
     with tabs[items.index("编辑微型词典")]:
         st.subheader("编辑微型词典", divider="rainbow", anchor=False)
 
@@ -1009,7 +1022,7 @@ elif menu == "词典管理":
         if btn_cols[1].button("提交保存", key="save-btn-4", help="✨ 将编辑后的简版词典变动部分保存到数据库"):
             save_dataframe_changes_to_database(mini_dict_dataframe)
             st.session_state["mini_dict_df"]["edited_rows"] = {}
-    
+
     # endregion
 
     # region 单词图片
