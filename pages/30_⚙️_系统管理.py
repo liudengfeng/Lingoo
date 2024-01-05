@@ -21,6 +21,7 @@ from mypylib.db_model import Payment, PaymentStatus, PurchaseType, str_to_enum
 from mypylib.google_cloud_configuration import PROJECT_ID
 from mypylib.st_helper import (
     check_access,
+    check_and_force_logout,
     configure_google_apis,
     google_translate,
     load_vertex_model,
@@ -202,12 +203,17 @@ def generate_timestamp(key: str, type: str, idx: int):
 
 # endregion
 
-# region 会话状态
+# region 侧边栏
+
+options = st.sidebar.select_slider("菜单", options=["支付管理", "处理反馈", "词典管理", "统计分析"])
+sidebar_status = st.sidebar.empty()
+check_and_force_logout(sidebar_status)
 
 # endregion
 
 # region 选项卡
-items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "编辑微型词典", "单词图片", "统计分析", "临时测试"]
+
+items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "编辑微型词典", "单词图片", "统计分析"]
 tabs = st.tabs(items)
 # endregion
 
