@@ -886,8 +886,10 @@ elif menu == "词典管理":
         "translation": "译文",
     }
 
+
+
     with tabs[items.index("词典管理")]:
-        st.subheader("词典管理", divider="rainbow")
+        st.subheader("词典管理", divider="rainbow", anchor=False)
         btn_cols = st.columns(10)
 
         if btn_cols[0].button("整理", key="init_btn-3", help="✨ 整理简版词典"):
@@ -897,13 +899,12 @@ elif menu == "词典管理":
             add_new_words_from_mini_dict_to_words()
 
     with tabs[items.index("编辑微型词典")]:
-        st.subheader("编辑微型词典", divider="rainbow")
+        st.subheader("编辑微型词典", divider="rainbow", anchor=False)
 
+        btn_cols = st.columns(10)
         view_cols = st.columns(2)
         edited_elem = view_cols[0].empty()
         view_elem = view_cols[1].container()
-
-        btn_cols = st.columns(10)
 
         mini_dict_dataframe = get_mini_dict_dataframe()
 
