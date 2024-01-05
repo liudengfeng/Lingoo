@@ -898,7 +898,7 @@ elif menu == "处理反馈":
     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
     blob_service_client = BlobServiceClient.from_connection_string(connect_str)
     container_client = blob_service_client.get_container_client(container_name)
-
+    # 设置缓存为 1 小时，不能实时查看反馈
     feedbacks = get_feedbacks()
     # st.write(f"{feedbacks=}")
     if len(feedbacks):
