@@ -828,10 +828,10 @@ with tabs[items.index("词典管理")]:
     view_cols = st.columns(2)
     edited_elem = view_cols[0].empty()
 
-    if btn_cols[0].button("整理", key="init_btn-3", help="✨ 整理编辑简版词典"):
+    if btn_cols[0].button("整理", key="init_btn-3", help="✨ 整理简版词典"):
         init_mini_dict()
 
-    if btn_cols[1].button("添加", key="add-btn-3", help="✨ 将所有单词添加到词典"):
+    if btn_cols[1].button("添加", key="add-btn-3", help="✨ 将简版词典单词添加到默认词典"):
         add_to_words()
 
     if btn_cols[2].button("编辑", key="edit-btn-3", help="✨ 编辑简版词典"):
