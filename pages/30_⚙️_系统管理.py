@@ -724,23 +724,29 @@ def init_mini_dict():
     words = get_unique_words(wp, True)
     st.write(f"单词总数：{len(words)}")
     mini_progress = st.progress(0)
+    
+    # 获取 mini_dict 集合中所有的文档名称
+    mini_dict_docs = [doc.id for doc in mini_dict_ref.stream()]
+    
     for i, w in enumerate(words):
         update_and_display_progress(i + 1, len(words), mini_progress)
         logger.info(f"单词：{w}...")
         # 将单词作为文档名称，将其内容存档
         doc_name = w.replace("/", " or ")
-        mini_dict_doc_ref = mini_dict_ref.document(doc_name)
-        if mini_dict_doc_ref.get().exists:
+
+        if doc_name in mini_dict_docs:
             logger.info(f"单词：{w} 已存在，跳过")
             continue
 
         word_doc_ref = words_ref.document(doc_name)
         word_doc = word_doc_ref.get()
         translation = ""
+        
         if word_doc.exists:
             p = word_doc.to_dict()
             if "zh-CN" in p and "translation" in p["zh-CN"]:
                 translation = p["zh-CN"]["translation"]
+        
         if not translation:
             translation = translate_text(w, target_language_code)
         p = {
