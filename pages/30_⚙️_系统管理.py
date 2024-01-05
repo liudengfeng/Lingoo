@@ -220,7 +220,7 @@ def generate_timestamp(key: str, type: str, idx: int):
 # endregion
 
 # 创建选项卡
-items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "转移词典", "单词图片", "统计分析"]
+items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "转移词典", "单词图片", "统计分析", "临时测试"]
 tabs = st.tabs(items)
 
 # region 收费登记
@@ -720,29 +720,52 @@ def translate_doc(doc, target_language_code):
 
 def init_mini_dict():
     target_language_code = "zh-CN"
-    fp = CURRENT_CWD / "resource" / "mini_dict.json"
-    # 检查文件是否存在
-    if not os.path.exists(fp):
-        wp = (
-            CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
-        )
-        words = get_unique_words(wp, True)
-        res = {}
-        for w in words:
-            logger.info(f"单词：{w}...")
-            p = {
-                "translation": translate_text(w, target_language_code),
-                "level": get_lowest_cefr_level(w),
-            }
-            res[w] = p
-        # 将结果保存到文件
-        with open(fp, "w", encoding="utf-8") as f:
-            json.dump(res, f)
-    else:
-        with open(fp, "r", encoding="utf-8") as f:
-            data = json.load(f)
-        df = pd.DataFrame(data)
-        edited_df = st.data_editor(df)
+    db = st.session_state.dbi.db
+    words_ref = db.collection("words")
+    mini_dict_ref = db.collection("mini_dict")
+    wp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
+    words = get_unique_words(wp, True)
+    for w in words:
+        logger.info(f"单词：{w}...")
+        # 将单词作为文档名称，将其内容存档
+        doc_name = w.replace("/", " or ")
+        mini_dict_doc_ref = mini_dict_ref.document(doc_name)
+        if mini_dict_doc_ref.get().exists:
+            logger.info(f"单词：{w} 已存在，跳过")
+            continue
+
+        word_doc_ref = words_ref.document(doc_name)
+        word_doc = word_doc_ref.get()
+        translation = ""
+        if word_doc.exists:
+            p = word_doc.to_dict()
+            if "zh-CN" in p and "translation" in p["zh-CN"]:
+                translation = p["zh-CN"]["translation"]
+        if not translation:
+            translation = translate_text(w, target_language_code)
+        p = {
+            "translation": translation,
+            "level": get_lowest_cefr_level(w),
+        }
+        mini_dict_ref.document(doc_name).set(p)
+        logger.info(f"🎇 单词：{w} 完成")
+        # 每次写入操作后休眠 0.5 秒
+        time.sleep(0.5)
+
+
+def configure_editable_mini_dict(elem):
+    db = st.session_state.dbi.db
+    collection = db.collection("mini_dict")
+
+    # 从 Firestore 获取数据
+    docs = collection.get()
+
+    # 将数据转换为 DataFrame
+    data = [{"word": doc.id, **doc.to_dict()} for doc in docs]
+    df = pd.DataFrame(data)
+
+    # 显示可编辑的 DataFrame
+    elem.data_editor(df, key="mini_dict_df", hide_index=True, disabled=["word"])
 
 
 # endregion
@@ -752,8 +775,14 @@ def init_mini_dict():
 with tabs[items.index("词典管理")]:
     st.subheader("词典管理", divider="rainbow")
     st.text("整理编辑简版词典")
-    if st.button("整理简版词典", key="init_btn-3",help="✨ 整理编辑简版词典"):
+    btn_cols = st.columns(12)
+    view_cols = st.columns(2)
+    edited_elem = view_cols[0].empty()
+    if btn_cols[0].button("整理简版词典", key="init_btn-3", help="✨ 整理编辑简版词典"):
         init_mini_dict()
+    if btn_cols[1].button("编辑", key="btn-3", help="✨ 编辑简版词典"):
+        configure_editable_mini_dict(edited_elem)
+
 
 # endregion
 
@@ -942,5 +971,22 @@ with tabs[items.index("单词图片")]:
 # endregion
 
 # region 创建统计分析页面
+
+# endregion
+
+# region 临时测试
+
+
+def test_func():
+    st.write("test_func")
+
+
+with tabs[items.index("临时测试")]:
+    st.subheader("临时测试", divider="rainbow")
+    st.text("莫名其妙跳到第一个tab")
+    if st.button("直接", key="init_btn-7", help="✨ 临时测试"):
+        st.write("test_func")
+    if st.button("函数", key="init_btn-8", help="✨ 临时测试"):
+        test_func()
 
 # endregion
