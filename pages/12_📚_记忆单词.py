@@ -89,6 +89,7 @@ if "current_flashcard_word_index" not in st.session_state:
 
 
 def generate_flashcard_words():
+    update_personal_dictionary()
     # 获取选中的单词列表
     word_lib_name = st.session_state["selected_list"]
     words = st.session_state.word_dict[word_lib_name]
@@ -106,15 +107,17 @@ def get_word_info(word):
     return st.session_state.dbi.find_word(word)
 
 
+def update_personal_dictionary():
+    # 从集合中提取个人词库，添加到word_lists中
+    personal_word_list = st.session_state.dbi.find_personal_dictionary()
+    if len(personal_word_list) > 0:
+        st.session_state.word_dict["0-个人词库"] = personal_word_list
+
+
 # endregion
 
 # region 侧边栏
 
-
-# 从集合中提取个人词库，添加到word_lists中
-personal_word_list = st.session_state.dbi.find_personal_dictionary()
-if len(personal_word_list) > 0:
-    st.session_state.word_dict["0-个人词库"] = personal_word_list
 
 with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
     voice_style_options = json.load(f)
