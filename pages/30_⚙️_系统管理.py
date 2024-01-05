@@ -193,14 +193,14 @@ def get_new_order_id():
 
         # 如果文档不存在，创建一个新的文档，设置 "last_order_id" 为 0
         if not doc.exists:
-            transaction.set(doc_ref, {"last_order_id": 0})
-            last_order_id = 0
+            transaction.set(doc_ref, {"last_order_id": "0"})
+            last_order_id = "0"
         else:
             # 获取 "last_order_id" 的值
             last_order_id = doc.get("last_order_id")
 
-        # 生成新的订单编号
-        new_order_id = str(last_order_id + 1).zfill(10)
+        # 将 "last_order_id" 转换为整数，然后加 1
+        new_order_id = str(int(last_order_id) + 1).zfill(10)
 
         # 在事务中更新文档，设置 "last_order_id" 为新的订单编号
         transaction.update(doc_ref, {"last_order_id": new_order_id})
