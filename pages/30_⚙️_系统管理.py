@@ -521,6 +521,42 @@ def fetch_and_update_word_image_indices(word, sidebar_status):
 
 # endregion
 
+# region 下载单词图片
+
+
+def process_images():
+    container_name = "word-images"
+    connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+    container_client = blob_service_client.get_container_client(container_name)
+    blobs_list = container_client.list_blobs()
+    blob_words = [blob.name.split("_")[0] for blob in blobs_list]
+    unique_words = set(blob_words)
+    mini_dict_dataframe = get_mini_dict_dataframe()
+    words = mini_dict_dataframe["word"].tolist()
+    to_do = [word for word in words if word not in unique_words]
+    st.write(f"待处理的文档数量：{len(to_do)}")
+    st.write("前10个待处理的文档名称：")
+    for name in to_do[:10]:
+        st.write(name)
+    progress_bar = st.progress(0)
+    for index, word in enumerate(to_do):
+        urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+        for i, url in enumerate(urls):
+            try:
+                img_byte_arr = load_image_bytes_from_url(url)
+            except Exception as e:
+                logger.error(f"加载图片字节数据时出错: {url}, 错误信息: {str(e)}")
+                continue
+            blob_client = blob_service_client.get_blob_client(
+                container_name, f"{word}_{i}.png"
+            )
+            blob_client.upload_blob(img_byte_arr, blob_type="BlockBlob", overwrite=True)
+        update_and_display_progress(index + 1, len(to_do), progress_bar, word)
+
+
+# endregion
+
 # endregion
 
 # region 侧边栏
@@ -1026,44 +1062,9 @@ elif menu == "词典管理":
 
     with dict_tabs[dict_items.index("下载图片")]:
         st.subheader("下载图片", divider="rainbow", anchor=False)
-        container_name = "word-images"
-        connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
-        blob_service_client = BlobServiceClient.from_connection_string(connect_str)
-        container_client = blob_service_client.get_container_client(container_name)
-        blobs_list = container_client.list_blobs()
-        # word_1.png word_2.png
-        # 提取出 blob 的名称，并分割每个名称，提取出单词部分
-        blob_words = [blob.name.split("_")[0] for blob in blobs_list]
-        # 使用 set 来存储唯一的单词
-        unique_words = set(blob_words)
-        mini_dict_dataframe = get_mini_dict_dataframe()
-        words = mini_dict_dataframe["word"].tolist()
-        # 找出没有下载图片的单词
-        to_do = [word for word in words if word not in unique_words]
-        st.write(f"待处理的文档数量：{len(to_do)}")
-        # 打印前10个名称
-        st.write("前10个待处理的文档名称：")
-        for name in to_do[:10]:
-            st.write(name)
-        # 创建一个进度条
-        progress_bar = st.progress(0)
-        for index, word in enumerate(to_do):
-            urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
-            for i, url in enumerate(urls):
-                try:
-                    img_byte_arr = load_image_bytes_from_url(url)
-                except Exception as e:
-                    logger.error(f"加载图片字节数据时出错: {url}, 错误信息: {str(e)}")
-                    continue
-                # 创建一个 BlobClient
-                blob_client = blob_service_client.get_blob_client(
-                    container_name, f"{word}_{i}.png"
-                )
-                blob_client.upload_blob(
-                    img_byte_arr, blob_type="BlockBlob", overwrite=True
-                )
-            # 更新进度条
-            update_and_display_progress(index + 1, len(to_do), progress_bar, word)
+        # 创建一个按钮，当用户点击这个按钮时，执行 process_images 函数
+        if st.button("开始处理图片", key="process-images-btn", help="✨ 下载单词图片"):
+            process_images()
 
     # endregion
 
