@@ -752,13 +752,13 @@ def add_to_words():
 
     # 获取 mini_dict 中的所有单词
     mini_dict_words = set([doc.id for doc in mini_dict_ref.stream()])
-    st.write(f"单词总数：{len(mini_dict_words)}")
 
     # 获取 words 中的所有单词
     words_words = set([doc.id for doc in words_ref.stream()])
 
     # 找出只在 mini_dict 中存在的单词
     new_words = mini_dict_words - words_words
+    st.write(f"单词总数：{len(new_words)}")
 
     for i, w in enumerate(new_words):
         update_and_display_progress(i + 1, len(new_words), mini_progress)
