@@ -23,6 +23,7 @@ from mypylib.st_helper import (
     configure_google_apis,
     google_translate,
     load_vertex_model,
+    setup_logger,
     update_and_display_progress,
 )
 from mypylib.word_utils import (
@@ -36,6 +37,7 @@ from mypylib.word_utils import (
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
+setup_logger(logger)
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 

@@ -1,3 +1,7 @@
+import logging
+from datetime import datetime
+
+import pytz
 import streamlit as st
 import vertexai
 from google.cloud import firestore, translate
@@ -11,6 +15,18 @@ from .google_cloud_configuration import (
     get_google_service_account_info,
     google_configure,
 )
+
+
+def setup_logger(logger):
+    # 设置日志的时间戳为 Asia/Shanghai 时区
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
+    formatter.converter = lambda *args: datetime.now(
+        tz=pytz.timezone("Asia/Shanghai")
+    ).timetuple()
+    for handler in logger.handlers:
+        handler.setFormatter(formatter)
 
 
 def check_and_force_logout(status):
