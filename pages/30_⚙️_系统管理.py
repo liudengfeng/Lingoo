@@ -1040,6 +1040,7 @@ elif menu == "词典管理":
         words = mini_dict_dataframe["word"].tolist()
         # 找出没有下载图片的单词
         to_do = [word for word in words if word not in unique_words]
+        st.write(f"待处理的文档数量：{len(to_do)}")
         # 创建一个进度条
         progress_bar = st.progress(0)
         for index, word in enumerate(to_do):
