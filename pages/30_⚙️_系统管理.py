@@ -205,7 +205,7 @@ def generate_timestamp(key: str, type: str, idx: int):
 
 # region 侧边栏
 
-options = st.sidebar.select_slider("菜单", options=["支付管理", "处理反馈", "词典管理", "统计分析"])
+options = st.sidebar.selectbox("菜单", options=["支付管理", "处理反馈", "词典管理", "统计分析"])
 sidebar_status = st.sidebar.empty()
 check_and_force_logout(sidebar_status)
 
