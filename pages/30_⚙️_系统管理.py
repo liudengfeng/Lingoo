@@ -605,7 +605,7 @@ if menu == "支付管理":
                 #     raise  # 重新抛出异常
 
     with tabs[items.index("支付管理")]:
-        st.markdown("#### 查询参数")
+        st.subheader("查询参数")
         with st.form(key="query_form", clear_on_submit=True):
             # 精确匹配
             t_0_cols = st.columns(4)
