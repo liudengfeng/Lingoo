@@ -177,6 +177,29 @@ PAYMENT_EDITABLE_COLS: list[str] = [
 
 # region 支付管理辅助函数
 
+def get_new_order_id():
+    db = st.session_state.dbi.db
+
+    # 获取用于生成订单编号的文档
+    doc_ref = db.collection("system").document("order_id_generator")
+
+    # 获取文档的内容
+    doc = doc_ref.get()
+
+    # 如果文档不存在，创建一个新的文档，设置 "last_order_id" 为 0
+    if not doc.exists:
+        doc_ref.set({"last_order_id": 0})
+
+    # 获取 "last_order_id" 的值
+    last_order_id = doc.get("last_order_id")
+
+    # 生成新的订单编号
+    new_order_id = str(last_order_id + 1).zfill(10)
+
+    # 更新文档，设置 "last_order_id" 为新的订单编号
+    doc_ref.update({"last_order_id": new_order_id})
+
+    return new_order_id
 
 def generate_timestamp(key: str, type: str, idx: int):
     # 获取日期和时间
@@ -572,9 +595,9 @@ if menu == "支付管理":
                 if not payment_id:
                     st.error("付款编号不能为空")
                     st.stop()
-                order_id = str(
-                    len(st.session_state.dbi.db.collection("payments").get()) + 1
-                ).zfill(10)
+                
+                order_id = get_new_order_id()
+                
                 receivable = PRICES[purchase_type]  # type: ignore
                 discount_rate = payment_amount / receivable
                 key = "payment_time"
