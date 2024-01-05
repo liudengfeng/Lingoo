@@ -780,7 +780,7 @@ def _add_to_words(mini_dict_ref, words_ref, doc_name, target_language_code):
         words_ref.document(doc_name).set(d)
         logger.info(f"🎇 单词：{doc_name} 完成")
         # 每次写入操作后休眠 0.5 秒
-        time.sleep(0.5)
+        # time.sleep(0.5)
 
 
 # endregion
