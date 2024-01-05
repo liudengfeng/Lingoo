@@ -716,13 +716,14 @@ def translate_doc(doc, target_language_code):
 
 
 def init_mini_dict():
+    st.text("初始化简版词典")
     target_language_code = "zh-CN"
     db = st.session_state.dbi.db
     words_ref = db.collection("words")
     mini_dict_ref = db.collection("mini_dict")
     wp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
     words = get_unique_words(wp, True)
-    st.write(f"单词总数：{len(words)}")
+    st.text(f"单词总数：{len(words)}")
     mini_progress = st.progress(0)
 
     # 获取 mini_dict 集合中所有的文档名称
@@ -761,6 +762,7 @@ def init_mini_dict():
 
 
 def add_to_words():
+    st.text("添加简版词典到默认词典")
     target_language_code = "zh-CN"
     db = st.session_state.dbi.db
     words_ref = db.collection("words")
@@ -803,6 +805,7 @@ def _add_to_words(mini_dict_ref, words_ref, doc_name, target_language_code):
 
 
 def configure_editable_mini_dict(elem):
+    st.text("编辑简版词典")
     db = st.session_state.dbi.db
     collection = db.collection("mini_dict")
 
@@ -817,16 +820,76 @@ def configure_editable_mini_dict(elem):
     elem.data_editor(df, key="mini_dict_df", hide_index=True, disabled=["word"])
 
 
+def display_mini_dict_changes(elem):
+    # 获取当前的 mini_dict_df
+    current_mini_dict_df = st.session_state.mini_dict_df
+
+    # 获取已编辑的行
+    edited_rows = st.session_state["mini_dict_df"]["edited_rows"]
+
+    # 创建一个空的 DataFrame 来存储变动的部分
+    changes = pd.DataFrame()
+
+    # 遍历已编辑的行
+    for idx, new_values in edited_rows.items():
+        # 获取原始的行
+        original_row = current_mini_dict_df.iloc[idx]
+
+        # 获取新的行
+        new_row = pd.Series(new_values, name=idx)
+
+        # 比较原始的行和新的行，找出变动的部分
+        change = original_row[original_row != new_row]
+
+        # 将变动的部分添加到 changes DataFrame 中
+        changes = changes.append(change)
+
+    # 将所有的变动部分列出来
+    elem.write(changes)
+
+
+def save_changes_to_database():
+    st.text("保存简版词典修改部分到数据库")
+    db = st.session_state.dbi.db
+    collection = db.collection("mini_dict")
+
+    # 获取当前的 mini_dict_df
+    current_mini_dict_df = st.session_state.mini_dict_df
+
+    # 获取已编辑的行
+    edited_rows = st.session_state["mini_dict_df"]["edited_rows"]
+
+    # 遍历已编辑的行
+    for idx, new_values in edited_rows.items():
+        # 获取原始的行
+        original_row = current_mini_dict_df.iloc[idx]
+
+        # 获取单词，作为文档名称
+        doc_name = original_row["word"]
+
+        # 获取变动的部分
+        changes = {
+            key: new_values[key]
+            for key in ["level", "translation"]
+            if key in new_values
+        }
+
+        # 更新文档
+        doc_ref = collection.document(doc_name)
+        doc_ref.update(changes)
+        st.toast(f"更新简版词典，单词：{doc_name}", icon="🎉")
+
+
 # endregion
 
 # region 词典管理
 
 with tabs[items.index("词典管理")]:
     st.subheader("词典管理", divider="rainbow")
-    st.text("整理编辑简版词典")
-    btn_cols = st.columns(12)
+    btn_cols = st.columns(10)
     view_cols = st.columns(2)
     edited_elem = view_cols[0].empty()
+    view_elem = view_cols[1].empty()
 
     if btn_cols[0].button("整理", key="init_btn-3", help="✨ 整理简版词典"):
         init_mini_dict()
@@ -836,6 +899,12 @@ with tabs[items.index("词典管理")]:
 
     if btn_cols[2].button("编辑", key="edit-btn-3", help="✨ 编辑简版词典"):
         configure_editable_mini_dict(edited_elem)
+
+    if btn_cols[3].button("显示", key="view-btn-3", help="✨ 显示简版词典变动部分"):
+        display_mini_dict_changes(view_elem)
+
+    if btn_cols[4].button("保存", key="save-btn-3", help="✨ 简版词典编辑后的数据保存到数据库"):
+        save_changes_to_database()
 
 
 # endregion
@@ -1025,22 +1094,5 @@ with tabs[items.index("单词图片")]:
 # endregion
 
 # region 创建统计分析页面
-
-# endregion
-
-# region 临时测试
-
-
-def test_func():
-    st.write("test_func")
-
-
-with tabs[items.index("临时测试")]:
-    st.subheader("临时测试", divider="rainbow")
-    st.text("莫名其妙跳到第一个tab")
-    if st.button("直接", key="init_btn-7", help="✨ 临时测试"):
-        st.write("test_func")
-    if st.button("函数", key="init_btn-8", help="✨ 临时测试"):
-        test_func()
 
 # endregion
