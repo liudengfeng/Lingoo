@@ -895,7 +895,7 @@ with tabs[items.index("编辑微型词典")]:
     if btn_cols[0].button("显示", key="view-btn-4", help="✨ 显示简版词典变动"):
         display_mini_dict_changes(view_elem)
 
-    if btn_cols[0].button("保存", key="save-btn-4", help="✨ 编辑简版词典，并保存到数据库"):
+    if btn_cols[1].button("保存", key="save-btn-4", help="✨ 编辑简版词典，并保存到数据库"):
         save_changes_to_database(collection)
         st.session_state["mini_dict_df"]["edited_rows"] = {}
 
