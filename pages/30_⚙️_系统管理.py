@@ -821,8 +821,8 @@ def configure_editable_mini_dict(elem):
 
 
 def display_mini_dict_changes(elem):
-    # 获取当前的 mini_dict_df
-    current_mini_dict_df = st.session_state.mini_dict_df
+    # # 获取当前的 mini_dict_df
+    # current_mini_dict_df = st.session_state.mini_dict_df
 
     # 获取已编辑的行
     edited_rows = st.session_state["mini_dict_df"]["edited_rows"]
@@ -832,17 +832,17 @@ def display_mini_dict_changes(elem):
 
     # 遍历已编辑的行
     for idx, new_values in edited_rows.items():
-        # 获取原始的行
-        original_row = current_mini_dict_df.iloc[idx]
+        # # 获取原始的行
+        # original_row = current_mini_dict_df.iloc[idx]
 
         # 获取新的行
         new_row = pd.Series(new_values, name=idx)
 
-        # 比较原始的行和新的行，找出变动的部分
-        change = original_row[original_row != new_row]
+        # # 比较原始的行和新的行，找出变动的部分
+        # change = original_row[original_row != new_row]
 
         # 将变动的部分添加到 changes DataFrame 中
-        changes = changes.append(change)
+        changes = changes.append(new_row)
 
     # 将所有的变动部分列出来
     elem.write(changes)
