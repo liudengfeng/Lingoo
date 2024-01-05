@@ -28,7 +28,7 @@ def generate_content_and_update_token_count(
     else:
         text = responses.text
     # 合成统计信息
-    to_be_counted = Part.from_text(text) + contents
+    to_be_counted = [Part.from_text(text)] + contents
     # 令牌数
     st.session_state.current_token_count = model.count_tokens(
         to_be_counted
