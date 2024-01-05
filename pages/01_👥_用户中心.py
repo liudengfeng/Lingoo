@@ -238,7 +238,7 @@ with tabs[items.index(":memo: 问题反馈")]:
                 bytes_data = uploaded_file.getvalue()
                 video_blob_client.upload_blob(bytes_data, overwrite=True)
 
-            st.toast("提交成功！")
+            st.toast("提交成功！", icon="👍")
 
     with st.expander("如何录制截屏视频..."):
         st.markdown(
