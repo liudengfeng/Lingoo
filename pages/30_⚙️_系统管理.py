@@ -1033,7 +1033,7 @@ elif menu == "词典管理":
         blobs_list = container_client.list_blobs()
         # word_1.png word_2.png
         # 提取出 blob 的名称，并分割每个名称，提取出单词部分
-        blob_words = [blob_name.split("_")[0] for blob_name in blobs_list]
+        blob_words = [blob.name.split("_")[0] for blob in blobs_list]
         # 使用 set 来存储唯一的单词
         unique_words = set(blob_words)
         mini_dict_dataframe = get_mini_dict_dataframe()
