@@ -674,7 +674,7 @@ with tabs[items.index("处理反馈")]:
 # region 词典管理辅助函数
 
 
-def get_words():
+def get_unique_words():
     words = []
     fp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
     with open(fp, "r", encoding="utf-8") as f:
@@ -718,55 +718,38 @@ def translate_doc(doc, target_language_code):
         doc[target_language_code][k] = translate_pos(v, target_language_code)
 
 
-def init_word_db():
-    added = ()
+def init_mini_dict():
     target_language_code = "zh-CN"
-    fp = CURRENT_CWD / "resource" / "cambridge.json"
-    with open(fp, "r", encoding="utf-8") as f:
-        cambridge_dict = json.load(f)
-
-    # 获取集合中的所有单词
-    existing_words = [doc["word"] for doc in st.session_state.dbi.words.find()]
-
-    for doc in cambridge_dict:
-        logger.info(f"单词：{doc['word']}...")
-        if doc["word"] not in existing_words:
-            translate_doc(doc, target_language_code)
-            doc["level"] = get_lowest_cefr_level(doc["word"])
-            try:
-                logger.info(f"添加单词：{doc['word']}")
-                st.session_state.dbi.words.insert_one(doc)
-                added += (doc["word"],)
-            except Exception as e:
-                logger.error(f"插入单词 {doc['word']} 时出现错误: {e}")
-
-    words = get_words()
-    for w in words:
-        logger.info(f"单词：{w}...")
-        if w not in added and w not in existing_words:
-            try:
-                logger.info(f"添加单词：{w}")
-                st.session_state.dbi.words.insert_one(
-                    {
-                        "word": w,
-                        target_language_code: {
-                            "translation": translate_text(w, target_language_code)
-                        },
-                        "level": get_lowest_cefr_level(w),
-                    }
-                )
-            except Exception as e:
-                logger.error(f"插入单词 {w} 时出现错误: {e}")
-
+    fp = CURRENT_CWD / "resource" / "mini_dict.json"
+    # 检查文件是否存在
+    if not os.path.exists(fp):
+        words = get_unique_words()
+        res = {}
+        for w in words:
+            logger.info(f"单词：{w}...")
+            p = {
+                "translation": translate_text(w, target_language_code),
+                "level": get_lowest_cefr_level(w),
+            }
+            res[w] = p
+        # 将结果保存到文件
+        with open(fp, "w", encoding="utf-8") as f:
+            json.dump(res, f)
+    else:
+        with open(fp, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        df = pd.DataFrame(data)
+        edited_df = st.data_editor(df)
 
 # endregion
 
 # region 初始化词典
 
 with tabs[items.index("词典管理")]:
-    st.subheader("词典管理")
+    st.subheader("词典管理", divider="rainbow")
+    st.text("整理编辑简版词典")
     if st.button("初始化词典", key="init_btn-3"):
-        init_word_db()
+        init_mini_dict()
 
 # endregion
 
