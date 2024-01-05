@@ -746,25 +746,25 @@ def add_to_words():
     db = st.session_state.dbi.db
     words_ref = db.collection("words")
     mini_dict_ref = db.collection("mini_dict")
-    wp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
-    words = get_unique_words(wp, True)
-    st.write(f"单词总数：{len(words)}")
+    # wp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
+    # words = get_unique_words(wp, True)
     mini_progress = st.progress(0)
 
-    for i, w in enumerate(words):
-        update_and_display_progress(i + 1, len(words), mini_progress)
+    # 获取 mini_dict 中的所有单词
+    mini_dict_words = set([doc.id for doc in mini_dict_ref.stream()])
+    st.write(f"单词总数：{len(mini_dict_words)}")
+
+    # 获取 words 中的所有单词
+    words_words = set([doc.id for doc in words_ref.stream()])
+
+    # 找出只在 mini_dict 中存在的单词
+    new_words = mini_dict_words - words_words
+
+    for i, w in enumerate(new_words):
+        update_and_display_progress(i + 1, len(new_words), mini_progress)
         logger.info(f"单词：{w}")
-        # 将单词作为文档名称，将其内容存档
-        doc_name = w.replace("/", " or ")
 
-        # 检查文档是否存在
-        doc_ref = words_ref.document(doc_name)
-        doc = doc_ref.get()
-        if doc.exists:
-            logger.info(f"单词：{w} 已存在，跳过")
-            continue
-
-        _add_to_words(mini_dict_ref, words_ref, doc_name, target_language_code)
+        _add_to_words(mini_dict_ref, words_ref, w, target_language_code)
 
 
 def _add_to_words(mini_dict_ref, words_ref, doc_name, target_language_code):
