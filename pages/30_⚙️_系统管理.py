@@ -829,8 +829,12 @@ def display_mini_dict_changes(current_df, elem):
 
         # 显示变动
         elem.write(f"单词：{word} 的变动：")
-        for key, value in new_values.items():
-            elem.write(f"{key}: {value}")
+        for key, new_value in new_values.items():
+            # 获取原始的值
+            original_value = original_row[key]
+
+            # 显示变动
+            elem.write(f"{key}: {original_value} -> {new_value}")
 
 
 def save_changes_to_database(collection):
