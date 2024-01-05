@@ -837,17 +837,14 @@ def display_mini_dict_changes(current_df, elem):
             elem.write(f"{key}: {original_value} -> {new_value}")
 
 
-def save_changes_to_database(collection):
-    # 获取当前的 mini_dict_df
-    current_mini_dict_df = st.session_state.mini_dict_df
-
+def save_changes_to_database(current_df, collection):
     # 获取已编辑的行
     edited_rows = st.session_state["mini_dict_df"]["edited_rows"]
 
     # 遍历已编辑的行
     for idx, new_values in edited_rows.items():
         # 获取原始的行
-        original_row = current_mini_dict_df.iloc[idx]
+        original_row = current_df.iloc[idx]
 
         # 获取单词，作为文档名称
         doc_name = original_row["word"]
@@ -875,21 +872,21 @@ with tabs[items.index("编辑微型词典")]:
 
     # 将数据转换为 DataFrame
     data = [{"word": doc.id, **doc.to_dict()} for doc in docs]
-    df = pd.DataFrame(data)
+    mini_dict_ddataframe = pd.DataFrame(data)
 
     # 显示可编辑的 DataFrame
     edited_elem.data_editor(
-        df,
+        mini_dict_ddataframe,
         key="mini_dict_df",
         column_config=MINI_DICT_COLUMN_CONFIG,
         hide_index=True,
         disabled=["word"],
     )
 
-    display_mini_dict_changes(df, view_elem)
+    display_mini_dict_changes(mini_dict_ddataframe, view_elem)
 
     if btn_cols[0].button("保存", key="save-btn-4", help="✨ 将编辑后的简版词典变动部分保存到数据库"):
-        save_changes_to_database(collection)
+        save_changes_to_database(mini_dict_ddataframe, collection)
         st.session_state["mini_dict_df"]["edited_rows"] = {}
 
 # endregion
