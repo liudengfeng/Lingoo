@@ -260,7 +260,10 @@ if menu == "支付管理":
                 "付款方式", key="payment_method", help="✨ 请输入付款方式", placeholder="必填。付款方式"
             )
             payment_id = cols[1].text_input(
-                "付款编号", key="payment_id", help="✨ 请输入付款编号", placeholder="必填。请在付款凭证上查找付款编号"
+                "付款编号",
+                key="payment_id",
+                help="✨ 请输入付款编号",
+                placeholder="必填。请在付款凭证上查找付款编号",
             )
             cols[0].date_input(
                 "支付日期",
@@ -319,7 +322,6 @@ if menu == "支付管理":
                 # except Exception as e:
                 #     raise  # 重新抛出异常
 
-
     with tabs[items.index("支付管理")]:
         st.markdown("#### 查询参数")
         with st.form(key="query_form", clear_on_submit=True):
@@ -376,7 +378,9 @@ if menu == "支付管理":
                 value=datetime.datetime.now(tz).date(),
             )
             payment_2_cols[1].time_input(
-                "支付【开始时间】", key="payment_time_start_time-1", value=datetime.time(0, 0, 0)
+                "支付【开始时间】",
+                key="payment_time_start_time-1",
+                value=datetime.time(0, 0, 0),
             )
             payment_2_cols[2].date_input(
                 "支付【结束日期】",
@@ -384,7 +388,9 @@ if menu == "支付管理":
                 value=datetime.datetime.now(tz).date(),
             )
             payment_2_cols[3].time_input(
-                "支付【结束时间】", key="payment_time_end_time-1", value=datetime.time(23, 59, 59)
+                "支付【结束时间】",
+                key="payment_time_end_time-1",
+                value=datetime.time(23, 59, 59),
             )
 
             # 服务时间查询
@@ -410,7 +416,9 @@ if menu == "支付管理":
                 value=datetime.datetime.now(tz).date(),
             )
             payment_3_cols[3].time_input(
-                "服务【结束时间】", key="expiry_time_end_time-1", value=datetime.time(23, 59, 59)
+                "服务【结束时间】",
+                key="expiry_time_end_time-1",
+                value=datetime.time(23, 59, 59),
             )
 
             # 模糊查询
@@ -439,7 +447,9 @@ if menu == "支付管理":
                 if t0:
                     kwargs.update(
                         {
-                            "phone_number": st.session_state.get("phone_number-1", None),
+                            "phone_number": st.session_state.get(
+                                "phone_number-1", None
+                            ),
                             "payment_id": st.session_state.get("payment_id-1", None),
                             "order_id": st.session_state.get("order_id-1", None),
                             "sales_representative": st.session_state.get(
@@ -522,7 +532,9 @@ if menu == "支付管理":
                 hide_index=True,
                 num_rows="dynamic",
                 key="users_payments",
-                disabled=[col for col in df.columns if col not in PAYMENT_EDITABLE_COLS],
+                disabled=[
+                    col for col in df.columns if col not in PAYMENT_EDITABLE_COLS
+                ],
             )
 
         # # Access edited data
