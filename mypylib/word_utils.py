@@ -132,8 +132,10 @@ def get_lowest_cefr_level(word):
     Returns:
     str or None: The lowest CEFR level of the word, or None if the word is not found in the CEFR dictionary.
     """
-    fp = os.path.join(CURRENT_CWD, "resource", "dictionary", "word_lists_by_edition_grade.json")
-    levels = ["A1", "A2", "B1", "B2", "C1"]
+    fp = os.path.join(
+        CURRENT_CWD, "resource", "dictionary", "word_lists_by_edition_grade.json"
+    )
+    levels = ["A1", "A2", "B1", "B2", "C1", "C2"]
     with open(fp, "r") as f:
         cefr = json.load(f)
     for level in levels:
@@ -148,15 +150,17 @@ def sample_words(level, n):
     Generate a random sample of words from a specific CEFR level.
 
     Args:
-        level (str): The CEFR level of the words. Must be one of ["A1", "A2", "B1", "B2", "C1"].
+        level (str): The CEFR level of the words. Must be one of ["A1", "A2", "B1", "B2", "C1", "C2"].
         n (int): The number of words to sample.
 
     Returns:
         list: A list of randomly sampled words from the specified CEFR level.
     """
-    levels = ["A1", "A2", "B1", "B2", "C1"]
+    levels = ["A1", "A2", "B1", "B2", "C1", "C2"]
     assert level in levels, f"level must be one of {levels}"
-    fp = os.path.join(CURRENT_CWD, "resource", "dictionary", "word_lists_by_edition_grade.json")
+    fp = os.path.join(
+        CURRENT_CWD, "resource", "dictionary", "word_lists_by_edition_grade.json"
+    )
     with open(fp, "r") as f:
         cefr = json.load(f)
     level_flag = f"1-CEFR-{level}"
