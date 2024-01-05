@@ -778,7 +778,7 @@ with tabs[items.index("词典管理")]:
     btn_cols = st.columns(12)
     view_cols = st.columns(2)
     edited_elem = view_cols[0].empty()
-    if btn_cols[0].button("整理简版词典", key="init_btn-3", help="✨ 整理编辑简版词典"):
+    if btn_cols[0].button("整理", key="init_btn-3", help="✨ 整理编辑简版词典"):
         init_mini_dict()
     if btn_cols[1].button("编辑", key="btn-3", help="✨ 编辑简版词典"):
         configure_editable_mini_dict(edited_elem)
