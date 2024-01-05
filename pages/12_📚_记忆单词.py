@@ -16,6 +16,7 @@ from mypylib.st_helper import (
     check_access,
     check_and_force_logout,
     configure_google_apis,
+    setup_logger,
 )
 from mypylib.word_utils import (
     audio_autoplay_elem,
@@ -25,6 +26,7 @@ from mypylib.word_utils import (
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
+setup_logger(logger)
 
 # region 页设置
 
@@ -98,9 +100,7 @@ def generate_flashcard_words():
     # 随机选择单词
     st.session_state.flashcard_words = random.sample(words, n)
     name = word_lib_name.split("-", maxsplit=1)[1]
-    st.toast(
-        f"当前单词列表名称：{name} 闪卡单词数量: {len(st.session_state.flashcard_words)}"
-    )
+    st.toast(f"当前单词列表名称：{name} 闪卡单词数量: {len(st.session_state.flashcard_words)}")
 
 
 @st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词信息...")

@@ -1,19 +1,23 @@
+import logging
 import streamlit as st
 
 from mypylib.st_helper import (
     check_access,
     check_and_force_logout,
     configure_google_apis,
+    setup_logger,
 )
 
 from mypylib.constants import CEFR_LEVEL_MAPS, rearrange_theme_scene
 
 # from mypylib.google_vertex import generate_sub_scenes
 
-# "第二页"
-
 
 # region 页面设置
+
+# 创建或获取logger对象
+logger = logging.getLogger("streamlit")
+setup_logger(logger)
 
 st.set_page_config(
     page_title="听力练习",

@@ -1,3 +1,4 @@
+import logging
 import time
 
 import streamlit as st
@@ -9,10 +10,14 @@ from mypylib.st_helper import (
     check_and_force_logout,
     configure_google_apis,
     load_vertex_model,
+    setup_logger,
 )
 
 # region 页面设置
 
+# 创建或获取logger对象
+logger = logging.getLogger("streamlit")
+setup_logger(logger)
 
 st.set_page_config(
     page_title="聊天机器人",

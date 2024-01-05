@@ -1,3 +1,4 @@
+import logging
 import time
 import uuid
 from pathlib import Path
@@ -14,13 +15,17 @@ from mypylib.auth_utils import is_valid_email
 from mypylib.constants import PROVINCES, CEFR_LEVEL_MAPS
 from mypylib.db_interface import DbInterface
 from mypylib.db_model import User
-from mypylib.st_helper import check_access, check_and_force_logout
+from mypylib.st_helper import check_access, check_and_force_logout, setup_logger
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 FEEDBACK_DIR = CURRENT_CWD / "resource" / "feedback"
 
 # 创建 Fernet 实例【必须将key转换为bytes类型】
 # fernet = Fernet(st.secrets["FERNET_KEY"].encode())
+
+# 创建或获取logger对象
+logger = logging.getLogger("streamlit")
+setup_logger(logger)
 
 st.set_page_config(
     page_title="用户管理",

@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import time
 import wave
@@ -23,8 +24,23 @@ from mypylib.google_api import (
 )
 from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
-from mypylib.st_helper import check_access, check_and_force_logout, configure_google_apis
+from mypylib.st_helper import (
+    check_access,
+    check_and_force_logout,
+    configure_google_apis,
+    setup_logger,
+)
 from mypylib.word_utils import audio_autoplay_elem
+
+# 创建或获取logger对象
+logger = logging.getLogger("streamlit")
+setup_logger(logger)
+
+st.set_page_config(
+    page_title="评估发音与对话",
+    page_icon="🗣️",
+    layout="wide",
+)
 
 # region 认证及初始化
 
@@ -345,11 +361,7 @@ def view_report():
 
 # region 页配置
 
-st.set_page_config(
-    page_title="评估发音与对话",
-    page_icon="🗣️",
-    layout="wide",
-)
+
 
 
 # endregion

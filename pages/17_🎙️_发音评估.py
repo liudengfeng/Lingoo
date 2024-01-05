@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import time
 import wave
@@ -21,11 +22,20 @@ from mypylib.azure_translator import language_detect
 from mypylib.constants import LAN_MAPS, LANGUAGES
 from mypylib.html_constants import STYLE, TIPPY_JS
 from mypylib.nivo_charts import gen_radar
-from mypylib.st_helper import check_access, check_and_force_logout, configure_google_apis
+from mypylib.st_helper import (
+    check_access,
+    check_and_force_logout,
+    configure_google_apis,
+    setup_logger,
+)
 from mypylib.word_utils import audio_autoplay_elem
 
 
 # region 认证及初始化
+
+# 创建或获取logger对象
+logger = logging.getLogger("streamlit")
+setup_logger(logger)
 
 check_access(False)
 configure_google_apis()

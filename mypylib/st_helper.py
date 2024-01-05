@@ -19,9 +19,7 @@ from .google_cloud_configuration import (
 
 def setup_logger(logger):
     # 设置日志的时间戳为 Asia/Shanghai 时区
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s - %(message)s")
     formatter.converter = lambda *args: datetime.now(
         tz=pytz.timezone("Asia/Shanghai")
     ).timetuple()
