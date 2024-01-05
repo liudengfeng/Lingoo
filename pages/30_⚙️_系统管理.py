@@ -963,7 +963,7 @@ elif menu == "处理反馈":
 
 
 elif menu == "词典管理":
-    items = ["词典管理", "编辑微型词典", "单词图片"]
+    items = ["词典管理", "编辑微型词典", "下载图片", "挑选图片"]
     tabs = st.tabs(items)
 
     MINI_DICT_COLUMN_CONFIG = {
@@ -1022,10 +1022,46 @@ elif menu == "词典管理":
 
     # endregion
 
+    # region 下载图片
+
+    with tabs[items.index("下载图片")]:
+        st.subheader("下载图片", divider="rainbow", anchor=False)
+        container_name = "word-images"
+        connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+        blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+        container_client = blob_service_client.get_container_client(container_name)
+        blobs_list = container_client.list_blobs()
+        # word_1.png word_2.png
+        # 提取出 blob 的名称，并分割每个名称，提取出单词部分
+        blob_words = [blob_name.split("_")[0] for blob_name in blobs_list]
+        # 使用 set 来存储唯一的单词
+        unique_words = set(blob_words)
+        mini_dict_dataframe = get_mini_dict_dataframe()
+        words = mini_dict_dataframe["word"].tolist()
+        # 找出没有下载图片的单词
+        to_do = [word for word in words if word not in unique_words]
+        # 创建一个进度条
+        progress_bar = st.progress(0)
+        for index, word in enumerate(to_do):
+            urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+            for i, url in enumerate(urls):
+                img_byte_arr = load_image_bytes_from_url(url)
+                # 创建一个 BlobClient
+                blob_client = blob_service_client.get_blob_client(
+                    container_name, f"{word}_{i}.png"
+                )
+                blob_client.upload_blob(
+                    img_byte_arr, blob_type="BlockBlob", overwrite=True
+                )
+            # 更新进度条
+            update_and_display_progress(index + 1, len(to_do), progress_bar, word)
+
+    # endregion
+
     # region 单词图片
 
-    with tabs[items.index("单词图片")]:
-        st.subheader("单词图片", divider="rainbow")
+    with tabs[items.index("挑选图片")]:
+        st.subheader("挑选图片", divider="rainbow", anchor=False)
         st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
         mini_dict_dataframe = get_mini_dict_dataframe()
         words = mini_dict_dataframe["word"].tolist()
