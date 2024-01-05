@@ -430,6 +430,64 @@ def save_dataframe_changes_to_database(current_df):
 
 # endregion
 
+# region 单词图片辅助函数
+
+
+def generate(word, images: List[Part]):
+    model = load_vertex_model("gemini-pro-vision")
+    prompt = f"单词：{word}\n输入的图片是否能形象解释单词含义，挑选出最合适的前4张图片。结果用输入图片的自然序号（从0开始）列表表达，如果没有合适的，返回空列表。以JSON格式输出。"
+    contents = [prompt] + images
+    responses = model.generate_content(
+        contents,
+        generation_config={
+            "max_output_tokens": 2048,
+            "temperature": 0.1,
+            "top_p": 1,
+            "top_k": 32,
+        },
+        stream=False,
+    )
+    return json.loads(responses.text.replace("```json", "").replace("```", ""))
+
+
+@st.spinner("使用 Gemini 挑选图片...")
+def fetch_and_update_word_image_indices(word):
+    container_name = "word-images"
+    connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+
+    # 创建 BlobServiceClient 对象
+    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+
+    # 获取 ContainerClient 对象
+    container_client = blob_service_client.get_container_client(container_name)
+
+    # 获取名称以 "abbreviated_" 开始的所有 blob
+    blobs_list = container_client.list_blobs(name_starts_with=f"{word}_")
+
+    images = []
+    for blob_name in blobs_list:
+        try:
+            blob_client = blob_service_client.get_blob_client(container_name, blob_name)
+            image_bytes = blob_client.download_blob().readall()
+            images.append(Image.from_bytes(image_bytes))
+        except Exception as e:
+            logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
+
+    indices = generate(word, images)
+    if indices:
+        # 检查 indices 是否为列表
+        if not isinstance(indices, list):
+            st.error(f"{word} indices 必须是一个列表")
+            return
+        # 检查列表中的每个元素是否都是整数
+        if not all(isinstance(i, int) for i in indices):
+            st.error(f"{word} indices 列表中的每个元素都必须是整数")
+            return
+        st.session_state.dbi.update_image_indices(word, indices)
+
+
+# endregion
+
 # endregion
 
 # region 侧边栏
@@ -870,8 +928,9 @@ elif menu == "处理反馈":
 
 # region 词典管理
 
+
 elif menu == "词典管理":
-    items = ["词典管理", "编辑微型词典"]
+    items = ["词典管理", "编辑微型词典", "单词图片"]
     tabs = st.tabs(items)
 
     MINI_DICT_COLUMN_CONFIG = {
@@ -886,6 +945,8 @@ elif menu == "词典管理":
         "translation": "译文",
     }
 
+    # region 词典管理
+
     with tabs[items.index("词典管理")]:
         st.subheader("词典管理", divider="rainbow", anchor=False)
         btn_cols = st.columns(10)
@@ -896,6 +957,10 @@ elif menu == "词典管理":
         if btn_cols[1].button("添加", key="add-btn-3", help="✨ 将简版词典单词添加到默认词典"):
             add_new_words_from_mini_dict_to_words()
 
+    # endregion
+
+    # region 编辑微型词典
+    
     with tabs[items.index("编辑微型词典")]:
         st.subheader("编辑微型词典", divider="rainbow", anchor=False)
 
@@ -921,6 +986,33 @@ elif menu == "词典管理":
         if btn_cols[1].button("提交保存", key="save-btn-4", help="✨ 将编辑后的简版词典变动部分保存到数据库"):
             save_dataframe_changes_to_database(mini_dict_dataframe)
             st.session_state["mini_dict_df"]["edited_rows"] = {}
+    
+    # endregion
+
+    # region 单词图片
+
+    with tabs[items.index("单词图片")]:
+        st.subheader("单词图片", divider="rainbow")
+        st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
+        words = get_unique_words(
+            CURRENT_CWD
+            / "resource"
+            / "dictionary"
+            / "word_lists_by_edition_grade.json",
+            False,
+        )
+        num = st.number_input("输入单词数量", min_value=1, max_value=len(words), value=100)
+        words = sorted(words)[:num]
+        progress_pic_bar = st.progress(0)
+        if st.button("挑选单词示例图", key="start_btn-5"):
+            for i, word in enumerate(words):
+                update_and_display_progress(i + 1, len(words), progress_pic_bar, word)
+                if not st.session_state.dbi.word_has_image_indices(word):
+                    fetch_and_update_word_image_indices(word)
+                    # 确保不超限
+                    time.sleep(1)
+
+    # endregion
 
 # endregion
 
@@ -1032,81 +1124,6 @@ elif menu == "词典管理":
 
 # # endregion
 
-# # region 单词图片
-
-
-# def generate(word, images: List[Part]):
-#     model = load_vertex_model("gemini-pro-vision")
-#     prompt = f"单词：{word}\n输入的图片是否能形象解释单词含义，挑选出最合适的前4张图片。结果用输入图片的自然序号（从0开始）列表表达，如果没有合适的，返回空列表。以JSON格式输出。"
-#     contents = [prompt] + images
-#     responses = model.generate_content(
-#         contents,
-#         generation_config={
-#             "max_output_tokens": 2048,
-#             "temperature": 0.1,
-#             "top_p": 1,
-#             "top_k": 32,
-#         },
-#         stream=False,
-#     )
-#     return json.loads(responses.text.replace("```json", "").replace("```", ""))
-
-
-# @st.spinner("使用 Gemini 挑选图片...")
-# def fetch_and_update_word_image_indices(word):
-#     container_name = "word-images"
-#     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
-
-#     # 创建 BlobServiceClient 对象
-#     blob_service_client = BlobServiceClient.from_connection_string(connect_str)
-
-#     # 获取 ContainerClient 对象
-#     container_client = blob_service_client.get_container_client(container_name)
-
-#     # 获取名称以 "abbreviated_" 开始的所有 blob
-#     blobs_list = container_client.list_blobs(name_starts_with=f"{word}_")
-
-#     images = []
-#     for blob_name in blobs_list:
-#         try:
-#             blob_client = blob_service_client.get_blob_client(container_name, blob_name)
-#             image_bytes = blob_client.download_blob().readall()
-#             images.append(Image.from_bytes(image_bytes))
-#         except Exception as e:
-#             logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
-
-#     indices = generate(word, images)
-#     if indices:
-#         # 检查 indices 是否为列表
-#         if not isinstance(indices, list):
-#             st.error(f"{word} indices 必须是一个列表")
-#             return
-#         # 检查列表中的每个元素是否都是整数
-#         if not all(isinstance(i, int) for i in indices):
-#             st.error(f"{word} indices 列表中的每个元素都必须是整数")
-#             return
-#         st.session_state.dbi.update_image_indices(word, indices)
-
-
-# with tabs[items.index("单词图片")]:
-#     st.subheader("单词图片", divider="rainbow")
-#     st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
-#     words = get_unique_words(
-#         CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json",
-#         False,
-#     )
-#     num = st.number_input("输入单词数量", min_value=1, max_value=len(words), value=100)
-#     words = sorted(words)[:num]
-#     progress_pic_bar = st.progress(0)
-#     if st.button("挑选单词示例图", key="start_btn-5"):
-#         for i, word in enumerate(words):
-#             update_and_display_progress(i + 1, len(words), progress_pic_bar, word)
-#             if not st.session_state.dbi.word_has_image_indices(word):
-#                 fetch_and_update_word_image_indices(word)
-#                 # 确保不超限
-#                 time.sleep(1)
-
-# # endregion
 
 # # region 创建统计分析页面
 
