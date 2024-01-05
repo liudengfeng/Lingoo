@@ -322,241 +322,241 @@ if menu == "支付管理":
 
 
     with tabs[items.index("支付管理")]:
-    st.markdown("#### 查询参数")
-    with st.form(key="query_form", clear_on_submit=True):
-        # 精确匹配
-        t_0_cols = st.columns(4)
-        t_0_cols[0].markdown(":rainbow[精确匹配查询]")
-        t0 = t_0_cols[1].toggle(
-            label="包含",
-            key="is_include-0",
-            help="✨ 选中表示包含该查询条件，否则表示不包含",
-        )
-        payment_0_cols = st.columns(4)
-        payment_0_cols[0].text_input(label="手机号码", key="phone_number-1")
-        payment_0_cols[1].text_input(label="付款编号", key="payment_id-1")
-        payment_0_cols[2].text_input(label="订单编号", key="order_id-1")
-        payment_0_cols[3].text_input(label="销售代表", key="sales_representative-1")
-        # 选项查询
-        t_1_cols = st.columns(4)
-        t_1_cols[0].markdown(":rainbow[状态查询]")
-        t1 = t_1_cols[1].toggle(
-            label="包含",
-            key="is_include-1",
-            help="✨ 选中表示包含该查询条件，否则表示不包含",
-        )
-        payment_1_cols = st.columns(4)
-        payment_1_cols[0].selectbox(
-            label="套餐类型",
-            key="purchase_type-1",
-            options=["All"] + [x.value for x in PurchaseType],
-        )
-        payment_1_cols[1].selectbox(
-            label="支付状态",
-            key="status-1",
-            options=["All"] + [x.value for x in PaymentStatus],
-        )
-        payment_1_cols[2].selectbox(
-            label="是否批准",
-            key="is_approved-1",
-            options=["All", False, True],
-        )
+        st.markdown("#### 查询参数")
+        with st.form(key="query_form", clear_on_submit=True):
+            # 精确匹配
+            t_0_cols = st.columns(4)
+            t_0_cols[0].markdown(":rainbow[精确匹配查询]")
+            t0 = t_0_cols[1].toggle(
+                label="包含",
+                key="is_include-0",
+                help="✨ 选中表示包含该查询条件，否则表示不包含",
+            )
+            payment_0_cols = st.columns(4)
+            payment_0_cols[0].text_input(label="手机号码", key="phone_number-1")
+            payment_0_cols[1].text_input(label="付款编号", key="payment_id-1")
+            payment_0_cols[2].text_input(label="订单编号", key="order_id-1")
+            payment_0_cols[3].text_input(label="销售代表", key="sales_representative-1")
+            # 选项查询
+            t_1_cols = st.columns(4)
+            t_1_cols[0].markdown(":rainbow[状态查询]")
+            t1 = t_1_cols[1].toggle(
+                label="包含",
+                key="is_include-1",
+                help="✨ 选中表示包含该查询条件，否则表示不包含",
+            )
+            payment_1_cols = st.columns(4)
+            payment_1_cols[0].selectbox(
+                label="套餐类型",
+                key="purchase_type-1",
+                options=["All"] + [x.value for x in PurchaseType],
+            )
+            payment_1_cols[1].selectbox(
+                label="支付状态",
+                key="status-1",
+                options=["All"] + [x.value for x in PaymentStatus],
+            )
+            payment_1_cols[2].selectbox(
+                label="是否批准",
+                key="is_approved-1",
+                options=["All", False, True],
+            )
 
-        # 支付时间
-        t_2_cols = st.columns(4)
-        t_2_cols[0].markdown(":rainbow[支付期间查询]")
-        t2 = t_2_cols[1].toggle(
-            label="包含",
-            key="is_include-2",
-            help="✨ 选中表示包含该查询条件，否则表示不包含",
-        )
-        payment_2_cols = st.columns(4)
-        payment_2_cols[0].date_input(
-            "支付【开始日期】",
-            key="payment_time_start_date-1",
-            value=datetime.datetime.now(tz).date(),
-        )
-        payment_2_cols[1].time_input(
-            "支付【开始时间】", key="payment_time_start_time-1", value=datetime.time(0, 0, 0)
-        )
-        payment_2_cols[2].date_input(
-            "支付【结束日期】",
-            key="payment_time_end_date-1",
-            value=datetime.datetime.now(tz).date(),
-        )
-        payment_2_cols[3].time_input(
-            "支付【结束时间】", key="payment_time_end_time-1", value=datetime.time(23, 59, 59)
-        )
+            # 支付时间
+            t_2_cols = st.columns(4)
+            t_2_cols[0].markdown(":rainbow[支付期间查询]")
+            t2 = t_2_cols[1].toggle(
+                label="包含",
+                key="is_include-2",
+                help="✨ 选中表示包含该查询条件，否则表示不包含",
+            )
+            payment_2_cols = st.columns(4)
+            payment_2_cols[0].date_input(
+                "支付【开始日期】",
+                key="payment_time_start_date-1",
+                value=datetime.datetime.now(tz).date(),
+            )
+            payment_2_cols[1].time_input(
+                "支付【开始时间】", key="payment_time_start_time-1", value=datetime.time(0, 0, 0)
+            )
+            payment_2_cols[2].date_input(
+                "支付【结束日期】",
+                key="payment_time_end_date-1",
+                value=datetime.datetime.now(tz).date(),
+            )
+            payment_2_cols[3].time_input(
+                "支付【结束时间】", key="payment_time_end_time-1", value=datetime.time(23, 59, 59)
+            )
 
-        # 服务时间查询
-        t_3_cols = st.columns(4)
-        t_3_cols[0].markdown(":rainbow[服务期间查询]")
-        t3 = t_3_cols[1].toggle(
-            label="包含",
-            key="is_include-3",
-            help="✨ 选中表示包含该查询条件，否则表示不包含",
-        )
-        payment_3_cols = st.columns(4)
-        payment_3_cols[0].date_input(
-            "服务【开始日期】",
-            key="expiry_time_start_date-1",
-            value=datetime.datetime.now(tz).date(),
-        )
-        payment_3_cols[1].time_input(
-            "服务【开始时间】", key="expiry_time_start_time-1", value=datetime.time(0, 0, 0)
-        )
-        payment_3_cols[2].date_input(
-            "服务【结束日期】",
-            key="expiry_time_end_date-1",
-            value=datetime.datetime.now(tz).date(),
-        )
-        payment_3_cols[3].time_input(
-            "服务【结束时间】", key="expiry_time_end_time-1", value=datetime.time(23, 59, 59)
-        )
+            # 服务时间查询
+            t_3_cols = st.columns(4)
+            t_3_cols[0].markdown(":rainbow[服务期间查询]")
+            t3 = t_3_cols[1].toggle(
+                label="包含",
+                key="is_include-3",
+                help="✨ 选中表示包含该查询条件，否则表示不包含",
+            )
+            payment_3_cols = st.columns(4)
+            payment_3_cols[0].date_input(
+                "服务【开始日期】",
+                key="expiry_time_start_date-1",
+                value=datetime.datetime.now(tz).date(),
+            )
+            payment_3_cols[1].time_input(
+                "服务【开始时间】", key="expiry_time_start_time-1", value=datetime.time(0, 0, 0)
+            )
+            payment_3_cols[2].date_input(
+                "服务【结束日期】",
+                key="expiry_time_end_date-1",
+                value=datetime.datetime.now(tz).date(),
+            )
+            payment_3_cols[3].time_input(
+                "服务【结束时间】", key="expiry_time_end_time-1", value=datetime.time(23, 59, 59)
+            )
 
-        # 模糊查询
-        t_4_cols = st.columns(4)
-        t_4_cols[0].markdown(":rainbow[模糊查询]")
-        t4 = t_4_cols[1].toggle(
-            label="包含",
-            key="is_include-4",
-            help="✨ 选中表示包含该查询条件，否则表示不包含",
-        )
-        payment_4_cols = st.columns(2)
-        payment_4_cols[0].text_input(
-            "支付方式",
-            key="payment_method-1",
-            help="✨ 要查询的支付方式信息",
-        )
-        payment_4_cols[1].text_input(
-            "备注",
-            key="remark-1",
-            help="✨ 要查询的备注信息",
-        )
-        query_button = st.form_submit_button(label="查询")
+            # 模糊查询
+            t_4_cols = st.columns(4)
+            t_4_cols[0].markdown(":rainbow[模糊查询]")
+            t4 = t_4_cols[1].toggle(
+                label="包含",
+                key="is_include-4",
+                help="✨ 选中表示包含该查询条件，否则表示不包含",
+            )
+            payment_4_cols = st.columns(2)
+            payment_4_cols[0].text_input(
+                "支付方式",
+                key="payment_method-1",
+                help="✨ 要查询的支付方式信息",
+            )
+            payment_4_cols[1].text_input(
+                "备注",
+                key="remark-1",
+                help="✨ 要查询的备注信息",
+            )
+            query_button = st.form_submit_button(label="查询")
 
-        if query_button:
-            kwargs = {}
-            if t0:
-                kwargs.update(
-                    {
-                        "phone_number": st.session_state.get("phone_number-1", None),
-                        "payment_id": st.session_state.get("payment_id-1", None),
-                        "order_id": st.session_state.get("order_id-1", None),
-                        "sales_representative": st.session_state.get(
-                            "sales_representative-1", None
-                        ),
-                    }
-                )
-            if t1:
-                kwargs.update(
-                    {
-                        "purchase_type": None
-                        if st.session_state.get("purchase_type-1", None) == "ALL"
-                        else str_to_enum(
-                            st.session_state.get("purchase_type-1", None),
-                            PurchaseType,
-                        ),
-                        "status": None
-                        if st.session_state.get("status-1", None) == "ALL"
-                        else str_to_enum(
-                            st.session_state.get("status-1", None), PaymentStatus
-                        ),
-                        "is_approved": None
-                        if st.session_state.get("is_approved-1", None) == "ALL"
-                        else st.session_state.get("is_approved-1", None),
-                    }
-                )
-
-            if t2:
-                kwargs.update(generate_timestamp("payment_time", "start", 1))
-                kwargs.update(generate_timestamp("payment_time", "end", 1))
-
-            if t3:
-                kwargs.update(generate_timestamp("expiry_time", "start", 1))
-                kwargs.update(generate_timestamp("expiry_time", "end", 1))
-
-            if t4:
-                kwargs.update(
-                    {
-                        "payment_method": st.session_state.get(
-                            "payment_method-1", None
-                        ),
-                        "remark": st.session_state.get("remark-1", None),
-                    }
-                )
-
-            # 删除字典中的空值部分【None ""】
-            kwargs = {k: v for k, v in kwargs.items() if v}
-            st.write(f"{kwargs=}")
-
-            # 检查数据生成的参数及其类型
-            # st.write(kwargs)
-            # for k, v in kwargs.items():
-            #     st.write(f"{k=}, {type(v)=}")
-            results = st.session_state.dbi.query_payments(kwargs)
-            # 将每个文档转换为字典
-            dicts = [{"order_id": doc.id, **doc.to_dict()} for doc in results]
-            st.write(f"{dicts=}")
-            st.session_state["queried_payments"] = dicts
-
-    st.subheader("支付清单")
-    df = pd.DataFrame(st.session_state.get("queried_payments", {}))
-
-    placeholder = st.empty()
-    status = st.empty()
-    pay_cols = st.columns([1, 1, 8])
-    upd_btn = pay_cols[0].button("更新", key="upd_btn", help="✨ 更新数据库中选中的支付记录")
-    del_btn = pay_cols[1].button("删除", key="del_btn", help="✨ 在数据库中删除选中的支付记录")
-    # # st.divider()
-    if df.empty:
-        placeholder.info("没有记录")
-    else:
-        # 将时间列转换为本地时区
-        for col in PAYMENT_TIME_COLS:
-            if col in df.columns:
-                df[col] = df[col].dt.tz_convert(tz)
-        edited_df = placeholder.data_editor(
-            df,
-            column_config=PAYMENT_COLUMN_CONFIG,
-            column_order=PAYMENT_COLUMN_ORDER,
-            hide_index=True,
-            num_rows="dynamic",
-            key="users_payments",
-            disabled=[col for col in df.columns if col not in PAYMENT_EDITABLE_COLS],
-        )
-
-    # # Access edited data
-    if upd_btn and st.session_state.get("users_payments", None):
-        users_payments = st.session_state["users_payments"]
-        # st.write(f"{users_payments=}")
-        for idx, d in users_payments["edited_rows"].items():
-            order_id = df.iloc[idx]["order_id"]  # type: ignore
-            for key in d.keys():
-                if key in PAYMENT_TIME_COLS:
-                    # 检查返回的对象的类型及其值
-                    # st.write(f"{type(d[key])=}, {d[key]=}")
-                    value = d[key]
-                    # 将 'Z' 替换为 '+00:00'
-                    value = value.replace("Z", "+00:00")
-                    # 将字符串转换为 datetime 对象
-                    timestamp = datetime.datetime.fromisoformat(value).astimezone(
-                        datetime.timezone.utc
+            if query_button:
+                kwargs = {}
+                if t0:
+                    kwargs.update(
+                        {
+                            "phone_number": st.session_state.get("phone_number-1", None),
+                            "payment_id": st.session_state.get("payment_id-1", None),
+                            "order_id": st.session_state.get("order_id-1", None),
+                            "sales_representative": st.session_state.get(
+                                "sales_representative-1", None
+                            ),
+                        }
                     )
-                    d[key] = timestamp
-            st.session_state.dbi.update_payment(order_id, d)
-            st.toast(f"更新支付记录，订单号：{order_id}", icon="🎉")
-        users_payments["edited_rows"] = {}
+                if t1:
+                    kwargs.update(
+                        {
+                            "purchase_type": None
+                            if st.session_state.get("purchase_type-1", None) == "ALL"
+                            else str_to_enum(
+                                st.session_state.get("purchase_type-1", None),
+                                PurchaseType,
+                            ),
+                            "status": None
+                            if st.session_state.get("status-1", None) == "ALL"
+                            else str_to_enum(
+                                st.session_state.get("status-1", None), PaymentStatus
+                            ),
+                            "is_approved": None
+                            if st.session_state.get("is_approved-1", None) == "ALL"
+                            else st.session_state.get("is_approved-1", None),
+                        }
+                    )
 
-    if del_btn and st.session_state.get("users_payments", None):
-        users_payments = st.session_state["users_payments"]
-        # st.write(f'{users_payments["deleted_rows"]=}')
-        for idx in users_payments["deleted_rows"]:
-            order_id = df.iloc[idx]["order_id"]  # type: ignore
-            st.session_state.dbi.delete_payment(order_id)
-            st.toast(f"删除支付记录，订单号：{order_id}", icon="⚠️")
-        # 清除删除的行
-        users_payments["deleted_rows"] = []
+                if t2:
+                    kwargs.update(generate_timestamp("payment_time", "start", 1))
+                    kwargs.update(generate_timestamp("payment_time", "end", 1))
+
+                if t3:
+                    kwargs.update(generate_timestamp("expiry_time", "start", 1))
+                    kwargs.update(generate_timestamp("expiry_time", "end", 1))
+
+                if t4:
+                    kwargs.update(
+                        {
+                            "payment_method": st.session_state.get(
+                                "payment_method-1", None
+                            ),
+                            "remark": st.session_state.get("remark-1", None),
+                        }
+                    )
+
+                # 删除字典中的空值部分【None ""】
+                kwargs = {k: v for k, v in kwargs.items() if v}
+                st.write(f"{kwargs=}")
+
+                # 检查数据生成的参数及其类型
+                # st.write(kwargs)
+                # for k, v in kwargs.items():
+                #     st.write(f"{k=}, {type(v)=}")
+                results = st.session_state.dbi.query_payments(kwargs)
+                # 将每个文档转换为字典
+                dicts = [{"order_id": doc.id, **doc.to_dict()} for doc in results]
+                st.write(f"{dicts=}")
+                st.session_state["queried_payments"] = dicts
+
+        st.subheader("支付清单")
+        df = pd.DataFrame(st.session_state.get("queried_payments", {}))
+
+        placeholder = st.empty()
+        status = st.empty()
+        pay_cols = st.columns([1, 1, 8])
+        upd_btn = pay_cols[0].button("更新", key="upd_btn", help="✨ 更新数据库中选中的支付记录")
+        del_btn = pay_cols[1].button("删除", key="del_btn", help="✨ 在数据库中删除选中的支付记录")
+        # # st.divider()
+        if df.empty:
+            placeholder.info("没有记录")
+        else:
+            # 将时间列转换为本地时区
+            for col in PAYMENT_TIME_COLS:
+                if col in df.columns:
+                    df[col] = df[col].dt.tz_convert(tz)
+            edited_df = placeholder.data_editor(
+                df,
+                column_config=PAYMENT_COLUMN_CONFIG,
+                column_order=PAYMENT_COLUMN_ORDER,
+                hide_index=True,
+                num_rows="dynamic",
+                key="users_payments",
+                disabled=[col for col in df.columns if col not in PAYMENT_EDITABLE_COLS],
+            )
+
+        # # Access edited data
+        if upd_btn and st.session_state.get("users_payments", None):
+            users_payments = st.session_state["users_payments"]
+            # st.write(f"{users_payments=}")
+            for idx, d in users_payments["edited_rows"].items():
+                order_id = df.iloc[idx]["order_id"]  # type: ignore
+                for key in d.keys():
+                    if key in PAYMENT_TIME_COLS:
+                        # 检查返回的对象的类型及其值
+                        # st.write(f"{type(d[key])=}, {d[key]=}")
+                        value = d[key]
+                        # 将 'Z' 替换为 '+00:00'
+                        value = value.replace("Z", "+00:00")
+                        # 将字符串转换为 datetime 对象
+                        timestamp = datetime.datetime.fromisoformat(value).astimezone(
+                            datetime.timezone.utc
+                        )
+                        d[key] = timestamp
+                st.session_state.dbi.update_payment(order_id, d)
+                st.toast(f"更新支付记录，订单号：{order_id}", icon="🎉")
+            users_payments["edited_rows"] = {}
+
+        if del_btn and st.session_state.get("users_payments", None):
+            users_payments = st.session_state["users_payments"]
+            # st.write(f'{users_payments["deleted_rows"]=}')
+            for idx in users_payments["deleted_rows"]:
+                order_id = df.iloc[idx]["order_id"]  # type: ignore
+                st.session_state.dbi.delete_payment(order_id)
+                st.toast(f"删除支付记录，订单号：{order_id}", icon="⚠️")
+            # 清除删除的行
+            users_payments["deleted_rows"] = []
 
 
 # endregion
