@@ -869,7 +869,7 @@ elif menu == "词典管理":
         ),
         "translation": "译文",
     }
-    
+
     with tabs[items.index("词典管理")]:
         st.subheader("词典管理", divider="rainbow")
         btn_cols = st.columns(10)
@@ -879,7 +879,6 @@ elif menu == "词典管理":
 
         if btn_cols[1].button("添加", key="add-btn-3", help="✨ 将简版词典单词添加到默认词典"):
             add_new_words_from_mini_dict_to_words()
-
 
     with tabs[items.index("编辑微型词典")]:
         st.subheader("编辑微型词典", divider="rainbow")
@@ -909,9 +908,10 @@ elif menu == "词典管理":
             disabled=["word"],
         )
 
-        display_mini_dict_changes(mini_dict_ddataframe, view_elem)
+        if btn_cols[0].button("显示", key="view-btn-4", help="✨ 显示编辑后的简版词典变动部分"):
+            display_mini_dict_changes(mini_dict_ddataframe, view_elem)
 
-        if btn_cols[0].button("保存", key="save-btn-4", help="✨ 将编辑后的简版词典变动部分保存到数据库"):
+        if btn_cols[1].button("保存", key="save-btn-4", help="✨ 将编辑后的简版词典变动部分保存到数据库"):
             save_dataframe_changes_to_database(mini_dict_ddataframe, collection)
             st.session_state["mini_dict_df"]["edited_rows"] = {}
 
