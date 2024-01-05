@@ -1041,12 +1041,20 @@ elif menu == "词典管理":
         # 找出没有下载图片的单词
         to_do = [word for word in words if word not in unique_words]
         st.write(f"待处理的文档数量：{len(to_do)}")
+        # 打印前10个名称
+        st.write("前10个待处理的文档名称：")
+        for name in to_do[:10]:
+            st.write(name)
         # 创建一个进度条
         progress_bar = st.progress(0)
         for index, word in enumerate(to_do):
             urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
             for i, url in enumerate(urls):
-                img_byte_arr = load_image_bytes_from_url(url)
+                try:
+                    img_byte_arr = load_image_bytes_from_url(url)
+                except Exception as e:
+                    logger.error(f"加载图片字节数据时出错: {url}, 错误信息: {str(e)}")
+                    continue
                 # 创建一个 BlobClient
                 blob_client = blob_service_client.get_blob_client(
                     container_name, f"{word}_{i}.png"
