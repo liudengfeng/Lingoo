@@ -5,8 +5,8 @@ import logging
 # import mimetypes
 import os
 import re
-from pathlib import Path
 import time
+from pathlib import Path
 from typing import List
 
 import pandas as pd
@@ -15,6 +15,7 @@ import streamlit as st
 from azure.storage.blob import BlobServiceClient
 from vertexai.preview.generative_models import GenerationConfig, Image, Part
 
+from mypylib.constants import CEFR_LEVEL_MAPS
 from mypylib.db_interface import PRICES
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, str_to_enum
 from mypylib.google_cloud_configuration import PROJECT_ID
@@ -57,7 +58,7 @@ tz = pytz.timezone(st.session_state.dbi.cache.get("timezone", "Asia/Shanghai"))
 
 PM_OPTS = list(PaymentStatus)
 
-COLUMN_CONFIG = {
+PAYMENT_COLUMN_CONFIG = {
     "phone_number": "手机号码",
     "payment_id": "付款编号",
     "order_id": "订单编号",
@@ -120,15 +121,6 @@ COLUMN_CONFIG = {
         max_value=datetime.datetime(2134, 1, 1),
         step=60,
     ),
-    # "user_role": st.column_config.SelectboxColumn(
-    #     "权限",
-    #     help="✨ 用户权限",
-    #     width="small",
-    #     options=list(UserRole),
-    #     default=list(UserRole)[0],
-    #     required=True,
-    # ),
-    # "registration_time": "注册时间",
     "status": st.column_config.SelectboxColumn(
         "服务状态",
         help="✨ 服务状态",
@@ -138,10 +130,9 @@ COLUMN_CONFIG = {
         required=True,
     ),
     "remark": "服务备注",
-    # "memo": "用户备注",
 }
 
-COLUMN_ORDER = [
+PAYMENT_COLUMN_ORDER = [
     "phone_number",
     "payment_id",
     "order_id",
@@ -159,9 +150,9 @@ COLUMN_ORDER = [
     "remark",
 ]
 
-TIME_COLS = ["payment_time", "expiry_time", "registration_time"]
+PAYMENT_TIME_COLS = ["payment_time", "expiry_time", "registration_time"]
 
-EDITABLE_COLS: list[str] = [
+PAYMENT_EDITABLE_COLS: list[str] = [
     "is_approved",
     "payment_time",
     "expiry_time",
@@ -176,18 +167,6 @@ EDITABLE_COLS: list[str] = [
     "payment_amount",
     "status",
     "remark",
-]
-
-PAYMENTS_FIELDS = [
-    "payment_id",
-    "order_id",
-    "payment_time",
-    "payment_amount",
-    "purchase_type",
-    "payment_method",
-    "is_approved",
-    "status",
-    "remark ",
 ]
 
 
@@ -228,7 +207,7 @@ def generate_timestamp(key: str, type: str, idx: int):
 # endregion
 
 # region 选项卡
-items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "转移词典", "单词图片", "统计分析", "临时测试"]
+items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "编辑微型词典", "单词图片", "统计分析", "临时测试"]
 tabs = st.tabs(items)
 # endregion
 
@@ -526,17 +505,17 @@ with tabs[items.index("支付管理")]:
         placeholder.info("没有记录")
     else:
         # 将时间列转换为本地时区
-        for col in TIME_COLS:
+        for col in PAYMENT_TIME_COLS:
             if col in df.columns:
                 df[col] = df[col].dt.tz_convert(tz)
         edited_df = placeholder.data_editor(
             df,
-            column_config=COLUMN_CONFIG,
-            column_order=COLUMN_ORDER,
+            column_config=PAYMENT_COLUMN_CONFIG,
+            column_order=PAYMENT_COLUMN_ORDER,
             hide_index=True,
             num_rows="dynamic",
             key="users_payments",
-            disabled=[col for col in df.columns if col not in EDITABLE_COLS],
+            disabled=[col for col in df.columns if col not in PAYMENT_EDITABLE_COLS],
         )
 
     # # Access edited data
@@ -546,7 +525,7 @@ with tabs[items.index("支付管理")]:
         for idx, d in users_payments["edited_rows"].items():
             order_id = df.iloc[idx]["order_id"]  # type: ignore
             for key in d.keys():
-                if key in TIME_COLS:
+                if key in PAYMENT_TIME_COLS:
                     # 检查返回的对象的类型及其值
                     # st.write(f"{type(d[key])=}, {d[key]=}")
                     value = d[key]
@@ -804,20 +783,36 @@ def _add_to_words(mini_dict_ref, words_ref, doc_name, target_language_code):
         time.sleep(0.5)
 
 
-def configure_editable_mini_dict(elem):
-    st.text("编辑简版词典")
-    db = st.session_state.dbi.db
-    collection = db.collection("mini_dict")
+# endregion
 
-    # 从 Firestore 获取数据
-    docs = collection.get()
+# region 词典管理
 
-    # 将数据转换为 DataFrame
-    data = [{"word": doc.id, **doc.to_dict()} for doc in docs]
-    df = pd.DataFrame(data)
+with tabs[items.index("词典管理")]:
+    st.subheader("词典管理", divider="rainbow")
+    btn_cols = st.columns(10)
 
-    # 显示可编辑的 DataFrame
-    elem.data_editor(df, key="mini_dict_df", hide_index=True, disabled=["word"])
+    if btn_cols[0].button("整理", key="init_btn-3", help="✨ 整理简版词典"):
+        init_mini_dict()
+
+    if btn_cols[1].button("添加", key="add-btn-3", help="✨ 将简版词典单词添加到默认词典"):
+        add_to_words()
+
+
+# endregion
+
+# region 编辑微型词典
+
+MINI_DICT_COLUMN_CONFIG = {
+    "word": "单词",
+    "level": st.column_config.SelectboxColumn(
+        "CEFR分级",
+        help="✨ CEFR分级",
+        width="small",
+        options=list(CEFR_LEVEL_MAPS.keys()),
+        required=True,
+    ),
+    "translation": "译文",
+}
 
 
 def display_mini_dict_changes(elem):
@@ -848,11 +843,7 @@ def display_mini_dict_changes(elem):
     elem.write(changes)
 
 
-def save_changes_to_database():
-    st.text("保存简版词典修改部分到数据库")
-    db = st.session_state.dbi.db
-    collection = db.collection("mini_dict")
-
+def save_changes_to_database(collection):
     # 获取当前的 mini_dict_df
     current_mini_dict_df = st.session_state.mini_dict_df
 
@@ -867,153 +858,154 @@ def save_changes_to_database():
         # 获取单词，作为文档名称
         doc_name = original_row["word"]
 
-        # 获取变动的部分
-        changes = {
-            key: new_values[key]
-            for key in ["level", "translation"]
-            if key in new_values
-        }
-
         # 更新文档
         doc_ref = collection.document(doc_name)
-        doc_ref.update(changes)
+        doc_ref.update(new_values)
         st.toast(f"更新简版词典，单词：{doc_name}", icon="🎉")
 
 
-# endregion
+with tabs[items.index("编辑微型词典")]:
+    st.subheader("编辑微型词典", divider="rainbow")
 
-# region 词典管理
-
-with tabs[items.index("词典管理")]:
-    st.subheader("词典管理", divider="rainbow")
-    btn_cols = st.columns(10)
     view_cols = st.columns(2)
     edited_elem = view_cols[0].empty()
     view_elem = view_cols[1].empty()
 
-    if btn_cols[0].button("整理", key="init_btn-3", help="✨ 整理简版词典"):
-        init_mini_dict()
+    btn_cols = st.columns(10)
 
-    if btn_cols[1].button("添加", key="add-btn-3", help="✨ 将简版词典单词添加到默认词典"):
-        add_to_words()
+    db = st.session_state.dbi.db
+    collection = db.collection("mini_dict")
 
-    if btn_cols[2].button("编辑", key="edit-btn-3", help="✨ 编辑简版词典"):
-        configure_editable_mini_dict(edited_elem)
+    # 从 Firestore 获取数据
+    docs = collection.get()
 
-    if btn_cols[3].button("显示", key="view-btn-3", help="✨ 显示简版词典变动部分"):
+    # 将数据转换为 DataFrame
+    data = [{"word": doc.id, **doc.to_dict()} for doc in docs]
+    df = pd.DataFrame(data)
+
+    # 显示可编辑的 DataFrame
+    edited_elem.data_editor(
+        df,
+        key="mini_dict_df",
+        column_config=MINI_DICT_COLUMN_CONFIG,
+        hide_index=True,
+        disabled=["word"],
+    )
+
+    if btn_cols[0].button("显示", key="view-btn-4", help="✨ 显示简版词典变动"):
         display_mini_dict_changes(view_elem)
 
-    if btn_cols[4].button("保存", key="save-btn-3", help="✨ 简版词典编辑后的数据保存到数据库"):
-        save_changes_to_database()
-
+    if btn_cols[0].button("保存", key="save-btn-4", help="✨ 编辑简版词典，并保存到数据库"):
+        save_changes_to_database(collection)
+        st.session_state["mini_dict_df"]["edited_rows"] = {}
 
 # endregion
 
 # region 转移数据库
 
 
-def transfer_data_from_mongodb_to_firestore():
-    from bson import ObjectId
-    from pymongo import MongoClient
+# def transfer_data_from_mongodb_to_firestore():
+#     from bson import ObjectId
+#     from pymongo import MongoClient
 
-    mongodb_uri = st.secrets["Microsoft"]["COSMOS_CONNECTION_STRING"]
-    client = MongoClient(mongodb_uri)
-    db = client["pg"]
-    words = db["words"]
-    firestore_db = st.session_state.dbi.db
+#     mongodb_uri = st.secrets["Microsoft"]["COSMOS_CONNECTION_STRING"]
+#     client = MongoClient(mongodb_uri)
+#     db = client["pg"]
+#     words = db["words"]
+#     firestore_db = st.session_state.dbi.db
 
-    # 查询 Firestore 中的所有文档 ID
-    firestore_doc_ids = set(doc.id for doc in firestore_db.collection("words").stream())
+#     # 查询 Firestore 中的所有文档 ID
+#     firestore_doc_ids = set(doc.id for doc in firestore_db.collection("words").stream())
 
-    # 查询 MongoDB 中的所有文档 ID
-    mongodb_doc_ids = set(str(doc["_id"]) for doc in words.find())
+#     # 查询 MongoDB 中的所有文档 ID
+#     mongodb_doc_ids = set(str(doc["_id"]) for doc in words.find())
 
-    # 找出需要转移的文档 ID
-    doc_ids_to_transfer = mongodb_doc_ids - firestore_doc_ids
+#     # 找出需要转移的文档 ID
+#     doc_ids_to_transfer = mongodb_doc_ids - firestore_doc_ids
 
-    # 显示需要转移的文档数量
-    st.write(f"需要转移的文档数量：{len(doc_ids_to_transfer)}")
+#     # 显示需要转移的文档数量
+#     st.write(f"需要转移的文档数量：{len(doc_ids_to_transfer)}")
 
-    # 创建一个进度条
-    progress = st.progress(0)
+#     # 创建一个进度条
+#     progress = st.progress(0)
 
-    # 遍历需要转移的文档 ID
-    for i, doc_id in enumerate(doc_ids_to_transfer):
-        # 从 MongoDB 中获取文档
-        doc = words.find_one({"_id": ObjectId(doc_id)})
-        # 将它添加到 Firestore 中
-        del doc["_id"]
-        firestore_db.collection("words").document(doc_id).set(doc)
+#     # 遍历需要转移的文档 ID
+#     for i, doc_id in enumerate(doc_ids_to_transfer):
+#         # 从 MongoDB 中获取文档
+#         doc = words.find_one({"_id": ObjectId(doc_id)})
+#         # 将它添加到 Firestore 中
+#         del doc["_id"]
+#         firestore_db.collection("words").document(doc_id).set(doc)
 
-        # 更新进度条
-        progress.progress((i + 1) / len(doc_ids_to_transfer))
+#         # 更新进度条
+#         progress.progress((i + 1) / len(doc_ids_to_transfer))
 
-    # 完成后，关闭 MongoDB 客户端
-    client.close()
-
-
-def rename_firestore_documents(num_docs_to_process):
-    firestore_db = st.session_state.dbi.db
-    words_collection = firestore_db.collection("words")
-
-    # 创建一个正则表达式，用于匹配 MongoDB ObjectId
-    mongodb_objectid_regex = re.compile("^[0-9a-fA-F]{24}$")
-
-    # 遍历 Firestore 中的所有文档，检查每个文档的 ID 是否符合特定的格式
-    num_docs_to_rename = sum(
-        1 for doc in words_collection.stream() if mongodb_objectid_regex.match(doc.id)
-    )
-    # 显示待处理的文档数量
-    st.write(f"待处理的文档数量：{num_docs_to_rename}")
-
-    # 取待处理的文档数量与用户指定的数量的最小值作为要处理的文档数量
-    num_docs_to_process = min(num_docs_to_process, num_docs_to_rename)
-
-    # 创建一个进度条
-    progress_bar = st.progress(0)
-
-    # 遍历 Firestore 中的所有文档
-    for i, doc in enumerate(words_collection.stream()):
-        # 如果已处理的文档数量达到了用户指定的数量，就停止处理
-        if i >= num_docs_to_process:
-            break
-
-        # 如果文档的 ID 不符合特定的格式，就跳过这个文档
-        if not mongodb_objectid_regex.match(doc.id):
-            continue
-
-        # 获取文档的数据
-        data = doc.to_dict()
-        # 获取文档的单词字段
-        word = data.get("word")
-        if word:
-            # 如果单词字段存在，将其删除
-            del data["word"]
-            # 将单词中的 "/" 字符替换为 " or "
-            new_doc_id = word.replace("/", " or ")
-            # 创建一个新的文档，其 ID 为新的单词，其数据为原文档的数据
-            words_collection.document(new_doc_id).set(data)
-            # 删除原文档
-            doc.reference.delete()
-
-        # 更新进度条的值
-        update_and_display_progress(i + 1, num_docs_to_process, progress_bar)
-
-    # 完成后，显示一条消息
-    st.success("完成！")
+#     # 完成后，关闭 MongoDB 客户端
+#     client.close()
 
 
-with tabs[items.index("转移词典")]:
-    st.subheader("转移词典", divider="rainbow")
-    st.text("将 MongoDB 中的数据转移到 Firestore 中")
-    if st.button("开始", key="start_btn-4"):
-        transfer_data_from_mongodb_to_firestore()
-    st.text("注意：全部转移完成后，才可重命名")
-    num_docs_to_process = st.number_input(
-        "输入要处理的文档数量", min_value=10, max_value=21000, value=10
-    )
-    if st.button("重命名 Firestore 文档", key="rename_btn"):
-        rename_firestore_documents(num_docs_to_process)
+# def rename_firestore_documents(num_docs_to_process):
+#     firestore_db = st.session_state.dbi.db
+#     words_collection = firestore_db.collection("words")
+
+#     # 创建一个正则表达式，用于匹配 MongoDB ObjectId
+#     mongodb_objectid_regex = re.compile("^[0-9a-fA-F]{24}$")
+
+#     # 遍历 Firestore 中的所有文档，检查每个文档的 ID 是否符合特定的格式
+#     num_docs_to_rename = sum(
+#         1 for doc in words_collection.stream() if mongodb_objectid_regex.match(doc.id)
+#     )
+#     # 显示待处理的文档数量
+#     st.write(f"待处理的文档数量：{num_docs_to_rename}")
+
+#     # 取待处理的文档数量与用户指定的数量的最小值作为要处理的文档数量
+#     num_docs_to_process = min(num_docs_to_process, num_docs_to_rename)
+
+#     # 创建一个进度条
+#     progress_bar = st.progress(0)
+
+#     # 遍历 Firestore 中的所有文档
+#     for i, doc in enumerate(words_collection.stream()):
+#         # 如果已处理的文档数量达到了用户指定的数量，就停止处理
+#         if i >= num_docs_to_process:
+#             break
+
+#         # 如果文档的 ID 不符合特定的格式，就跳过这个文档
+#         if not mongodb_objectid_regex.match(doc.id):
+#             continue
+
+#         # 获取文档的数据
+#         data = doc.to_dict()
+#         # 获取文档的单词字段
+#         word = data.get("word")
+#         if word:
+#             # 如果单词字段存在，将其删除
+#             del data["word"]
+#             # 将单词中的 "/" 字符替换为 " or "
+#             new_doc_id = word.replace("/", " or ")
+#             # 创建一个新的文档，其 ID 为新的单词，其数据为原文档的数据
+#             words_collection.document(new_doc_id).set(data)
+#             # 删除原文档
+#             doc.reference.delete()
+
+#         # 更新进度条的值
+#         update_and_display_progress(i + 1, num_docs_to_process, progress_bar)
+
+#     # 完成后，显示一条消息
+#     st.success("完成！")
+
+
+# with tabs[items.index("转移词典")]:
+#     st.subheader("转移词典", divider="rainbow")
+#     st.text("将 MongoDB 中的数据转移到 Firestore 中")
+#     if st.button("开始", key="start_btn-4"):
+#         transfer_data_from_mongodb_to_firestore()
+#     st.text("注意：全部转移完成后，才可重命名")
+#     num_docs_to_process = st.number_input(
+#         "输入要处理的文档数量", min_value=10, max_value=21000, value=10
+#     )
+#     if st.button("重命名 Firestore 文档", key="rename_btn"):
+#         rename_firestore_documents(num_docs_to_process)
 
 # endregion
 
