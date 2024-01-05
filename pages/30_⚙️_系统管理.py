@@ -731,7 +731,7 @@ def init_mini_dict():
 
     for i, w in enumerate(words):
         update_and_display_progress(i + 1, len(words), mini_progress)
-        logger.info(f"单词：{w}...")
+        logger.info(f"单词：{w}")
         # 将单词作为文档名称，将其内容存档
         doc_name = w.replace("/", " or ")
 
@@ -777,7 +777,7 @@ def add_to_words():
 
     for i, w in enumerate(words):
         update_and_display_progress(i + 1, len(words), mini_progress)
-        logger.info(f"单词：{w}...")
+        logger.info(f"单词：{w}")
         # 将单词作为文档名称，将其内容存档
         doc_name = w.replace("/", " or ")
 
