@@ -674,16 +674,16 @@ with tabs[items.index("处理反馈")]:
 # region 词典管理辅助函数
 
 
-def get_unique_words():
-    words = []
-    fp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
-    with open(fp, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    for d in data.values():
-        words.extend(d)
-    words = set([w for w in words if w])
-    logger.info(f"共有{len(words)}个单词")
-    return words
+# def get_unique_words():
+#     words = []
+#     fp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
+#     with open(fp, "r", encoding="utf-8") as f:
+#         data = json.load(f)
+#     for d in data.values():
+#         words.extend(d)
+#     words = set([w for w in words if w])
+#     logger.info(f"共有{len(words)}个单词")
+#     return words
 
 
 @st.cache_data(ttl=60 * 60 * 2)  # 缓存有效期为2小时
@@ -723,7 +723,10 @@ def init_mini_dict():
     fp = CURRENT_CWD / "resource" / "mini_dict.json"
     # 检查文件是否存在
     if not os.path.exists(fp):
-        words = get_unique_words()
+        wp = (
+            CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
+        )
+        words = get_unique_words(wp, True)
         res = {}
         for w in words:
             logger.info(f"单词：{w}...")
@@ -740,6 +743,7 @@ def init_mini_dict():
             data = json.load(f)
         df = pd.DataFrame(data)
         edited_df = st.data_editor(df)
+
 
 # endregion
 

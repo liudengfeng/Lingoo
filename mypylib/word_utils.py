@@ -132,12 +132,13 @@ def get_lowest_cefr_level(word):
     Returns:
     str or None: The lowest CEFR level of the word, or None if the word is not found in the CEFR dictionary.
     """
-    fp = os.path.join(CURRENT_CWD, "resource", "dictionary", "cefr.json")
+    fp = os.path.join(CURRENT_CWD, "resource", "dictionary", "word_lists_by_edition_grade.json")
     levels = ["A1", "A2", "B1", "B2", "C1"]
     with open(fp, "r") as f:
         cefr = json.load(f)
     for level in levels:
-        if word in cefr[level]:
+        level_flag = f"1-CEFR-{level}"
+        if word in cefr[level_flag]:
             return level
     return None
 
@@ -155,10 +156,11 @@ def sample_words(level, n):
     """
     levels = ["A1", "A2", "B1", "B2", "C1"]
     assert level in levels, f"level must be one of {levels}"
-    fp = os.path.join(CURRENT_CWD, "resource", "dictionary", "cefr.json")
+    fp = os.path.join(CURRENT_CWD, "resource", "dictionary", "word_lists_by_edition_grade.json")
     with open(fp, "r") as f:
         cefr = json.load(f)
-    return random.sample(cefr[level], n)
+    level_flag = f"1-CEFR-{level}"
+    return random.sample(cefr[level_flag], n)
 
 
 def get_or_create_and_return_audio_data(word: str, style: str, secrets: dict):
