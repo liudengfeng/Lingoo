@@ -175,6 +175,8 @@ PAYMENT_EDITABLE_COLS: list[str] = [
 
 # region 函数
 
+# region 支付管理辅助函数
+
 
 def generate_timestamp(key: str, type: str, idx: int):
     # 获取日期和时间
@@ -203,6 +205,217 @@ def generate_timestamp(key: str, type: str, idx: int):
 
 # endregion
 
+# region 处理反馈辅助函数
+
+
+@st.cache_data(ttl=60 * 60 * 1)  # 缓存有效期为1小时
+def get_feedbacks():
+    container_name = "feedback"
+    connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+    container_client = blob_service_client.get_container_client(container_name)
+
+    # 获取blob列表
+    blobs_list = container_client.list_blobs()
+
+    # 获取一周前的日期
+    one_week_ago = datetime.datetime.now() - datetime.timedelta(weeks=1)
+
+    feedbacks = {}
+    for blob in blobs_list:
+        # 检查 blob 是否在最近一周内创建
+        if blob.last_modified >= one_week_ago:
+            name, ext = os.path.splitext(blob.name)
+            if name not in feedbacks:
+                feedbacks[name] = {
+                    "txt": None,
+                    "webm": None,
+                    "delete": False,
+                    "view": False,
+                }
+            if ext == ".txt":
+                feedbacks[name]["txt"] = blob.name
+            elif ext == ".webm":
+                feedbacks[name]["webm"] = blob.name
+
+    return feedbacks
+
+
+# endregion
+
+# region 词典管理辅助函数
+
+
+@st.cache_data(ttl=60 * 60 * 2)  # 缓存有效期为2小时
+def translate_text(text: str, target_language_code):
+    return google_translate(text, target_language_code)
+
+
+def translate_dict(d, target_language_code):
+    res = {}
+    if d.get("definition", None):
+        res["definition"] = translate_text(d["definition"], target_language_code)
+    examples = []
+    for e in d["examples"]:
+        examples.append(translate_text(e, target_language_code))
+    res["examples"] = examples
+    return res
+
+
+def translate_pos(pos: str, target_language_code):
+    res = []
+    for d in pos:
+        res.append(translate_dict(d, target_language_code))
+    return res
+
+
+def translate_doc(doc, target_language_code):
+    doc[target_language_code] = {}
+    doc[target_language_code]["translation"] = translate_text(
+        doc["word"], target_language_code
+    )
+    for k, v in doc["en-US"].items():
+        doc[target_language_code][k] = translate_pos(v, target_language_code)
+
+
+def init_mini_dict():
+    st.text("初始化简版词典")
+    target_language_code = "zh-CN"
+    db = st.session_state.dbi.db
+    words_ref = db.collection("words")
+    mini_dict_ref = db.collection("mini_dict")
+    wp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
+    words = get_unique_words(wp, True)
+    st.text(f"单词总数：{len(words)}")
+    mini_progress = st.progress(0)
+
+    # 获取 mini_dict 集合中所有的文档名称
+    mini_dict_docs = [doc.id for doc in mini_dict_ref.stream()]
+
+    for i, w in enumerate(words):
+        update_and_display_progress(i + 1, len(words), mini_progress)
+        logger.info(f"单词：{w}")
+        # 将单词作为文档名称，将其内容存档
+        doc_name = w.replace("/", " or ")
+
+        if doc_name in mini_dict_docs:
+            logger.info(f"单词：{w} 已存在，跳过")
+            continue
+
+        word_doc_ref = words_ref.document(doc_name)
+        word_doc = word_doc_ref.get()
+        translation = ""
+
+        if word_doc.exists:
+            p = word_doc.to_dict()
+            if "zh-CN" in p and "translation" in p["zh-CN"]:
+                translation = p["zh-CN"]["translation"]
+
+        if not translation:
+            translation = translate_text(w, target_language_code)
+
+        p = {
+            "translation": translation,
+            "level": get_lowest_cefr_level(w),
+        }
+        mini_dict_ref.document(doc_name).set(p)
+        logger.info(f"🎇 单词：{w} 完成")
+        # 每次写入操作后休眠 0.5 秒
+        time.sleep(0.5)
+
+
+def add_new_words_from_mini_dict_to_words():
+    st.text("添加简版词典到默认词典")
+    target_language_code = "zh-CN"
+    db = st.session_state.dbi.db
+    words_ref = db.collection("words")
+    mini_dict_ref = db.collection("mini_dict")
+    # wp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
+    # words = get_unique_words(wp, True)
+    mini_progress = st.progress(0)
+
+    # 获取 mini_dict 中的所有单词
+    mini_dict_words = set([doc.id for doc in mini_dict_ref.stream()])
+
+    # 获取 words 中的所有单词
+    words_words = set([doc.id for doc in words_ref.stream()])
+
+    # 找出只在 mini_dict 中存在的单词
+    new_words = mini_dict_words - words_words
+    st.write(f"单词总数：{len(new_words)}")
+
+    for i, w in enumerate(new_words):
+        update_and_display_progress(i + 1, len(new_words), mini_progress)
+        logger.info(f"单词：{w}")
+
+        _add_to_words(mini_dict_ref, words_ref, w, target_language_code)
+
+
+def _add_to_words(mini_dict_ref, words_ref, doc_name, target_language_code):
+    mini_dict_doc_ref = mini_dict_ref.document(doc_name)
+    mini_dict_doc = mini_dict_doc_ref.get()
+
+    if mini_dict_doc.exists:
+        p = mini_dict_doc.to_dict()
+        d = {
+            "level": p["level"],
+            target_language_code: {"translation": p["translation"]},
+        }
+        words_ref.document(doc_name).set(d)
+        logger.info(f"🎇 单词：{doc_name} 完成")
+        # 每次写入操作后休眠 0.5 秒
+        # time.sleep(0.5)
+
+
+# endregion
+
+# region 简版词典辅助函数
+
+
+def display_mini_dict_changes(current_df, elem):
+    # 获取已编辑的行
+    edited_rows = st.session_state["mini_dict_df"]["edited_rows"]
+
+    # 遍历已编辑的行
+    for idx, new_values in edited_rows.items():
+        # 获取原始的行
+        original_row = current_df.iloc[idx]
+
+        # 获取单词
+        word = original_row["word"]
+
+        # 显示变动
+        elem.write(f"单词：{word} 的变动：")
+        for key, new_value in new_values.items():
+            # 获取原始的值
+            original_value = original_row[key]
+
+            # 显示变动
+            elem.write(f"{key}: {original_value} -> {new_value}")
+
+
+def save_dataframe_changes_to_database(current_df, collection):
+    # 获取已编辑的行
+    edited_rows = st.session_state["mini_dict_df"]["edited_rows"]
+
+    # 遍历已编辑的行
+    for idx, new_values in edited_rows.items():
+        # 获取原始的行
+        original_row = current_df.iloc[idx]
+
+        # 获取单词，作为文档名称
+        doc_name = original_row["word"]
+
+        # 更新文档
+        doc_ref = collection.document(doc_name)
+        doc_ref.update(new_values)
+        st.toast(f"更新简版词典，单词：{doc_name}", icon="🎉")
+
+
+# endregion
+
+# endregion
+
 # region 侧边栏
 
 menu = st.sidebar.selectbox("菜单", options=["支付管理", "处理反馈", "词典管理", "统计分析"])
@@ -211,12 +424,7 @@ check_and_force_logout(sidebar_status)
 
 # endregion
 
-# region 选项卡
-
-# items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "编辑微型词典", "单词图片", "统计分析"]
-# tabs = st.tabs(items)
-
-# endregion
+# region 主页
 
 # region 支付管理
 
@@ -572,344 +780,142 @@ if menu == "支付管理":
 
 # endregion
 
+# region 处理反馈
+
+elif menu == "处理反馈":
+    st.subheader("处理反馈", divider="rainbow", anchor=False)
+    container_name = "feedback"
+    connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+    container_client = blob_service_client.get_container_client(container_name)
+
+    feedbacks = get_feedbacks()
+    # st.write(f"{feedbacks=}")
+    if len(feedbacks):
+        # 将反馈字典转换为一个DataFrame
+        feedbacks_df = pd.DataFrame(feedbacks.values())
+        feedbacks_df.columns = ["文件文件", "视频文件", "删除", "显示"]
+
+        feedbacks_edited_df = st.data_editor(
+            feedbacks_df, hide_index=True, key="feedbacks"
+        )
+
+        cols = st.columns(2)
+        # 添加一个按钮来删除反馈
+        if cols[0].button("删除", help="✨ 删除选中的反馈"):
+            # 获取要删除的反馈
+            edited_rows = st.session_state["feedbacks"]["edited_rows"]
+            for idx, vs in edited_rows.items():
+                if vs.get("删除", False):
+                    try:
+                        txt = feedbacks_df.iloc[idx]["文件文件"]
+                        webm = feedbacks_df.iloc[idx]["视频文件"]
+                        if txt is not None:
+                            container_client.delete_blob(txt)
+                            feedbacks_df.iloc[idx]["删除"] = True
+                            st.toast(f"从blob中删除：{txt}", icon="🎉")
+                        if webm is not None:
+                            container_client.delete_blob(webm)
+                            st.toast(f"从blob中删除：{webm}", icon="🎉")
+                    except Exception as e:
+                        pass
+
+        if cols[1].button("显示", help="✨ 显示选中的反馈"):
+            # 显示反馈
+            edited_rows = st.session_state["feedbacks"]["edited_rows"]
+            for idx, vs in edited_rows.items():
+                if vs.get("显示", False):
+                    deleted = feedbacks_df.iloc[idx]["删除"]
+                    if not deleted:
+                        try:
+                            st.divider()
+                            txt = feedbacks_df.iloc[idx]["文件文件"]
+                            if txt is not None:
+                                text_blob_client = blob_service_client.get_blob_client(
+                                    container_name, txt
+                                )
+                                text_data = (
+                                    text_blob_client.download_blob()
+                                    .readall()
+                                    .decode("utf-8")
+                                )
+                                st.text(f"{text_data}")
+                            webm = feedbacks_df.iloc[idx]["视频文件"]
+                            if webm is not None:
+                                video_blob_client = blob_service_client.get_blob_client(
+                                    container_name, webm
+                                )
+                                video_data = video_blob_client.download_blob().readall()
+                                st.video(video_data)
+                        except Exception as e:
+                            pass
+
+# endregion
+
+# region 词典管理
+
+elif menu == "词典管理":
+    items = ["词典管理", "编辑微型词典"]
+    tabs = st.tabs(items)
+
+    MINI_DICT_COLUMN_CONFIG = {
+        "word": "单词",
+        "level": st.column_config.SelectboxColumn(
+            "CEFR分级",
+            help="✨ CEFR分级",
+            width="small",
+            options=list(CEFR_LEVEL_MAPS.keys()),
+            required=True,
+        ),
+        "translation": "译文",
+    }
+    
+    with tabs[items.index("词典管理")]:
+        st.subheader("词典管理", divider="rainbow")
+        btn_cols = st.columns(10)
+
+        if btn_cols[0].button("整理", key="init_btn-3", help="✨ 整理简版词典"):
+            init_mini_dict()
+
+        if btn_cols[1].button("添加", key="add-btn-3", help="✨ 将简版词典单词添加到默认词典"):
+            add_new_words_from_mini_dict_to_words()
+
+
+    with tabs[items.index("编辑微型词典")]:
+        st.subheader("编辑微型词典", divider="rainbow")
 
-# # region 处理反馈
-
-
-# @st.cache_data(ttl=60 * 60 * 1)  # 缓存有效期为1小时
-# def get_feedbacks():
-#     container_name = "feedback"
-#     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
-#     blob_service_client = BlobServiceClient.from_connection_string(connect_str)
-#     container_client = blob_service_client.get_container_client(container_name)
-
-#     # 获取blob列表
-#     blobs_list = container_client.list_blobs()
-
-#     # 获取一周前的日期
-#     one_week_ago = datetime.datetime.now() - datetime.timedelta(weeks=1)
-
-#     feedbacks = {}
-#     for blob in blobs_list:
-#         # 检查 blob 是否在最近一周内创建
-#         if blob.last_modified >= one_week_ago:
-#             name, ext = os.path.splitext(blob.name)
-#             if name not in feedbacks:
-#                 feedbacks[name] = {
-#                     "txt": None,
-#                     "webm": None,
-#                     "delete": False,
-#                     "view": False,
-#                 }
-#             if ext == ".txt":
-#                 feedbacks[name]["txt"] = blob.name
-#             elif ext == ".webm":
-#                 feedbacks[name]["webm"] = blob.name
-
-#     return feedbacks
-
-
-# with tabs[items.index("处理反馈")]:
-#     st.subheader("处理反馈")
-#     container_name = "feedback"
-#     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
-#     blob_service_client = BlobServiceClient.from_connection_string(connect_str)
-#     container_client = blob_service_client.get_container_client(container_name)
-
-#     feedbacks = get_feedbacks()
-#     # st.write(f"{feedbacks=}")
-#     if len(feedbacks):
-#         # 将反馈字典转换为一个DataFrame
-#         feedbacks_df = pd.DataFrame(feedbacks.values())
-#         feedbacks_df.columns = ["文件文件", "视频文件", "删除", "显示"]
-
-#         feedbacks_edited_df = st.data_editor(
-#             feedbacks_df, hide_index=True, key="feedbacks"
-#         )
-
-#         cols = st.columns(2)
-#         # 添加一个按钮来删除反馈
-#         if cols[0].button("删除", help="✨ 删除选中的反馈"):
-#             # 获取要删除的反馈
-#             edited_rows = st.session_state["feedbacks"]["edited_rows"]
-#             for idx, vs in edited_rows.items():
-#                 if vs.get("删除", False):
-#                     try:
-#                         txt = feedbacks_df.iloc[idx]["文件文件"]
-#                         webm = feedbacks_df.iloc[idx]["视频文件"]
-#                         if txt is not None:
-#                             container_client.delete_blob(txt)
-#                             feedbacks_df.iloc[idx]["删除"] = True
-#                             st.toast(f"从blob中删除：{txt}", icon="🎉")
-#                         if webm is not None:
-#                             container_client.delete_blob(webm)
-#                             st.toast(f"从blob中删除：{webm}", icon="🎉")
-#                     except Exception as e:
-#                         pass
-
-#         if cols[1].button("显示", help="✨ 显示选中的反馈"):
-#             # 显示反馈
-#             edited_rows = st.session_state["feedbacks"]["edited_rows"]
-#             for idx, vs in edited_rows.items():
-#                 if vs.get("显示", False):
-#                     deleted = feedbacks_df.iloc[idx]["删除"]
-#                     if not deleted:
-#                         try:
-#                             st.divider()
-#                             txt = feedbacks_df.iloc[idx]["文件文件"]
-#                             if txt is not None:
-#                                 text_blob_client = blob_service_client.get_blob_client(
-#                                     container_name, txt
-#                                 )
-#                                 text_data = (
-#                                     text_blob_client.download_blob()
-#                                     .readall()
-#                                     .decode("utf-8")
-#                                 )
-#                                 st.text(f"{text_data}")
-#                             webm = feedbacks_df.iloc[idx]["视频文件"]
-#                             if webm is not None:
-#                                 video_blob_client = blob_service_client.get_blob_client(
-#                                     container_name, webm
-#                                 )
-#                                 video_data = video_blob_client.download_blob().readall()
-#                                 st.video(video_data)
-#                         except Exception as e:
-#                             pass
-
-# # endregion
-
-# # region 词典管理辅助函数
-
-
-# @st.cache_data(ttl=60 * 60 * 2)  # 缓存有效期为2小时
-# def translate_text(text: str, target_language_code):
-#     return google_translate(text, target_language_code)
-
-
-# def translate_dict(d, target_language_code):
-#     res = {}
-#     if d.get("definition", None):
-#         res["definition"] = translate_text(d["definition"], target_language_code)
-#     examples = []
-#     for e in d["examples"]:
-#         examples.append(translate_text(e, target_language_code))
-#     res["examples"] = examples
-#     return res
-
-
-# def translate_pos(pos: str, target_language_code):
-#     res = []
-#     for d in pos:
-#         res.append(translate_dict(d, target_language_code))
-#     return res
-
-
-# def translate_doc(doc, target_language_code):
-#     doc[target_language_code] = {}
-#     doc[target_language_code]["translation"] = translate_text(
-#         doc["word"], target_language_code
-#     )
-#     for k, v in doc["en-US"].items():
-#         doc[target_language_code][k] = translate_pos(v, target_language_code)
-
-
-# def init_mini_dict():
-#     st.text("初始化简版词典")
-#     target_language_code = "zh-CN"
-#     db = st.session_state.dbi.db
-#     words_ref = db.collection("words")
-#     mini_dict_ref = db.collection("mini_dict")
-#     wp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
-#     words = get_unique_words(wp, True)
-#     st.text(f"单词总数：{len(words)}")
-#     mini_progress = st.progress(0)
+        view_cols = st.columns(2)
+        edited_elem = view_cols[0].empty()
+        view_elem = view_cols[1].container()
 
-#     # 获取 mini_dict 集合中所有的文档名称
-#     mini_dict_docs = [doc.id for doc in mini_dict_ref.stream()]
+        btn_cols = st.columns(10)
 
-#     for i, w in enumerate(words):
-#         update_and_display_progress(i + 1, len(words), mini_progress)
-#         logger.info(f"单词：{w}")
-#         # 将单词作为文档名称，将其内容存档
-#         doc_name = w.replace("/", " or ")
-
-#         if doc_name in mini_dict_docs:
-#             logger.info(f"单词：{w} 已存在，跳过")
-#             continue
-
-#         word_doc_ref = words_ref.document(doc_name)
-#         word_doc = word_doc_ref.get()
-#         translation = ""
-
-#         if word_doc.exists:
-#             p = word_doc.to_dict()
-#             if "zh-CN" in p and "translation" in p["zh-CN"]:
-#                 translation = p["zh-CN"]["translation"]
-
-#         if not translation:
-#             translation = translate_text(w, target_language_code)
-
-#         p = {
-#             "translation": translation,
-#             "level": get_lowest_cefr_level(w),
-#         }
-#         mini_dict_ref.document(doc_name).set(p)
-#         logger.info(f"🎇 单词：{w} 完成")
-#         # 每次写入操作后休眠 0.5 秒
-#         time.sleep(0.5)
+        db = st.session_state.dbi.db
+        collection = db.collection("mini_dict")
 
+        # 从 Firestore 获取数据
+        docs = collection.get()
 
-# def add_to_words():
-#     st.text("添加简版词典到默认词典")
-#     target_language_code = "zh-CN"
-#     db = st.session_state.dbi.db
-#     words_ref = db.collection("words")
-#     mini_dict_ref = db.collection("mini_dict")
-#     # wp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
-#     # words = get_unique_words(wp, True)
-#     mini_progress = st.progress(0)
+        # 将数据转换为 DataFrame
+        data = [{"word": doc.id, **doc.to_dict()} for doc in docs]
+        mini_dict_ddataframe = pd.DataFrame(data)
 
-#     # 获取 mini_dict 中的所有单词
-#     mini_dict_words = set([doc.id for doc in mini_dict_ref.stream()])
+        # 显示可编辑的 DataFrame
+        edited_elem.data_editor(
+            mini_dict_ddataframe,
+            key="mini_dict_df",
+            column_config=MINI_DICT_COLUMN_CONFIG,
+            hide_index=True,
+            disabled=["word"],
+        )
 
-#     # 获取 words 中的所有单词
-#     words_words = set([doc.id for doc in words_ref.stream()])
+        display_mini_dict_changes(mini_dict_ddataframe, view_elem)
 
-#     # 找出只在 mini_dict 中存在的单词
-#     new_words = mini_dict_words - words_words
-#     st.write(f"单词总数：{len(new_words)}")
+        if btn_cols[0].button("保存", key="save-btn-4", help="✨ 将编辑后的简版词典变动部分保存到数据库"):
+            save_dataframe_changes_to_database(mini_dict_ddataframe, collection)
+            st.session_state["mini_dict_df"]["edited_rows"] = {}
 
-#     for i, w in enumerate(new_words):
-#         update_and_display_progress(i + 1, len(new_words), mini_progress)
-#         logger.info(f"单词：{w}")
-
-#         _add_to_words(mini_dict_ref, words_ref, w, target_language_code)
-
-
-# def _add_to_words(mini_dict_ref, words_ref, doc_name, target_language_code):
-#     mini_dict_doc_ref = mini_dict_ref.document(doc_name)
-#     mini_dict_doc = mini_dict_doc_ref.get()
-
-#     if mini_dict_doc.exists:
-#         p = mini_dict_doc.to_dict()
-#         d = {
-#             "level": p["level"],
-#             target_language_code: {"translation": p["translation"]},
-#         }
-#         words_ref.document(doc_name).set(d)
-#         logger.info(f"🎇 单词：{doc_name} 完成")
-#         # 每次写入操作后休眠 0.5 秒
-#         # time.sleep(0.5)
-
-
-# # endregion
-
-# # region 词典管理
-
-# with tabs[items.index("词典管理")]:
-#     st.subheader("词典管理", divider="rainbow")
-#     btn_cols = st.columns(10)
-
-#     if btn_cols[0].button("整理", key="init_btn-3", help="✨ 整理简版词典"):
-#         init_mini_dict()
-
-#     if btn_cols[1].button("添加", key="add-btn-3", help="✨ 将简版词典单词添加到默认词典"):
-#         add_to_words()
-
-
-# # endregion
-
-# # region 编辑微型词典
-
-# MINI_DICT_COLUMN_CONFIG = {
-#     "word": "单词",
-#     "level": st.column_config.SelectboxColumn(
-#         "CEFR分级",
-#         help="✨ CEFR分级",
-#         width="small",
-#         options=list(CEFR_LEVEL_MAPS.keys()),
-#         required=True,
-#     ),
-#     "translation": "译文",
-# }
-
-
-# def display_mini_dict_changes(current_df, elem):
-#     # 获取已编辑的行
-#     edited_rows = st.session_state["mini_dict_df"]["edited_rows"]
-
-#     # 遍历已编辑的行
-#     for idx, new_values in edited_rows.items():
-#         # 获取原始的行
-#         original_row = current_df.iloc[idx]
-
-#         # 获取单词
-#         word = original_row["word"]
-
-#         # 显示变动
-#         elem.write(f"单词：{word} 的变动：")
-#         for key, new_value in new_values.items():
-#             # 获取原始的值
-#             original_value = original_row[key]
-
-#             # 显示变动
-#             elem.write(f"{key}: {original_value} -> {new_value}")
-
-
-# def save_changes_to_database(current_df, collection):
-#     # 获取已编辑的行
-#     edited_rows = st.session_state["mini_dict_df"]["edited_rows"]
-
-#     # 遍历已编辑的行
-#     for idx, new_values in edited_rows.items():
-#         # 获取原始的行
-#         original_row = current_df.iloc[idx]
-
-#         # 获取单词，作为文档名称
-#         doc_name = original_row["word"]
-
-#         # 更新文档
-#         doc_ref = collection.document(doc_name)
-#         doc_ref.update(new_values)
-#         st.toast(f"更新简版词典，单词：{doc_name}", icon="🎉")
-
-
-# with tabs[items.index("编辑微型词典")]:
-#     st.subheader("编辑微型词典", divider="rainbow")
-
-#     view_cols = st.columns(2)
-#     edited_elem = view_cols[0].empty()
-#     view_elem = view_cols[1].container()
-
-#     btn_cols = st.columns(10)
-
-#     db = st.session_state.dbi.db
-#     collection = db.collection("mini_dict")
-
-#     # 从 Firestore 获取数据
-#     docs = collection.get()
-
-#     # 将数据转换为 DataFrame
-#     data = [{"word": doc.id, **doc.to_dict()} for doc in docs]
-#     mini_dict_ddataframe = pd.DataFrame(data)
-
-#     # 显示可编辑的 DataFrame
-#     edited_elem.data_editor(
-#         mini_dict_ddataframe,
-#         key="mini_dict_df",
-#         column_config=MINI_DICT_COLUMN_CONFIG,
-#         hide_index=True,
-#         disabled=["word"],
-#     )
-
-#     display_mini_dict_changes(mini_dict_ddataframe, view_elem)
-
-#     if btn_cols[0].button("保存", key="save-btn-4", help="✨ 将编辑后的简版词典变动部分保存到数据库"):
-#         save_changes_to_database(mini_dict_ddataframe, collection)
-#         st.session_state["mini_dict_df"]["edited_rows"] = {}
-
-# # endregion
+# endregion
 
 # # region 转移数据库
 
@@ -1098,3 +1104,5 @@ if menu == "支付管理":
 # # region 创建统计分析页面
 
 # # endregion
+
+# endregion
