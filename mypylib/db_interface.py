@@ -225,16 +225,12 @@ class DbInterface:
 
         # 添加 token 记录到 'token_records' 集合
         token_records_ref = self.db.collection("token_records")
-        token_records_ref.document(phone_number).set(used_token.model_dump())
+        token_records_ref.document().set(used_token.model_dump())
 
         # 更新用户的 'total_tokens' 属性
         user_doc_ref = self.db.collection("users").document(phone_number)
-        user_doc = user_doc_ref.get()
-        if user_doc.exists:
-            user_data = user_doc.to_dict()
-            total_tokens = user_data.get("total_tokens", 0)
-            total_tokens += used_token_count
-            user_doc_ref.update({"total_tokens": total_tokens})
+        user_doc_ref.update({"total_tokens": firestore.Increment(used_token_count)})
+
 
     # endregion
 
