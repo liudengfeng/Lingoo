@@ -859,7 +859,7 @@ with tabs[items.index("编辑微型词典")]:
 
     view_cols = st.columns(2)
     edited_elem = view_cols[0].empty()
-    view_elem = view_cols[1].empty()
+    view_elem = view_cols[1].container()
 
     btn_cols = st.columns(10)
 
