@@ -173,7 +173,7 @@ def generate_content_from_files_and_prompt(contents, response_container):
     ).total_tokens
     # 添加记录到数据库
     st.session_state.dbi.add_token_record(
-        st.session_state.user_info["phone_number"],
+        st.session_state.dbi.cache["phone_number"],
         "gemini-pro-vision",
         st.session_state.current_token_count,
     )

@@ -250,7 +250,7 @@ if prompt := st.chat_input("输入提示以便开始对话"):
             st.session_state.total_token_count += st.session_state.current_token_count
             # 添加记录到数据库
             st.session_state.dbi.add_token_record(
-                st.session_state.user_info["phone_number"],
+                st.session_state.dbi.cache["phone_number"],
                 "gemini-pro-chatbot",
                 st.session_state.current_token_count,
             )

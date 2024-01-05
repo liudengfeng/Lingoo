@@ -152,10 +152,10 @@ if st.session_state.dbi.cache.get("is_logged_in", False):
 
 # 没有登录的用户，显示登录表单
 if not st.session_state.dbi.cache.get("is_logged_in", False):
-    # if st.session_state.user_info and st.session_state.dbi.cache.get(
-    #     st.session_state.user_info["phone_number"]
+    # if st.session_state.dbi.cache and st.session_state.dbi.cache.get(
+    #     st.session_state.dbi.cache["phone_number"]
     # ):
-    #     sidebar_status.success(f"您已登录，{st.session_state.user_info['display_name']} 您好！")
+    #     sidebar_status.success(f"您已登录，{st.session_state.dbi.cache['display_name']} 您好！")
     with st.sidebar.form(key="login_form", clear_on_submit=True):
         phone_number = st.text_input(
             "手机号码",

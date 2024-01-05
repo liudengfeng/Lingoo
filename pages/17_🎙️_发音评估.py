@@ -53,10 +53,10 @@ if not os.path.exists(audio_dir):
 
 # 使用临时文件
 replay_fp = os.path.join(
-    audio_dir, f"{st.session_state.user_info['phone_number']}-tab1-replay.wav"
+    audio_dir, f"{st.session_state.dbi.cache['phone_number']}-tab1-replay.wav"
 )
 listen_fp = os.path.join(
-    audio_dir, f"{st.session_state.user_info['phone_number']}-tab1-listen.wav"
+    audio_dir, f"{st.session_state.dbi.cache['phone_number']}-tab1-listen.wav"
 )
 
 
