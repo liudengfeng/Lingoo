@@ -963,8 +963,8 @@ elif menu == "处理反馈":
 
 
 elif menu == "词典管理":
-    items = ["词典管理", "编辑微型词典", "下载图片", "挑选图片"]
-    tabs = st.tabs(items)
+    dict_items = ["词典管理", "编辑微型词典", "下载图片", "挑选图片"]
+    dict_tabs = st.tabs(dict_items)
 
     MINI_DICT_COLUMN_CONFIG = {
         "word": "单词",
@@ -980,7 +980,7 @@ elif menu == "词典管理":
 
     # region 词典管理
 
-    with tabs[items.index("词典管理")]:
+    with dict_tabs[dict_items.index("词典管理")]:
         st.subheader("词典管理", divider="rainbow", anchor=False)
         btn_cols = st.columns(10)
 
@@ -994,7 +994,7 @@ elif menu == "词典管理":
 
     # region 编辑微型词典
 
-    with tabs[items.index("编辑微型词典")]:
+    with dict_tabs[dict_items.index("编辑微型词典")]:
         st.subheader("编辑微型词典", divider="rainbow", anchor=False)
 
         btn_cols = st.columns(10)
@@ -1024,7 +1024,7 @@ elif menu == "词典管理":
 
     # region 下载图片
 
-    with tabs[items.index("下载图片")]:
+    with dict_tabs[dict_items.index("下载图片")]:
         st.subheader("下载图片", divider="rainbow", anchor=False)
         container_name = "word-images"
         connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
@@ -1061,7 +1061,7 @@ elif menu == "词典管理":
 
     # region 单词图片
 
-    with tabs[items.index("挑选图片")]:
+    with dict_tabs[dict_items.index("挑选图片")]:
         st.subheader("挑选图片", divider="rainbow", anchor=False)
         st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
         mini_dict_dataframe = get_mini_dict_dataframe()
@@ -1071,7 +1071,9 @@ elif menu == "词典管理":
         to_do = st.session_state.dbi.find_docs_without_image_indices(words)
         st.write(f"待处理的文档数量：{len(to_do)}")
         progress_pic_bar = st.progress(0)
-        if st.button("挑选单词示例图", key="start_btn-5"):
+        if st.button(
+            "执行", key="pick-image-btn", help="✨ 使用 gemini 多模态检验图片是否能形象解释单词的含义"
+        ):
             for i, word in enumerate(to_do):
                 start_time = time.time()  # 记录开始时间
                 update_and_display_progress(i + 1, len(words), progress_pic_bar, word)
