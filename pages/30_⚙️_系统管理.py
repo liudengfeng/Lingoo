@@ -815,24 +815,22 @@ MINI_DICT_COLUMN_CONFIG = {
 }
 
 
-def display_mini_dict_changes(elem):
+def display_mini_dict_changes(current_df, elem):
     # 获取已编辑的行
     edited_rows = st.session_state["mini_dict_df"]["edited_rows"]
-    current_mini_dict_df = st.session_state.mini_dict_df
-    elem.write(f"对象：{current_mini_dict_df}")
 
-    # # 遍历已编辑的行
-    # for idx, new_values in edited_rows.items():
-    #     # 获取原始的行
-    #     original_row = current_mini_dict_df.iloc[idx]
+    # 遍历已编辑的行
+    for idx, new_values in edited_rows.items():
+        # 获取原始的行
+        original_row = current_df.iloc[idx]
 
-    #     # 获取单词
-    #     word = original_row["word"]
+        # 获取单词
+        word = original_row["word"]
 
-    #     # 显示变动
-    #     elem.write(f"单词：{word} 的变动：")
-    #     for key, value in new_values.items():
-    #         elem.write(f"{key}: {value}")
+        # 显示变动
+        elem.write(f"单词：{word} 的变动：")
+        for key, value in new_values.items():
+            elem.write(f"{key}: {value}")
 
 
 def save_changes_to_database(collection):
@@ -884,7 +882,7 @@ with tabs[items.index("编辑微型词典")]:
         disabled=["word"],
     )
 
-    display_mini_dict_changes(view_elem)
+    display_mini_dict_changes(df, view_elem)
 
     if btn_cols[1].button("保存", key="save-btn-4", help="✨ 编辑简版词典，并保存到数据库"):
         save_changes_to_database(collection)
