@@ -19,6 +19,7 @@ from vertexai.preview.generative_models import GenerationConfig, Image, Part
 from mypylib.constants import CEFR_LEVEL_MAPS
 from mypylib.db_interface import PRICES
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, str_to_enum
+from mypylib.google_ai import generate_content_and_update_token_count
 from mypylib.google_cloud_configuration import PROJECT_ID
 from mypylib.st_helper import (
     check_access,
@@ -469,25 +470,21 @@ def save_dataframe_changes_to_database(current_df):
 # region 单词图片辅助函数
 
 
-def generate(word, images: List[Part]):
+def generate(word, images: List[Part], sidebar_status):
     model = load_vertex_model("gemini-pro-vision")
     prompt = f"单词：{word}\n输入的图片是否能形象解释单词含义，挑选出最合适的前4张图片。结果用输入图片的自然序号（从0开始）列表表达，如果没有合适的，返回空列表。以JSON格式输出。"
-    contents = [prompt] + images
-    responses = model.generate_content(
-        contents,
-        generation_config={
-            "max_output_tokens": 2048,
-            "temperature": 0.1,
-            "top_p": 1,
-            "top_k": 32,
-        },
-        stream=False,
+    contents = [Part.from_text(prompt)] + images
+    generation_config = GenerationConfig(
+        max_output_tokens=2048, temperature=0.1, top_p=1, top_k=32
+    )
+    responses = generate_content_and_update_token_count(
+        "挑选图片", sidebar_status, model, contents, generation_config, stream=False
     )
     return json.loads(responses.text.replace("```json", "").replace("```", ""))
 
 
 @st.spinner("使用 Gemini 挑选图片...")
-def fetch_and_update_word_image_indices(word):
+def fetch_and_update_word_image_indices(word, sidebar_status):
     container_name = "word-images"
     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
 
@@ -509,7 +506,7 @@ def fetch_and_update_word_image_indices(word):
         except Exception as e:
             logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
 
-    indices = generate(word, images)
+    indices = generate(word, images, sidebar_status)
     if indices:
         # 检查 indices 是否为列表
         if not isinstance(indices, list):
@@ -1030,23 +1027,19 @@ elif menu == "词典管理":
     with tabs[items.index("单词图片")]:
         st.subheader("单词图片", divider="rainbow")
         st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
-        words = get_unique_words(
-            CURRENT_CWD
-            / "resource"
-            / "dictionary"
-            / "word_lists_by_edition_grade.json",
-            False,
-        )
+        mini_dict_dataframe = get_mini_dict_dataframe()
+        words = mini_dict_dataframe["word"].tolist()
         num = st.number_input("输入单词数量", min_value=1, max_value=len(words), value=100)
-        words = sorted(words)[:num]
+        words = words[:num]
+        to_do = st.session_state.dbi.find_docs_without_image_indices(words)
+        st.write(f"待处理的文档数量：{len(to_do)}")
         progress_pic_bar = st.progress(0)
         if st.button("挑选单词示例图", key="start_btn-5"):
-            for i, word in enumerate(words):
+            for i, word in enumerate(to_do):
                 update_and_display_progress(i + 1, len(words), progress_pic_bar, word)
-                if not st.session_state.dbi.word_has_image_indices(word):
-                    fetch_and_update_word_image_indices(word)
-                    # 确保不超限
-                    time.sleep(1)
+                fetch_and_update_word_image_indices(word, sidebar_status)
+                # 确保不超限
+                time.sleep(1)
 
     # endregion
 

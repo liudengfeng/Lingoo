@@ -515,4 +515,26 @@ class DbInterface:
         # 检查 image_urls 字段是否存在
         return "image_indices" in doc_dict
 
+    def find_docs_without_image_indices(self, doc_names):
+        # 获取 "words" 集合
+        collection = self.db.collection("words")
+
+        # 存储没有 "image_indices" 字段的文档的名称
+        doc_names_without_image_indices = []
+
+        # 遍历所有文档名称
+        for doc_name in doc_names:
+            # 获取文档
+            doc = collection.document(doc_name).get()
+
+            # 将 DocumentSnapshot 对象转换为字典
+            doc_dict = doc.to_dict()
+
+            # 检查 "image_indices" 字段是否存在
+            if "image_indices" not in doc_dict:
+                # 如果 "image_indices" 字段不存在，将文档的名称添加到列表中
+                doc_names_without_image_indices.append(doc_name)
+
+        return doc_names_without_image_indices
+
     # endregion
