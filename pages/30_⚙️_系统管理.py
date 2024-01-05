@@ -39,6 +39,12 @@ logger = logging.getLogger("streamlit")
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 
+st.set_page_config(
+    page_title="系统管理",
+    page_icon=":gear:",
+    layout="wide",
+)
+
 check_access(True)
 configure_google_apis()
 
@@ -219,9 +225,10 @@ def generate_timestamp(key: str, type: str, idx: int):
 
 # endregion
 
-# 创建选项卡
+# region 选项卡
 items = ["订阅登记", "支付管理", "处理反馈", "词典管理", "转移词典", "单词图片", "统计分析", "临时测试"]
 tabs = st.tabs(items)
+# endregion
 
 # region 收费登记
 
@@ -674,18 +681,6 @@ with tabs[items.index("处理反馈")]:
 # region 词典管理辅助函数
 
 
-# def get_unique_words():
-#     words = []
-#     fp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
-#     with open(fp, "r", encoding="utf-8") as f:
-#         data = json.load(f)
-#     for d in data.values():
-#         words.extend(d)
-#     words = set([w for w in words if w])
-#     logger.info(f"共有{len(words)}个单词")
-#     return words
-
-
 @st.cache_data(ttl=60 * 60 * 2)  # 缓存有效期为2小时
 def translate_text(text: str, target_language_code):
     return google_translate(text, target_language_code)
@@ -725,7 +720,10 @@ def init_mini_dict():
     mini_dict_ref = db.collection("mini_dict")
     wp = CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
     words = get_unique_words(wp, True)
-    for w in words:
+    st.write(f"单词总数：{len(words)}")
+    mini_progress = st.progress(0)
+    for i, w in enumerate(words):
+        update_and_display_progress(i + 1, len(words), mini_progress)
         logger.info(f"单词：{w}...")
         # 将单词作为文档名称，将其内容存档
         doc_name = w.replace("/", " or ")
@@ -770,7 +768,7 @@ def configure_editable_mini_dict(elem):
 
 # endregion
 
-# region 初始化词典
+# region 词典管理
 
 with tabs[items.index("词典管理")]:
     st.subheader("词典管理", divider="rainbow")
@@ -778,15 +776,17 @@ with tabs[items.index("词典管理")]:
     btn_cols = st.columns(12)
     view_cols = st.columns(2)
     edited_elem = view_cols[0].empty()
+
     if btn_cols[0].button("整理", key="init_btn-3", help="✨ 整理编辑简版词典"):
         init_mini_dict()
+
     if btn_cols[1].button("编辑", key="btn-3", help="✨ 编辑简版词典"):
         configure_editable_mini_dict(edited_elem)
 
 
 # endregion
 
-# region 词典管理
+# region 转移数据库
 
 
 def transfer_data_from_mongodb_to_firestore():
