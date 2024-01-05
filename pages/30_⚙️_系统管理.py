@@ -372,7 +372,7 @@ def _add_to_words(mini_dict_ref, words_ref, doc_name, target_language_code):
 # region 简版词典辅助函数
 
 
-@st.cache_data
+@st.cache_data(show_spinner="提取简版词典...", ttl=60 * 60 * 2)  # 缓存有效期为2小时
 def get_mini_dict_dataframe():
     db = st.session_state.dbi.db
     collection = db.collection("mini_dict")
