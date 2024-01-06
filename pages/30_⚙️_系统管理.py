@@ -349,7 +349,7 @@ def init_mini_dict():
             if "zh-CN" in p and "translation" in p["zh-CN"]:
                 translation = p["zh-CN"]["translation"]
 
-        if not translation:
+        if translation == "":
             translation = translate_text(w, target_language_code)
 
         p = {

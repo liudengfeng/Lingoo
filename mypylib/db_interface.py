@@ -493,13 +493,13 @@ class DbInterface:
         word = word.replace("/", " or ")
 
         # 更新或添加 image_urls 字段
-        self.db.collection("words").document(word).set(
+        self.db.collection("mini_dict").document(word).set(
             {"image_indices": indices}, merge=True
         )
 
     def word_has_image_indices(self, word: str) -> bool:
         # 获取文档
-        doc = self.db.collection("words").document(word).get()
+        doc = self.db.collection("mini_dict").document(word).get()
 
         # 如果文档不存在，返回 False
         if not doc.exists:
@@ -513,7 +513,7 @@ class DbInterface:
 
     def find_docs_without_image_indices(self, doc_names):
         # 获取 "words" 集合
-        collection = self.db.collection("words")
+        collection = self.db.collection("mini_dict")
 
         # 存储没有 "image_indices" 字段的文档的名称
         doc_names_without_image_indices = []
