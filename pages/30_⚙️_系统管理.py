@@ -536,6 +536,13 @@ def process_images(num):
     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
     blob_service_client = BlobServiceClient.from_connection_string(connect_str)
     container_client = blob_service_client.get_container_client(container_name)
+    
+    # 获取容器中的所有 blob
+    blobs = container_client.list_blobs()
+    # 计算 blob 的总数
+    blob_count = sum(1 for _ in blobs)
+    logger.info(f"容器 {container_name} 中的 blob 总数：{blob_count}")    
+    
     progress_bar = st.progress(0)
     for index, word in enumerate(words[:num]):
         # 获取以单词开头的所有 blob
