@@ -112,8 +112,8 @@ def view_example(examples, container):
             container.image(p["part"].inline_data.data, use_column_width=True)
         elif mime_type.startswith("video"):
             container.video(p["part"].inline_data.data)
-    # 清空文本
-    clear_prompt("user_prompt_key")
+    # 清空文本:期望模型响应或指示词
+    clear_prompt("ex_text_key")
     # 更新案例数量
     st.rerun()
 
