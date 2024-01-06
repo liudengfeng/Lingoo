@@ -542,7 +542,7 @@ def process_images(num):
         word_blobs = container_client.list_blobs(name_starts_with=f"{word}_")
         # 如果存在任何以单词开头的 blob，就跳出循环
         if any(word_blobs):
-            logger.info(f"已找到以 '{word}_' 开头的 blob，跳过下载和上传步骤")
+            logger.info(f"找到 '{word}' 开头的 blob，跳过下载和上传步骤")
             continue
 
         urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
@@ -554,7 +554,7 @@ def process_images(num):
             try:
                 img_byte_arr = load_image_bytes_from_url(url)
             except Exception:
-                logger.error(f"加载单词{word}第{index+1}张图片时出错:")
+                logger.error(f"加载单词{word}第{index+1}张图片时出错")
                 continue
 
             blob_client.upload_blob(img_byte_arr, blob_type="BlockBlob", overwrite=True)
