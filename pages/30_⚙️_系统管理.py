@@ -1077,6 +1077,7 @@ elif menu == "词典管理":
 
     with dict_tabs[dict_items.index("下载图片")]:
         st.subheader("下载图片", divider="rainbow", anchor=False)
+        st.write(st.secrets["SERPER_KEY"])
         # 创建一个按钮，当用户点击这个按钮时，执行 process_images 函数
         if st.button("开始下载", key="process-images-btn", help="✨ 下载单词图片"):
             process_images()
