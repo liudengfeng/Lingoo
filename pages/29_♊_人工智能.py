@@ -580,17 +580,17 @@ elif menu == "工具能手":
         response_container = st.container()
 
         if view_all_btn:
+            response_container.empty()
             contents = st.session_state.multimodal_examples.copy()
             if uploaded_files is not None:
                 for m in uploaded_files:
                     contents.append(_process_media(m))
             contents.append({"mime_type": "text", "part": Part.from_text(prompt)})
-            st.subheader(
-                f":clipboard: :blue[已添加的案例（{len(contents)}）]",
+            response_container.subheader(
+                f":clipboard: :blue[完整提示词（{len(contents)}）]",
                 divider="rainbow",
                 anchor=False,
             )
-            response_container.empty()
             view_example(contents, response_container)
 
         if submitted:
