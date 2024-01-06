@@ -538,7 +538,9 @@ def process_images():
     container_client = blob_service_client.get_container_client(container_name)
 
     progress_bar = st.progress(0)
+    n = len(words)
     for index, word in enumerate(words):
+        update_and_display_progress(index + 1, n, progress_bar, word)
         # 获取以单词开头的所有 blob
         word_blobs = container_client.list_blobs(name_starts_with=f"{word}_")
         # 如果存在任何以单词开头的 blob，就跳出循环
@@ -559,8 +561,6 @@ def process_images():
                 continue
 
             blob_client.upload_blob(img_byte_arr, blob_type="BlockBlob", overwrite=True)
-
-        update_and_display_progress(index + 1, len(words), progress_bar, word)
 
 
 # endregion
