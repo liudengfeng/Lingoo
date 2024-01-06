@@ -463,7 +463,7 @@ elif menu == "工具能手":
     ex_text = tab0_col2.text_area(
         "期望模型响应或指示词",
         placeholder="输入期望的响应",
-        height=60,
+        # height=60,
         key="ex_text_key",
         help="✨ 期望模型响应或指示词",
     )
