@@ -522,6 +522,7 @@ def fetch_and_update_word_image_indices(word, sidebar_status):
             st.error(f"{word} indices 列表中的每个元素都必须是整数")
             return
         st.session_state.dbi.update_image_indices(word, indices)
+        logger.info(f"🧨 单词:{word} 图片索引:{indices} 已经更新")
 
 
 # endregion
@@ -1092,10 +1093,8 @@ elif menu == "词典管理":
         ):
             mini_dict_dataframe = get_mini_dict_dataframe()
             words = mini_dict_dataframe["word"].tolist()
-            num = st.number_input(
-                "输入单词数量", min_value=1, max_value=len(words), value=100
-            )
-            words = words[:num]
+            # 对列表进行随机洗牌
+            random.shuffle(words)
             to_do = st.session_state.dbi.find_docs_without_image_indices(words)
             st.write(f"待处理的文档数量：{len(to_do)}")
             for i, word in enumerate(to_do):
