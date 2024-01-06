@@ -492,7 +492,6 @@ elif menu == "工具能手":
             key="del_text_btn",
             on_click=clear_prompt,
             args=("ex_text_key",),
-            help="✨ 删除文本",
         )
         del_last_btn = tab0_ex_btn_cols[3].button(
             ":rewind:", help="✨ 删除最后一条样本", key="del_last_example"
