@@ -103,16 +103,15 @@ def _process_media(uploaded_file):
 
 
 def view_example(examples, container):
-    for p in examples:
+    cols = st.beta_columns(2)
+    for i, p in enumerate(examples):
         mime_type = p["mime_type"]
         if mime_type.startswith("text"):
-            container.markdown(p["part"].text)
+            cols[i % 2].markdown(p["part"].text)
         elif mime_type.startswith("image"):
-            container.image(
-                p["part"].inline_data.data, use_column_width=True, width=300
-            )
+            cols[i % 2].image(p["part"].inline_data.data, width=300)
         elif mime_type.startswith("video"):
-            container.video(p["part"].inline_data.data)
+            cols[i % 2].video(p["part"].inline_data.data)
 
 
 def generate_content_from_files_and_prompt(contents, response_container):
@@ -472,7 +471,7 @@ elif menu == "工具能手":
             key="ex_text_key",
             help="✨ 期望模型响应或指示词",
         )
-        tab0_col2.info("✨ 添加文本后记得点击删除按钮清除文本")
+        # tab0_col2.info("✨ 添加文本后记得点击删除按钮清除文本")
 
         tab0_ex_btn_cols = st.columns([1, 1, 1, 1, 1, 1, 4])
 
