@@ -129,18 +129,18 @@ def generate_content_from_files_and_prompt(contents, response_container):
         stream=True,
     )
 
-    col1, col2 = response_container.columns(2)
-    view_example(contents, col1)
+    # col1, col2 = response_container.columns(2)
+    # view_example(contents, col1)
 
     full_response = ""
-    message_placeholder = col2.empty()
+    # message_placeholder = col2.empty()
     for chunk in responses:  # type: ignore
         full_response += chunk.text
         time.sleep(0.05)
         # Add a blinking cursor to simulate typing
-        message_placeholder.markdown(full_response + "▌")
+        response_container.markdown(full_response + "▌")
 
-    message_placeholder.markdown(full_response)
+    response_container.markdown(full_response)
     # 令牌数
     st.session_state.current_token_count = model.count_tokens(
         [p["part"] for p in contents] + [Part.from_text(full_response)]
