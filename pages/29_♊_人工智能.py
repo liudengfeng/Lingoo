@@ -103,7 +103,6 @@ def _process_media(uploaded_file):
 
 
 def view_example(examples, container):
-    # for p in st.session_state.multimodal_examples:
     for p in examples:
         mime_type = p["mime_type"]
         if mime_type.startswith("text"):
@@ -440,6 +439,7 @@ elif menu == "工具能手":
     st.header(":rocket: :rainbow[通用多模态AI]", divider="rainbow", anchor=False)
     st.markdown("""您可以向`Gemini`模型发送多模态提示信息。支持的模态包括文字、图片和视频。""")
 
+    st.tabs(["运行", "添加案例", "查看提示词"])
     st.subheader(":clipboard: :blue[添加案例（可选）]", divider="rainbow", anchor=False)
     st.markdown(
         "输入案例可丰富模型响应内容。`Gemini`模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。"
@@ -468,7 +468,7 @@ elif menu == "工具能手":
         help="✨ 期望模型响应或指示词",
     )
 
-    tab0_ex_btn_cols = st.columns([1, 1, 1, 1, 6])
+    tab0_ex_btn_cols = st.columns([1, 1, 1, 1, 1, 5])
 
     add_media_btn = tab0_ex_btn_cols[0].button(
         ":film_projector:",
@@ -479,8 +479,6 @@ elif menu == "工具能手":
         ":memo:",
         help="✨ 添加指示词或期望模型的响应",
         key="add_text_btn",
-        on_click=clear_prompt,
-        args=("ex_text_key",),
     )
     del_last_btn = tab0_ex_btn_cols[2].button(
         ":rewind:", help="✨ 删除最后一条样本", key="del_last_example"
