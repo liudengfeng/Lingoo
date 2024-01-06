@@ -1095,11 +1095,14 @@ elif menu == "词典管理":
             words = mini_dict_dataframe["word"].tolist()
             # 对列表进行随机洗牌
             random.shuffle(words)
-            to_do = st.session_state.dbi.find_docs_without_image_indices(words)
-            st.write(f"待处理的文档数量：{len(to_do)}")
-            for i, word in enumerate(to_do):
+            # to_do = st.session_state.dbi.find_docs_without_image_indices(words)
+            # st.write(f"待处理的文档数量：{len(to_do)}")
+            for i, word in enumerate(words):
                 start_time = time.time()  # 记录开始时间
                 update_and_display_progress(i + 1, len(words), progress_pic_bar, word)
+                if st.session_state.dbi.word_has_image_indices(word):
+                    logger.info(f"✅ 单词：{word} 已经有图片索引，跳过")
+                    continue
                 fetch_and_update_word_image_indices(word, sidebar_status)
                 end_time = time.time()  # 记录结束时间
                 elapsed_time = end_time - start_time  # 计算运行时间
