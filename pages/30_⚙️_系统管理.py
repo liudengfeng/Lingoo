@@ -505,7 +505,11 @@ def fetch_and_update_word_image_indices(word, sidebar_status):
             images.append(Image.from_bytes(image_bytes))
         except Exception as e:
             logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
-
+    
+    if len(images) == 0:
+        logger.error(f"没有找到单词 {word} 的图片")
+        return
+    
     indices = generate(word, images, sidebar_status)
     if indices:
         # 检查 indices 是否为列表
@@ -1088,11 +1092,11 @@ elif menu == "词典管理":
     with dict_tabs[dict_items.index("挑选图片")]:
         st.subheader("挑选图片", divider="rainbow", anchor=False)
         st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
-        mini_dict_dataframe = get_mini_dict_dataframe()
         progress_pic_bar = st.progress(0)
         if st.button(
             "执行", key="pick-image-btn", help="✨ 使用 gemini 多模态检验图片是否能形象解释单词的含义"
         ):
+            mini_dict_dataframe = get_mini_dict_dataframe()
             words = mini_dict_dataframe["word"].tolist()
             num = st.number_input(
                 "输入单词数量", min_value=1, max_value=len(words), value=100
