@@ -538,6 +538,7 @@ elif menu == "工具能手":
                 divider="rainbow",
                 anchor=False,
             )
+            examples_container.empty()
             view_example(st.session_state.multimodal_examples, examples_container)
 
     with tabs[1]:
