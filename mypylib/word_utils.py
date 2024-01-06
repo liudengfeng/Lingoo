@@ -223,7 +223,8 @@ def get_word_image_urls(word, api_key):
 
     response = requests.request("POST", url, headers=headers, data=payload)
     data_dict = json.loads(response.text)
-    return [img["imageUrl"] for img in data_dict["images"]]
+    # 使用缩略图确保可正确下载图像
+    return [img["thumbnailUrl"] for img in data_dict["images"]]
 
 
 def load_image_bytes_from_url(img_url: str) -> bytes:
