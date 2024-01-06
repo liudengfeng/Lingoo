@@ -4,6 +4,7 @@ import logging
 
 # import mimetypes
 import os
+import random
 import re
 import time
 from pathlib import Path
@@ -531,6 +532,8 @@ def fetch_and_update_word_image_indices(word, sidebar_status):
 def process_images():
     mini_dict_dataframe = get_mini_dict_dataframe()
     words = mini_dict_dataframe["word"].tolist()
+    # 对列表进行随机洗牌
+    random.shuffle(words)
 
     container_name = "word-images"
     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
