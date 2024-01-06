@@ -529,48 +529,37 @@ def fetch_and_update_word_image_indices(word, sidebar_status):
 
 
 def process_images(num):
-    # 记录开始时间
-    start_time = time.time()
     mini_dict_dataframe = get_mini_dict_dataframe()
     words = mini_dict_dataframe["word"].tolist()
-    elapsed_time = time.time() - start_time
-    
-    logger.info(f"mini_dict 运行耗时：{elapsed_time:.2f} 秒")
-    
-    start_time = time.time()
+
     container_name = "word-images"
     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
     blob_service_client = BlobServiceClient.from_connection_string(connect_str)
     container_client = blob_service_client.get_container_client(container_name)
-    blobs_list = container_client.list_blobs()
-    blob_words = [blob.name.split("_")[0] for blob in blobs_list]
-    unique_words = set(blob_words)
-    # 计算运行时间
-    elapsed_time = time.time() - start_time
-
-    # 输出数量和运行时间
-    logger.info(f"unique_words 的数量：{len(unique_words)}")
-    logger.info(f"blob 运行耗时：{elapsed_time:.2f} 秒")
-
-
-    to_do = [word for word in words if word not in unique_words]
-    st.write(f"需处理的文档数量：{len(to_do)}")
-    to_do = to_do[:num]
-
     progress_bar = st.progress(0)
-    for index, word in enumerate(to_do):
+    for index, word in enumerate(words[:num]):
+        # 获取以单词开头的所有 blob
+        word_blobs = container_client.list_blobs(name_starts_with=f"{word}_")
+        # 如果存在任何以单词开头的 blob，就跳出循环
+        if any(word_blobs):
+            logger.info(f"已找到以 '{word}_' 开头的 blob，跳过下载和上传步骤")
+            continue
+
         urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
         for i, url in enumerate(urls):
+            # 创建 blob 名称
+            blob_name = f"{word}_{i}.png"
+            blob_client = blob_service_client.get_blob_client(container_name, blob_name)
+
             try:
                 img_byte_arr = load_image_bytes_from_url(url)
             except Exception:
                 logger.error(f"加载单词{word}第{index+1}张图片时出错:")
                 continue
-            blob_client = blob_service_client.get_blob_client(
-                container_name, f"{word}_{i}.png"
-            )
+
             blob_client.upload_blob(img_byte_arr, blob_type="BlockBlob", overwrite=True)
-        update_and_display_progress(index + 1, len(to_do), progress_bar, word)
+
+        update_and_display_progress(index + 1, num, progress_bar, word)
 
 
 # endregion
