@@ -111,8 +111,6 @@ def view_example(examples, container):
             container.image(p["part"].inline_data.data, use_column_width=True)
         elif mime_type.startswith("video"):
             container.video(p["part"].inline_data.data)
-    # 更新案例数量
-    st.rerun()
 
 
 def generate_content_from_files_and_prompt(contents, response_container):
@@ -488,7 +486,7 @@ elif menu == "工具能手":
         )
         del_text_btn = tab0_ex_btn_cols[2].button(
             ":wastebasket:",
-            help="✨ 删除文本",
+            help="✨ 删除文本框内的文本",
             key="del_text_btn",
             on_click=clear_prompt,
             args=("ex_text_key",),
