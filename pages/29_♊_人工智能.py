@@ -477,7 +477,7 @@ elif menu == "工具能手":
         tab0_ex_btn_cols = st.columns([1, 1, 1, 1, 1, 5])
 
         add_media_btn = tab0_ex_btn_cols[0].button(
-            ":film_projector:",
+            ":frame_with_picture:",
             help="✨ 添加图片或视频",
             key="add_media_btn",
         )
