@@ -564,6 +564,7 @@ def process_images():
                 continue
 
             blob_client.upload_blob(img_byte_arr, blob_type="BlockBlob", overwrite=True)
+            logger.info(f"🎇 单词：{word} 第{i+1}张图片上传成功")
 
 
 # endregion
