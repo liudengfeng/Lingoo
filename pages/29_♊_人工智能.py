@@ -103,7 +103,7 @@ def _process_media(uploaded_file):
 
 
 def view_example(examples, container):
-    cols = st.columns(2)
+    cols = container.columns(2)
     for i, p in enumerate(examples):
         mime_type = p["mime_type"]
         if mime_type.startswith("text"):
@@ -563,7 +563,7 @@ elif menu == "工具能手":
             max_chars=12288,
             height=300,
         )
-        tab0_btn_cols = st.columns([1, 1, 8])
+        tab0_btn_cols = st.columns([1, 1, 1, 7])
         # help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。"
         cls_btn = tab0_btn_cols[0].button(
             ":wastebasket:",
@@ -572,9 +572,26 @@ elif menu == "工具能手":
             on_click=clear_prompt,
             args=("user_prompt_key",),
         )
-        submitted = tab0_btn_cols[1].button("提交")
+        view_all_btn = tab0_btn_cols[1].button(
+            ":mag_right:", help="✨ 查看全部样本", key="view_example-2"
+        )
+        submitted = tab0_btn_cols[2].button("提交")
 
         response_container = st.container()
+
+        if view_all_btn:
+            contents = st.session_state.multimodal_examples.copy()
+            if uploaded_files is not None:
+                for m in uploaded_files:
+                    contents.append(_process_media(m))
+            contents.append({"mime_type": "text", "part": Part.from_text(prompt)})
+            st.subheader(
+                f":clipboard: :blue[已添加的案例（{len(contents)}）]",
+                divider="rainbow",
+                anchor=False,
+            )
+            response_container.empty()
+            view_example(contents, response_container)
 
         if submitted:
             if uploaded_files is None or len(uploaded_files) == 0:  # type: ignore
