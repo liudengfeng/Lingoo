@@ -112,8 +112,6 @@ def view_example(examples, container):
             container.image(p["part"].inline_data.data, use_column_width=True)
         elif mime_type.startswith("video"):
             container.video(p["part"].inline_data.data)
-    # 清空文本:期望模型响应或指示词
-    clear_prompt("ex_text_key")
     # 更新案例数量
     st.rerun()
 
@@ -480,6 +478,8 @@ elif menu == "工具能手":
         ":memo:",
         help="✨ 添加指示词或期望模型的响应",
         key="add_text_btn",
+        on_click=clear_prompt,
+        args=("ex_text_key",),
     )
     del_last_btn = tab0_ex_btn_cols[2].button(
         ":rewind:", help="✨ 删除最后一条样本", key="del_last_example"
