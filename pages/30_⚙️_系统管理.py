@@ -538,7 +538,7 @@ def process_images():
     container_client = blob_service_client.get_container_client(container_name)
 
     progress_bar = st.progress(0)
-    for index, word in enumerate(word):
+    for index, word in enumerate(words):
         # 获取以单词开头的所有 blob
         word_blobs = container_client.list_blobs(name_starts_with=f"{word}_")
         # 如果存在任何以单词开头的 blob，就跳出循环
