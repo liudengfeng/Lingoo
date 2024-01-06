@@ -552,7 +552,8 @@ def process_images():
             logger.info(f"找到 '{word}' 开头的 blob，跳过下载和上传步骤")
             continue
 
-        urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+        # urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+        urls = get_word_image_urls(word, "00f0b47160060b92b0c1723f1e800766f989a78e")
         for i, url in enumerate(urls):
             # 创建 blob 名称
             blob_name = f"{word}_{i}.png"
