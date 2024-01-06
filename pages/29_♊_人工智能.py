@@ -104,7 +104,7 @@ if menu == "聊天机器人":
     """
     )
     sidebar_cols = st.sidebar.columns(2)
-    sidebar_cols[0].sidebar.slider(
+    sidebar_cols[0].slider(
         "词元限制",
         key="max_output_tokens",
         min_value=32,
@@ -114,7 +114,7 @@ if menu == "聊天机器人":
         help="""✨ 词元限制决定了一条提示的最大文本输出量。词元约为 4 个字符。默认值为 2048。""",
     )
     # 生成参数
-    sidebar_cols[1].sidebar.slider(
+    sidebar_cols[1].slider(
         "温度",
         min_value=0.00,
         max_value=1.0,
@@ -123,7 +123,7 @@ if menu == "聊天机器人":
         step=0.1,
         help="✨ 温度可以控制词元选择的随机性。较低的温度适合希望获得真实或正确回复的提示，而较高的温度可能会引发更加多样化或意想不到的结果。如果温度为 0，系统始终会选择概率最高的词元。对于大多数应用场景，不妨先试着将温度设为 0.2。",
     )
-    sidebar_cols[0].sidebar.slider(
+    sidebar_cols[0].slider(
         "Top K",
         key="top_k",
         min_value=1,
@@ -131,11 +131,11 @@ if menu == "聊天机器人":
         value=40,
         step=1,
         help="""✨ Top-k 可更改模型选择输出词元的方式。
-    - 如果 Top-k 设为 1，表示所选词元是模型词汇表的所有词元中概率最高的词元（也称为贪心解码）。
-    - 如果 Top-k 设为 3，则表示系统将从 3 个概率最高的词元（通过温度确定）中选择下一个词元。
-    - Top-k 的默认值为 40。""",
+- 如果 Top-k 设为 1，表示所选词元是模型词汇表的所有词元中概率最高的词元（也称为贪心解码）。
+- 如果 Top-k 设为 3，则表示系统将从 3 个概率最高的词元（通过温度确定）中选择下一个词元。
+- Top-k 的默认值为 40。""",
     )
-    sidebar_cols[1].sidebar.slider(
+    sidebar_cols[1].slider(
         "Top P",
         key="top_p",
         min_value=0.00,
@@ -143,8 +143,8 @@ if menu == "聊天机器人":
         value=1.0,
         step=0.01,
         help="""✨ Top-p 可更改模型选择输出词元的方式。系统会按照概率从最高到最低的顺序选择词元，直到所选词元的概率总和等于 Top-p 的值。
-    - 例如，如果词元 A、B 和 C 的概率分别是 0.3、0.2 和 0.1，并且 Top-p 的值为 0.5，则模型将选择 A 或 B 作为下一个词元（通过温度确定）。
-    - Top-p 的默认值为 0.8。""",
+- 例如，如果词元 A、B 和 C 的概率分别是 0.3、0.2 和 0.1，并且 Top-p 的值为 0.5，则模型将选择 A 或 B 作为下一个词元（通过温度确定）。
+- Top-p 的默认值为 0.8。""",
     )
 
     st.sidebar.text_input(
@@ -172,9 +172,9 @@ if menu == "聊天机器人":
         on_click=add_chat_pairs,
         disabled=len(st.session_state["examples_pair"]) >= 8,
         help="""✨ 聊天提示的示例是输入输出对的列表，它们演示给定输入的示例性模型输出。控制在8对以内。使用示例来自定义模型如何响应某些问题。
-    |用户示例|AI示例|
-    |:-|:-|
-    |火星有多少颗卫星？|火星有两个卫星，火卫一和火卫二。|
+|用户示例|AI示例|
+|:-|:-|
+|火星有多少颗卫星？|火星有两个卫星，火卫一和火卫二。|
     """,
     )
     sidebar_col2.button(
