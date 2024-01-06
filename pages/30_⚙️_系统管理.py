@@ -531,6 +531,13 @@ def fetch_and_update_word_image_indices(word, sidebar_status):
 def process_images(num):
     # 记录开始时间
     start_time = time.time()
+    mini_dict_dataframe = get_mini_dict_dataframe()
+    words = mini_dict_dataframe["word"].tolist()
+    elapsed_time = time.time() - start_time
+    
+    logger.info(f"mini_dict 运行耗时：{elapsed_time:.2f} 秒")
+    
+    start_time = time.time()
     container_name = "word-images"
     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
     blob_service_client = BlobServiceClient.from_connection_string(connect_str)
@@ -545,11 +552,6 @@ def process_images(num):
     logger.info(f"unique_words 的数量：{len(unique_words)}")
     logger.info(f"blob 运行耗时：{elapsed_time:.2f} 秒")
 
-    start_time = time.time()
-    mini_dict_dataframe = get_mini_dict_dataframe()
-    words = mini_dict_dataframe["word"].tolist()
-    elapsed_time = time.time() - start_time
-    logger.info(f"mini_dict 运行耗时：{elapsed_time:.2f} 秒")
 
     to_do = [word for word in words if word not in unique_words]
     st.write(f"需处理的文档数量：{len(to_do)}")
