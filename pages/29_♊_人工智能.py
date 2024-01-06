@@ -472,7 +472,7 @@ elif menu == "工具能手":
             key="ex_text_key",
             help="✨ 期望模型响应或指示词",
         )
-        tab0_col2.info("✨ 添加文本后记得点击删除按钮清除文本", icon="🗑️")
+        tab0_col2.info("✨ 添加文本后记得点击删除按钮清除文本")
 
         tab0_ex_btn_cols = st.columns([1, 1, 1, 1, 1, 5])
 
@@ -486,10 +486,18 @@ elif menu == "工具能手":
             help="✨ 添加指示词或期望模型的响应",
             key="add_text_btn",
         )
-        del_last_btn = tab0_ex_btn_cols[2].button(
+        del_text_btn = tab0_ex_btn_cols[2].button(
+            ":wastebasket:",
+            help="✨ 删除文本",
+            key="del_text_btn",
+            on_click=clear_prompt,
+            args=("ex_text_key",),
+            help="✨ 删除文本",
+        )
+        del_last_btn = tab0_ex_btn_cols[3].button(
             ":rewind:", help="✨ 删除最后一条样本", key="del_last_example"
         )
-        cls_ex_btn = tab0_ex_btn_cols[3].button(
+        cls_ex_btn = tab0_ex_btn_cols[4].button(
             ":arrows_counterclockwise:", help="✨ 删除全部样本", key="clear_example"
         )
 
