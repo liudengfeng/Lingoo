@@ -485,15 +485,15 @@ elif menu == "工具能手":
             help="✨ 将文本框内的内容添加到案例中",
             key="add_text_btn",
         )
-        del_text_btn = tab0_ex_btn_cols[2].button(
+        del_last_btn = tab0_ex_btn_cols[2].button(
+            ":rewind:", help="✨ 删除案例中的最后一条样本", key="del_last_example"
+        )
+        del_text_btn = tab0_ex_btn_cols[3].button(
             ":wastebasket:",
             help="✨ 删除文本框内的文本",
             key="del_text_btn",
             on_click=clear_prompt,
             args=("ex_text_key",),
-        )
-        del_last_btn = tab0_ex_btn_cols[3].button(
-            ":rewind:", help="✨ 删除案例中的最后一条样本", key="del_last_example"
         )
         cls_ex_btn = tab0_ex_btn_cols[4].button(
             ":arrows_counterclockwise:", help="✨ 删除全部样本", key="clear_example"
