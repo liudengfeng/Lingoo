@@ -471,7 +471,6 @@ elif menu == "工具能手":
             key="ex_text_key",
             help="✨ 期望模型响应或指示词",
         )
-        # tab0_col2.info("✨ 添加文本后记得点击删除按钮清除文本")
 
         tab0_ex_btn_cols = st.columns([1, 1, 1, 1, 1, 1, 4])
 
@@ -485,8 +484,8 @@ elif menu == "工具能手":
             help="✨ 将文本框内的内容添加到案例中",
             key="add_text_btn",
         )
-        del_last_btn = tab0_ex_btn_cols[2].button(
-            ":rewind:", help="✨ 删除案例中的最后一条样本", key="del_last_example"
+        view_ex_btn = tab0_ex_btn_cols[2].button(
+            ":mag_right:", help="✨ 查看全部样本", key="view_example"
         )
         del_text_btn = tab0_ex_btn_cols[3].button(
             ":wastebasket:",
@@ -495,11 +494,11 @@ elif menu == "工具能手":
             on_click=clear_prompt,
             args=("ex_text_key",),
         )
-        cls_ex_btn = tab0_ex_btn_cols[4].button(
-            ":arrows_counterclockwise:", help="✨ 删除全部样本", key="clear_example"
+        del_last_btn = tab0_ex_btn_cols[4].button(
+            ":rewind:", help="✨ 删除案例中的最后一条样本", key="del_last_example"
         )
-        view_ex_btn = tab0_ex_btn_cols[5].button(
-            ":mag_right:", help="✨ 查看全部样本", key="view_example"
+        cls_ex_btn = tab0_ex_btn_cols[5].button(
+            ":arrows_counterclockwise:", help="✨ 删除全部样本", key="clear_example"
         )
 
         examples_container = st.container()
@@ -542,7 +541,7 @@ elif menu == "工具能手":
 
     with tabs[1]:
         st.subheader(":bulb: :blue[提示词]", divider="rainbow", anchor=False)
-        st.markdown("结合第一步添加的案例（可选），您可以上传多媒体文件、在文本框中撰写您的提示词，点击'提交'按钮启动模型。")
+        st.markdown("结合第一步添加的案例（可选），您可以上传多媒体文件、在文本框中撰写您的提示词，点击`提交`按钮启动模型。")
         uploaded_files = st.file_uploader(
             "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
             accept_multiple_files=True,
