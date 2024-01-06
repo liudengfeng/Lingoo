@@ -472,7 +472,7 @@ elif menu == "工具能手":
         )
         tab0_col2.info("✨ 添加文本后记得点击删除按钮清除文本")
 
-        tab0_ex_btn_cols = st.columns([1, 1, 1, 1, 1, 5])
+        tab0_ex_btn_cols = st.columns([1, 1, 1, 1, 1, 1, 4])
 
         add_media_btn = tab0_ex_btn_cols[0].button(
             ":frame_with_picture:",
@@ -496,6 +496,9 @@ elif menu == "工具能手":
         )
         cls_ex_btn = tab0_ex_btn_cols[4].button(
             ":arrows_counterclockwise:", help="✨ 删除全部样本", key="clear_example"
+        )
+        view_ex_btn = tab0_ex_btn_cols[5].button(
+            ":mag_right:", help="✨ 查看全部样本", key="view_example"
         )
 
         st.subheader(
