@@ -505,11 +505,11 @@ def fetch_and_update_word_image_indices(word, sidebar_status):
             images.append(Image.from_bytes(image_bytes))
         except Exception as e:
             logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
-    
+
     if len(images) == 0:
         logger.error(f"没有找到单词 {word} 的图片")
         return
-    
+
     indices = generate(word, images, sidebar_status)
     if indices:
         # 检查 indices 是否为列表
@@ -542,17 +542,18 @@ def process_images(num):
     elapsed_time = time.time() - start_time
 
     # 输出数量和运行时间
-    st.write(f"unique_words 的数量：{len(unique_words)}")
-    st.write(f"blob 运行耗时：{elapsed_time:.2f} 秒")
+    logger.info(f"unique_words 的数量：{len(unique_words)}")
+    logger.info(f"blob 运行耗时：{elapsed_time:.2f} 秒")
 
     start_time = time.time()
     mini_dict_dataframe = get_mini_dict_dataframe()
     words = mini_dict_dataframe["word"].tolist()
     elapsed_time = time.time() - start_time
-    st.write(f"mini_dict 运行耗时：{elapsed_time:.2f} 秒")
+    logger.info(f"mini_dict 运行耗时：{elapsed_time:.2f} 秒")
 
-    to_do = [word for word in words if word not in unique_words][:num]
-    st.write(f"待处理的文档数量：{len(to_do)}")
+    to_do = [word for word in words if word not in unique_words]
+    st.write(f"需处理的文档数量：{len(to_do)}")
+    to_do = to_do[:num]
 
     progress_bar = st.progress(0)
     for index, word in enumerate(to_do):
@@ -560,8 +561,8 @@ def process_images(num):
         for i, url in enumerate(urls):
             try:
                 img_byte_arr = load_image_bytes_from_url(url)
-            except Exception as e:
-                logger.error(f"加载图片字节数据时出错: {url}, 错误信息: {str(e)}")
+            except Exception:
+                logger.error(f"加载单词{word}第{index+1}张图片时出错:")
                 continue
             blob_client = blob_service_client.get_blob_client(
                 container_name, f"{word}_{i}.png"
