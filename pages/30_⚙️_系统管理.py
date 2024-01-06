@@ -528,7 +528,7 @@ def fetch_and_update_word_image_indices(word, sidebar_status):
 # region 下载单词图片
 
 
-def process_images(num):
+def process_images():
     mini_dict_dataframe = get_mini_dict_dataframe()
     words = mini_dict_dataframe["word"].tolist()
 
@@ -536,15 +536,9 @@ def process_images(num):
     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
     blob_service_client = BlobServiceClient.from_connection_string(connect_str)
     container_client = blob_service_client.get_container_client(container_name)
-    
-    # 获取容器中的所有 blob
-    blobs = container_client.list_blobs()
-    # 计算 blob 的总数
-    blob_count = sum(1 for _ in blobs)
-    logger.info(f"容器 {container_name} 中的 blob 总数：{blob_count}")    
-    
+
     progress_bar = st.progress(0)
-    for index, word in enumerate(words[:num]):
+    for index, word in enumerate(word):
         # 获取以单词开头的所有 blob
         word_blobs = container_client.list_blobs(name_starts_with=f"{word}_")
         # 如果存在任何以单词开头的 blob，就跳出循环
@@ -561,12 +555,12 @@ def process_images(num):
             try:
                 img_byte_arr = load_image_bytes_from_url(url)
             except Exception:
-                logger.error(f"加载单词{word}第{index+1}张图片时出错")
+                logger.error(f"加载单词{word}第{i+1}张图片时出错")
                 continue
 
             blob_client.upload_blob(img_byte_arr, blob_type="BlockBlob", overwrite=True)
 
-        update_and_display_progress(index + 1, num, progress_bar, word)
+        update_and_display_progress(index + 1, len(words), progress_bar, word)
 
 
 # endregion
@@ -1077,12 +1071,9 @@ elif menu == "词典管理":
 
     with dict_tabs[dict_items.index("下载图片")]:
         st.subheader("下载图片", divider="rainbow", anchor=False)
-        # 创建一个数字输入控件，用户可以输入他们想要处理的单词的数量
-        num = st.number_input("请输入你想要处理的单词的数量", min_value=1, max_value=30000, value=100)
-
         # 创建一个按钮，当用户点击这个按钮时，执行 process_images 函数
         if st.button("开始下载", key="process-images-btn", help="✨ 下载单词图片"):
-            process_images(num)
+            process_images()
 
     # endregion
 
