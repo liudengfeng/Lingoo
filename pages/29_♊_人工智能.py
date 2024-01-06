@@ -444,134 +444,137 @@ elif menu == "工具能手":
     tab_items = [f"{e} {i}" for e, i in zip(items_emoji, items)]
     tabs = st.tabs(tab_items)
 
-    st.subheader(":clipboard: :blue[添加案例（可选）]", divider="rainbow", anchor=False)
-    st.markdown(
-        "输入案例可丰富模型响应内容。`Gemini`模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。"
-    )
+    with tabs[0]:
+        st.subheader(":clipboard: :blue[添加案例（可选）]", divider="rainbow", anchor=False)
+        st.markdown(
+            "输入案例可丰富模型响应内容。`Gemini`模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。"
+        )
 
-    tab0_col1, tab0_col2 = st.columns([1, 1])
-    ex_media_file = tab0_col1.file_uploader(
-        "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
-        accept_multiple_files=False,
-        key="ex_media_file_key",
-        type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
-        help="""
+        tab0_col1, tab0_col2 = st.columns([1, 1])
+        ex_media_file = tab0_col1.file_uploader(
+            "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
+            accept_multiple_files=False,
+            key="ex_media_file_key",
+            type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
+            help="""
 支持的格式
 - 图片：PNG、JPG
 - 视频：
     - 您可以上传视频，支持以下格式：MKV、MOV、MP4、WEBM（最大 7MB）
     - 该模型将分析长达 2 分钟的视频。 请注意，它将处理从视频中获取的一组不连续的图像帧。
-    """,
-    )
-    # 与上传文档控件高度相同
-    ex_text = tab0_col2.text_area(
-        "期望模型响应或指示词",
-        placeholder="输入期望的响应",
-        # height=60,
-        key="ex_text_key",
-        help="✨ 期望模型响应或指示词",
-    )
+        """,
+        )
+        # 与上传文档控件高度相同
+        ex_text = tab0_col2.text_area(
+            "期望模型响应或指示词",
+            placeholder="输入期望的响应",
+            # height=60,
+            key="ex_text_key",
+            help="✨ 期望模型响应或指示词",
+        )
 
-    tab0_ex_btn_cols = st.columns([1, 1, 1, 1, 1, 5])
+        tab0_ex_btn_cols = st.columns([1, 1, 1, 1, 1, 5])
 
-    add_media_btn = tab0_ex_btn_cols[0].button(
-        ":film_projector:",
-        help="✨ 添加图片或视频",
-        key="add_media_btn",
-    )
-    add_text_btn = tab0_ex_btn_cols[1].button(
-        ":memo:",
-        help="✨ 添加指示词或期望模型的响应",
-        key="add_text_btn",
-    )
-    del_last_btn = tab0_ex_btn_cols[2].button(
-        ":rewind:", help="✨ 删除最后一条样本", key="del_last_example"
-    )
-    cls_ex_btn = tab0_ex_btn_cols[3].button(
-        ":arrows_counterclockwise:", help="✨ 删除全部样本", key="clear_example"
-    )
+        add_media_btn = tab0_ex_btn_cols[0].button(
+            ":film_projector:",
+            help="✨ 添加图片或视频",
+            key="add_media_btn",
+        )
+        add_text_btn = tab0_ex_btn_cols[1].button(
+            ":memo:",
+            help="✨ 添加指示词或期望模型的响应",
+            key="add_text_btn",
+        )
+        del_last_btn = tab0_ex_btn_cols[2].button(
+            ":rewind:", help="✨ 删除最后一条样本", key="del_last_example"
+        )
+        cls_ex_btn = tab0_ex_btn_cols[3].button(
+            ":arrows_counterclockwise:", help="✨ 删除全部样本", key="clear_example"
+        )
 
-    st.subheader(
-        f":clipboard: :blue[已添加的案例（{len(st.session_state.multimodal_examples)}）]",
-        divider="rainbow",
-        anchor=False,
-    )
+        st.subheader(
+            f":clipboard: :blue[已添加的案例（{len(st.session_state.multimodal_examples)}）]",
+            divider="rainbow",
+            anchor=False,
+        )
 
-    examples_container = st.container()
+        examples_container = st.container()
 
-    if add_media_btn:
-        if not ex_media_file:
-            st.error("请添加多媒体文件")
-            st.stop()
-        p = _process_media(ex_media_file)
-        st.session_state.multimodal_examples.append(p)
-        view_example(st.session_state.multimodal_examples, examples_container)
-
-    if add_text_btn:
-        if not ex_text:
-            st.error("请输入文本")
-            st.stop()
-        p = Part.from_text(ex_text)
-        st.session_state.multimodal_examples.append({"mime_type": "text", "part": p})
-        view_example(st.session_state.multimodal_examples, examples_container)
-
-    if del_last_btn:
-        if len(st.session_state["multimodal_examples"]) > 0:
-            st.session_state["multimodal_examples"].pop()
+        if add_media_btn:
+            if not ex_media_file:
+                st.error("请添加多媒体文件")
+                st.stop()
+            p = _process_media(ex_media_file)
+            st.session_state.multimodal_examples.append(p)
             view_example(st.session_state.multimodal_examples, examples_container)
 
-    if cls_ex_btn:
-        st.session_state["multimodal_examples"] = []
-        view_example(st.session_state.multimodal_examples, examples_container)
+        if add_text_btn:
+            if not ex_text:
+                st.error("请输入文本")
+                st.stop()
+            p = Part.from_text(ex_text)
+            st.session_state.multimodal_examples.append(
+                {"mime_type": "text", "part": p}
+            )
+            view_example(st.session_state.multimodal_examples, examples_container)
 
-    st.subheader(":bulb: :blue[提示词]", divider="rainbow", anchor=False)
-    uploaded_files = st.file_uploader(
-        "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
-        accept_multiple_files=True,
-        key="uploaded_files",
-        type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
-        help="""
+        if del_last_btn:
+            if len(st.session_state["multimodal_examples"]) > 0:
+                st.session_state["multimodal_examples"].pop()
+                view_example(st.session_state.multimodal_examples, examples_container)
+
+        if cls_ex_btn:
+            st.session_state["multimodal_examples"] = []
+            view_example(st.session_state.multimodal_examples, examples_container)
+    with tabs[1]:
+        st.subheader(":bulb: :blue[提示词]", divider="rainbow", anchor=False)
+        uploaded_files = st.file_uploader(
+            "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
+            accept_multiple_files=True,
+            key="uploaded_files",
+            type=["png", "jpg", "mkv", "mov", "mp4", "webm"],
+            help="""
 支持的格式
 - 图片：PNG、JPG
 - 视频：
     - 您可以上传视频，支持以下格式：MKV、MOV、MP4、WEBM（最大 7MB）
     - 该模型将分析长达 2 分钟的视频。 请注意，它将处理从视频中获取的一组不连续的图像帧。
-    """,
-    )
+        """,
+        )
 
-    prompt = st.text_area(
-        "您的提示词",
-        key="user_prompt_key",
-        placeholder="请输入关于多媒体的提示词，例如：'描述这张风景图片'",
-        max_chars=12288,
-        height=300,
-    )
-    tab0_btn_cols = st.columns([1, 1, 8])
-    # help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。"
-    cls_btn = tab0_btn_cols[0].button(
-        ":wastebasket:",
-        help="✨ 清空提示词",
-        key="clear_prompt",
-        on_click=clear_prompt,
-        args=("user_prompt_key",),
-    )
-    submitted = tab0_btn_cols[1].button("提交")
+        prompt = st.text_area(
+            "您的提示词",
+            key="user_prompt_key",
+            placeholder="请输入关于多媒体的提示词，例如：'描述这张风景图片'",
+            max_chars=12288,
+            height=300,
+        )
+        tab0_btn_cols = st.columns([1, 1, 8])
+        # help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。"
+        cls_btn = tab0_btn_cols[0].button(
+            ":wastebasket:",
+            help="✨ 清空提示词",
+            key="clear_prompt",
+            on_click=clear_prompt,
+            args=("user_prompt_key",),
+        )
+        submitted = tab0_btn_cols[1].button("提交")
 
-    response_container = st.container()
+        response_container = st.container()
 
-    if submitted:
-        if uploaded_files is None or len(uploaded_files) == 0:  # type: ignore
-            st.warning("您是否忘记了上传图片或视频？")
-        if not prompt:
-            st.error("请添加提示词")
-            st.stop()
-        contents = st.session_state.multimodal_examples.copy()
-        if uploaded_files is not None:
-            for m in uploaded_files:
-                contents.append(_process_media(m))
+        if submitted:
+            if uploaded_files is None or len(uploaded_files) == 0:  # type: ignore
+                st.warning("您是否忘记了上传图片或视频？")
+            if not prompt:
+                st.error("请添加提示词")
+                st.stop()
+            contents = st.session_state.multimodal_examples.copy()
+            if uploaded_files is not None:
+                for m in uploaded_files:
+                    contents.append(_process_media(m))
 
-        contents.append({"mime_type": "text", "part": Part.from_text(prompt)})
-        generate_content_from_files_and_prompt(contents, response_container)
+            contents.append({"mime_type": "text", "part": Part.from_text(prompt)})
+            generate_content_from_files_and_prompt(contents, response_container)
 
 # endregion
 
