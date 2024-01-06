@@ -292,15 +292,14 @@ if menu == "聊天机器人":
 # region AI工具
 
 elif menu == "AI工具":
-    
     # region 边栏
-
+    sidebar_cols = st.sidebar.columns(2)
     st.sidebar.markdown(
         """:rainbow[运行设置]\n
 :gemini: 模型：gemini-pro-vision            
     """
     )
-    st.sidebar.slider(
+    sidebar_cols[0].slider(
         "词元限制",
         key="max_output_tokens",
         min_value=16,
@@ -310,7 +309,7 @@ elif menu == "AI工具":
         help="""✨ 词元限制决定了一条提示的最大文本输出量。词元约为`4`个字符。默认值为`2048`""",
     )
     # 生成参数
-    st.sidebar.slider(
+    sidebar_cols[1].slider(
         "温度",
         min_value=0.00,
         max_value=1.0,
@@ -319,7 +318,7 @@ elif menu == "AI工具":
         step=0.1,
         help="✨ `temperature`（温度）可以控制词元选择的随机性。较低的温度适合希望获得真实或正确回复的提示，而较高的温度可能会引发更加多样化或意想不到的结果。如果温度为`0`，系统始终会选择概率最高的词元。对于大多数应用场景，不妨先试着将温度设为`0.2`。",
     )
-    st.sidebar.slider(
+    sidebar_cols[0].slider(
         "Top K",
         key="top_k",
         min_value=1,
@@ -331,7 +330,7 @@ elif menu == "AI工具":
 - 如果`Top-k`设为`3`，则表示系统将从`3`个概率最高的词元（通过温度确定）中选择下一个词元。
 - 多模态`Top-k`的默认值为`32`。""",
     )
-    st.sidebar.slider(
+    sidebar_cols[1].slider(
         "Top P",
         key="top_p",
         min_value=0.00,
@@ -342,7 +341,6 @@ elif menu == "AI工具":
 - 例如，如果词元`A`、`B` 和`C`的概率分别是`0.3`、`0.2`和`0.1`，并且`Top-p`的值为`0.5`，则模型将选择`A`或`B`作为下一个词元（通过温度确定）。
 - 多模态`Top-p`的默认值为`1.0`。""",
     )
-
     st.sidebar.text_input(
         "添加停止序列",
         key="stop_sequences",
