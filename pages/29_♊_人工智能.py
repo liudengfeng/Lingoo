@@ -477,12 +477,12 @@ elif menu == "工具能手":
 
         add_media_btn = tab0_ex_btn_cols[0].button(
             ":frame_with_picture:",
-            help="✨ 添加图片或视频",
+            help="✨ 将上传的图片或视频文件添加到案例中",
             key="add_media_btn",
         )
         add_text_btn = tab0_ex_btn_cols[1].button(
             ":memo:",
-            help="✨ 添加指示词或期望模型的响应",
+            help="✨ 将文本框内的内容添加到案例中",
             key="add_text_btn",
         )
         del_text_btn = tab0_ex_btn_cols[2].button(
@@ -493,7 +493,7 @@ elif menu == "工具能手":
             args=("ex_text_key",),
         )
         del_last_btn = tab0_ex_btn_cols[3].button(
-            ":rewind:", help="✨ 删除最后一条样本", key="del_last_example"
+            ":rewind:", help="✨ 删除案例中的最后一条样本", key="del_last_example"
         )
         cls_ex_btn = tab0_ex_btn_cols[4].button(
             ":arrows_counterclockwise:", help="✨ 删除全部样本", key="clear_example"
