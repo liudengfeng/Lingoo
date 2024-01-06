@@ -524,7 +524,9 @@ def fetch_and_update_word_image_indices(word, sidebar_status):
 # region 下载单词图片
 
 
-def process_images():
+def process_images(num):
+    # 记录开始时间
+    start_time = time.time()
     container_name = "word-images"
     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
     blob_service_client = BlobServiceClient.from_connection_string(connect_str)
@@ -532,13 +534,22 @@ def process_images():
     blobs_list = container_client.list_blobs()
     blob_words = [blob.name.split("_")[0] for blob in blobs_list]
     unique_words = set(blob_words)
+    # 计算运行时间
+    elapsed_time = time.time() - start_time
+
+    # 输出数量和运行时间
+    st.write(f"unique_words 的数量：{len(unique_words)}")
+    st.write(f"blob 运行耗时：{elapsed_time:.2f} 秒")
+
+    start_time = time.time()
     mini_dict_dataframe = get_mini_dict_dataframe()
     words = mini_dict_dataframe["word"].tolist()
-    to_do = [word for word in words if word not in unique_words]
+    elapsed_time = time.time() - start_time
+    st.write(f"mini_dict 运行耗时：{elapsed_time:.2f} 秒")
+
+    to_do = [word for word in words if word not in unique_words][:num]
     st.write(f"待处理的文档数量：{len(to_do)}")
-    st.write("前10个待处理的文档名称：")
-    for name in to_do[:10]:
-        st.write(name)
+
     progress_bar = st.progress(0)
     for index, word in enumerate(to_do):
         urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
@@ -999,7 +1010,8 @@ elif menu == "处理反馈":
 
 
 elif menu == "词典管理":
-    dict_items = ["词典管理", "编辑微型词典", "下载图片", "挑选图片"]
+    # dict_items = ["词典管理", "编辑微型词典", "下载图片", "挑选图片"]
+    dict_items = ["词典管理", "下载图片", "挑选图片"]
     dict_tabs = st.tabs(dict_items)
 
     MINI_DICT_COLUMN_CONFIG = {
@@ -1028,43 +1040,46 @@ elif menu == "词典管理":
 
     # endregion
 
-    # region 编辑微型词典
+    # # region 编辑微型词典
 
-    with dict_tabs[dict_items.index("编辑微型词典")]:
-        st.subheader("编辑微型词典", divider="rainbow", anchor=False)
+    # with dict_tabs[dict_items.index("编辑微型词典")]:
+    #     st.subheader("编辑微型词典", divider="rainbow", anchor=False)
 
-        btn_cols = st.columns(10)
-        view_cols = st.columns(2)
-        edited_elem = view_cols[0].empty()
-        view_elem = view_cols[1].container()
+    #     btn_cols = st.columns(10)
+    #     view_cols = st.columns(2)
+    #     edited_elem = view_cols[0].empty()
+    #     view_elem = view_cols[1].container()
 
-        mini_dict_dataframe = get_mini_dict_dataframe()
+    #     mini_dict_dataframe = get_mini_dict_dataframe()
 
-        # 显示可编辑的 DataFrame
-        edited_elem.data_editor(
-            mini_dict_dataframe,
-            key="mini_dict_df",
-            column_config=MINI_DICT_COLUMN_CONFIG,
-            hide_index=True,
-            disabled=["word"],
-        )
+    #     # 显示可编辑的 DataFrame
+    #     edited_elem.data_editor(
+    #         mini_dict_dataframe,
+    #         key="mini_dict_df",
+    #         column_config=MINI_DICT_COLUMN_CONFIG,
+    #         hide_index=True,
+    #         disabled=["word"],
+    #     )
 
-        if btn_cols[0].button("显示变动", key="view-btn-4", help="✨ 显示编辑后的简版词典变动部分"):
-            display_mini_dict_changes(mini_dict_dataframe, view_elem)
+    #     if btn_cols[0].button("显示变动", key="view-btn-4", help="✨ 显示编辑后的简版词典变动部分"):
+    #         display_mini_dict_changes(mini_dict_dataframe, view_elem)
 
-        if btn_cols[1].button("提交保存", key="save-btn-4", help="✨ 将编辑后的简版词典变动部分保存到数据库"):
-            save_dataframe_changes_to_database(mini_dict_dataframe)
-            st.session_state["mini_dict_df"]["edited_rows"] = {}
+    #     if btn_cols[1].button("提交保存", key="save-btn-4", help="✨ 将编辑后的简版词典变动部分保存到数据库"):
+    #         save_dataframe_changes_to_database(mini_dict_dataframe)
+    #         st.session_state["mini_dict_df"]["edited_rows"] = {}
 
-    # endregion
+    # # endregion
 
     # region 下载图片
 
     with dict_tabs[dict_items.index("下载图片")]:
         st.subheader("下载图片", divider="rainbow", anchor=False)
+        # 创建一个数字输入控件，用户可以输入他们想要处理的单词的数量
+        num = st.number_input("请输入你想要处理的单词的数量", min_value=1, max_value=30000, value=100)
+
         # 创建一个按钮，当用户点击这个按钮时，执行 process_images 函数
         if st.button("开始下载", key="process-images-btn", help="✨ 下载单词图片"):
-            process_images()
+            process_images(num)
 
     # endregion
 
@@ -1079,7 +1094,9 @@ elif menu == "词典管理":
             "执行", key="pick-image-btn", help="✨ 使用 gemini 多模态检验图片是否能形象解释单词的含义"
         ):
             words = mini_dict_dataframe["word"].tolist()
-            num = st.number_input("输入单词数量", min_value=1, max_value=len(words), value=100)
+            num = st.number_input(
+                "输入单词数量", min_value=1, max_value=len(words), value=100
+            )
             words = words[:num]
             to_do = st.session_state.dbi.find_docs_without_image_indices(words)
             st.write(f"待处理的文档数量：{len(to_do)}")
