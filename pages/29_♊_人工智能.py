@@ -112,6 +112,8 @@ def view_example(examples, container):
             container.image(p["part"].inline_data.data, use_column_width=True)
         elif mime_type.startswith("video"):
             container.video(p["part"].inline_data.data)
+    # 更新案例数量
+    st.rerun()
 
 
 def generate_content_from_files_and_prompt(contents, response_container):
@@ -459,10 +461,10 @@ elif menu == "工具能手":
     )
 
     ex_text = tab0_col2.text_area(
-        "期望的响应",
+        "期望模型响应或指示词",
         placeholder="输入期望的响应",
         key="ex_text_key",
-        help="✨ 期望模型响应或标识",
+        help="✨ 期望模型响应或指示词",
     )
 
     tab0_ex_btn_cols = st.columns([1, 1, 1, 1, 6])
