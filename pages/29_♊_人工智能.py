@@ -362,7 +362,7 @@ if menu == "聊天机器":
 
 # endregion
 
-# region AI工具
+# region 工具能手
 
 elif menu == "工具能手":
     # region 边栏
@@ -562,6 +562,7 @@ elif menu == "工具能手":
 
         contents.append({"mime_type": "text", "part": Part.from_text(prompt)})
         generate_content_from_files_and_prompt(contents, response_container)
+
 # endregion
 
 # endregion
