@@ -112,6 +112,8 @@ def view_example(examples, container):
             container.image(p["part"].inline_data.data, use_column_width=True)
         elif mime_type.startswith("video"):
             container.video(p["part"].inline_data.data)
+    # 清空文本
+    clear_prompt("user_prompt_key")
     # 更新案例数量
     st.rerun()
 
@@ -159,8 +161,8 @@ def generate_content_from_files_and_prompt(contents, response_container):
     )
 
 
-def clear_prompt():
-    st.session_state["user_prompt_key"] = ""
+def clear_prompt(key):
+    st.session_state[key] = ""
 
 
 # endregion
@@ -536,7 +538,6 @@ elif menu == "工具能手":
 
     prompt = st.text_area(
         "您的提示词",
-        # value=st.session_state["user_prompt"],
         key="user_prompt_key",
         placeholder="请输入关于多媒体的提示词，例如：'描述这张风景图片'",
         max_chars=12288,
@@ -545,7 +546,11 @@ elif menu == "工具能手":
     tab0_btn_cols = st.columns([1, 1, 8])
     # help="模型可以接受多个输入，以用作示例来了解您想要的输出。添加这些样本有助于模型识别模式，并将指定图片和响应之间的关系应用于新样本。这也称为少量样本学习。示例之间，添加'<>'符号用于分隔。"
     cls_btn = tab0_btn_cols[0].button(
-        ":wastebasket:", help="✨ 清空提示词", key="clear_prompt", on_click=clear_prompt
+        ":wastebasket:",
+        help="✨ 清空提示词",
+        key="clear_prompt",
+        on_click=clear_prompt,
+        args=("user_prompt_key",),
     )
     submitted = tab0_btn_cols[1].button("提交")
 
