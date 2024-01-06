@@ -103,7 +103,7 @@ def _process_media(uploaded_file):
 
 
 def view_example(examples, container):
-    cols = st.beta_columns(2)
+    cols = st.columns(2)
     for i, p in enumerate(examples):
         mime_type = p["mime_type"]
         if mime_type.startswith("text"):
