@@ -552,8 +552,8 @@ def process_images():
             logger.info(f"找到 '{word}' 开头的 blob，跳过下载和上传步骤")
             continue
 
-        # urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
-        urls = get_word_image_urls(word, "00f0b47160060b92b0c1723f1e800766f989a78e")
+        urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+        # urls = get_word_image_urls(word, "00f0b47160060b92b0c1723f1e800766f989a78e")
         for i, url in enumerate(urls):
             # 创建 blob 名称
             blob_name = f"{word}_{i}.png"
@@ -1078,7 +1078,6 @@ elif menu == "词典管理":
 
     with dict_tabs[dict_items.index("下载图片")]:
         st.subheader("下载图片", divider="rainbow", anchor=False)
-        st.write(st.secrets['SERPER_KEY'])
         # 创建一个按钮，当用户点击这个按钮时，执行 process_images 函数
         if st.button("开始下载", key="process-images-btn", help="✨ 下载单词图片"):
             process_images()
