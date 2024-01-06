@@ -1074,15 +1074,15 @@ elif menu == "词典管理":
         st.subheader("挑选图片", divider="rainbow", anchor=False)
         st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
         mini_dict_dataframe = get_mini_dict_dataframe()
-        words = mini_dict_dataframe["word"].tolist()
-        num = st.number_input("输入单词数量", min_value=1, max_value=len(words), value=100)
-        words = words[:num]
-        to_do = st.session_state.dbi.find_docs_without_image_indices(words)
-        st.write(f"待处理的文档数量：{len(to_do)}")
         progress_pic_bar = st.progress(0)
         if st.button(
             "执行", key="pick-image-btn", help="✨ 使用 gemini 多模态检验图片是否能形象解释单词的含义"
         ):
+            words = mini_dict_dataframe["word"].tolist()
+            num = st.number_input("输入单词数量", min_value=1, max_value=len(words), value=100)
+            words = words[:num]
+            to_do = st.session_state.dbi.find_docs_without_image_indices(words)
+            st.write(f"待处理的文档数量：{len(to_do)}")
             for i, word in enumerate(to_do):
                 start_time = time.time()  # 记录开始时间
                 update_and_display_progress(i + 1, len(words), progress_pic_bar, word)
