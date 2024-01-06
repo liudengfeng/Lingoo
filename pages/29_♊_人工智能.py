@@ -108,7 +108,9 @@ def view_example(examples, container):
         if mime_type.startswith("text"):
             container.markdown(p["part"].text)
         elif mime_type.startswith("image"):
-            container.image(p["part"].inline_data.data, use_column_width=True)
+            container.image(
+                p["part"].inline_data.data, use_column_width=True, width=300
+            )
         elif mime_type.startswith("video"):
             container.video(p["part"].inline_data.data)
 
@@ -501,12 +503,6 @@ elif menu == "工具能手":
             ":mag_right:", help="✨ 查看全部样本", key="view_example"
         )
 
-        st.subheader(
-            f":clipboard: :blue[已添加的案例（{len(st.session_state.multimodal_examples)}）]",
-            divider="rainbow",
-            anchor=False,
-        )
-
         examples_container = st.container()
 
         if add_media_btn:
@@ -534,6 +530,14 @@ elif menu == "工具能手":
 
         if cls_ex_btn:
             st.session_state["multimodal_examples"] = []
+            view_example(st.session_state.multimodal_examples, examples_container)
+
+        if view_ex_btn:
+            st.subheader(
+                f":clipboard: :blue[已添加的案例（{len(st.session_state.multimodal_examples)}）]",
+                divider="rainbow",
+                anchor=False,
+            )
             view_example(st.session_state.multimodal_examples, examples_container)
 
     with tabs[1]:
