@@ -95,6 +95,19 @@ def parse_generated_content_and_update_token(
 
 
 def select_best_images_for_word(model, word, images: List[Part]):
+    """
+    为给定的单词选择最佳解释单词含义的图片。
+
+    这个函数使用模型生成一个图片选择结果，然后返回最能解释给定单词含义的图片的序号列表。
+
+    Args:
+        word (str): 要解释的单词。
+        images (List[Part]): 图片列表，每个元素都是一个Part对象，代表一张图片。
+        model (GenerativeModel): 用于生成图片选择结果的模型。
+
+    Returns:
+        list: 以JSON格式输出的最佳图片序号列表。这些序号对应于输入的图片列表中的位置。如果没有合适的图片，则返回空列表。
+    """
     prompt = f"单词：{word}\n输入的图片是否能形象解释单词含义，挑选出最合适的前4张图片。结果用输入图片的自然序号（从0开始）列表表达，如果没有合适的，返回空列表。以JSON格式输出。"
     contents = [Part.from_text(prompt)] + images
     generation_config = GenerationConfig(
