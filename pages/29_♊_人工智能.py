@@ -127,20 +127,14 @@ def generate_content_from_files_and_prompt(contents, placeholder):
         top_k=st.session_state["top_k"],
         max_output_tokens=st.session_state["max_output_tokens"],
     )
-    responses = generate_content_and_update_token(
+    generate_content_and_update_token(
         "多模态AI",
         model,
         [p["part"] for p in contents],
         generation_config,
         stream=True,
+        placeholder=placeholder,
     )
-    full_response = ""
-    for chunk in responses:  # type: ignore
-        full_response += chunk.text
-        time.sleep(0.05)
-        # Add a blinking cursor to simulate typing
-        placeholder.markdown(full_response + "▌")
-    placeholder.markdown(full_response)
 
 
 def clear_prompt(key):
@@ -304,26 +298,16 @@ if menu == "聊天机器":
             "max_output_tokens": st.session_state["max_output_tokens-chatbot"],
         }
         config = GenerationConfig(**config)
-        try:
-            responses = generate_content_and_update_token(
+        with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
+            message_placeholder = st.empty()
+            generate_content_and_update_token(
                 "聊天机器人",
                 st.session_state.chat_model,
                 [Part.from_text(prompt)],
                 config,
                 stream=True,
+                placeholder=message_placeholder,
             )
-            with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
-                message_placeholder = st.empty()
-                view_stream_response(responses, message_placeholder)
-        # except ResponseBlockedError as e:
-        #     # 处理被阻止的消息
-        #     st.toast("抱歉，您尝试发送的消息包含潜在不安全的内容，已被阻止。")
-        #     # 删除最后一对会话
-        #     st.session_state.chat_session.rewind()
-        except Exception as e:
-            # 处理其他类型的异常
-            st.write(e)
-
     # endregion
 
 # endregion
