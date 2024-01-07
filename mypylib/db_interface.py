@@ -9,12 +9,14 @@ from faker import Faker
 from google.cloud import firestore
 from google.cloud.firestore import FieldFilter
 
+from mypylib.st_helper import setup_logger
+
 from .constants import FAKE_EMAIL_DOMAIN
 from .db_model import Payment, PaymentStatus, PurchaseType, TokenUsageRecord, User
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
-
+setup_logger(logger)
 
 PRICES = {
     PurchaseType.ANNUAL: 6570,
