@@ -76,7 +76,10 @@ class DbInterface:
         user.hash_password()
         user_data = user.model_dump()
         logger.info(f"注册用户：{user_data}")
-        del user_data["phone_number"]  # 删除手机号码
+        try:
+            del user_data["phone_number"]  # 删除手机号码
+        except KeyError:
+            pass
         doc_ref.set(user_data)
 
     # endregion
