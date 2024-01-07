@@ -960,7 +960,7 @@ elif menu == "示例教程":
                 st.text(prompt + "\n" + "input_image")
             with tab3:
                 st.write("使用的参数：")
-                st.text("默认参数")
+                st.write(gemini_pro_vision_generation_config)
 
         with recommendations:
             compare_img_1_uri = "gs://github-repo/img/gemini/multimodality_usecases_overview/glasses1.jpg"
@@ -1014,19 +1014,26 @@ elif menu == "示例教程":
             compare_img_description = st.button("生成推荐", key="compare_img_description")
             with tab1:
                 if compare_img_description and content:
-                    with st.spinner("使用 Gemini 生成推荐..."):                        
-                        response = get_gemini_pro_vision_response(
-                            st.session_state.multimodal_model_pro, content
+                    placeholder = st.empty()
+                    new_contents = [
+                        Part.from_text(item) if isinstance(item, str) else item
+                        for item in content
+                    ]
+                    with st.spinner("使用 Gemini 生成推荐..."):
+                        display_generated_content_and_update_token(
+                            "演示：眼镜推荐",
+                            vision_model,
+                            new_contents,
+                            GenerationConfig(**gemini_pro_vision_generation_config),
+                            stream=True,
+                            placeholder=placeholder,
                         )
-                        placeholder = st.empty()
-                        # st.write(response)
-                        view_stream_response(response, placeholder)
             with tab2:
                 st.write("使用的提示词：")
                 st.text(content)
             with tab3:
                 st.write("使用的参数：")
-                st.text("默认参数")
+                st.write(gemini_pro_vision_generation_config)
 
         with sim_diff:
             math_image_uri = "gs://github-repo/img/gemini/multimodality_usecases_overview/math_beauty.jpg"
@@ -1038,40 +1045,43 @@ elif menu == "示例教程":
             st.image(math_image_url, width=350, caption="Image of a math equation")
             st.markdown(
                 f"""
-    我们的期望：提出有关数学方程的问题如下：
-    - 提取公式。
-    - Pi 前面的符号是什么？ 这是什么意思？
-    - 这是一个著名的公式吗？ 它有名字吗？
-    """
+我们的期望：提出有关数学方程的问题如下：
+- 提取公式。
+- $\pi$ 前面的符号是什么？ 这是什么意思？
+- 这是一个著名的公式吗？ 它有名字吗？
+"""
             )
             prompt = """
-    按照说明进行操作。
-    用"$"将数学表达式括起来。
-    使用一个表格，其中一行代表每条指令及其结果。
+按照说明进行操作。
+用"$"将数学表达式括起来。
+使用一个表格，其中一行代表每条指令及其结果。
 
-    指示：
-    - 提取公式。
-    - $\pi$ 前面的符号是什么？ 这是什么意思？
-    - 这是一个著名的公式吗？ 它有名字吗？
-    """
+指示：
+- 提取公式。
+- $\pi$ 前面的符号是什么？ 这是什么意思？
+- 这是一个著名的公式吗？ 它有名字吗？
+"""
             tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
             math_image_description = st.button("生成答案", key="math_image_description")
             with tab1:
                 if math_image_description and prompt:
+                    placeholder = st.empty()
+                    new_contents = [math_image_img, Part.from_text(prompt)]
                     with st.spinner("使用 Gemini 生成公式答案..."):
-                        response = get_gemini_pro_vision_response(
-                            st.session_state.multimodal_model_pro,
-                            [math_image_img, prompt],
+                        display_generated_content_and_update_token(
+                            "演示：数学推理",
+                            vision_model,
+                            new_contents,
+                            GenerationConfig(**gemini_pro_vision_generation_config),
+                            stream=True,
+                            placeholder=placeholder,
                         )
-                        placeholder = st.empty()
-                        # st.write(response)
-                        view_stream_response(response, placeholder)
             with tab2:
                 st.write("使用的提示词：")
                 st.text(content)
             with tab3:
                 st.write("使用的参数：")
-                st.text("默认参数")
+                st.write(gemini_pro_vision_generation_config)
 
     with tabs[3]:
         st.write("使用 Gemini Pro Vision - 多模态模型")
@@ -1091,25 +1101,25 @@ elif menu == "示例教程":
                 st.video(video_desc_url)
                 st.write("我们的期望：生成视频的描述")
                 prompt = """描述视频中发生的事情并回答以下问题：\n
-    - 我在看什么？ \n
-    - 我应该去哪里看？ \n
-    - 世界上还有哪些像这样的前 5 个地方？
+- 我在看什么？ \n
+- 我应该去哪里看？ \n
+- 世界上还有哪些像这样的前 5 个地方？
                 """
                 tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
                 vide_desc_description = st.button("生成视频描述", key="vide_desc_description")
                 with tab1:
                     if vide_desc_description and prompt:
+                        placeholder = st.empty()
+                        new_contents = [Part.from_text(prompt), vide_desc_img]
                         with st.spinner("使用 Gemini 生成视频描述..."):
-                            model = load_vertex_model("gemini-pro-vision")
-                            placeholder = st.empty()
-                            response = get_gemini_pro_vision_response(
-                                st.session_state.multimodal_model_pro,
-                                [prompt, vide_desc_img],
+                            display_generated_content_and_update_token(
+                                "演示：视频描述",
+                                vision_model,
+                                new_contents,
+                                GenerationConfig(**gemini_pro_vision_generation_config),
+                                stream=True,
+                                placeholder=placeholder,
                             )
-                            placeholder = st.empty()
-                            # st.write(response)
-                            view_stream_response(response, placeholder)
-                            st.markdown("\n\n\n")
                 with tab2:
                     st.write("使用的提示词：")
                     st.markdown(prompt + "\n" + "{video_data}")
@@ -1128,25 +1138,27 @@ elif menu == "示例教程":
                 st.video(video_tags_url)
                 st.write("我们的期望：为视频生成标签")
                 prompt = """仅使用视频回答以下问题：
-    1. 视频里讲了什么？
-    2. 视频中有哪些物体？
-    3. 视频中的动作是什么？
-    4. 为该视频提供5个最佳标签？
-    以表格形式给出答案，问题和答案作为列。
+1. 视频里讲了什么？
+2. 视频中有哪些物体？
+3. 视频中的动作是什么？
+4. 为该视频提供5个最佳标签？
+以表格形式给出答案，问题和答案作为列。
                 """
                 tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
                 video_tags_description = st.button("生成标签", key="video_tags_description")
                 with tab1:
                     if video_tags_description and prompt:
+                        placeholder = st.empty()
+                        new_contents = [Part.from_text(prompt), video_tags_img]
                         with st.spinner("使用 Gemini 生成视频描述..."):
-                            response = get_gemini_pro_vision_response(
-                                st.session_state.multimodal_model_pro,
-                                [prompt, video_tags_img],
+                            display_generated_content_and_update_token(
+                                "演示：为视频生成标签",
+                                vision_model,
+                                new_contents,
+                                GenerationConfig(**gemini_pro_vision_generation_config),
+                                stream=True,
+                                placeholder=placeholder,
                             )
-                            placeholder = st.empty()
-                            # st.write(response)
-                            view_stream_response(response, placeholder)
-                            st.markdown("\n\n\n")
                 with tab2:
                     st.write("使用的提示词：")
                     st.write(prompt, "\n", "{video_data}")
@@ -1170,10 +1182,10 @@ elif menu == "示例教程":
                 st.video(video_highlights_url)
                 st.write("我们的期望：生成视频的亮点")
                 prompt = """仅使用视频回答以下问题：
-    视频中的女孩是什么职业？
-    这里重点介绍了手机的哪些功能？
-    用一段总结视频。
-    以表格形式提供答案。
+视频中的女孩是什么职业？
+这里重点介绍了手机的哪些功能？
+用一段总结视频。
+以表格形式提供答案。
                 """
                 tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
                 video_highlights_description = st.button(
@@ -1181,15 +1193,17 @@ elif menu == "示例教程":
                 )
                 with tab1:
                     if video_highlights_description and prompt:
+                        placeholder = st.empty()
+                        new_contents = [Part.from_text(prompt), video_highlights_img]
                         with st.spinner("使用 Gemini 生成视频集锦..."):
-                            response = get_gemini_pro_vision_response(
-                                st.session_state.multimodal_model_pro,
-                                [prompt, video_highlights_img],
+                            display_generated_content_and_update_token(
+                                "演示：视频集锦",
+                                vision_model,
+                                new_contents,
+                                GenerationConfig(**gemini_pro_vision_generation_config),
+                                stream=True,
+                                placeholder=placeholder,
                             )
-                            placeholder = st.empty()
-                            # st.write(response)
-                            view_stream_response(response, placeholder)
-                            st.markdown("\n\n\n")
                 with tab2:
                     st.write("使用的提示词：")
                     st.write(prompt, "\n", "{video_data}")
@@ -1213,21 +1227,21 @@ elif menu == "示例教程":
                 st.video(video_geoloaction_url)
                 st.markdown(
                     """我们的期望：\n
-    回答视频中的以下问题：
-    - 这个视频是关于什么的？
-    - 你怎么知道是哪个城市？
-    - 这是哪条街？
-    - 最近的十字路口是什么？
+回答视频中的以下问题：
+- 这个视频是关于什么的？
+- 你怎么知道是哪个城市？
+- 这是哪条街？
+- 最近的十字路口是什么？
                 """
                 )
                 prompt = """仅使用视频回答以下问题：
 
-    - 这个视频是关于什么的？
-    - 你怎么知道是哪个城市？
-    - 这是哪条街？
-    - 最近的十字路口是什么？
+- 这个视频是关于什么的？
+- 你怎么知道是哪个城市？
+- 这是哪条街？
+- 最近的十字路口是什么？
 
-    以表格形式回答以下问题，问题和答案作为列。
+以表格形式回答以下问题，问题和答案作为列。
                 """
                 tab1, tab2, tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
                 video_geoloaction_description = st.button(
@@ -1235,15 +1249,17 @@ elif menu == "示例教程":
                 )
                 with tab1:
                     if video_geoloaction_description and prompt:
+                        placeholder = st.empty()
+                        new_contents = [Part.from_text(prompt), video_geoloaction_img]
                         with st.spinner("使用 Gemini 生成位置标签..."):
-                            response = get_gemini_pro_vision_response(
-                                st.session_state.multimodal_model_pro,
-                                [prompt, video_geoloaction_img],
+                            display_generated_content_and_update_token(
+                                "演示：视频位置标签",
+                                vision_model,
+                                new_contents,
+                                GenerationConfig(**gemini_pro_vision_generation_config),
+                                stream=True,
+                                placeholder=placeholder,
                             )
-                            placeholder = st.empty()
-                            # st.write(response)
-                            view_stream_response(response, placeholder)
-                            st.markdown("\n\n\n")
                 with tab2:
                     st.write("使用的提示词：")
                     st.write(prompt, "\n", "{video_data}")
