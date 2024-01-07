@@ -73,6 +73,7 @@ class DbInterface:
         # 为用户密码加密
         user.hash_password()
         user_data = user.model_dump()
+        logger.info(f"注册用户：{user_data}")
         del user_data["phone_number"]  # 删除手机号码
         doc_ref.set(user_data)
 
@@ -230,7 +231,6 @@ class DbInterface:
         # 更新用户的 'total_tokens' 属性
         user_doc_ref = self.db.collection("users").document(phone_number)
         user_doc_ref.update({"total_tokens": firestore.Increment(used_token_count)})
-
 
     # endregion
 

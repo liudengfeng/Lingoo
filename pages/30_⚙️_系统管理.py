@@ -670,14 +670,10 @@ if menu == "支付管理":
                     is_approved=is_approved,
                     remark=remark,
                 )
-                # try:
+                st.write(f"{payment=}")
                 st.session_state.dbi.add_payment(payment)
                 st.toast(f"成功登记，订单号:{order_id}", icon="🎉")
-                # except DuplicateKeyError:
-                #     st.error("付款编号已存在，请勿重复登记")
-                #     st.stop()
-                # except Exception as e:
-                #     raise  # 重新抛出异常
+
 
     with tabs[items.index("支付管理")]:
         st.subheader("查询参数")
