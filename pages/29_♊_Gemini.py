@@ -583,7 +583,7 @@ elif menu == "示例教程":
     items_emoji = [
         ":book:",
         ":mega:",
-        ":framed_picture:",
+        "🖼️",
         "🎞️",
         ":bookmark_tabs:",
         ":mortar_board:",
