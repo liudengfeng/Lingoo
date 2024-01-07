@@ -74,7 +74,6 @@ class DbInterface:
         # 为用户密码加密
         user.hash_password()
         user_data = user.model_dump()
-        logger.info(f"注册用户：{user_data}")
         try:
             del user_data["phone_number"]  # 删除手机号码
         except KeyError:
@@ -370,6 +369,7 @@ class DbInterface:
             new_user = User(
                 username=self.faker.user_name(),
                 email=f"{phone_number}@{FAKE_EMAIL_DOMAIN}",
+                phone_number=phone_number,
                 password=phone_number,
                 registration_time=datetime.now(timezone.utc),
                 memo=f"订单号：{payment.order_id}",
