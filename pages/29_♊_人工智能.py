@@ -9,9 +9,9 @@ from mypylib.st_helper import (
     check_access,
     check_and_force_logout,
     configure_google_apis,
+    format_token_count,
     load_vertex_model,
     setup_logger,
-    view_stream_response,
 )
 
 
@@ -264,7 +264,7 @@ if menu == "聊天机器":
 
     sidebar_status = st.sidebar.empty()
     sidebar_status.markdown(
-        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}",
+        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{format_token_count(st.session_state.total_token_count)}",
         help=help_info,
     )
     # endregion
@@ -372,7 +372,7 @@ elif menu == "工具能手":
     )
     sidebar_status = st.sidebar.empty()
     sidebar_status.markdown(
-        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}",
+        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{format_token_count(st.session_state.total_token_count)}",
         help=help_info,
     )
 

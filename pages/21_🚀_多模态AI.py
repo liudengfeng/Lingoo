@@ -11,6 +11,7 @@ from mypylib.st_helper import (
     check_access,
     check_and_force_logout,
     configure_google_apis,
+    format_token_count,
     load_vertex_model,
     setup_logger,
 )
@@ -101,7 +102,7 @@ st.sidebar.text_input(
 help_info = "✨ 对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。"
 sidebar_status = st.sidebar.empty()
 sidebar_status.markdown(
-    f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}",
+    f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{format_token_count(st.session_state.total_token_count)}",
     help=help_info,
 )
 
@@ -174,7 +175,7 @@ def generate_content_from_files_and_prompt(contents, response_container):
     )
     st.session_state.total_token_count += st.session_state.current_token_count
     sidebar_status.markdown(
-        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
+        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{format_token_count(st.session_state.total_token_count)}"
     )
 
 

@@ -5,6 +5,7 @@ from mypylib.st_helper import (
     check_access,
     check_and_force_logout,
     configure_google_apis,
+    format_token_count,
     setup_logger,
 )
 
@@ -66,7 +67,7 @@ selected_sub_scene = st.sidebar.selectbox(
 # 显示计费令牌数
 if "inited_google_ai" in st.session_state:
     sidebar_status.markdown(
-        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
+        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{format_token_count(st.session_state.total_token_count)}"
     )
 
 

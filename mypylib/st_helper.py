@@ -142,6 +142,10 @@ def google_translate(text: str, target_language_code: str = "zh-CN"):
     return res[0]
 
 
+def format_token_count(count):
+    return f"{count / 1000:.1f}k" if count >= 1000 else str(count)
+
+
 def update_and_display_progress(
     current_value: int, total_value: int, progress_bar, message=""
 ):

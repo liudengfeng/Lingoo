@@ -9,6 +9,7 @@ from mypylib.st_helper import (
     check_access,
     check_and_force_logout,
     configure_google_apis,
+    format_token_count,
     load_vertex_model,
     setup_logger,
 )
@@ -258,7 +259,7 @@ if prompt := st.chat_input("输入提示以便开始对话"):
         st.write(e)
 
 
-msg = f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
+msg = f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{format_token_count(st.session_state.total_token_count)}"
 sidebar_status.markdown(msg, help=help_info)
 # st.write(st.session_state.chat_session.history)
 
