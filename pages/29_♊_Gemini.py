@@ -584,7 +584,7 @@ elif menu == "示例教程":
         ":book:",
         ":mega:",
         ":framed_picture:",
-        ":film_frames:",
+        "🎞️",
         ":bookmark_tabs:",
         ":mortar_board:",
     ]
