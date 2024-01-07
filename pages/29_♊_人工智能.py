@@ -2,7 +2,7 @@ import logging
 import mimetypes
 import time
 import streamlit as st
-from mypylib.google_ai import generate_content_and_update_token_count
+from mypylib.google_ai import generate_content_and_update_token
 from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 from vertexai.preview.generative_models import GenerationConfig, Part
 from mypylib.st_helper import (
@@ -119,7 +119,7 @@ def process_files_and_prompt(uploaded_files, prompt):
     return contents
 
 
-def generate_content_from_files_and_prompt(contents, container):
+def generate_content_from_files_and_prompt(contents, placeholder):
     model = load_vertex_model("gemini-pro-vision")
     generation_config = GenerationConfig(
         temperature=st.session_state["temperature"],
@@ -127,7 +127,7 @@ def generate_content_from_files_and_prompt(contents, container):
         top_k=st.session_state["top_k"],
         max_output_tokens=st.session_state["max_output_tokens"],
     )
-    responses = generate_content_and_update_token_count(
+    responses = generate_content_and_update_token(
         "多模态AI",
         model,
         [p["part"] for p in contents],
@@ -139,9 +139,8 @@ def generate_content_from_files_and_prompt(contents, container):
         full_response += chunk.text
         time.sleep(0.05)
         # Add a blinking cursor to simulate typing
-        container.markdown(full_response + "▌")
-    container.empty()
-    container.markdown(full_response)
+        placeholder.markdown(full_response + "▌")
+    placeholder.markdown(full_response)
 
 
 def clear_prompt(key):
@@ -306,7 +305,7 @@ if menu == "聊天机器":
         }
         config = GenerationConfig(**config)
         try:
-            responses = generate_content_and_update_token_count(
+            responses = generate_content_and_update_token(
                 "聊天机器人",
                 st.session_state.chat_model,
                 [Part.from_text(prompt)],
@@ -567,7 +566,7 @@ elif menu == "工具能手":
             response_container.empty()
             col1, col2 = response_container.columns([1, 1])
             view_example(contents, col1)
-            generate_content_from_files_and_prompt(contents, col2)
+            generate_content_from_files_and_prompt(contents, col2.empty())
 
 # endregion
 

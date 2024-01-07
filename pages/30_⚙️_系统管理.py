@@ -20,7 +20,7 @@ from vertexai.preview.generative_models import GenerationConfig, Image, Part
 from mypylib.constants import CEFR_LEVEL_MAPS
 from mypylib.db_interface import PRICES
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, str_to_enum
-from mypylib.google_ai import generate_content_and_update_token_count
+from mypylib.google_ai import generate_content_and_update_token
 from mypylib.google_cloud_configuration import PROJECT_ID
 from mypylib.st_helper import (
     check_access,
@@ -478,7 +478,7 @@ def generate(word, images: List[Part]):
     generation_config = GenerationConfig(
         max_output_tokens=2048, temperature=0.1, top_p=1, top_k=32
     )
-    responses = generate_content_and_update_token_count(
+    responses = generate_content_and_update_token(
         "挑选图片", model, contents, generation_config, stream=False
     )
     return json.loads(responses.text.replace("```json", "").replace("```", ""))
