@@ -532,6 +532,7 @@ def process_images():
 
     progress_bar = st.progress(0)
     n = len(words)
+    existing_blob_count = 0  # 初始化已存在的 blob 计数
     for index, word in enumerate(words):
         update_and_display_progress(index + 1, n, progress_bar, word)
         # 获取以单词开头的所有 blob
@@ -539,6 +540,7 @@ def process_images():
         # 如果存在任何以单词开头的 blob，就跳出循环
         if any(word_blobs):
             logger.info(f"找到 '{word}' 开头的 blob，跳过下载和上传步骤")
+            existing_blob_count += 1  # 更新已存在的 blob 计数
             continue
 
         urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
@@ -554,7 +556,11 @@ def process_images():
                 continue
 
             blob_client.upload_blob(img_byte_arr, blob_type="BlockBlob", overwrite=True)
-        logger.info(f"🎇 单词：{word} 图片上传成功")
+        # 计算已存在的 blob 的百分比，并将结果记录在日志中
+        existing_blob_percentage = (existing_blob_count / (index + 1)) * 100
+        logger.info(
+            f"🎇 单词：{word} 图片上传成功 已存在的 blob 占总 blob 的 {existing_blob_percentage:.2f}%
+        ")
 
 
 # endregion
