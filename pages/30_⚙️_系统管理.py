@@ -558,9 +558,7 @@ def process_images():
             blob_client.upload_blob(img_byte_arr, blob_type="BlockBlob", overwrite=True)
         # 计算已存在的 blob 的百分比，并将结果记录在日志中
         existing_blob_percentage = (existing_blob_count / (index + 1)) * 100
-        logger.info(
-            f"🎇 单词：{word} 图片上传成功 完成率：{existing_blob_percentage:.2f}%
-        ")
+        logger.info(f"🎇 单词：{word} 图片上传成功 完成率：{existing_blob_percentage:.2f}%")
 
 
 # endregion
