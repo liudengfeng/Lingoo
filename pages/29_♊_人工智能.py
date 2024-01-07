@@ -132,12 +132,6 @@ def generate_content_from_files_and_prompt(contents, container):
         top_k=st.session_state["top_k"],
         max_output_tokens=st.session_state["max_output_tokens"],
     )
-    # responses = model.generate_content(
-    #     [p["part"] for p in contents],
-    #     generation_config=generation_config,
-    #     safety_settings=DEFAULT_SAFETY_SETTINGS,
-    #     stream=True,
-    # )
     responses = generate_content_and_update_token_count(
         "多模态AI",
         model,
