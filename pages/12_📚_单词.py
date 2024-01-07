@@ -49,23 +49,6 @@ DICT_DIR = CURRENT_CWD / "resource/dictionary"
 
 # endregion
 
-# region 认证及初始化
-
-
-@st.cache_resource  # 👈 Add the caching decorator
-def load_word_dict():
-    with open(
-        DICT_DIR / "word_lists_by_edition_grade.json", "r", encoding="utf-8"
-    ) as f:
-        return json.load(f)
-
-
-if len(st.session_state.get("word_dict", {})) == 0:
-    st.session_state["word_dict"] = load_word_dict()
-
-# endregion
-
-
 # region 闪卡状态
 
 if "flashcard_words" not in st.session_state:
@@ -84,6 +67,27 @@ if "current_flashcard_word_index" not in st.session_state:
 # endregion
 
 # region 事件及函数
+
+
+@st.cache_resource  # 👈 Add the caching decorator
+def load_word_dict():
+    with open(
+        DICT_DIR / "word_lists_by_edition_grade.json", "r", encoding="utf-8"
+    ) as f:
+        return json.load(f)
+
+
+@st.cache_data(show_spinner="提取简版词典...", ttl=60 * 60 * 24)  # 缓存有效期为24小时
+def get_mini_dict():
+    db = st.session_state.dbi.db
+    collection = db.collection("mini_dict")
+
+    # 从 Firestore 获取数据
+    docs = collection.get()
+
+    data = {doc.id: doc.to_dict() for doc in docs}
+
+    return data
 
 
 def generate_flashcard_words():
@@ -124,8 +128,18 @@ menu = st.sidebar.selectbox("选择子菜单", menu_names, help="在这里选择
 
 # endregion
 
+# region 会话状态
+
+if "mini_dict" not in st.session_state:
+    st.session_state["mini_dict"] = get_mini_dict()
+
+if "word_dict" not in st.session_state:
+    st.session_state["word_dict"] = load_word_dict()
+
 with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
     voice_style_options = json.load(f)
+
+# endregion
 
 
 # region tabs
