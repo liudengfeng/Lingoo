@@ -6,7 +6,7 @@ from pathlib import Path
 import streamlit as st
 from vertexai.preview.generative_models import GenerationConfig, Part
 
-from mypylib.google_ai import generate_content_and_update_token
+from mypylib.google_ai import display_generated_content_and_update_token
 from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 from mypylib.st_helper import (
     check_access,
@@ -139,7 +139,7 @@ def generate_content_from_files_and_prompt(contents, placeholder):
         top_k=st.session_state["top_k"],
         max_output_tokens=st.session_state["max_output_tokens"],
     )
-    generate_content_and_update_token(
+    display_generated_content_and_update_token(
         "多模态AI",
         model,
         [p["part"] for p in contents],
@@ -311,7 +311,7 @@ if menu == "聊天机器人":
         config = GenerationConfig(**config)
         with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
             message_placeholder = st.empty()
-            generate_content_and_update_token(
+            display_generated_content_and_update_token(
                 "聊天机器人",
                 st.session_state.chat_model,
                 [Part.from_text(prompt)],
@@ -661,7 +661,7 @@ elif menu == "示例教程":
                 first_tab1, first_tab2, first_tab3 = st.tabs(["模型响应", "提示词", "参数设置"])
                 with first_tab1:
                     placeholder = st.empty()
-                    generate_content_and_update_token(
+                    display_generated_content_and_update_token(
                         "演示：生成故事",
                         text_model,
                         [Part.from_text(prompt)],
@@ -768,7 +768,7 @@ elif menu == "示例教程":
             with st.spinner("使用 Gemini 生成您的营销活动..."):
                 with second_tab1:
                     placeholder = st.empty()
-                    generate_content_and_update_token(
+                    display_generated_content_and_update_token(
                         "演示：营销活动",
                         text_model,
                         [Part.from_text(prompt)],
@@ -868,7 +868,7 @@ elif menu == "示例教程":
                             Part.from_text(item) if isinstance(item, str) else item
                             for item in content
                         ]
-                        generate_content_and_update_token(
+                        display_generated_content_and_update_token(
                             "演示：家具推荐",
                             vision_model,
                             new_contents,
@@ -910,7 +910,7 @@ elif menu == "示例教程":
                 if generate_instructions_description and prompt:
                     with st.spinner("使用 Gemini 生成指令..."):
                         new_contents = [stove_screen_img, Part.from_text(prompt)]
-                        generate_content_and_update_token(
+                        display_generated_content_and_update_token(
                             "烤箱使用说明演示",
                             vision_model,
                             new_contents,
@@ -947,7 +947,7 @@ elif menu == "示例教程":
                     placeholder = st.empty()
                     new_contents = [er_diag_img, Part.from_text(prompt)]
                     with st.spinner("生成..."):
-                        generate_content_and_update_token(
+                        display_generated_content_and_update_token(
                             "演示：ER 图",
                             vision_model,
                             new_contents,

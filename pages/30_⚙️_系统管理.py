@@ -20,7 +20,7 @@ from vertexai.preview.generative_models import GenerationConfig, Image, Part
 from mypylib.constants import CEFR_LEVEL_MAPS
 from mypylib.db_interface import PRICES
 from mypylib.db_model import Payment, PaymentStatus, PurchaseType, str_to_enum
-from mypylib.google_ai import generate_content_and_update_token
+from mypylib.google_ai import select_best_images_for_word
 from mypylib.google_cloud_configuration import PROJECT_ID
 from mypylib.st_helper import (
     check_access,
@@ -471,19 +471,6 @@ def save_dataframe_changes_to_database(current_df):
 # region 单词图片辅助函数
 
 
-def generate(word, images: List[Part]):
-    model = load_vertex_model("gemini-pro-vision")
-    prompt = f"单词：{word}\n输入的图片是否能形象解释单词含义，挑选出最合适的前4张图片。结果用输入图片的自然序号（从0开始）列表表达，如果没有合适的，返回空列表。以JSON格式输出。"
-    contents = [Part.from_text(prompt)] + images
-    generation_config = GenerationConfig(
-        max_output_tokens=2048, temperature=0.1, top_p=1, top_k=32
-    )
-    responses = generate_content_and_update_token(
-        "挑选图片", model, contents, generation_config, stream=False
-    )
-    return json.loads(responses.text.replace("```json", "").replace("```", ""))
-
-
 @st.spinner("使用 Gemini 挑选图片...")
 def fetch_and_update_word_image_indices(word):
     container_name = "word-images"
@@ -511,7 +498,9 @@ def fetch_and_update_word_image_indices(word):
         logger.error(f"没有找到单词 {word} 的图片")
         return
 
-    indices = generate(word, images)
+    model = load_vertex_model("gemini-pro-vision")
+    indices = select_best_images_for_word(model, word, images)
+
     if indices:
         # 检查 indices 是否为列表
         if not isinstance(indices, list):
