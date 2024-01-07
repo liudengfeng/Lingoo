@@ -104,9 +104,10 @@ def configure_google_apis():
         if "current_token_count" not in st.session_state:
             st.session_state["current_token_count"] = 0
 
-        # 应该存放在数据库
         if "total_token_count" not in st.session_state:
-            st.session_state["total_token_count"] = 0
+            st.session_state[
+                "total_token_count"
+            ] = st.session_state.dbi.get_token_count()
     else:
         st.warning("非云端环境，无法使用 Google AI", icon="⚠️")
 
