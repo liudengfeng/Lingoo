@@ -553,7 +553,6 @@ def process_images():
             continue
 
         urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
-        # urls = get_word_image_urls(word, "00f0b47160060b92b0c1723f1e800766f989a78e")
         for i, url in enumerate(urls):
             # 创建 blob 名称
             blob_name = f"{word}_{i}.png"
@@ -561,12 +560,12 @@ def process_images():
 
             try:
                 img_byte_arr = load_image_bytes_from_url(url)
-            except Exception:
-                logger.error(f"加载单词{word}第{i+1}张图片时出错")
+            except Exception as e:
+                logger.error(f"加载单词{word}第{i+1}张图片时出错:{str(e)}")
                 continue
 
             blob_client.upload_blob(img_byte_arr, blob_type="BlockBlob", overwrite=True)
-            logger.info(f"🎇 单词：{word} 第{i+1}张图片上传成功")
+        logger.info(f"🎇 单词：{word} 图片上传成功")
 
 
 # endregion
