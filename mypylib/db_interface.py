@@ -139,7 +139,7 @@ class DbInterface:
                 else:
                     return {
                         "status": "warning",
-                        "message": "您的服务账号已过期，请重新续费。",
+                        "message": "您尚未付费订阅或者服务账号已过期，请付费订阅。",
                     }
             else:
                 return {
