@@ -38,11 +38,6 @@ tabs = st.tabs(tab_flags)
 if "multimodal_examples" not in st.session_state:
     st.session_state["multimodal_examples"] = []
 
-if "current_token_count" not in st.session_state:
-    st.session_state["current_token_count"] = 0
-
-if "total_token_count" not in st.session_state:
-    st.session_state["total_token_count"] = st.session_state.dbi.get_token_count()
 
 # endregion
 

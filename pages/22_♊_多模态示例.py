@@ -7,13 +7,13 @@ from PIL import Image as PImage
 from vertexai.generative_models._generative_models import ContentsType
 from vertexai.preview.generative_models import GenerationConfig, GenerativeModel, Part
 
-from mypylib.ai_utils import view_stream_response
 from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 from mypylib.st_helper import (
     check_access,
     check_and_force_logout,
     configure_google_apis,
     load_vertex_model,
+    view_stream_response,
 )
 
 CURRENT_CWD: Path = Path(__file__).parent.parent

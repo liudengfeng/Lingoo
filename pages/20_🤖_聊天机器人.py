@@ -34,11 +34,6 @@ AVATAR_MAPS = {name: emoji for name, emoji in zip(AVATAR_NAMES, AVATAR_EMOJIES)}
 if "examples_pair" not in st.session_state:
     st.session_state["examples_pair"] = []
 
-if "current_token_count" not in st.session_state:
-    st.session_state["current_token_count"] = 0
-
-if "total_token_count" not in st.session_state:
-    st.session_state["total_token_count"] = st.session_state.dbi.get_token_count()
 
 if st.session_state.get("clear_example"):
     st.session_state["user_text_area"] = ""

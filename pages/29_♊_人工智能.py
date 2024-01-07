@@ -11,6 +11,7 @@ from mypylib.st_helper import (
     configure_google_apis,
     load_vertex_model,
     setup_logger,
+    view_stream_response,
 )
 
 
@@ -269,6 +270,10 @@ if menu == "聊天机器":
             st.write(f"**{his.role}**：{his.parts[0].text}")
 
     sidebar_status = st.sidebar.empty()
+    sidebar_status.markdown(
+        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}",
+        help=help_info,
+    )
     # endregion
 
     # region 认证及强制退出
@@ -299,37 +304,18 @@ if menu == "聊天机器":
             "top_k": st.session_state["top_k-chatbot"],
             "max_output_tokens": st.session_state["max_output_tokens-chatbot"],
         }
+        config = GenerationConfig(**config)
         try:
-            response = st.session_state.chat_session.send_message(
-                prompt,
-                generation_config=config,
-                safety_settings=DEFAULT_SAFETY_SETTINGS,
+            responses = generate_content_and_update_token_count(
+                "聊天机器人",
+                st.session_state.chat_model,
+                [Part.from_text(prompt)],
+                config,
                 stream=True,
             )
             with st.chat_message("assistant", avatar=AVATAR_MAPS["model"]):
                 message_placeholder = st.empty()
-                full_response = ""
-                for chunk in response:
-                    full_response += chunk.text
-                    time.sleep(0.05)
-                    # Add a blinking cursor to simulate typing
-                    message_placeholder.markdown(full_response + "▌")
-                message_placeholder.markdown(full_response)
-                # 令牌数
-                st.session_state.current_token_count = (
-                    st.session_state.chat_model.count_tokens(
-                        prompt + full_response
-                    ).total_tokens
-                )
-                st.session_state.total_token_count += (
-                    st.session_state.current_token_count
-                )
-                # 添加记录到数据库
-                st.session_state.dbi.add_token_record(
-                    st.session_state.dbi.cache["phone_number"],
-                    "gemini-pro-chatbot",
-                    st.session_state.current_token_count,
-                )
+                view_stream_response(responses, message_placeholder)
         # except ResponseBlockedError as e:
         #     # 处理被阻止的消息
         #     st.toast("抱歉，您尝试发送的消息包含潜在不安全的内容，已被阻止。")
@@ -338,12 +324,6 @@ if menu == "聊天机器":
         except Exception as e:
             # 处理其他类型的异常
             st.write(e)
-
-    sidebar_status = st.sidebar.empty()
-    sidebar_status.markdown(
-        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}",
-        help=help_info,
-    )
 
     # endregion
 

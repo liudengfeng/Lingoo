@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime
+import time
 
 import pytz
 import streamlit as st
@@ -163,3 +164,25 @@ def update_and_display_progress(
 
     # 更新进度条的值
     progress_bar.progress(progress, text)
+
+
+def view_stream_response(responses, placeholder):
+    """
+    Concatenates the text from the given responses and displays it in a placeholder.
+
+    Args:
+        responses (list): A list of response chunks.
+        placeholder: The placeholder where the concatenated text will be displayed.
+    """
+    full_response = ""
+    for chunk in responses:
+        try:
+            full_response += chunk.text
+        except (IndexError, ValueError) as e:
+            st.write(chunk)
+            st.error(e)
+            # pass
+        time.sleep(0.05)
+        # Add a blinking cursor to simulate typing
+        placeholder.markdown(full_response + "▌")
+    placeholder.markdown(full_response)
