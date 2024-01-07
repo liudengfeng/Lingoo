@@ -471,7 +471,7 @@ def save_dataframe_changes_to_database(current_df):
 # region 单词图片辅助函数
 
 
-def generate(word, images: List[Part], sidebar_status):
+def generate(word, images: List[Part]):
     model = load_vertex_model("gemini-pro-vision")
     prompt = f"单词：{word}\n输入的图片是否能形象解释单词含义，挑选出最合适的前4张图片。结果用输入图片的自然序号（从0开始）列表表达，如果没有合适的，返回空列表。以JSON格式输出。"
     contents = [Part.from_text(prompt)] + images
@@ -479,13 +479,13 @@ def generate(word, images: List[Part], sidebar_status):
         max_output_tokens=2048, temperature=0.1, top_p=1, top_k=32
     )
     responses = generate_content_and_update_token_count(
-        "挑选图片", sidebar_status, model, contents, generation_config, stream=False
+        "挑选图片", model, contents, generation_config, stream=False
     )
     return json.loads(responses.text.replace("```json", "").replace("```", ""))
 
 
 @st.spinner("使用 Gemini 挑选图片...")
-def fetch_and_update_word_image_indices(word, sidebar_status):
+def fetch_and_update_word_image_indices(word):
     container_name = "word-images"
     connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
 
@@ -511,7 +511,7 @@ def fetch_and_update_word_image_indices(word, sidebar_status):
         logger.error(f"没有找到单词 {word} 的图片")
         return
 
-    indices = generate(word, images, sidebar_status)
+    indices = generate(word, images)
     if indices:
         # 检查 indices 是否为列表
         if not isinstance(indices, list):
@@ -1105,7 +1105,7 @@ elif menu == "词典管理":
                 if st.session_state.dbi.word_has_image_indices(word):
                     logger.info(f"✅ 单词：{word} 已经有图片索引，跳过")
                     continue
-                fetch_and_update_word_image_indices(word, sidebar_status)
+                fetch_and_update_word_image_indices(word)
                 end_time = time.time()  # 记录结束时间
                 elapsed_time = end_time - start_time  # 计算运行时间
                 # 确保不超限

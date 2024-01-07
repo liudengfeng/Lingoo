@@ -2,6 +2,7 @@ import logging
 import mimetypes
 import time
 import streamlit as st
+from mypylib.google_ai import generate_content_and_update_token_count
 from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 from vertexai.preview.generative_models import GenerationConfig, Part
 from mypylib.st_helper import (
@@ -25,7 +26,7 @@ st.set_page_config(
 )
 check_access(False)
 configure_google_apis()
-
+help_info = "✨ 对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。"
 # endregion
 
 # region 会话状态
@@ -114,7 +115,16 @@ def view_example(examples, container):
             cols[i % 2].video(p["part"].inline_data.data)
 
 
-def generate_content_from_files_and_prompt(contents, response_container):
+def process_files_and_prompt(uploaded_files, prompt):
+    contents = st.session_state.multimodal_examples.copy()
+    if uploaded_files is not None:
+        for m in uploaded_files:
+            contents.append(_process_media(m))
+    contents.append({"mime_type": "text", "part": Part.from_text(prompt)})
+    return contents
+
+
+def generate_content_from_files_and_prompt(contents, container):
     model = load_vertex_model("gemini-pro-vision")
     generation_config = GenerationConfig(
         temperature=st.session_state["temperature"],
@@ -122,39 +132,27 @@ def generate_content_from_files_and_prompt(contents, response_container):
         top_k=st.session_state["top_k"],
         max_output_tokens=st.session_state["max_output_tokens"],
     )
-    responses = model.generate_content(
+    # responses = model.generate_content(
+    #     [p["part"] for p in contents],
+    #     generation_config=generation_config,
+    #     safety_settings=DEFAULT_SAFETY_SETTINGS,
+    #     stream=True,
+    # )
+    responses = generate_content_and_update_token_count(
+        "多模态AI",
+        model,
         [p["part"] for p in contents],
-        generation_config=generation_config,
-        safety_settings=DEFAULT_SAFETY_SETTINGS,
+        generation_config,
         stream=True,
     )
-
-    # col1, col2 = response_container.columns(2)
-    # view_example(contents, col1)
-
     full_response = ""
-    # message_placeholder = col2.empty()
     for chunk in responses:  # type: ignore
         full_response += chunk.text
         time.sleep(0.05)
         # Add a blinking cursor to simulate typing
-        response_container.markdown(full_response + "▌")
-
-    response_container.markdown(full_response)
-    # 令牌数
-    st.session_state.current_token_count = model.count_tokens(
-        [p["part"] for p in contents] + [Part.from_text(full_response)]
-    ).total_tokens
-    # 添加记录到数据库
-    st.session_state.dbi.add_token_record(
-        st.session_state.dbi.cache["phone_number"],
-        "gemini-pro-vision",
-        st.session_state.current_token_count,
-    )
-    st.session_state.total_token_count += st.session_state.current_token_count
-    sidebar_status.markdown(
-        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
-    )
+        container.markdown(full_response + "▌")
+    container.empty()
+    container.markdown(full_response)
 
 
 def clear_prompt(key):
@@ -282,7 +280,6 @@ if menu == "聊天机器":
         for his in st.session_state.chat_session.history[:num]:
             st.write(f"**{his.role}**：{his.parts[0].text}")
 
-    help_info = "✨ 对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。"
     sidebar_status = st.sidebar.empty()
     # endregion
 
@@ -354,9 +351,11 @@ if menu == "聊天机器":
             # 处理其他类型的异常
             st.write(e)
 
-    msg = f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
-    sidebar_status.markdown(msg, help=help_info)
-    # st.write(st.session_state.chat_session.history)
+    sidebar_status = st.sidebar.empty()
+    sidebar_status.markdown(
+        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}",
+        help=help_info,
+    )
 
     # endregion
 
@@ -420,7 +419,6 @@ elif menu == "工具能手":
         max_chars=64,
         help="✨ 停止序列是一连串字符（包括空格），如果模型中出现停止序列，则会停止生成回复。该序列不包含在回复中。您最多可以添加五个停止序列。",
     )
-    help_info = "✨ 对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。"
     sidebar_status = st.sidebar.empty()
     sidebar_status.markdown(
         f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}",
@@ -541,7 +539,9 @@ elif menu == "工具能手":
 
     with tabs[1]:
         st.subheader(":bulb: :blue[提示词]", divider="rainbow", anchor=False)
-        st.markdown("结合第一步添加的案例（可选），您可以上传多媒体文件、在文本框中撰写您的提示词，点击`提交`按钮启动模型。")
+        st.markdown(
+            "请上传所需的多媒体文件，并在下方的文本框中输入您的提示词。完成后，请点击 `提交` 按钮以启动模型。如果您已添加示例，它们也将一同提交。"
+        )
         uploaded_files = st.file_uploader(
             "插入多媒体文件【点击`Browse files`按钮，从本地上传文件】",
             accept_multiple_files=True,
@@ -581,11 +581,7 @@ elif menu == "工具能手":
 
         if view_all_btn:
             response_container.empty()
-            contents = st.session_state.multimodal_examples.copy()
-            if uploaded_files is not None:
-                for m in uploaded_files:
-                    contents.append(_process_media(m))
-            contents.append({"mime_type": "text", "part": Part.from_text(prompt)})
+            contents = process_files_and_prompt(uploaded_files, prompt)
             response_container.subheader(
                 f":clipboard: :blue[完整提示词（{len(contents)}）]",
                 divider="rainbow",
@@ -599,13 +595,11 @@ elif menu == "工具能手":
             if not prompt:
                 st.error("请添加提示词")
                 st.stop()
-            contents = st.session_state.multimodal_examples.copy()
-            if uploaded_files is not None:
-                for m in uploaded_files:
-                    contents.append(_process_media(m))
-
-            contents.append({"mime_type": "text", "part": Part.from_text(prompt)})
-            generate_content_from_files_and_prompt(contents, response_container)
+            contents = process_files_and_prompt(uploaded_files, prompt)
+            response_container.empty()
+            col1, col2 = response_container.columns([1, 1])
+            view_example(contents, col1)
+            generate_content_from_files_and_prompt(contents, col2)
 
 # endregion
 

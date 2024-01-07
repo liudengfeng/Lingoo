@@ -8,7 +8,6 @@ from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 
 def generate_content_and_update_token_count(
     item_name: str,
-    sidebar_status: st.sidebar,
     model: GenerativeModel,
     contents: List[Part],
     generation_config: GenerationConfig,
@@ -29,7 +28,7 @@ def generate_content_and_update_token_count(
         text = responses.text
     # 合成统计信息
     to_be_counted = [Part.from_text(text)] + contents
-    # 令牌数
+    # 修改会话中的令牌数
     st.session_state.current_token_count = model.count_tokens(
         to_be_counted
     ).total_tokens
@@ -40,7 +39,4 @@ def generate_content_and_update_token_count(
         st.session_state.current_token_count,
     )
     st.session_state.total_token_count += st.session_state.current_token_count
-    sidebar_status.markdown(
-        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{st.session_state.total_token_count}"
-    )
     return responses
