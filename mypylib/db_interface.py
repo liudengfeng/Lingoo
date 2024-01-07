@@ -367,7 +367,7 @@ class DbInterface:
         if not user_doc.exists:
             # 如果用户不存在，则创建一个新用户
             new_user = User(
-                username=self.faker.user_name(),
+                display_name=self.faker.user_name(),
                 email=f"{phone_number}@{FAKE_EMAIL_DOMAIN}",
                 phone_number=phone_number,
                 password=phone_number,
