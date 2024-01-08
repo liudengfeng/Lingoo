@@ -528,6 +528,15 @@ class DbInterface:
         else:
             return []
 
+    def update_image_urls(self, word: str, urls: list):
+        # 将单词中的 "/" 字符替换为 " or "
+        word = word.replace("/", " or ")
+
+        # 更新或添加 image_urls 字段
+        self.db.collection("mini_dict").document(word).set(
+            {"image_urls": urls}, merge=True
+        )
+
     def update_image_indices(self, word: str, indices: list):
         # 将单词中的 "/" 字符替换为 " or "
         word = word.replace("/", " or ")

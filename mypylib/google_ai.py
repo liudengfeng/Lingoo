@@ -92,6 +92,20 @@ def parse_generated_content_and_update_token(
     return parser(full_response)
 
 
+WORD_IMAGE_PROMPT_TEMPLATE = """
+找出最能解释单词含义的前4张图片序号，要求：
+- 清晰易懂：图片的清晰度和可读性是最重要的，用户应该能够轻松地理解图片所传达的信息。
+- 准确：图片应该准确地反映单词的含义，避免出现误导或混淆。
+- 生动形象：图片应该生动形象，能够引起用户的注意力和兴趣，从而促进对单词的理解和记忆。
+- 图片的主题：图片的主题应该与单词的含义相关，能够帮助用户理解单词的具体含义。
+- 图片的构图：图片的构图应该合理，能够突出单词的重点内容。
+- 图片的色彩：图片的色彩应该鲜明，能够引起用户的注意力。
+图片序号从0开始，按输入顺序编号。如果没有符号要求的照片，返回空列表。以JSON格式输出。
+
+单词：{word}
+"""
+
+
 def select_best_images_for_word(model, word, images: List[Part]):
     """
     为给定的单词选择最佳解释单词含义的图片。
@@ -106,7 +120,7 @@ def select_best_images_for_word(model, word, images: List[Part]):
     Returns:
         list: 以JSON格式输出的最佳图片序号列表。这些序号对应于输入的图片列表中的位置。如果没有合适的图片，则返回空列表。
     """
-    prompt = f"单词：{word}\n输入的图片是否能形象解释单词含义，挑选出最合适的前4张图片。结果用输入图片的自然序号（从0开始）列表表达，如果没有合适的，返回空列表。以JSON格式输出。"
+    prompt = WORD_IMAGE_PROMPT_TEMPLATE.format(word=word)
     contents = [Part.from_text(prompt)] + images
     generation_config = GenerationConfig(
         max_output_tokens=2048, temperature=0.1, top_p=1, top_k=32

@@ -123,50 +123,97 @@ def get_word_info(word):
     return st.session_state.dbi.find_word(word)
 
 
-@st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词图片序号...")
-def get_word_image_indices(word: str):
-    # 从 session_state 中的 mini_dict 查找 image_indices
-    image_indices = st.session_state.mini_dict.get(word, {}).get("image_indices")
+# @st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词图片序号...")
+# def get_word_image_indices(word: str):
+#     # 从 session_state 中的 mini_dict 查找 image_indices
+#     image_indices = st.session_state.mini_dict.get(word, {}).get("image_indices")
+#     model = load_vertex_model("gemini-pro-vision")
+#     # 如果 image_indices 不存在
+#     # if not image_indices:
+#     if True:
+#         container_name = "word-images"
+#         blob_service_client = get_blob_service_client()
+#         # 此处假设没有提取照片
+#         # container_client = get_blob_container_client(container_name)
+#         # blobs_list = container_client.list_blobs(name_starts_with=f"{word}_")
+#         images = []
+#         # for blob_name in blobs_list:
+#         #     try:
+#         #         blob_client = blob_service_client.get_blob_client(
+#         #             container_name, blob_name
+#         #         )
+#         #         image_bytes = blob_client.download_blob().readall()
+#         #         images.append(Image.from_bytes(image_bytes))
+#         #     except Exception as e:
+#         #         logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
+
+#         # 检查图片是否存在
+#         if len(images) == 0:
+#             # 如果图片不存在，则下载图片
+#             urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+#             for i, url in enumerate(urls):
+#                 blob_name = f"{word}_{i}.png"
+#                 blob_client = blob_service_client.get_blob_client(
+#                     container_name, blob_name
+#                 )
+#                 try:
+#                     image_bytes = load_image_bytes_from_url(url)
+#                     blob_client.upload_blob(
+#                         image_bytes, blob_type="BlockBlob", overwrite=True
+#                     )
+#                     images.append(Image.from_bytes(image_bytes))
+#                 except Exception as e:
+#                     logger.error(f"加载单词{word}第{i+1}张图片时出错:{str(e)}")
+#                     continue
+
+#         # 生成 image_indices
+#         image_indices = select_best_images_for_word(model, word, images)
+
+#         # 检查 indices 是否为列表
+#         if not isinstance(image_indices, list):
+#             st.error(f"{word} indices 必须是一个列表")
+#             raise TypeError(f"{word} indices 必须是一个列表")
+#         # 检查列表中的每个元素是否都是整数
+#         if not all(isinstance(i, int) for i in image_indices):
+#             st.error(f"{word} indices 列表中的每个元素都必须是整数")
+#             raise TypeError(f"{word} indices 列表中的每个元素都必须是整数")
+
+#         st.session_state.dbi.update_image_indices(word, image_indices)
+
+#     return image_indices
+
+
+# @st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="提取单词图片...")
+# def get_word_images(word: str, indices: List[int]):
+#     # s_word = word.replace("/", " or ")
+#     container_name = "word-images"
+#     blob_service_client = get_blob_service_client()
+#     res = []
+#     for i in indices:
+#         blob_name = f"{word}_{i}.png"
+#         blob_client = blob_service_client.get_blob_client(container_name, blob_name)
+#         image_bytes = blob_client.download_blob().readall()
+#         res.append(image_bytes)
+#     return res
+
+
+@st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词图片网址...")
+def select_word_image_urls(word: str):
+    # 从 session_state 中的 mini_dict 查找 image_urls
+    urls = st.session_state.mini_dict.get(word, {}).get("image_urls")
     model = load_vertex_model("gemini-pro-vision")
-    # 如果 image_indices 不存在
-    # if not image_indices:
-    if True:
-        container_name = "word-images"
-        blob_service_client = get_blob_service_client()
-        # 此处假设没有提取照片
-        # container_client = get_blob_container_client(container_name)
-        # blobs_list = container_client.list_blobs(name_starts_with=f"{word}_")
+    if len(urls) == 0:
         images = []
-        # for blob_name in blobs_list:
-        #     try:
-        #         blob_client = blob_service_client.get_blob_client(
-        #             container_name, blob_name
-        #         )
-        #         image_bytes = blob_client.download_blob().readall()
-        #         images.append(Image.from_bytes(image_bytes))
-        #     except Exception as e:
-        #         logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
+        urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+        for i, url in enumerate(urls):
+            try:
+                image_bytes = load_image_bytes_from_url(url)
+                images.append(Image.from_bytes(image_bytes))
+            except Exception as e:
+                logger.error(f"加载单词{word}第{i+1}张图片时出错:{str(e)}")
+                continue
 
-        # 检查图片是否存在
-        if len(images) == 0:
-            # 如果图片不存在，则下载图片
-            urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
-            for i, url in enumerate(urls):
-                blob_name = f"{word}_{i}.png"
-                blob_client = blob_service_client.get_blob_client(
-                    container_name, blob_name
-                )
-                try:
-                    image_bytes = load_image_bytes_from_url(url)
-                    blob_client.upload_blob(
-                        image_bytes, blob_type="BlockBlob", overwrite=True
-                    )
-                    images.append(Image.from_bytes(image_bytes))
-                except Exception as e:
-                    logger.error(f"加载单词{word}第{i+1}张图片时出错:{str(e)}")
-                    continue
-
-        # 使用 f0() 函数生成 image_indices
+        # 生成 image_indices
         image_indices = select_best_images_for_word(model, word, images)
 
         # 检查 indices 是否为列表
@@ -178,7 +225,7 @@ def get_word_image_indices(word: str):
             st.error(f"{word} indices 列表中的每个元素都必须是整数")
             raise TypeError(f"{word} indices 列表中的每个元素都必须是整数")
 
-        st.session_state.dbi.update_image_indices(word, image_indices)
+        st.session_state.dbi.update_image_urls(word, [urls[i] for i in image_indices])
 
     return image_indices
 
@@ -401,13 +448,14 @@ def view_flash_word(container, tip_placeholder):
     container.divider()
     container.markdown(md)
 
-    image_indices = get_word_image_indices(s_word)
-    logger.info(f"单词 {s_word} 图片序号：{image_indices}")
-    images = get_word_images(s_word, image_indices)
-    cols = container.columns(len(images))
-    caption = [f"图片 {i+1}" for i in image_indices]
+    urls = select_word_image_urls(s_word)
+    # logger.info(f"单词 {s_word} 图片序号：{image_indices}")
+    # images = get_word_images(s_word, image_indices)
+    cols = container.columns(len(urls))
+    caption = [f"图片 {i+1}" for i in range(len(urls))]
     for i, col in enumerate(cols):
-        col.image(images[i], use_column_width=True, caption=caption[i])
+        # col.image(images[i], use_column_width=True, caption=caption[i])
+        col.image(urls[i], use_column_width=True, caption=caption[i])
 
     view_pos(container, word_info, word)
 
