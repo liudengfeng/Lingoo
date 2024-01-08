@@ -47,13 +47,13 @@ def display_generated_content_and_update_token(
         safety_settings=DEFAULT_SAFETY_SETTINGS,
         stream=stream,
     )
-    st.write(f"responses 令牌数：{responses._raw_response.usage_metadata}")
     full_response = ""
     # 提取生成的内容
     if stream:
         for chunk in responses:
             try:
                 full_response += chunk.text
+                st.write(f"流式块 令牌数：{chunk._raw_response.usage_metadata}")
             except (IndexError, ValueError) as e:
                 st.write(chunk)
                 st.error(e)
@@ -62,6 +62,7 @@ def display_generated_content_and_update_token(
             placeholder.markdown(full_response + "▌")
     else:
         full_response = responses.text
+        st.write(f"responses 令牌数：{chunk._raw_response.usage_metadata}")
 
     placeholder.markdown(full_response)
 
