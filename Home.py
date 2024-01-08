@@ -19,7 +19,7 @@ from mypylib.st_helper import check_and_force_logout, get_firestore_client, setu
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
-setup_logger(logger, "DEBUG")
+setup_logger(logger)
 
 CURRENT_CWD: Path = Path(__file__).parent
 LOGO_DIR: Path = CURRENT_CWD / "resource/logo"
@@ -73,8 +73,7 @@ login_btn = s_cols[0].button(
 )
 
 logout_btn = s_cols[1].button("退出", help="✨ 在公共场所使用本产品时，请在离开前退出登录，以保护您的隐私和安全。")
-# 检查
-st.write(st.session_state.dbi.cache)
+
 
 sidebar_status = st.sidebar.empty()
 
@@ -92,7 +91,7 @@ def extend_service_period():
     user_role = str_to_enum(user_dic.get("role"), UserRole)
     # 定义角色范围
     role_range = [UserRole.SVIP, UserRole.ADMIN]
-    logger.debug(f"用户角色：{user_role} {type(user_role)}")
+    logger.info(f"用户角色：{user_role} {type(user_role)}")
     if user_role in role_range:
         return
 
