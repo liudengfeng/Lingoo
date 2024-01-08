@@ -129,7 +129,8 @@ def get_word_image_indices(word: str):
     image_indices = st.session_state.mini_dict.get(word, {}).get("image_indices")
     model = load_vertex_model("gemini-pro-vision")
     # 如果 image_indices 不存在
-    if not image_indices:
+    # if not image_indices:
+    if True:
         container_name = "word-images"
         blob_service_client = get_blob_service_client()
         # 此处假设没有提取照片
