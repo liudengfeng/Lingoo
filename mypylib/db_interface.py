@@ -390,6 +390,7 @@ class DbInterface:
                 email=f"{phone_number}@{FAKE_EMAIL_DOMAIN}",
                 phone_number=phone_number,
                 password=phone_number,
+                timezone="Asia/Shanghai",
                 registration_time=datetime.now(timezone.utc),
                 memo=f"订单号：{payment.order_id}",
             )  # type: ignore

@@ -108,7 +108,7 @@ def get_word_info(word):
 
 
 def add_personal_dictionary():
-    st.write(st.session_state["add_personal_dictionary"])
+    # st.write(st.session_state["add_personal_dictionary"])
     flag = st.session_state["add_personal_dictionary"]
     # 从集合中提取个人词库，添加到word_lists中
     personal_word_list = st.session_state.dbi.find_personal_dictionary()
@@ -325,7 +325,7 @@ if menu == "闪卡记忆":
     voice_style = voice_style_options[style][0]
     st.sidebar.info(f"语音风格：{voice_style[0]}({voice_style[1]})")
     st.sidebar.checkbox(
-        "添加个人词库", key="add_personal_dictionary", on_change=add_personal_dictionary
+        "包含个人词库？", key="add_personal_dictionary", on_change=add_personal_dictionary
     )
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
     st.sidebar.selectbox(
