@@ -13,7 +13,6 @@ from typing import List
 import pandas as pd
 import pytz
 import streamlit as st
-from azure.storage.blob import BlobServiceClient
 from google.cloud import firestore
 from vertexai.preview.generative_models import GenerationConfig, Image, Part
 
@@ -26,6 +25,8 @@ from mypylib.st_helper import (
     check_access,
     check_and_force_logout,
     configure_google_apis,
+    get_blob_container_client,
+    get_blob_service_client,
     google_translate,
     load_vertex_model,
     setup_logger,
@@ -249,9 +250,10 @@ def generate_timestamp(key: str, type: str, idx: int):
 @st.cache_data(ttl=60 * 60 * 1)  # 缓存有效期为1小时
 def get_feedbacks():
     container_name = "feedback"
-    connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
-    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
-    container_client = blob_service_client.get_container_client(container_name)
+    # connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+    # blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+    # container_client = blob_service_client.get_container_client(container_name)
+    container_client = get_blob_container_client(container_name)
 
     # 获取blob列表
     blobs_list = container_client.list_blobs()
@@ -474,13 +476,15 @@ def save_dataframe_changes_to_database(current_df):
 @st.spinner("使用 Gemini 挑选图片...")
 def fetch_and_update_word_image_indices(word):
     container_name = "word-images"
-    connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+    # connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
 
-    # 创建 BlobServiceClient 对象
-    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+    # # 创建 BlobServiceClient 对象
+    # blob_service_client = BlobServiceClient.from_connection_string(connect_str)
 
-    # 获取 ContainerClient 对象
-    container_client = blob_service_client.get_container_client(container_name)
+    # # 获取 ContainerClient 对象
+    # container_client = blob_service_client.get_container_client(container_name)
+
+    container_client = get_blob_container_client(container_name)
 
     # 获取名称以 "abbreviated_" 开始的所有 blob
     blobs_list = container_client.list_blobs(name_starts_with=f"{word}_")
@@ -526,9 +530,10 @@ def process_images():
     random.shuffle(words)
 
     container_name = "word-images"
-    connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
-    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
-    container_client = blob_service_client.get_container_client(container_name)
+    # connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+    # blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+    # container_client = blob_service_client.get_container_client(container_name)
+    container_client = get_blob_container_client(container_name)
 
     progress_bar = st.progress(0)
     n = len(words)
@@ -929,9 +934,10 @@ if menu == "支付管理":
 elif menu == "处理反馈":
     st.subheader("处理反馈", divider="rainbow", anchor=False)
     container_name = "feedback"
-    connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
-    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
-    container_client = blob_service_client.get_container_client(container_name)
+    # connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+    blob_service_client = get_blob_service_client()
+    # container_client = blob_service_client.get_container_client(container_name)
+    container_client = get_blob_container_client(container_name)
     # 设置缓存为 1 小时，不能实时查看反馈
     feedbacks = get_feedbacks()
     # st.write(f"{feedbacks=}")

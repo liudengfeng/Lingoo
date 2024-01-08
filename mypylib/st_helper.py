@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime
 import time
-
+from azure.storage.blob import BlobServiceClient
 import pytz
 import streamlit as st
 import vertexai
@@ -76,6 +76,26 @@ def get_firestore_client():
 @st.cache_resource
 def load_vertex_model(model_name):
     return GenerativeModel(model_name)
+
+
+@st.cache_resource
+def get_blob_service_client():
+    # container_name = "word-images"
+    connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+    # 创建 BlobServiceClient 对象
+    return BlobServiceClient.from_connection_string(connect_str)
+
+
+@st.cache_resource
+def get_blob_container_client(container_name):
+    # container_name = "word-images"
+    connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
+
+    # 创建 BlobServiceClient 对象
+    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
+
+    # 获取 ContainerClient 对象
+    return blob_service_client.get_container_client(container_name)
 
 
 def check_access(is_admin_page):
