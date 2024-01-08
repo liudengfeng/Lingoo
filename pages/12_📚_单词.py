@@ -216,6 +216,8 @@ def select_word_image_urls(word: str):
         # 生成 image_indices
         image_indices = select_best_images_for_word(model, word, images)
 
+        st.write(f"单词 {word} 图片序号：{image_indices}")
+
         # 检查 indices 是否为列表
         if not isinstance(image_indices, list):
             msg = f"{word} 序号必须是一个列表，但是得到的类型是 {type(image_indices)}"
