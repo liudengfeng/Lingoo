@@ -216,8 +216,6 @@ def select_word_image_urls(word: str):
         # 生成 image_indices
         image_indices = select_best_images_for_word(model, word, images)
 
-        st.write(f"单词 {word} 图片序号：{image_indices}")
-
         # 检查 indices 是否为列表
         if not isinstance(image_indices, list):
             msg = f"{word} 序号必须是一个列表，但是得到的类型是 {type(image_indices)}"
@@ -233,20 +231,6 @@ def select_word_image_urls(word: str):
         st.session_state.dbi.update_image_urls(word, urls)
 
     return urls
-
-
-@st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="提取单词图片...")
-def get_word_images(word: str, indices: List[int]):
-    # s_word = word.replace("/", " or ")
-    container_name = "word-images"
-    blob_service_client = get_blob_service_client()
-    res = []
-    for i in indices:
-        blob_name = f"{word}_{i}.png"
-        blob_client = blob_service_client.get_blob_client(container_name, blob_name)
-        image_bytes = blob_client.download_blob().readall()
-        res.append(image_bytes)
-    return res
 
 
 def add_personal_dictionary():
@@ -454,8 +438,6 @@ def view_flash_word(container, tip_placeholder):
     container.markdown(md)
 
     urls = select_word_image_urls(s_word)
-    # logger.info(f"单词 {s_word} 图片序号：{image_indices}")
-    # images = get_word_images(s_word, image_indices)
     cols = container.columns(len(urls))
     caption = [f"图片 {i+1}" for i in range(len(urls))]
     for i, col in enumerate(cols):
@@ -506,9 +488,7 @@ if menu == "闪卡记忆":
     # endregion
     st.subheader(":book: 记忆闪卡", divider="rainbow", anchor=False)
     st.markdown(
-        """✨ 闪卡记忆是一种记忆单词的游戏，其玩法是将单词或短语的中英文对照显示在屏幕上，玩家需要根据提示信息，尽可能多地记住单词或短语的含义。这种游戏可以帮助玩家记忆单词的含义。
-- 用户可以在侧边栏选择发音标准、单词列表和计划记忆的单词数量。
-- 在主页面上，用户可以通过点击按钮来切换显示状态、切换到上一个或下一个单词、播放单词发音、将当前单词添加到或从个人词库中删除。如果在侧边栏改变了词库或记忆数量，可以点击一个按钮来重新生成闪卡词库。"""
+        """✨ 闪卡记忆是一种记忆单词的游戏，其玩法是将单词或短语的中英文对照显示在屏幕上，玩家需要根据提示信息，尽可能多地记住单词或短语的含义。"""
     )
     btn_cols = st.columns(10)
     tip_placeholder = st.empty()
