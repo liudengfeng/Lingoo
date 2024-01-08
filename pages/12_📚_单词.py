@@ -218,12 +218,14 @@ def select_word_image_urls(word: str):
 
         # 检查 indices 是否为列表
         if not isinstance(image_indices, list):
-            st.error(f"{word} indices 必须是一个列表")
-            raise TypeError(f"{word} indices 必须是一个列表")
+            msg = f"{word} 序号必须是一个列表，但是得到的类型是 {type(image_indices)}"
+            logger.error(msg)
+            raise TypeError(msg)
         # 检查列表中的每个元素是否都是整数
         if not all(isinstance(i, int) for i in image_indices):
-            st.error(f"{word} indices 列表中的每个元素都必须是整数")
-            raise TypeError(f"{word} indices 列表中的每个元素都必须是整数")
+            msg = f"{word} 序号列表中的每个元素都必须是整数，但是得到的类型是 {[type(image_indices[i] for i in image_indices)]}"
+            logger.error(msg)
+            raise TypeError(msg)
 
         urls = [full_urls[i] for i in image_indices]
         st.session_state.dbi.update_image_urls(word, urls)
