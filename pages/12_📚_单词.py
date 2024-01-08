@@ -69,7 +69,6 @@ if "current_flashcard_word_index" not in st.session_state:
 # region 事件及函数
 
 
-@st.cache_resource  # 👈 Add the caching decorator
 def load_word_dict():
     with open(
         DICT_DIR / "word_lists_by_edition_grade.json", "r", encoding="utf-8"
