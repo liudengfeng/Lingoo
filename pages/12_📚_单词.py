@@ -91,7 +91,6 @@ def get_mini_dict():
 
 
 def generate_flashcard_words():
-    update_personal_dictionary()
     # 获取选中的单词列表
     word_lib_name = st.session_state["selected_list"]
     words = st.session_state.word_dict[word_lib_name]
@@ -108,11 +107,17 @@ def get_word_info(word):
     return st.session_state.dbi.find_word(word)
 
 
-def update_personal_dictionary():
+def add_personal_dictionary():
+    st.write(st.session_state["add_personal_dictionary"])
+    flag = st.session_state["add_personal_dictionary"]
     # 从集合中提取个人词库，添加到word_lists中
     personal_word_list = st.session_state.dbi.find_personal_dictionary()
-    if len(personal_word_list) > 0:
-        st.session_state.word_dict["0-个人词库"] = personal_word_list
+    if flag:
+        if len(personal_word_list) > 0:
+            st.session_state.word_dict["0-个人词库"] = personal_word_list
+    else:
+        if "0-个人词库" in st.session_state.word_dict:
+            del st.session_state.word_dict["0-个人词库"]
 
 
 # endregion
@@ -319,7 +324,9 @@ if menu == "闪卡记忆":
     # 固定语音风格
     voice_style = voice_style_options[style][0]
     st.sidebar.info(f"语音风格：{voice_style[0]}({voice_style[1]})")
-
+    st.sidebar.checkbox(
+        "添加个人词库", key="add_personal_dictionary", on_change=add_personal_dictionary
+    )
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
     st.sidebar.selectbox(
         "请选择单词列表",
