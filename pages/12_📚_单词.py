@@ -200,7 +200,7 @@ def get_word_info(word):
 @st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词图片网址...")
 def select_word_image_urls(word: str):
     # 从 session_state 中的 mini_dict 查找 image_urls
-    urls = st.session_state.mini_dict.get(word, {}).get("image_urls")
+    urls = st.session_state.mini_dict.get(word, {}).get("image_urls", [])
     model = load_vertex_model("gemini-pro-vision")
     if len(urls) == 0:
         images = []
