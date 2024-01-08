@@ -402,8 +402,10 @@ def view_flash_word(container, tip_placeholder):
 
     image_indices = get_word_image_indices(word)
     images = get_word_images(word, image_indices)
+    cols = container.columns(len(images))
     caption = [f"图片 {i+1}" for i in image_indices]
-    container.image(images, width=200, caption=caption)
+    for i, col in enumerate(cols):
+        col.image(images[i], use_column_width=True, caption=caption[i])
 
     view_pos(container, word_info, word)
 
