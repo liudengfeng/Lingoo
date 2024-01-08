@@ -252,9 +252,9 @@ class DbInterface:
             .order_by("payment_time", direction=firestore.Query.DESCENDING)
             .limit(1)
         )
-        doc = query.get()
-        if doc:
-            return doc.to_dict()
+        docs = query.get()
+        if docs:
+            return docs[0].to_dict()
         else:
             return {}
 
