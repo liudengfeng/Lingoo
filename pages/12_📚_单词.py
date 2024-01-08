@@ -212,9 +212,11 @@ def select_word_image_urls(word: str):
             except Exception as e:
                 logger.error(f"加载单词{word}第{i+1}张图片时出错:{str(e)}")
                 continue
-
-        # 生成 image_indices
-        image_indices = select_best_images_for_word(model, word, images)
+        try:
+            # 生成 image_indices
+            image_indices = select_best_images_for_word(model, word, images)
+        except:
+            image_indices = [0, 1, 2, 3]
 
         # 检查 indices 是否为列表
         if not isinstance(image_indices, list):
