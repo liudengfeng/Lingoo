@@ -391,6 +391,8 @@ class DbInterface:
                 phone_number=phone_number,
                 password=phone_number,
                 timezone="Asia/Shanghai",
+                country="中国",
+                province="上海",
                 registration_time=datetime.now(timezone.utc),
                 memo=f"订单号：{payment.order_id}",
             )  # type: ignore
