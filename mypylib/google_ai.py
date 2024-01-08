@@ -14,12 +14,16 @@ def _update_token_counts_and_db(
     contents: List[Part],
     item_name: str,
 ):
+    cs0 = model.count_tokens(contents)
+    cs1 = model.count_tokens([Part.from_text(full_response)])
+    st.write(f"输入的令牌数：{cs0.total_tokens}")
+    st.write(f"生成的令牌数：{cs1.total_tokens}")
     # 合成统计信息
     to_be_counted = [Part.from_text(full_response)] + contents
+    cs = model.count_tokens(to_be_counted)
+    st.write(f"本次生成的令牌数：{cs.total_tokens}")
     # 修改会话中的令牌数
-    st.session_state.current_token_count = model.count_tokens(
-        to_be_counted
-    ).total_tokens
+    st.session_state.current_token_count = cs.total_tokens
     # 添加记录到数据库
     st.session_state.dbi.add_token_record(
         st.session_state.dbi.cache["phone_number"],
@@ -43,6 +47,7 @@ def display_generated_content_and_update_token(
         safety_settings=DEFAULT_SAFETY_SETTINGS,
         stream=stream,
     )
+    st.write(f"responses 令牌数：{responses._raw_response.usage_metadata}")
     full_response = ""
     # 提取生成的内容
     if stream:
