@@ -135,8 +135,18 @@ def get_word_image_indices(word: str):
         container_client = get_blob_container_client(container_name)
         blobs_list = container_client.list_blobs(name_starts_with=f"{s_word}_")
         images = []
+        for blob_name in blobs_list:
+            try:
+                blob_client = blob_service_client.get_blob_client(
+                    container_name, blob_name
+                )
+                image_bytes = blob_client.download_blob().readall()
+                images.append(Image.from_bytes(image_bytes))
+            except Exception as e:
+                logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
+
         # 检查图片是否存在
-        if len(blobs_list) == 0:
+        if len(images) == 0:
             # 如果图片不存在，则下载图片
             urls = get_word_image_urls(s_word, st.secrets["SERPER_KEY"])
             for i, url in enumerate(urls):
@@ -153,16 +163,6 @@ def get_word_image_indices(word: str):
                 except Exception as e:
                     logger.error(f"加载单词{s_word}第{i+1}张图片时出错:{str(e)}")
                     continue
-        else:
-            for blob_name in blobs_list:
-                try:
-                    blob_client = blob_service_client.get_blob_client(
-                        container_name, blob_name
-                    )
-                    image_bytes = blob_client.download_blob().readall()
-                    images.append(Image.from_bytes(image_bytes))
-                except Exception as e:
-                    logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
 
         # 使用 f0() 函数生成 image_indices
         image_indices = select_best_images_for_word(model, s_word, images)
