@@ -162,6 +162,7 @@ def clear_prompt(key):
 # region 主页
 
 menu = st.sidebar.selectbox("菜单", options=["聊天机器人", "多模态AI", "示例教程"])
+st.sidebar.divider()
 sidebar_status = st.sidebar.empty()
 check_and_force_logout(sidebar_status)
 
