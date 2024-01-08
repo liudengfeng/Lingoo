@@ -90,7 +90,14 @@ def get_mini_dict():
     return data
 
 
+def reset_flashcard_word():
+    # 恢复初始显示状态
+    st.session_state.flashcard_display_state = "全部"
+    st.session_state["current_flashcard_word_index"] = -1
+
+
 def generate_flashcard_words():
+    reset_flashcard_word()
     # 获取选中的单词列表
     word_lib_name = st.session_state["selected_list"]
     words = st.session_state.word_dict[word_lib_name]
@@ -348,6 +355,7 @@ if menu == "闪卡记忆":
         50,
         step=5,
         key="num_words_key",
+        on_change=generate_flashcard_words,
     )
     # endregion
     st.subheader(":book: 记忆闪卡", divider="rainbow", anchor=False)
