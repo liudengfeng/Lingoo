@@ -13,7 +13,7 @@ from mypylib.auth_utils import is_valid_phone_number
 from mypylib.azure_speech import speech_synthesis_get_available_voices
 from mypylib.constants import LANGUAGES
 from mypylib.db_interface import DbInterface
-from mypylib.db_model import PaymentStatus
+from mypylib.db_model import PaymentStatus, UserRole
 from mypylib.st_helper import check_and_force_logout, get_firestore_client
 
 CURRENT_CWD: Path = Path(__file__).parent
@@ -83,12 +83,20 @@ def extend_service_period():
     extend_time_btn_disabled = False
     # 获取用户的数据
     user_dic = st.session_state.dbi.get_user(False)
+    # 获取用户角色
+    user_role = user_dic.get("role")
+    # 定义角色范围
+    role_range = [UserRole.SVIP, UserRole.ADMIN]
+    if user_role in role_range:
+        return
     user_tz = user_dic["timezone"]
     timezone = pytz.timezone(user_tz)
     # 获取当前的日期和时间
     current_datetime = datetime.now(timezone)
     # 查询在服务期内，处于服务状态的支付记录
     payment_record = st.session_state.dbi.get_last_active_payment()
+    if not payment_record:
+        return
 
     # 限制在正常时段才能领取
     if 6 <= current_datetime.hour <= 20:
