@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import random
 import time
@@ -14,7 +15,11 @@ from mypylib.azure_speech import speech_synthesis_get_available_voices
 from mypylib.constants import LANGUAGES
 from mypylib.db_interface import DbInterface
 from mypylib.db_model import PaymentStatus, UserRole, str_to_enum
-from mypylib.st_helper import check_and_force_logout, get_firestore_client
+from mypylib.st_helper import check_and_force_logout, get_firestore_client, setup_logger
+
+# 创建或获取logger对象
+logger = logging.getLogger("streamlit")
+setup_logger(logger)
 
 CURRENT_CWD: Path = Path(__file__).parent
 LOGO_DIR: Path = CURRENT_CWD / "resource/logo"
@@ -87,14 +92,17 @@ def extend_service_period():
     user_role = str_to_enum(user_dic.get("role"), UserRole)
     # 定义角色范围
     role_range = [UserRole.SVIP, UserRole.ADMIN]
+    logger.debug(f"用户角色：{user_role} {type(user_role)}")
     if user_role in role_range:
         return
+
     user_tz = user_dic["timezone"]
     timezone = pytz.timezone(user_tz)
     # 获取当前的日期和时间
     current_datetime = datetime.now(timezone)
     # 查询在服务期内，处于服务状态的支付记录
     payment_record = st.session_state.dbi.get_last_active_payment()
+
     if not payment_record:
         return
 
