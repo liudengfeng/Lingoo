@@ -204,8 +204,8 @@ def select_word_image_urls(word: str):
     model = load_vertex_model("gemini-pro-vision")
     if len(urls) == 0:
         images = []
-        urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
-        for i, url in enumerate(urls):
+        full_urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+        for i, url in enumerate(full_urls):
             try:
                 image_bytes = load_image_bytes_from_url(url)
                 images.append(Image.from_bytes(image_bytes))
@@ -225,9 +225,10 @@ def select_word_image_urls(word: str):
             st.error(f"{word} indices 列表中的每个元素都必须是整数")
             raise TypeError(f"{word} indices 列表中的每个元素都必须是整数")
 
-        st.session_state.dbi.update_image_urls(word, [urls[i] for i in image_indices])
+        urls = [full_urls[i] for i in image_indices]
+        st.session_state.dbi.update_image_urls(word, urls)
 
-    return image_indices
+    return urls
 
 
 @st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="提取单词图片...")
