@@ -30,6 +30,7 @@ if "dbi" not in st.session_state:
     st.session_state["dbi"] = DbInterface(get_firestore_client())
 
 
+# region 更新语音列表
 need_update = False
 # 如果文件不存在，或者文件的最后修改时间距离当前时间超过120天
 if not os.path.exists(VOICES_FP):
@@ -44,7 +45,7 @@ else:
 
 if need_update:
     res = {}
-    with st.spinner("正在更新语音列表，请稍后..."):
+    with st.spinner("正在更新语音列表，请稍候..."):
         for lan in LANGUAGES:
             res[lan] = speech_synthesis_get_available_voices(
                 lan,
@@ -54,7 +55,7 @@ if need_update:
         # 将数据存储为 JSON 格式
         with open(VOICES_FP, "w", encoding="utf-8") as f:
             json.dump(res, f, ensure_ascii=False)
-
+# endregion
 
 s_cols = st.sidebar.columns(3)
 login_btn = s_cols[0].button(
@@ -67,6 +68,8 @@ login_btn = s_cols[0].button(
     disabled=st.session_state.dbi.cache.get("is_logged_in", False),
 )
 logout_btn = s_cols[1].button("退出", help="✨ 在公共场所使用本产品时，请在离开前退出登录，以保护您的隐私和安全。")
+# 检查
+st.write(st.session_state.dbi.cache)
 
 # 获取当前的日期和时间
 current_datetime = datetime.now(timezone.utc)
