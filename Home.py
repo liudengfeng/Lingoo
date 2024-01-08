@@ -19,7 +19,7 @@ from mypylib.st_helper import check_and_force_logout, get_firestore_client, setu
 
 # 创建或获取logger对象
 logger = logging.getLogger("streamlit")
-setup_logger(logger)
+setup_logger(logger, "DEBUG")
 
 CURRENT_CWD: Path = Path(__file__).parent
 LOGO_DIR: Path = CURRENT_CWD / "resource/logo"

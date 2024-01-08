@@ -18,7 +18,7 @@ from .google_cloud_configuration import (
 )
 
 
-def setup_logger(logger):
+def setup_logger(logger, level="INFO"):
     # 设置日志的时间戳为 Asia/Shanghai 时区
     formatter = logging.Formatter("%(asctime)s - %(message)s")
     formatter.converter = lambda *args: datetime.now(
@@ -26,6 +26,7 @@ def setup_logger(logger):
     ).timetuple()
     for handler in logger.handlers:
         handler.setFormatter(formatter)
+        handler.setLevel(logging.getLevelName(level))
 
 
 def check_and_force_logout(status):
