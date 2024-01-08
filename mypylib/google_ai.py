@@ -8,31 +8,6 @@ from vertexai.preview.generative_models import GenerationConfig, GenerativeModel
 from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 
 
-def _update_token_counts_and_db(
-    model: GenerativeModel,
-    full_response: str,
-    contents: List[Part],
-    item_name: str,
-):
-    cs0 = model.count_tokens(contents)
-    cs1 = model.count_tokens([Part.from_text(full_response)])
-    st.write(f"输入的令牌数：{cs0.total_tokens}")
-    st.write(f"生成的令牌数：{cs1.total_tokens}")
-    # 合成统计信息
-    to_be_counted = [Part.from_text(full_response)] + contents
-    cs = model.count_tokens(to_be_counted)
-    st.write(f"本次生成的令牌数：{cs.total_tokens}")
-    # 修改会话中的令牌数
-    st.session_state.current_token_count = cs.total_tokens
-    # 添加记录到数据库
-    st.session_state.dbi.add_token_record(
-        st.session_state.dbi.cache["phone_number"],
-        item_name,
-        st.session_state.current_token_count,
-    )
-    st.session_state.total_token_count += st.session_state.current_token_count
-
-
 def display_generated_content_and_update_token(
     item_name: str,
     model: GenerativeModel,
@@ -48,12 +23,14 @@ def display_generated_content_and_update_token(
         stream=stream,
     )
     full_response = ""
+    total_tokens = 0
     # 提取生成的内容
     if stream:
         for chunk in responses:
             try:
                 full_response += chunk.text
-                st.write(f"流式块 令牌数：{chunk._raw_response.usage_metadata}")
+                total_tokens += chunk._raw_response.usage_metadata.total_token_count
+                # st.write(f"流式块 令牌数：{chunk._raw_response.usage_metadata}")
             except (IndexError, ValueError) as e:
                 st.write(chunk)
                 st.error(e)
@@ -62,11 +39,18 @@ def display_generated_content_and_update_token(
             placeholder.markdown(full_response + "▌")
     else:
         full_response = responses.text
-        st.write(f"responses 令牌数：{chunk._raw_response.usage_metadata}")
+        total_tokens += responses._raw_response.usage_metadata.total_token_count
+        # st.write(f"responses 令牌数：{responses._raw_response.usage_metadata}")
 
     placeholder.markdown(full_response)
 
-    _update_token_counts_and_db(model, full_response, contents, item_name)
+    # 添加记录到数据库
+    st.session_state.dbi.add_token_record(
+        st.session_state.dbi.cache["phone_number"], item_name, total_tokens
+    )
+    # 修改会话中的令牌数
+    st.session_state.current_token_count = total_tokens
+    st.session_state.total_token_count += total_tokens
 
 
 def parse_generated_content_and_update_token(
@@ -84,19 +68,27 @@ def parse_generated_content_and_update_token(
         stream=stream,
     )
     full_response = ""
+    total_tokens = 0
     # 提取生成的内容
     if stream:
         for chunk in responses:
             try:
                 full_response += chunk.text
+                total_tokens += chunk._raw_response.usage_metadata.total_token_count
             except (IndexError, ValueError) as e:
                 st.write(chunk)
                 st.error(e)
     else:
         full_response = responses.text
+        total_tokens += responses._raw_response.usage_metadata.total_token_count
 
-    _update_token_counts_and_db(model, full_response, contents, item_name)
-
+    # 添加记录到数据库
+    st.session_state.dbi.add_token_record(
+        st.session_state.dbi.cache["phone_number"], item_name, total_tokens
+    )
+    # 修改会话中的令牌数
+    st.session_state.current_token_count = total_tokens
+    st.session_state.total_token_count += total_tokens
     return parser(full_response)
 
 
