@@ -88,7 +88,7 @@ def extend_service_period():
     # 获取用户的数据
     user_dic = st.session_state.dbi.get_user(False)
     # 获取用户角色
-    user_role = str_to_enum(user_dic.get("role"), UserRole)
+    user_role = str_to_enum(user_dic.get("user_role"), UserRole)
     # 定义角色范围
     role_range = [UserRole.SVIP, UserRole.ADMIN]
     logger.info(f"用户角色：{user_role} {type(user_role)}")
