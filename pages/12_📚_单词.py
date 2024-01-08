@@ -69,6 +69,7 @@ if "current_flashcard_word_index" not in st.session_state:
 # region 事件及函数
 
 
+@st.cache_data(show_spinner="提取词典...", ttl=60 * 60 * 24)  # 缓存有效期为24小时
 def load_word_dict():
     with open(
         DICT_DIR / "word_lists_by_edition_grade.json", "r", encoding="utf-8"
@@ -107,11 +108,10 @@ def get_word_info(word):
 
 
 def add_personal_dictionary():
-    # st.write(st.session_state["add_personal_dictionary"])
-    flag = st.session_state["add_personal_dictionary"]
+    include = st.session_state["include_personal_dictionary"]
     # 从集合中提取个人词库，添加到word_lists中
     personal_word_list = st.session_state.dbi.find_personal_dictionary()
-    if flag:
+    if include:
         if len(personal_word_list) > 0:
             st.session_state.word_dict["0-个人词库"] = personal_word_list
     else:
@@ -139,7 +139,8 @@ if "mini_dict" not in st.session_state:
     st.session_state["mini_dict"] = get_mini_dict()
 
 if "word_dict" not in st.session_state:
-    st.session_state["word_dict"] = load_word_dict()
+    # 注意要使用副本
+    st.session_state["word_dict"] = load_word_dict().copy()
 
 with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
     voice_style_options = json.load(f)
@@ -298,7 +299,8 @@ def view_flash_word(container, tip_placeholder):
 
     md = template.format(
         word=v_word,
-        cefr=word_info.get("level", ""),
+        # cefr=word_info.get("level", ""),
+        cefr=st.session_state.mini_dict[word].get("level", ""),
         us_written=word_info.get("us_written", ""),
         uk_written=word_info.get("uk_written", ""),
         translation=t_word,
@@ -325,7 +327,7 @@ if menu == "闪卡记忆":
     st.sidebar.info(f"语音风格：{voice_style[0]}({voice_style[1]})")
     st.sidebar.checkbox(
         "包含个人词库？",
-        key="add_personal_dictionary",
+        key="include_personal_dictionary",
         on_change=add_personal_dictionary,
         value=True,
     )
@@ -358,7 +360,6 @@ if menu == "闪卡记忆":
     tip_placeholder = st.empty()
     container = st.container()
 
-    # placeholder = st.container()
     # 创建前后选择的按钮
     display_status_button = btn_cols[0].button(
         ":recycle:",

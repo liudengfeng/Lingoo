@@ -91,7 +91,7 @@ def extend_service_period():
     user_role = str_to_enum(user_dic.get("user_role"), UserRole)
     # 定义角色范围
     role_range = [UserRole.SVIP, UserRole.ADMIN]
-    logger.info(f"用户角色：{user_role} {type(user_role)}")
+    # logger.info(f"用户角色：{user_role} {type(user_role)}")
     if user_role in role_range:
         return
 
@@ -136,7 +136,7 @@ def extend_service_period():
         # 获取订单号
         order_id = payment_record.get("order_id")
 
-        logger.info(f"订单号：{order_id}")
+        # logger.info(f"订单号：{order_id}")
 
         # 获取 payments 集合中的文档引用
         doc_ref = db.collection("payments").document(order_id)

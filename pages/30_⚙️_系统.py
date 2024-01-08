@@ -332,12 +332,12 @@ def init_mini_dict():
 
     for i, w in enumerate(words):
         update_and_display_progress(i + 1, len(words), mini_progress)
-        logger.info(f"单词：{w}")
+        # logger.info(f"单词：{w}")
         # 将单词作为文档名称，将其内容存档
         doc_name = w.replace("/", " or ")
 
         if doc_name in mini_dict_docs:
-            logger.info(f"单词：{w} 已存在，跳过")
+            # logger.info(f"单词：{w} 已存在，跳过")
             continue
 
         word_doc_ref = words_ref.document(doc_name)
