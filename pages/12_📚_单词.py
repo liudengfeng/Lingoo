@@ -302,7 +302,8 @@ def view_flash_word(container, tip_placeholder):
         v_word = ""
 
     if st.session_state.flashcard_display_state != "英文":
-        t_word = word_info["zh-CN"].get("translation", "")
+        # t_word = word_info["zh-CN"].get("translation", "")
+        t_word = st.session_state.mini_dict[word].get("translation", "")
 
     md = template.format(
         word=v_word,
