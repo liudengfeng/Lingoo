@@ -217,8 +217,9 @@ def _normalize_english_word(word):
 
 def get_word_image_urls(word, api_key):
     url = "https://google.serper.dev/images"
-
-    payload = json.dumps({"q": _normalize_english_word(word)})
+    w = _normalize_english_word(word)
+    q = f"Pictures that can vividly explain the meaning of the word '{w}'"
+    payload = json.dumps({"q": q})
     headers = {"X-API-KEY": api_key, "Content-Type": "application/json"}
 
     response = requests.request("POST", url, headers=headers, data=payload)

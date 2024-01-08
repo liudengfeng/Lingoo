@@ -125,7 +125,6 @@ def get_word_info(word):
 
 @st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词图片序号...")
 def get_word_image_indices(word: str):
-    # s_word = word.replace("/", " or ")
     # 从 session_state 中的 mini_dict 查找 image_indices
     image_indices = st.session_state.mini_dict.get(word, {}).get("image_indices")
     model = load_vertex_model("gemini-pro-vision")
@@ -133,18 +132,19 @@ def get_word_image_indices(word: str):
     if not image_indices:
         container_name = "word-images"
         blob_service_client = get_blob_service_client()
-        container_client = get_blob_container_client(container_name)
-        blobs_list = container_client.list_blobs(name_starts_with=f"{word}_")
+        # 此处假设没有提取照片
+        # container_client = get_blob_container_client(container_name)
+        # blobs_list = container_client.list_blobs(name_starts_with=f"{word}_")
         images = []
-        for blob_name in blobs_list:
-            try:
-                blob_client = blob_service_client.get_blob_client(
-                    container_name, blob_name
-                )
-                image_bytes = blob_client.download_blob().readall()
-                images.append(Image.from_bytes(image_bytes))
-            except Exception as e:
-                logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
+        # for blob_name in blobs_list:
+        #     try:
+        #         blob_client = blob_service_client.get_blob_client(
+        #             container_name, blob_name
+        #         )
+        #         image_bytes = blob_client.download_blob().readall()
+        #         images.append(Image.from_bytes(image_bytes))
+        #     except Exception as e:
+        #         logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
 
         # 检查图片是否存在
         if len(images) == 0:
