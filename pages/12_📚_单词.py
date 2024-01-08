@@ -10,7 +10,8 @@ from typing import List
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
-from PIL import Image
+from PIL import Image as PILImage
+from vertexai.preview.generative_models import Image
 
 from mypylib.google_ai import select_best_images_for_word
 
