@@ -401,7 +401,7 @@ def view_flash_word(container, tip_placeholder):
     container.markdown(md)
 
     image_indices = get_word_image_indices(s_word)
-    logger.info("单词 {s_word} 图片序号：", image_indices)
+    logger.info(f"单词 {s_word} 图片序号：{image_indices}")
     images = get_word_images(s_word, image_indices)
     cols = container.columns(len(images))
     caption = [f"图片 {i+1}" for i in image_indices]
