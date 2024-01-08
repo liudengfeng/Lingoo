@@ -88,12 +88,8 @@ def get_blob_service_client():
 
 @st.cache_resource
 def get_blob_container_client(container_name):
-    # container_name = "word-images"
-    connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
-
     # 创建 BlobServiceClient 对象
-    blob_service_client = BlobServiceClient.from_connection_string(connect_str)
-
+    blob_service_client = get_blob_service_client()
     # 获取 ContainerClient 对象
     return blob_service_client.get_container_client(container_name)
 
