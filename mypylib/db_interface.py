@@ -46,7 +46,7 @@ class DbInterface:
 
     # region 用户管理
 
-    def get_user(self):
+    def get_user(self, return_object=True):
         phone_number = self.cache.get("phone_number", "")
         if not phone_number:
             return None
@@ -55,7 +55,10 @@ class DbInterface:
         if doc.exists:
             user_data = doc.to_dict()
             user_data["phone_number"] = phone_number  # 添加手机号码
-            return User.from_doc(user_data)
+            if return_object:
+                return User.from_doc(user_data)
+            else:
+                return user_data
         else:
             return None
 
@@ -238,6 +241,22 @@ class DbInterface:
     # endregion
 
     # region 支付管理
+
+    def get_last_active_payment(self):
+        payments_ref = self.db.collection("payments")
+        query = (
+            payments_ref.where(
+                filter=FieldFilter("phone_number", "==", self.cache["phone_number"])
+            )
+            .where(filter=FieldFilter("status", "==", PaymentStatus.IN_SERVICE))
+            .order_by("payment_time", direction=firestore.Query.DESCENDING)
+            .limit(1)
+        )
+        doc = query.get()
+        if doc:
+            return doc.to_dict()
+        else:
+            return {}
 
     def query_payments(self, query_dict: dict):
         # 检查所有的值是否有效
