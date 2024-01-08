@@ -254,7 +254,7 @@ class DbInterface:
         )
         docs = query.get()
         if docs:
-            return docs[0].to_dict()
+            return {"order_id": docs[0].id, **docs[0].to_dict()}
         else:
             return {}
 
