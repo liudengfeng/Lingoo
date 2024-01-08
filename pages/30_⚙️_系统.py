@@ -484,6 +484,7 @@ def fetch_and_update_word_image_indices(word):
     # # 获取 ContainerClient 对象
     # container_client = blob_service_client.get_container_client(container_name)
 
+    blob_service_client = get_blob_service_client()
     container_client = get_blob_container_client(container_name)
 
     # 获取名称以 "abbreviated_" 开始的所有 blob

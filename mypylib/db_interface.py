@@ -514,6 +514,20 @@ class DbInterface:
         # 如果文档存在，将其转换为字典，否则返回一个空字典
         return doc.to_dict() if doc.exists else {}
 
+    def get_image_indices(self, doc_name):
+        # 获取 mini_dict 集合中的文档引用
+        doc_ref = self.db.collection("mini_dict").document(doc_name)
+
+        # 获取文档的数据
+        doc = doc_ref.get()
+
+        # 如果文档存在并且包含 image_indices 字段，返回该字段的值
+        # 否则，返回一个空列表
+        if doc.exists and "image_indices" in doc.to_dict():
+            return doc.to_dict()["image_indices"]
+        else:
+            return []
+
     def update_image_indices(self, word: str, indices: list):
         # 将单词中的 "/" 字符替换为 " or "
         word = word.replace("/", " or ")

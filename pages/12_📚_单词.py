@@ -5,22 +5,30 @@ import random
 import re
 from datetime import timedelta
 from pathlib import Path
+from typing import List
 
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 from PIL import Image
 
+from mypylib.google_ai import select_best_images_for_word
+
 # from mypylib.google_api import generate_word_memory_tip, generate_word_test
 from mypylib.st_helper import (
     check_access,
     check_and_force_logout,
     configure_google_apis,
+    get_blob_container_client,
+    get_blob_service_client,
+    load_vertex_model,
     setup_logger,
 )
 from mypylib.word_utils import (
     audio_autoplay_elem,
     get_or_create_and_return_audio_data,
+    get_word_image_urls,
+    load_image_bytes_from_url,
     remove_trailing_punctuation,
 )
 
@@ -112,6 +120,79 @@ def generate_flashcard_words():
 @st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词信息...")
 def get_word_info(word):
     return st.session_state.dbi.find_word(word)
+
+
+@st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词图片序号...")
+def get_word_image_indices(word: str):
+    s_word = word.replace("/", " or ")
+    # 从 session_state 中的 mini_dict 查找 image_indices
+    image_indices = st.session_state.mini_dict.get(s_word, {}).get("image_indices")
+    model = load_vertex_model("gemini-pro-vision")
+    # 如果 image_indices 不存在
+    if not image_indices:
+        container_name = "word-images"
+        blob_service_client = get_blob_service_client()
+        container_client = get_blob_container_client(container_name)
+        blobs_list = container_client.list_blobs(name_starts_with=f"{s_word}_")
+        images = []
+        # 检查图片是否存在
+        if len(blobs_list) == 0:
+            # 如果图片不存在，则下载图片
+            urls = get_word_image_urls(s_word, st.secrets["SERPER_KEY"])
+            for i, url in enumerate(urls):
+                blob_name = f"{s_word}_{i}.png"
+                blob_client = blob_service_client.get_blob_client(
+                    container_name, blob_name
+                )
+                try:
+                    image_bytes = load_image_bytes_from_url(url)
+                    blob_client.upload_blob(
+                        image_bytes, blob_type="BlockBlob", overwrite=True
+                    )
+                    images.append(Image.from_bytes(image_bytes))
+                except Exception as e:
+                    logger.error(f"加载单词{s_word}第{i+1}张图片时出错:{str(e)}")
+                    continue
+        else:
+            for blob_name in blobs_list:
+                try:
+                    blob_client = blob_service_client.get_blob_client(
+                        container_name, blob_name
+                    )
+                    image_bytes = blob_client.download_blob().readall()
+                    images.append(Image.from_bytes(image_bytes))
+                except Exception as e:
+                    logger.error(f"加载图片 {blob_name} 时出现错误: {e}")
+
+        # 使用 f0() 函数生成 image_indices
+        image_indices = select_best_images_for_word(model, s_word, images)
+
+        # 检查 indices 是否为列表
+        if not isinstance(image_indices, list):
+            st.error(f"{word} indices 必须是一个列表")
+            raise TypeError(f"{word} indices 必须是一个列表")
+        # 检查列表中的每个元素是否都是整数
+        if not all(isinstance(i, int) for i in image_indices):
+            st.error(f"{word} indices 列表中的每个元素都必须是整数")
+            raise TypeError(f"{word} indices 列表中的每个元素都必须是整数")
+
+        st.session_state.dbi.update_image_indices(s_word, image_indices)
+
+    return image_indices
+
+
+@st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="提取单词图片...")
+def get_word_images(word: str, indices: List[int]):
+    s_word = word.replace("/", " or ")
+    container_name = "word-images"
+    blob_service_client = get_blob_service_client()
+    res = []
+    for i in indices:
+        blob_name = f"{s_word}_{i}.png"
+        blob_client = blob_service_client.get_blob_client(container_name, blob_name)
+        image_bytes = blob_client.download_blob().readall()
+        res.append(image_bytes)
+    return res
 
 
 def add_personal_dictionary():
@@ -301,14 +382,15 @@ def view_flash_word(container, tip_placeholder):
     if st.session_state.flashcard_display_state == "中文":
         v_word = ""
 
+    s_word = word.replace("/", " or ")
     if st.session_state.flashcard_display_state != "英文":
         # t_word = word_info["zh-CN"].get("translation", "")
-        t_word = st.session_state.mini_dict[word].get("translation", "")
+        t_word = st.session_state.mini_dict[s_word].get("translation", "")
 
     md = template.format(
         word=v_word,
         # cefr=word_info.get("level", ""),
-        cefr=st.session_state.mini_dict[word].get("level", ""),
+        cefr=st.session_state.mini_dict[s_word].get("level", ""),
         us_written=word_info.get("us_written", ""),
         uk_written=word_info.get("uk_written", ""),
         translation=t_word,
@@ -316,6 +398,11 @@ def view_flash_word(container, tip_placeholder):
 
     container.divider()
     container.markdown(md)
+
+    image_indices = get_word_image_indices(word)
+    images = get_word_images(word, image_indices)
+    caption = [f"图片 {i+1}" for i in image_indices]
+    container.image(images, width=200, caption=caption)
 
     view_pos(container, word_info, word)
 
