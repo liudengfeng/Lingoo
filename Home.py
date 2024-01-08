@@ -13,7 +13,7 @@ from mypylib.auth_utils import is_valid_phone_number
 from mypylib.azure_speech import speech_synthesis_get_available_voices
 from mypylib.constants import LANGUAGES
 from mypylib.db_interface import DbInterface
-from mypylib.db_model import PaymentStatus, UserRole
+from mypylib.db_model import PaymentStatus, UserRole, str_to_enum
 from mypylib.st_helper import check_and_force_logout, get_firestore_client
 
 CURRENT_CWD: Path = Path(__file__).parent
@@ -84,7 +84,7 @@ def extend_service_period():
     # 获取用户的数据
     user_dic = st.session_state.dbi.get_user(False)
     # 获取用户角色
-    user_role = user_dic.get("role")
+    user_role = str_to_enum(user_dic.get("role"), UserRole)
     # 定义角色范围
     role_range = [UserRole.SVIP, UserRole.ADMIN]
     if user_role in role_range:
