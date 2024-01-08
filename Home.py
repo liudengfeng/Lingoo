@@ -136,6 +136,8 @@ def extend_service_period():
         # 获取订单号
         order_id = payment_record.get("order_id")
 
+        logger.info(f"订单号：{order_id}")
+
         # 获取 payments 集合中的文档引用
         doc_ref = db.collection("payments").document(order_id)
 
