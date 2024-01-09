@@ -110,7 +110,7 @@ def get_mini_dict():
 
     return data
 
-@st.cache_data
+
 def generate_page_words(word_lib_name, num_words, key):
     # 获取选中的单词列表
     words = st.session_state.word_dict[word_lib_name]
@@ -819,7 +819,7 @@ if menu.endswith("闪卡记忆"):
         help="✨ 请选择计划记忆的单词数量。",
     )
 
-    generate_page_words(word_lib, num_word, "flashcard_words")
+    # generate_page_words(word_lib, num_word, "flashcard_words")
 
     # endregion
     st.subheader(":book: 记忆闪卡", divider="rainbow", anchor=False)
@@ -852,19 +852,26 @@ if menu.endswith("闪卡记忆"):
         and st.session_state.current_flashcard_word_index
         == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
+    refresh_btn = btn_cols[4].button(
+        ":arrows_counterclockwise:",
+        key="flashcard-refresh",
+        help="✨ 点击按钮，刷新单词。",
+        on_click=generate_page_words,
+        args=(word_lib, num_word, "flashcard_words"),
+    )
     play_btn = btn_cols[3].button(
         ":sound:",
         key="flashcard-play",
         help="✨ 聆听单词发音",
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
-    add_btn = btn_cols[4].button(
+    add_btn = btn_cols[5].button(
         ":heavy_plus_sign:",
         key="flashcard-add",
         help="✨ 将当前单词添加到个人词库",
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
-    del_btn = btn_cols[5].button(
+    del_btn = btn_cols[6].button(
         ":heavy_minus_sign:",
         key="flashcard-del",
         help="✨ 将当前单词从个人词库中删除",
