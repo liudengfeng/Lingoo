@@ -690,8 +690,6 @@ elif menu.endswith("拼图游戏"):
             len(st.session_state.puzzle_words),
             puzzle_progress,
         )
-        display_puzzle_hint(puzzle_tip_placeholder)
-        view_puzzle_word(puzzle_word_container)
 
     if puzzle_next_btn:
         prepare_puzzle()
@@ -700,11 +698,11 @@ elif menu.endswith("拼图游戏"):
             len(st.session_state.puzzle_words),
             puzzle_progress,
         )
-        display_puzzle_hint(puzzle_tip_placeholder)
-        view_puzzle_word(puzzle_word_container)
 
     # 在需要的地方调用这个函数
     if st.session_state.puzzle_idx != -1:
+        display_puzzle_hint(puzzle_tip_placeholder)
+        view_puzzle_word(puzzle_word_container)
         handle_puzzle_input()
 
 # endregion
