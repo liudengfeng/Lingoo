@@ -667,7 +667,7 @@ elif menu.endswith("拼图游戏"):
         help="✨ 点击按钮，切换到下一单词拼图。",
         on_click=on_next_puzzle_btn_click,
         disabled=len(st.session_state["puzzle_words"])
-        and st.session_state.puzzle_idx == st.session_state["puzzle_words"] - 1,
+        and st.session_state.puzzle_idx == len(st.session_state["puzzle_words"]) - 1,
     )
     puzzle_add_btn = puzzle_cols[2].button(
         ":heavy_plus_sign:",
@@ -679,7 +679,7 @@ elif menu.endswith("拼图游戏"):
         ":heavy_minus_sign:",
         key="puzzle-del",
         help="✨ 将当前单词从个人词库中删除",
-        disabled=st.session_state.current_flashcard_word_index == -1,
+        disabled=st.session_state.puzzle_idx == -1,
     )
 
     if puzzle_prev_btn:
