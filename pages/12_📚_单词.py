@@ -42,6 +42,21 @@ st.set_page_config(
 
 check_access(False)
 configure_google_apis()
+sidebar_status = st.sidebar.empty()
+# 在页面加载时检查是否有需要强制退出的登录会话
+check_and_force_logout(sidebar_status)
+
+menu_names = ["闪卡记忆", "拼图游戏", "图片游戏", "单词测验", "管理词库"]
+menu_emoji = [
+    "📚",
+    "🧩",
+    "🖼️",
+    "📝",
+    "🗂️",
+]
+menu_opts = [e + " " + n for e, n in zip(menu_emoji, menu_names)]
+menu = st.sidebar.selectbox("菜单", menu_opts, help="在这里选择你想要进行的操作。")
+st.sidebar.divider()
 
 # endregion
 
@@ -50,23 +65,6 @@ configure_google_apis()
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 DICT_DIR = CURRENT_CWD / "resource/dictionary"
-
-# endregion
-
-# region 闪卡状态
-
-if "flashcard_words" not in st.session_state:
-    st.session_state["flashcard_words"] = []
-
-if "flashcard_word_info" not in st.session_state:
-    st.session_state["flashcard_word_info"] = {}
-
-if "flashcard_display_state" not in st.session_state:
-    st.session_state["flashcard_display_state"] = "全部"
-
-# 初始化单词的索引
-if "current_flashcard_word_index" not in st.session_state:
-    st.session_state["current_flashcard_word_index"] = -1
 
 # endregion
 
@@ -162,9 +160,24 @@ def select_word_image_urls(word: str):
 
 # endregion
 
-# region 事件及函数
+# region 闪卡状态
 
-# region 闪卡
+if "flashcard_words" not in st.session_state:
+    st.session_state["flashcard_words"] = []
+
+if "flashcard_word_info" not in st.session_state:
+    st.session_state["flashcard_word_info"] = {}
+
+if "flashcard_display_state" not in st.session_state:
+    st.session_state["flashcard_display_state"] = "全部"
+
+# 初始化单词的索引
+if "current_flashcard_word_index" not in st.session_state:
+    st.session_state["current_flashcard_word_index"] = -1
+
+# endregion
+
+# region 闪卡辅助函数
 
 
 def reset_flashcard_word():
@@ -172,154 +185,6 @@ def reset_flashcard_word():
     st.session_state.flashcard_words = []
     st.session_state.flashcard_display_state = "全部"
     st.session_state["current_flashcard_word_index"] = -1
-
-
-# def generate_flashcard_words():
-#     # 获取选中的单词列表
-#     word_lib_name = st.session_state["selected_list"]
-#     words = st.session_state.word_dict[word_lib_name]
-#     num_words = st.session_state["num_words_key"]
-#     n = min(num_words, len(words))
-#     # 随机选择单词
-#     st.session_state.flashcard_words = random.sample(words, n)
-#     name = word_lib_name.split("-", maxsplit=1)[1]
-#     st.toast(f"当前单词列表名称：{name} 闪卡单词数量: {len(st.session_state.flashcard_words)}")
-
-
-# endregion
-
-# region 单词拼图状态
-
-if "puzzle_idx" not in st.session_state:
-    st.session_state["puzzle_idx"] = -1
-
-if "puzzle_words" not in st.session_state:
-    st.session_state["puzzle_words"] = []
-
-if "puzzle_answer_value" not in st.session_state:
-    st.session_state["puzzle_answer_value"] = ""
-
-if "puzzle_view_word" not in st.session_state:
-    st.session_state["puzzle_view_word"] = []
-
-if "clicked_character" not in st.session_state:
-    st.session_state["clicked_character"] = []
-
-if "puzzle_test_score" not in st.session_state:
-    st.session_state["puzzle_test_score"] = {}
-
-# endregion
-
-# region 单词拼图辅助函数
-
-
-def get_word_definition(word):
-    word_info = get_word_info(word)
-    definition = ""
-    en = word_info.get("en-US", {})
-    for k, v in en.items():
-        definition += f"\n{k}\n"
-        for d in v:
-            definition += f'- {d["definition"]}\n'
-    return definition
-
-
-def prepare_puzzle():
-    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-    ws = [w for w in word]
-    random.shuffle(ws)
-    st.session_state.puzzle_view_word = ws
-    st.session_state.clicked_character = [False] * len(ws)
-    st.session_state.puzzle_answer_value = ""
-
-
-def view_puzzle_word():
-    if st.session_state.puzzle_idx == -1:
-        return
-
-    if len(st.session_state.puzzle_view_word) == 0:
-        prepare_puzzle()
-
-    ws = st.session_state["puzzle_view_word"]
-    n = len(ws)
-    cols = st.columns(n + 8)
-    button_placeholders = [cols[i].empty() for i in range(n)]
-    for i in range(n):
-        if button_placeholders[i].button(
-            ws[i],
-            key=f"btn_{i}",
-            disabled=st.session_state.clicked_character[i],
-            help="✨ 点击按钮，选择单词拼图中的字母。",
-            type="primary",
-        ):
-            st.session_state.puzzle_answer_value += ws[i]
-            st.session_state.clicked_character[i] = True
-            st.rerun()
-
-
-def display_puzzle_hint(puzzle_progress):
-    if st.session_state.puzzle_idx == -1:
-        return
-    n = len(st.session_state.puzzle_words)
-    progress = 1.0 * (st.session_state.puzzle_idx + 1) / n
-    # st.write("进度：", progress, "idx", st.session_state.puzzle_idx)
-    puzzle_progress.progress(progress, text=":jigsaw: 单词拼图进度")
-    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-    definition = get_word_definition(word)
-    st.write("提示信息：")
-    st.markdown(definition)
-
-
-def on_prev_puzzle_btn_click():
-    st.session_state["puzzle_idx"] -= 1
-    st.session_state.puzzle_answer_value = ""
-
-
-def on_next_puzzle_btn_click():
-    st.session_state["puzzle_idx"] += 1
-    st.session_state.puzzle_answer_value = ""
-
-
-# endregion
-
-# endregion
-
-# region 侧边栏
-
-sidebar_status = st.sidebar.empty()
-# 在页面加载时检查是否有需要强制退出的登录会话
-check_and_force_logout(sidebar_status)
-
-menu_names = ["闪卡记忆", "拼图游戏", "图片游戏", "单词测验", "管理词库"]
-menu_emoji = [
-    "📚",
-    "🧩",
-    "🖼️",
-    "📝",
-    "🗂️",
-]
-menu_opts = [e + " " + n for e, n in zip(menu_emoji, menu_names)]
-menu = st.sidebar.selectbox("菜单", menu_opts, help="在这里选择你想要进行的操作。")
-st.sidebar.divider()
-
-# endregion
-
-# region 会话状态
-
-if "mini_dict" not in st.session_state:
-    st.session_state["mini_dict"] = get_mini_dict()
-
-if "word_dict" not in st.session_state:
-    # 注意要使用副本
-    st.session_state["word_dict"] = load_word_dict().copy()
-
-with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
-    voice_style_options = json.load(f)
-
-# endregion
-
-
-# region 记忆闪卡辅助
 
 
 def on_prev_btn_click():
@@ -468,6 +333,123 @@ def view_flash_word(container):
 
 # endregion
 
+# region 单词拼图状态
+
+if "puzzle_idx" not in st.session_state:
+    st.session_state["puzzle_idx"] = -1
+
+if "puzzle_words" not in st.session_state:
+    st.session_state["puzzle_words"] = []
+
+if "puzzle_answer_value" not in st.session_state:
+    st.session_state["puzzle_answer_value"] = ""
+
+if "puzzle_view_word" not in st.session_state:
+    st.session_state["puzzle_view_word"] = []
+
+if "clicked_character" not in st.session_state:
+    st.session_state["clicked_character"] = []
+
+if "puzzle_test_score" not in st.session_state:
+    st.session_state["puzzle_test_score"] = {}
+
+# endregion
+
+# region 单词拼图辅助函数
+
+
+def reset_puzzle_word():
+    # 恢复初始显示状态
+    st.session_state.puzzle_idx = -1
+    st.session_state["puzzle_view_word"] = []
+    st.session_state["puzzle_test_score"] = {}
+    st.session_state.puzzle_answer_value = ""
+    generate_page_words("puzzle")
+
+
+def get_word_definition(word):
+    word_info = get_word_info(word)
+    definition = ""
+    en = word_info.get("en-US", {})
+    for k, v in en.items():
+        definition += f"\n{k}\n"
+        for d in v:
+            definition += f'- {d["definition"]}\n'
+    return definition
+
+
+def prepare_puzzle():
+    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+    ws = [w for w in word]
+    random.shuffle(ws)
+    st.session_state.puzzle_view_word = ws
+    st.session_state.clicked_character = [False] * len(ws)
+    st.session_state.puzzle_answer_value = ""
+
+
+def view_puzzle_word():
+    if st.session_state.puzzle_idx == -1:
+        return
+
+    if len(st.session_state.puzzle_view_word) == 0:
+        prepare_puzzle()
+
+    ws = st.session_state["puzzle_view_word"]
+    n = len(ws)
+    cols = st.columns(n + 8)
+    button_placeholders = [cols[i].empty() for i in range(n)]
+    for i in range(n):
+        if button_placeholders[i].button(
+            ws[i],
+            key=f"btn_{i}",
+            disabled=st.session_state.clicked_character[i],
+            help="✨ 点击按钮，选择单词拼图中的字母。",
+            type="primary",
+        ):
+            st.session_state.puzzle_answer_value += ws[i]
+            st.session_state.clicked_character[i] = True
+            st.rerun()
+
+
+def display_puzzle_hint(puzzle_progress):
+    if st.session_state.puzzle_idx == -1:
+        return
+    n = len(st.session_state.puzzle_words)
+    progress = 1.0 * (st.session_state.puzzle_idx + 1) / n
+    # st.write("进度：", progress, "idx", st.session_state.puzzle_idx)
+    puzzle_progress.progress(progress, text=":jigsaw: 单词拼图进度")
+    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+    definition = get_word_definition(word)
+    st.write("提示信息：")
+    st.markdown(definition)
+
+
+def on_prev_puzzle_btn_click():
+    st.session_state["puzzle_idx"] -= 1
+    st.session_state.puzzle_answer_value = ""
+
+
+def on_next_puzzle_btn_click():
+    st.session_state["puzzle_idx"] += 1
+    st.session_state.puzzle_answer_value = ""
+
+
+# endregion
+
+# region 会话状态
+
+if "mini_dict" not in st.session_state:
+    st.session_state["mini_dict"] = get_mini_dict()
+
+if "word_dict" not in st.session_state:
+    # 注意要使用副本
+    st.session_state["word_dict"] = load_word_dict().copy()
+
+with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
+    voice_style_options = json.load(f)
+
+# endregion
+
 # region 记忆闪卡
 
 if menu.endswith("闪卡记忆"):
@@ -556,8 +538,6 @@ if menu.endswith("闪卡记忆"):
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
 
-    placeholder = st.empty()
-
     # 创建按钮
     if display_status_button:
         if st.session_state.flashcard_display_state == "全部":
@@ -589,11 +569,11 @@ if menu.endswith("闪卡记忆"):
         st.session_state.dbi.remove_word_from_personal_dictionary(word)
         st.toast(f"从个人词库中删除单词：{word}。")
 
-    # 控制闪卡单词的显示
     # 初始化闪卡单词
     if len(st.session_state.flashcard_words) == 0:
         generate_page_words("flashcard")
 
+    # 显示闪卡单词
     view_flash_word(container)
 
 # endregion
@@ -614,7 +594,7 @@ elif menu.endswith("拼图游戏"):
         "词库",
         sorted(list(st.session_state.word_dict.keys())),
         key="puzzle-selected",
-        on_change=reset_flashcard_word,
+        on_change=reset_puzzle_word,
         format_func=lambda x: x.split("-", maxsplit=1)[1],
         help="✨ 选择一个词库，用于生成单词拼图。",
     )
@@ -626,7 +606,7 @@ elif menu.endswith("拼图游戏"):
         50,
         step=5,
         key="puzzle-num-words",
-        on_change=reset_flashcard_word,
+        on_change=reset_puzzle_word,
         help="✨ 单词拼图的数量。",
     )
     # endregion
@@ -671,14 +651,6 @@ elif menu.endswith("拼图游戏"):
 
     if next_puzzle_btn:
         prepare_puzzle()
-
-    # if update_puzzle_wordbank_button:
-    #     gen_puzzle_words()
-    #     # 恢复初始显示状态
-    #     st.session_state.puzzle_idx = -1
-    #     st.session_state["puzzle_view_word"] = []
-    #     st.session_state["puzzle_test_score"] = {}
-    #     st.session_state.puzzle_answer_value = ""
 
     if len(st.session_state.puzzle_words) == 0:
         generate_page_words("puzzle")
