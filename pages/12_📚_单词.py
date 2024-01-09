@@ -684,16 +684,6 @@ def reset_test_words():
     st.session_state.user_answer = {}
 
 
-# def generate_test_words(word_lib, num_words, word_key):
-#     # 获取选中的单词列表
-#     words = st.session_state.word_dict[word_lib]
-#     n = min(num_words, len(words))
-#     # 随机选择单词
-#     st.session_state[word_key] = random.sample(words, n)
-#     name = word_lib.split("-", maxsplit=1)[1]
-#     st.toast(f"当前单词列表名称：{name} 单词数量: {len(st.session_state[word_key])}")
-
-
 def on_prev_test_btn_click():
     st.session_state["word_test_idx"] -= 1
 
@@ -1157,9 +1147,7 @@ elif menu.endswith("单词测验"):
         on_change=reset_test_words,
     )
     # 挑选单词
-    generate_page_words(
-        word_lib, test_num, "words_for_test"
-    )
+    generate_page_words(word_lib, test_num, "words_for_test")
     # endregion
     st.subheader(":pencil: 单词测验", divider="rainbow", anchor=False)
     st.markdown("""英语单选单词词义理解测试是指给出一个单词和四个含义，要求考生选择正确的含义。这种测试题型简单易行，适用于各个英语水平的考生。""")
