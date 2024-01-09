@@ -393,7 +393,7 @@ def prepare_puzzle():
 def view_puzzle_word(container):
     ws = st.session_state.puzzle_view_word
     n = len(ws)
-    cols = container.columns(30)
+    cols = container.columns(40)
     button_placeholders = [cols[i].empty() for i in range(n)]
     for i in range(n):
         if button_placeholders[i].button(
