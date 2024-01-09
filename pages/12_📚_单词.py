@@ -173,6 +173,105 @@ def add_personal_dictionary(include):
             del st.session_state.word_dict["0-个人词库"]
 
 
+# region 单词拼图辅助
+
+if "puzzle_idx" not in st.session_state:
+    st.session_state["puzzle_idx"] = -1
+
+if "puzzle_words" not in st.session_state:
+    st.session_state["puzzle_words"] = []
+
+if "puzzle_answer_value" not in st.session_state:
+    st.session_state["puzzle_answer_value"] = ""
+
+if "puzzle_view_word" not in st.session_state:
+    st.session_state["puzzle_view_word"] = []
+
+if "clicked_character" not in st.session_state:
+    st.session_state["clicked_character"] = []
+
+if "puzzle_test_score" not in st.session_state:
+    st.session_state["puzzle_test_score"] = {}
+
+
+def gen_puzzle_words():
+    # 获取选中的单词列表
+    words = st.session_state.word_dict[st.session_state["selected_list"]]
+    num_words = st.session_state["num_words_key"]
+    n = min(num_words, len(words))
+    # 随机选择单词
+    st.session_state.puzzle_words = random.sample(words, n)
+
+
+def get_word_definition(word):
+    word_info = get_word_info(word)
+    definition = ""
+    en = word_info.get("en-US", {})
+    for k, v in en.items():
+        definition += f"\n{k}\n"
+        for d in v:
+            definition += f'- {d["definition"]}\n'
+    return definition
+
+
+def prepare_puzzle():
+    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+    ws = [w for w in word]
+    random.shuffle(ws)
+    st.session_state.puzzle_view_word = ws
+    st.session_state.clicked_character = [False] * len(ws)
+    st.session_state.puzzle_answer_value = ""
+
+
+def view_puzzle_word():
+    if st.session_state.puzzle_idx == -1:
+        return
+
+    if len(st.session_state.puzzle_view_word) == 0:
+        prepare_puzzle()
+
+    ws = st.session_state["puzzle_view_word"]
+    n = len(ws)
+    cols = st.columns(n + 8)
+    button_placeholders = [cols[i].empty() for i in range(n)]
+    for i in range(n):
+        if button_placeholders[i].button(
+            ws[i],
+            key=f"btn_{i}",
+            disabled=st.session_state.clicked_character[i],
+            help="✨ 点击按钮，选择单词拼图中的字母。",
+            type="primary",
+        ):
+            st.session_state.puzzle_answer_value += ws[i]
+            st.session_state.clicked_character[i] = True
+            st.rerun()
+
+
+def display_puzzle_hint(puzzle_progress):
+    if st.session_state.puzzle_idx == -1:
+        return
+    n = len(st.session_state.puzzle_words)
+    progress = 1.0 * (st.session_state.puzzle_idx + 1) / n
+    # st.write("进度：", progress, "idx", st.session_state.puzzle_idx)
+    puzzle_progress.progress(progress, text=":jigsaw: 单词拼图进度")
+    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+    definition = get_word_definition(word)
+    st.write("提示信息：")
+    st.markdown(definition)
+
+
+def on_prev_puzzle_btn_click():
+    st.session_state["puzzle_idx"] -= 1
+    st.session_state.puzzle_answer_value = ""
+
+
+def on_next_puzzle_btn_click():
+    st.session_state["puzzle_idx"] += 1
+    st.session_state.puzzle_answer_value = ""
+
+
+# endregion
+
 # endregion
 
 # region 侧边栏
@@ -503,196 +602,98 @@ if menu.endswith("闪卡记忆"):
     # 初始化闪卡单词
     if len(st.session_state.flashcard_words) == 0:
         generate_flashcard_words()
-    
+
     view_flash_word(container, tip_placeholder)
 
 # endregion
 
-# region 单词拼图辅助
+# region 单词拼图
 
-if "puzzle_idx" not in st.session_state:
-    st.session_state["puzzle_idx"] = -1
+elif menu.endswith("拼图游戏"):
+    st.subheader(":book: 拼图游戏", divider="rainbow", anchor=False)
+    st.markdown(
+        "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。它是一种非常有效的学习方式，可以帮助我们提高词汇量、拼写能力、思维能力和解决问题能力。单词来自于您的记忆闪卡。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
+    )
+    puzzle_progress = st.empty()
+    puzzle_cols = st.columns(10)
+    prev_puzzle_btn = puzzle_cols[0].button(
+        ":leftwards_arrow_with_hook:",
+        key="prev-puzzle",
+        help="✨ 点击按钮，切换到上一单词拼图。",
+        on_click=on_prev_puzzle_btn_click,
+        disabled=st.session_state.puzzle_idx <= 0,
+    )
+    next_puzzle_btn = puzzle_cols[1].button(
+        ":arrow_right_hook:",
+        key="next-puzzle",
+        help="✨ 点击按钮，切换到下一单词拼图。",
+        on_click=on_next_puzzle_btn_click,
+        disabled=st.session_state.puzzle_idx == st.session_state["num_words_key"] - 1,
+    )
 
-if "puzzle_words" not in st.session_state:
-    st.session_state["puzzle_words"] = []
+    update_puzzle_wordbank_button = puzzle_cols[2].button(
+        ":arrows_counterclockwise:", key="refresh-puzzle", help="✨ 重新生成单词列表"
+    )
 
-if "puzzle_answer_value" not in st.session_state:
-    st.session_state["puzzle_answer_value"] = ""
-
-if "puzzle_view_word" not in st.session_state:
-    st.session_state["puzzle_view_word"] = []
-
-if "clicked_character" not in st.session_state:
-    st.session_state["clicked_character"] = []
-
-if "puzzle_test_score" not in st.session_state:
-    st.session_state["puzzle_test_score"] = {}
-
-
-def gen_puzzle_words():
-    # 获取选中的单词列表
-    words = st.session_state.word_dict[st.session_state["selected_list"]]
-    num_words = st.session_state["num_words_key"]
-    n = min(num_words, len(words))
-    # 随机选择单词
-    st.session_state.puzzle_words = random.sample(words, n)
-
-
-def get_word_definition(word):
-    word_info = get_word_info(word)
-    definition = ""
-    en = word_info.get("en-US", {})
-    for k, v in en.items():
-        definition += f"\n{k}\n"
-        for d in v:
-            definition += f'- {d["definition"]}\n'
-    return definition
-
-
-def prepare_puzzle():
-    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-    ws = [w for w in word]
-    random.shuffle(ws)
-    st.session_state.puzzle_view_word = ws
-    st.session_state.clicked_character = [False] * len(ws)
-    st.session_state.puzzle_answer_value = ""
-
-
-def view_puzzle_word():
-    if st.session_state.puzzle_idx == -1:
-        return
-
-    if len(st.session_state.puzzle_view_word) == 0:
+    if prev_puzzle_btn:
         prepare_puzzle()
 
-    ws = st.session_state["puzzle_view_word"]
-    n = len(ws)
-    cols = st.columns(n + 8)
-    button_placeholders = [cols[i].empty() for i in range(n)]
-    for i in range(n):
-        if button_placeholders[i].button(
-            ws[i],
-            key=f"btn_{i}",
-            disabled=st.session_state.clicked_character[i],
-            help="✨ 点击按钮，选择单词拼图中的字母。",
-            type="primary",
-        ):
-            st.session_state.puzzle_answer_value += ws[i]
-            st.session_state.clicked_character[i] = True
-            st.rerun()
+    if next_puzzle_btn:
+        prepare_puzzle()
 
+    if update_puzzle_wordbank_button:
+        gen_puzzle_words()
+        # 恢复初始显示状态
+        st.session_state.puzzle_idx = -1
+        st.session_state["puzzle_view_word"] = []
+        st.session_state["puzzle_test_score"] = {}
+        st.session_state.puzzle_answer_value = ""
 
-def display_puzzle_hint(puzzle_progress):
-    if st.session_state.puzzle_idx == -1:
-        return
-    n = len(st.session_state.puzzle_words)
-    progress = 1.0 * (st.session_state.puzzle_idx + 1) / n
-    # st.write("进度：", progress, "idx", st.session_state.puzzle_idx)
-    puzzle_progress.progress(progress, text=":jigsaw: 单词拼图进度")
-    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-    definition = get_word_definition(word)
-    st.write("提示信息：")
-    st.markdown(definition)
+    if len(st.session_state.puzzle_words) == 0:
+        gen_puzzle_words()
 
+        display_puzzle_hint(puzzle_progress)
+        view_puzzle_word()
 
-def on_prev_puzzle_btn_click():
-    st.session_state["puzzle_idx"] -= 1
-    st.session_state.puzzle_answer_value = ""
+        if st.session_state.puzzle_idx != -1:
+            user_input = st.text_input(
+                "点击字符按钮或输入您的答案",
+                placeholder="点击字符按钮或直接输入您的答案",
+                value=st.session_state.puzzle_answer_value,
+                key="puzzle_answer",
+                label_visibility="collapsed",
+            )
+            puzzle_score = st.empty()
+            sumbit_cols = st.columns(6)
 
+            if sumbit_cols[0].button("重试", help="✨ 恢复初始状态，重新开始。"):
+                prepare_puzzle()
+                st.rerun()
 
-def on_next_puzzle_btn_click():
-    st.session_state["puzzle_idx"] += 1
-    st.session_state.puzzle_answer_value = ""
+            if sumbit_cols[1].button("检查", help="✨ 点击按钮，检查您的答案是否正确。"):
+                word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+                if word not in st.session_state.flashcard_word_info:
+                    st.session_state.flashcard_word_info[word] = get_word_info(word)
+
+                msg = f'单词：{word}\t翻译：{st.session_state.flashcard_word_info[word]["zh-CN"]["translation"]}'
+                if user_input == word:
+                    st.balloons()
+                    st.session_state.puzzle_test_score[word] = True
+                else:
+                    st.write(f"对不起，您回答错误。正确的单词应该为：{word}")
+                    st.session_state.puzzle_test_score[word] = False
+
+                # if st.session_state.puzzle_idx == st.session_state["num_words_key"] - 1:
+                score = (
+                    sum(st.session_state.puzzle_test_score.values())
+                    / st.session_state["num_words_key"]
+                    * 100
+                )
+                msg = f":red[您的得分：{score:.0f}%]\t{msg}"
+                puzzle_score.markdown(msg)
 
 
 # endregion
-
-# # region 单词拼图
-
-# with tabs[tab_items.index(":jigsaw: 单词拼图")]:
-#     st.markdown(
-#         "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。它是一种非常有效的学习方式，可以帮助我们提高词汇量、拼写能力、思维能力和解决问题能力。单词来自于您的记忆闪卡。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
-#     )
-#     puzzle_progress = st.empty()
-#     puzzle_cols = st.columns(4)
-#     prev_puzzle_btn = puzzle_cols[1].button(
-#         ":leftwards_arrow_with_hook:",
-#         key="prev-puzzle",
-#         help="✨ 点击按钮，切换到上一单词拼图。",
-#         on_click=on_prev_puzzle_btn_click,
-#         disabled=st.session_state.puzzle_idx <= 0,
-#     )
-#     next_puzzle_btn = puzzle_cols[2].button(
-#         ":arrow_right_hook:",
-#         key="next-puzzle",
-#         help="✨ 点击按钮，切换到下一单词拼图。",
-#         on_click=on_next_puzzle_btn_click,
-#         disabled=st.session_state.puzzle_idx == st.session_state["num_words_key"] - 1,
-#     )
-
-#     update_puzzle_wordbank_button = puzzle_cols[3].button(
-#         ":arrows_counterclockwise:", key="refresh-puzzle", help="✨ 重新生成单词列表"
-#     )
-
-#     if prev_puzzle_btn:
-#         prepare_puzzle()
-
-#     if next_puzzle_btn:
-#         prepare_puzzle()
-
-#     if update_puzzle_wordbank_button:
-#         gen_puzzle_words()
-#         # 恢复初始显示状态
-#         st.session_state.puzzle_idx = -1
-#         st.session_state["puzzle_view_word"] = []
-#         st.session_state["puzzle_test_score"] = {}
-#         st.session_state.puzzle_answer_value = ""
-
-#     if len(st.session_state.puzzle_words) == 0:
-#         gen_puzzle_words()
-
-#         display_puzzle_hint(puzzle_progress)
-#         view_puzzle_word()
-
-#         if st.session_state.puzzle_idx != -1:
-#             user_input = st.text_input(
-#                 "点击字符按钮或输入您的答案",
-#                 placeholder="点击字符按钮或直接输入您的答案",
-#                 value=st.session_state.puzzle_answer_value,
-#                 key="puzzle_answer",
-#                 label_visibility="collapsed",
-#             )
-#             puzzle_score = st.empty()
-#             sumbit_cols = st.columns(6)
-
-#             if sumbit_cols[0].button("重试", help="✨ 恢复初始状态，重新开始。"):
-#                 prepare_puzzle()
-#                 st.rerun()
-
-#             if sumbit_cols[1].button("检查", help="✨ 点击按钮，检查您的答案是否正确。"):
-#                 word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-#                 if word not in st.session_state.flashcard_word_info:
-#                     st.session_state.flashcard_word_info[word] = get_word_info(word)
-
-#                 msg = f'单词：{word}\t翻译：{st.session_state.flashcard_word_info[word]["zh-CN"]["translation"]}'
-#                 if user_input == word:
-#                     st.balloons()
-#                     st.session_state.puzzle_test_score[word] = True
-#                 else:
-#                     st.write(f"对不起，您回答错误。正确的单词应该为：{word}")
-#                     st.session_state.puzzle_test_score[word] = False
-
-#                 # if st.session_state.puzzle_idx == st.session_state["num_words_key"] - 1:
-#                 score = (
-#                     sum(st.session_state.puzzle_test_score.values())
-#                     / st.session_state["num_words_key"]
-#                     * 100
-#                 )
-#                 msg = f":red[您的得分：{score:.0f}%]\t{msg}"
-#                 puzzle_score.markdown(msg)
-
-
-# # endregion
 
 # # region 图片测词辅助
 
