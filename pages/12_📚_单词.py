@@ -563,8 +563,8 @@ def gen_pic_tests(category, num):
 def pic_word_test_reset():
     st.session_state.user_pic_answer = {}
     st.session_state.pic_idx = -1
-    category = st.session_state["pic_category"]
-    num = st.session_state["pic_num"]
+    category = st.session_state["pic-category"]
+    num = st.session_state["pic-num"]
     gen_pic_tests(category, num)
 
 
