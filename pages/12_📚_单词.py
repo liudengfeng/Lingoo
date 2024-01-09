@@ -406,7 +406,7 @@ def view_puzzle_word(container):
         ):
             st.session_state.puzzle_answer_value += ws[i]
             st.session_state.clicked_character[i] = True
-            st.rerun()
+            # st.rerun()
 
 
 def display_puzzle_hint(placeholder):
@@ -425,7 +425,7 @@ def on_next_puzzle_btn_click():
     st.session_state.puzzle_answer_value = ""
 
 
-def handle_puzzle_input(st):
+def handle_puzzle_input():
     user_input = st.text_input(
         "点击字符按钮或输入您的答案",
         placeholder="点击字符按钮或直接输入您的答案",
@@ -705,7 +705,7 @@ elif menu.endswith("拼图游戏"):
 
     # 在需要的地方调用这个函数
     if st.session_state.puzzle_idx != -1:
-        handle_puzzle_input(st)
+        handle_puzzle_input()
 
 # endregion
 
