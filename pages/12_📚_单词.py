@@ -399,7 +399,7 @@ def view_puzzle_word():
             ws[i],
             key=f"btn_{i}",
             disabled=st.session_state.clicked_character[i],
-            help="✨ 点击按钮，选择单词拼图中的字母。",
+            help="✨ 点击选择字符。",
             type="primary",
             use_container_width=True,
         ):
