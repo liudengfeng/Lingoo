@@ -111,17 +111,14 @@ def get_mini_dict():
     return data
 
 
-def generate_page_words(key):
+def generate_page_words(word_lib_name, num_words, key):
     # 获取选中的单词列表
-    word_lib_name = st.session_state[f"{key}-selected"]
     words = st.session_state.word_dict[word_lib_name]
-    num_words = st.session_state[f"{key}-num-words"]
     n = min(num_words, len(words))
     # 随机选择单词
-    word_key = f"{key}_words"
-    st.session_state[word_key] = random.sample(words, n)
+    st.session_state[key] = random.sample(words, n)
     name = word_lib_name.split("-", maxsplit=1)[1]
-    st.toast(f"当前单词列表名称：{name} 单词数量: {len(st.session_state[word_key])}")
+    st.toast(f"当前单词列表名称：{name} 单词数量: {len(st.session_state[key])}")
 
 
 def add_personal_dictionary(include):
@@ -417,7 +414,6 @@ def reset_puzzle_word():
     st.session_state["puzzle_view_word"] = []
     st.session_state["puzzle_test_score"] = {}
     st.session_state.puzzle_answer_value = ""
-    generate_page_words("puzzle")
 
 
 def get_word_definition(word):
@@ -688,14 +684,14 @@ def reset_test_words():
     st.session_state.user_answer = {}
 
 
-def generate_test_words(word_lib, num_words, word_key):
-    # 获取选中的单词列表
-    words = st.session_state.word_dict[word_lib]
-    n = min(num_words, len(words))
-    # 随机选择单词
-    st.session_state[word_key] = random.sample(words, n)
-    name = word_lib.split("-", maxsplit=1)[1]
-    st.toast(f"当前单词列表名称：{name} 单词数量: {len(st.session_state[word_key])}")
+# def generate_test_words(word_lib, num_words, word_key):
+#     # 获取选中的单词列表
+#     words = st.session_state.word_dict[word_lib]
+#     n = min(num_words, len(words))
+#     # 随机选择单词
+#     st.session_state[word_key] = random.sample(words, n)
+#     name = word_lib.split("-", maxsplit=1)[1]
+#     st.toast(f"当前单词列表名称：{name} 单词数量: {len(st.session_state[word_key])}")
 
 
 def on_prev_test_btn_click():
@@ -823,7 +819,7 @@ if menu.endswith("闪卡记忆"):
     # 添加或删减个人词库
     add_personal_dictionary(include_cb)
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
-    st.sidebar.selectbox(
+    word_lib = st.sidebar.selectbox(
         "词库",
         sorted(list(st.session_state.word_dict.keys())),
         key="flashcard-selected",
@@ -833,7 +829,7 @@ if menu.endswith("闪卡记忆"):
     )
 
     # 在侧边栏添加一个滑块让用户选择记忆的单词数量
-    st.sidebar.slider(
+    num_word = st.sidebar.slider(
         "单词数量",
         10,
         50,
@@ -842,6 +838,9 @@ if menu.endswith("闪卡记忆"):
         on_change=reset_flashcard_word,
         help="✨ 请选择计划记忆的单词数量。",
     )
+
+    generate_page_words(word_lib, num_word, "flashcard_words")
+
     # endregion
     st.subheader(":book: 记忆闪卡", divider="rainbow", anchor=False)
     st.markdown(
@@ -926,10 +925,6 @@ if menu.endswith("闪卡记忆"):
     # 更新待处理的单词
     update_pending_words()
 
-    # 初始化闪卡单词
-    if len(st.session_state.flashcard_words) == 0:
-        generate_page_words("flashcard")
-
     # 显示闪卡单词
     view_flash_word(container)
 
@@ -947,7 +942,7 @@ elif menu.endswith("拼图游戏"):
     # 添加或删减个人词库
     add_personal_dictionary(include_cb)
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
-    st.sidebar.selectbox(
+    word_lib = st.sidebar.selectbox(
         "词库",
         sorted(list(st.session_state.word_dict.keys())),
         key="puzzle-selected",
@@ -957,7 +952,7 @@ elif menu.endswith("拼图游戏"):
     )
 
     # 在侧边栏添加一个滑块让用户选择记忆的单词数量
-    st.sidebar.slider(
+    num_word = st.sidebar.slider(
         "单词数量",
         10,
         50,
@@ -966,6 +961,9 @@ elif menu.endswith("拼图游戏"):
         on_change=reset_puzzle_word,
         help="✨ 单词拼图的数量。",
     )
+
+    generate_page_words(word_lib, num_word, "puzzle_words")
+
     # endregion
     st.subheader(":jigsaw: 拼图游戏", divider="rainbow", anchor=False)
     st.markdown(
@@ -1159,7 +1157,7 @@ elif menu.endswith("单词测验"):
         on_change=reset_test_words,
     )
     # 挑选单词
-    st.session_state.words_for_test = generate_test_words(
+    generate_page_words(
         word_lib, test_num, "words_for_test"
     )
     # endregion
