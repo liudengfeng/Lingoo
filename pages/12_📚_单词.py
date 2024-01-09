@@ -110,7 +110,7 @@ def get_mini_dict():
 
     return data
 
-
+@st.cache_data
 def generate_page_words(word_lib_name, num_words, key):
     # 获取选中的单词列表
     words = st.session_state.word_dict[word_lib_name]
