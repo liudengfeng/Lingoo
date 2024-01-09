@@ -700,10 +700,10 @@ def check_answer():
     score = 0
     n = len(st.session_state.word_tests)
     for word, test in st.session_state.word_tests.items():
-        question = test["question"]
-        options = test["options"]
-        answer = test["answer"]
-        explanation = test["explanation"]
+        question = test["问题"]
+        options = test["选项"]
+        answer = test["答案"]
+        explanation = test["解释"]
 
         user_answer = st.session_state.user_answer.get(word, "")
         user_answer_idx = options.index(user_answer) if user_answer else None
@@ -735,18 +735,13 @@ def check_answer():
     st.divider()
 
 
-# def on_radio_change(idx):
-#     # 保存用户答案
-#     st.session_state.user_answer[idx] = st.session_state["test_options"]
-
-
 def view_test_word():
     n = len(st.session_state.words_for_test)
     idx = st.session_state.word_test_idx
     word = st.session_state.words_for_test[idx]
     test = st.session_state.word_tests[word]
-    question = test["question"]
-    options = test["options"]
+    question = test["问题"]
+    options = test["选项"]
     user_answer = st.session_state.user_answer.get(word, options[0])
     user_answer_idx = options.index(user_answer)
 
