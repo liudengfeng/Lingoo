@@ -411,7 +411,7 @@ def view_puzzle_word():
         ):
             st.session_state.puzzle_answer_value += ws[i]
             st.session_state.clicked_character[i] = True
-            st.rerun()
+    st.rerun()
 
 
 def display_puzzle_hint(placeholder):
@@ -460,7 +460,7 @@ def handle_puzzle_input(st):
 
         score = (
             sum(st.session_state.puzzle_test_score.values())
-            / st.session_state["num_words_key"]
+            / len(st.session_state["puzzle_words"])
             * 100
         )
         msg = f":red[您的得分：{score:.0f}%]\t{msg}"
@@ -678,10 +678,10 @@ elif menu.endswith("拼图游戏"):
         help="✨ 将当前单词从个人词库中删除",
         disabled=st.session_state.puzzle_idx == -1,
     )
-    
+
     puzzle_tip_placeholder = st.empty()
     puzzle_image_placeholder = st.empty()
-    
+
     if puzzle_prev_btn:
         prepare_puzzle()
         current_puzzle_word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
@@ -693,7 +693,7 @@ elif menu.endswith("拼图游戏"):
         )
         display_puzzle_hint(puzzle_tip_placeholder)
         view_puzzle_word()
-    
+
     if puzzle_next_btn:
         prepare_puzzle()
         current_puzzle_word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
@@ -705,48 +705,6 @@ elif menu.endswith("拼图游戏"):
         )
         display_puzzle_hint(puzzle_tip_placeholder)
         view_puzzle_word()
-    
-    # if len(st.session_state.puzzle_words) == 0:
-    #     generate_page_words("puzzle")
-    #     display_puzzle_hint()
-    #     view_puzzle_word()
-
-        # if st.session_state.puzzle_idx != -1:
-        #     user_input = st.text_input(
-        #         "点击字符按钮或输入您的答案",
-        #         placeholder="点击字符按钮或直接输入您的答案",
-        #         value=st.session_state.puzzle_answer_value,
-        #         key="puzzle_answer",
-        #         label_visibility="collapsed",
-        #     )
-        #     puzzle_score = st.empty()
-        #     sumbit_cols = st.columns(10)
-
-        #     if sumbit_cols[0].button("重试", help="✨ 恢复初始状态，重新开始。"):
-        #         prepare_puzzle()
-        #         st.rerun()
-
-        #     if sumbit_cols[1].button("检查", help="✨ 点击按钮，检查您的答案是否正确。"):
-        #         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-        #         if word not in st.session_state.flashcard_word_info:
-        #             st.session_state.flashcard_word_info[word] = get_word_info(word)
-
-        #         msg = f'单词：{word}\t翻译：{st.session_state.flashcard_word_info[word]["zh-CN"]["translation"]}'
-        #         if user_input == word:
-        #             st.balloons()
-        #             st.session_state.puzzle_test_score[word] = True
-        #         else:
-        #             st.write(f"对不起，您回答错误。正确的单词应该为：{word}")
-        #             st.session_state.puzzle_test_score[word] = False
-
-        #         # if st.session_state.puzzle_idx == st.session_state["num_words_key"] - 1:
-        #         score = (
-        #             sum(st.session_state.puzzle_test_score.values())
-        #             / st.session_state["num_words_key"]
-        #             * 100
-        #         )
-        #         msg = f":red[您的得分：{score:.0f}%]\t{msg}"
-        #         puzzle_score.markdown(msg)
 
     # 在需要的地方调用这个函数
     if st.session_state.puzzle_idx != -1:
