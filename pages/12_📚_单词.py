@@ -406,7 +406,7 @@ def view_puzzle_word():
         ):
             st.session_state.puzzle_answer_value += ws[i]
             st.session_state.clicked_character[i] = True
-            # st.rerun()
+            st.rerun()
 
 
 def display_puzzle_hint(placeholder):
@@ -694,7 +694,7 @@ elif menu.endswith("拼图游戏"):
     if puzzle_next_btn:
         prepare_puzzle()
         update_and_display_progress(
-            st.session_state.puzzle_idx,
+            st.session_state.puzzle_idx + 1,
             len(st.session_state.puzzle_words),
             puzzle_progress,
         )
