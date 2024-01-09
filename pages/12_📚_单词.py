@@ -327,7 +327,6 @@ def view_flash_word(container):
     cols = container.columns(len(urls))
     caption = [f"图片 {i+1}" for i in range(len(urls))]
     for i, col in enumerate(cols):
-        # col.image(images[i], use_column_width=True, caption=caption[i])
         col.image(urls[i], use_column_width=True, caption=caption[i])
 
     view_pos(container, word_info, word)
@@ -699,6 +698,14 @@ elif menu.endswith("拼图游戏"):
     if st.session_state.puzzle_idx != -1:
         display_puzzle_hint()
         view_puzzle_word()
+
+        word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+        urls = select_word_image_urls(word)
+        cols = st.columns(len(urls))
+        caption = [f"图片 {i+1}" for i in range(len(urls))]
+        for i, col in enumerate(cols):
+            col.image(urls[i], use_column_width=True, caption=caption[i])
+
         handle_puzzle_input()
         update_and_display_progress(
             st.session_state.puzzle_idx + 1,
