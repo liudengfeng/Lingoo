@@ -5,7 +5,6 @@ import random
 import re
 from datetime import timedelta
 from pathlib import Path
-from typing import List
 
 import pandas as pd
 import streamlit as st
@@ -14,14 +13,10 @@ from PIL import Image as PILImage
 from vertexai.preview.generative_models import Image
 
 from mypylib.google_ai import select_best_images_for_word
-
-# from mypylib.google_api import generate_word_memory_tip, generate_word_test
 from mypylib.st_helper import (
     check_access,
     check_and_force_logout,
     configure_google_apis,
-    get_blob_container_client,
-    get_blob_service_client,
     load_vertex_model,
     setup_logger,
 )
@@ -75,7 +70,7 @@ if "current_flashcard_word_index" not in st.session_state:
 
 # endregion
 
-# region 事件及函数
+# region 通用函数
 
 
 @st.cache_data(show_spinner="提取词典...", ttl=60 * 60 * 24)  # 缓存有效期为24小时
@@ -99,23 +94,27 @@ def get_mini_dict():
     return data
 
 
-def reset_flashcard_word():
-    # 恢复初始显示状态
-    st.session_state.flashcard_words = []
-    st.session_state.flashcard_display_state = "全部"
-    st.session_state["current_flashcard_word_index"] = -1
-
-
-def generate_flashcard_words():
+def generate_page_words(key):
     # 获取选中的单词列表
-    word_lib_name = st.session_state["selected_list"]
+    word_lib_name = st.session_state[f"{key}-selected"]
     words = st.session_state.word_dict[word_lib_name]
-    num_words = st.session_state["num_words_key"]
+    num_words = st.session_state[f"{key}-num-words"]
     n = min(num_words, len(words))
     # 随机选择单词
     st.session_state.flashcard_words = random.sample(words, n)
     name = word_lib_name.split("-", maxsplit=1)[1]
     st.toast(f"当前单词列表名称：{name} 闪卡单词数量: {len(st.session_state.flashcard_words)}")
+
+
+def add_personal_dictionary(include):
+    # 从集合中提取个人词库，添加到word_lists中
+    personal_word_list = st.session_state.dbi.find_personal_dictionary()
+    if include:
+        if len(personal_word_list) > 0:
+            st.session_state.word_dict["0-个人词库"] = personal_word_list
+    else:
+        if "0-个人词库" in st.session_state.word_dict:
+            del st.session_state.word_dict["0-个人词库"]
 
 
 @st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词信息...")
@@ -161,19 +160,35 @@ def select_word_image_urls(word: str):
     return urls
 
 
-def add_personal_dictionary(include):
-    # include = st.session_state["include_personal_dictionary"]
-    # 从集合中提取个人词库，添加到word_lists中
-    personal_word_list = st.session_state.dbi.find_personal_dictionary()
-    if include:
-        if len(personal_word_list) > 0:
-            st.session_state.word_dict["0-个人词库"] = personal_word_list
-    else:
-        if "0-个人词库" in st.session_state.word_dict:
-            del st.session_state.word_dict["0-个人词库"]
+# endregion
+
+# region 事件及函数
+
+# region 闪卡
 
 
-# region 单词拼图辅助
+def reset_flashcard_word():
+    # 恢复初始显示状态
+    st.session_state.flashcard_words = []
+    st.session_state.flashcard_display_state = "全部"
+    st.session_state["current_flashcard_word_index"] = -1
+
+
+# def generate_flashcard_words():
+#     # 获取选中的单词列表
+#     word_lib_name = st.session_state["selected_list"]
+#     words = st.session_state.word_dict[word_lib_name]
+#     num_words = st.session_state["num_words_key"]
+#     n = min(num_words, len(words))
+#     # 随机选择单词
+#     st.session_state.flashcard_words = random.sample(words, n)
+#     name = word_lib_name.split("-", maxsplit=1)[1]
+#     st.toast(f"当前单词列表名称：{name} 闪卡单词数量: {len(st.session_state.flashcard_words)}")
+
+
+# endregion
+
+# region 单词拼图状态
 
 if "puzzle_idx" not in st.session_state:
     st.session_state["puzzle_idx"] = -1
@@ -193,14 +208,9 @@ if "clicked_character" not in st.session_state:
 if "puzzle_test_score" not in st.session_state:
     st.session_state["puzzle_test_score"] = {}
 
+# endregion
 
-def gen_puzzle_words():
-    # 获取选中的单词列表
-    words = st.session_state.word_dict[st.session_state["selected_list"]]
-    num_words = st.session_state["num_words_key"]
-    n = min(num_words, len(words))
-    # 随机选择单词
-    st.session_state.puzzle_words = random.sample(words, n)
+# region 单词拼图辅助函数
 
 
 def get_word_definition(word):
@@ -382,11 +392,6 @@ def view_pos(container, word_info, word):
         _view_pos(container, key, en[key], zh[key], word)
 
 
-# @st.cache_data(ttl=timedelta(hours=12), max_entries=1000, show_spinner="获取 Ai 提示...")
-# def _memory_tip(word):
-#     return generate_word_memory_tip(word)
-
-
 @st.cache_data(ttl=timedelta(hours=12), max_entries=1000, show_spinner="获取音频元素...")
 def get_audio_html(word, voice_style):
     """
@@ -403,7 +408,7 @@ def get_audio_html(word, voice_style):
     return audio_autoplay_elem(audio_data)
 
 
-def view_flash_word(container, tip_placeholder):
+def view_flash_word(container):
     """
     Display the flashcard word and its information.
 
@@ -428,12 +433,6 @@ def view_flash_word(container, tip_placeholder):
     if not word_info:
         st.error(f"没有该单词：“{word}”的信息。TODO：添加到单词库。")
         st.stop()
-
-    # if st.secrets.get("dev", "") in ["streamlit", "azure"]:
-    #     with tip_placeholder.expander("记忆提示"):
-    #         # 生成记忆提示
-    #         memory_tip = _memory_tip(word)
-    #         st.markdown(memory_tip)
 
     v_word = word
     t_word = ""
@@ -482,8 +481,7 @@ if menu.endswith("闪卡记忆"):
     st.sidebar.info(f"语音风格：{voice_style[0]}({voice_style[1]})")
     include_cb = st.sidebar.checkbox(
         "包含个人词库？",
-        key="include_personal_dictionary",
-        # on_change=add_personal_dictionary,
+        key="flashcard-personal-dictionary",
         value=True,
     )
     # 添加或删减个人词库
@@ -492,7 +490,7 @@ if menu.endswith("闪卡记忆"):
     st.sidebar.selectbox(
         "词库",
         sorted(list(st.session_state.word_dict.keys())),
-        key="selected_list",
+        key="flashcard-selected",
         on_change=reset_flashcard_word,
         format_func=lambda x: x.split("-", maxsplit=1)[1],
         help="✨ 选择一个单词列表，用于生成闪卡单词。",
@@ -504,7 +502,7 @@ if menu.endswith("闪卡记忆"):
         10,
         50,
         step=5,
-        key="num_words_key",
+        key="flashcard-num-words",
         on_change=reset_flashcard_word,
         help="✨ 请选择计划记忆的单词数量。",
     )
@@ -515,25 +513,24 @@ if menu.endswith("闪卡记忆"):
     )
 
     btn_cols = st.columns(10)
-    tip_placeholder = st.empty()
     container = st.container()
 
     # 创建前后选择的按钮
     display_status_button = btn_cols[0].button(
         ":recycle:",
-        key="mask",
+        key="flashcard-mask",
         help="✨ 点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。",
     )
     prev_btn = btn_cols[1].button(
         ":leftwards_arrow_with_hook:",
-        key="prev",
+        key="flashcard-prev",
         help="✨ 点击按钮，切换到上一个单词。",
         on_click=on_prev_btn_click,
         disabled=st.session_state.current_flashcard_word_index <= 0,
     )
     next_btn = btn_cols[2].button(
         ":arrow_right_hook:",
-        key="next",
+        key="flashcard-next",
         help="✨ 点击按钮，切换到下一个单词。",
         on_click=on_next_btn_click,
         disabled=len(st.session_state.flashcard_words)
@@ -542,25 +539,22 @@ if menu.endswith("闪卡记忆"):
     )
     play_btn = btn_cols[3].button(
         ":sound:",
-        key="play",
+        key="flashcard-play",
         help="✨ 聆听单词发音",
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
     add_btn = btn_cols[4].button(
         ":heavy_plus_sign:",
-        key="add",
+        key="flashcard-add",
         help="✨ 将当前单词添加到个人词库",
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
     del_btn = btn_cols[5].button(
         ":heavy_minus_sign:",
-        key="del",
+        key="flashcard-del",
         help="✨ 将当前单词从个人词库中删除",
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
-    # update_flashcard_wordbank_button = btn_cols[6].button(
-    #     ":arrows_counterclockwise:", key="refresh", help="✨ 左侧菜单改变词库或记忆数量后，请重新生成闪卡单词"
-    # )
 
     placeholder = st.empty()
 
@@ -581,12 +575,6 @@ if menu.endswith("闪卡记忆"):
         audio_html = get_audio_html(word, voice_style)
         components.html(audio_html)
 
-    # if update_flashcard_wordbank_button:
-    #     # 恢复初始显示状态
-    #     st.session_state.flashcard_display_state = "全部"
-    #     st.session_state["current_flashcard_word_index"] = -1
-    #     generate_flashcard_words()
-
     if add_btn:
         word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
@@ -604,9 +592,9 @@ if menu.endswith("闪卡记忆"):
     # 控制闪卡单词的显示
     # 初始化闪卡单词
     if len(st.session_state.flashcard_words) == 0:
-        generate_flashcard_words()
+        generate_page_words("flashcard")
 
-    view_flash_word(container, tip_placeholder)
+    view_flash_word(container)
 
 # endregion
 
@@ -616,8 +604,7 @@ elif menu.endswith("拼图游戏"):
     # region 边栏
     include_cb = st.sidebar.checkbox(
         "包含个人词库？",
-        key="include_personal_dictionary",
-        # on_change=add_personal_dictionary,
+        key="puzzle-personal-dictionary",
         value=True,
     )
     # 添加或删减个人词库
@@ -626,7 +613,7 @@ elif menu.endswith("拼图游戏"):
     st.sidebar.selectbox(
         "词库",
         sorted(list(st.session_state.word_dict.keys())),
-        key="selected_list",
+        key="puzzle-selected",
         on_change=reset_flashcard_word,
         format_func=lambda x: x.split("-", maxsplit=1)[1],
         help="✨ 选择一个词库，用于生成单词拼图。",
@@ -638,7 +625,7 @@ elif menu.endswith("拼图游戏"):
         10,
         50,
         step=5,
-        key="num_words_key",
+        key="puzzle-num-words",
         on_change=reset_flashcard_word,
         help="✨ 单词拼图的数量。",
     )
@@ -694,7 +681,7 @@ elif menu.endswith("拼图游戏"):
     #     st.session_state.puzzle_answer_value = ""
 
     if len(st.session_state.puzzle_words) == 0:
-        gen_puzzle_words()
+        generate_page_words("puzzle")
         display_puzzle_hint(puzzle_progress)
         view_puzzle_word()
 
