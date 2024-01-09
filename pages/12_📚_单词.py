@@ -658,7 +658,7 @@ elif menu.endswith("拼图游戏"):
         key="puzzle-prev",
         help="✨ 点击按钮，切换到上一单词拼图。",
         on_click=on_prev_puzzle_btn_click,
-        disabled=st.session_state.puzzle_idx <= 0,
+        disabled=st.session_state.puzzle_idx < 0,
     )
     puzzle_next_btn = puzzle_cols[1].button(
         ":arrow_right_hook:",
