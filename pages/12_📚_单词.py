@@ -490,21 +490,23 @@ if menu.endswith("闪卡记忆"):
     add_personal_dictionary(include_cb)
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
     st.sidebar.selectbox(
-        "请选择单词列表",
+        "词库",
         sorted(list(st.session_state.word_dict.keys())),
         key="selected_list",
         on_change=reset_flashcard_word,
         format_func=lambda x: x.split("-", maxsplit=1)[1],
+        help="✨ 选择一个单词列表，用于生成闪卡单词。",
     )
 
     # 在侧边栏添加一个滑块让用户选择记忆的单词数量
     st.sidebar.slider(
-        "请选择计划记忆的单词数量",
+        "单词数量",
         10,
         50,
         step=5,
         key="num_words_key",
         on_change=reset_flashcard_word,
+        help="✨ 请选择计划记忆的单词数量。",
     )
     # endregion
     st.subheader(":book: 记忆闪卡", divider="rainbow", anchor=False)
@@ -622,21 +624,23 @@ elif menu.endswith("拼图游戏"):
     add_personal_dictionary(include_cb)
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
     st.sidebar.selectbox(
-        "请选择单词列表",
+        "词库",
         sorted(list(st.session_state.word_dict.keys())),
         key="selected_list",
         on_change=reset_flashcard_word,
         format_func=lambda x: x.split("-", maxsplit=1)[1],
+        help="✨ 选择一个词库，用于生成单词拼图。",
     )
 
     # 在侧边栏添加一个滑块让用户选择记忆的单词数量
     st.sidebar.slider(
-        "请选择计划记忆的单词数量",
+        "单词数量",
         10,
         50,
         step=5,
         key="num_words_key",
         on_change=reset_flashcard_word,
+        help="✨ 单词拼图的数量。",
     )
     # endregion
     st.subheader(":jigsaw: 拼图游戏", divider="rainbow", anchor=False)
@@ -659,10 +663,21 @@ elif menu.endswith("拼图游戏"):
         on_click=on_next_puzzle_btn_click,
         disabled=st.session_state.puzzle_idx == st.session_state["num_words_key"] - 1,
     )
-
-    update_puzzle_wordbank_button = puzzle_cols[2].button(
-        ":arrows_counterclockwise:", key="refresh-puzzle", help="✨ 重新生成单词列表"
+    add_btn = puzzle_cols[2].button(
+        ":heavy_plus_sign:",
+        key="add",
+        help="✨ 将当前单词添加到个人词库",
+        disabled=st.session_state.current_flashcard_word_index == -1,
     )
+    del_btn = puzzle_cols[3].button(
+        ":heavy_minus_sign:",
+        key="del",
+        help="✨ 将当前单词从个人词库中删除",
+        disabled=st.session_state.current_flashcard_word_index == -1,
+    )
+    # update_puzzle_wordbank_button = puzzle_cols[2].button(
+    #     ":arrows_counterclockwise:", key="refresh-puzzle", help="✨ 重新生成单词列表"
+    # )
 
     if prev_puzzle_btn:
         prepare_puzzle()
@@ -670,17 +685,16 @@ elif menu.endswith("拼图游戏"):
     if next_puzzle_btn:
         prepare_puzzle()
 
-    if update_puzzle_wordbank_button:
-        gen_puzzle_words()
-        # 恢复初始显示状态
-        st.session_state.puzzle_idx = -1
-        st.session_state["puzzle_view_word"] = []
-        st.session_state["puzzle_test_score"] = {}
-        st.session_state.puzzle_answer_value = ""
+    # if update_puzzle_wordbank_button:
+    #     gen_puzzle_words()
+    #     # 恢复初始显示状态
+    #     st.session_state.puzzle_idx = -1
+    #     st.session_state["puzzle_view_word"] = []
+    #     st.session_state["puzzle_test_score"] = {}
+    #     st.session_state.puzzle_answer_value = ""
 
     if len(st.session_state.puzzle_words) == 0:
         gen_puzzle_words()
-
         display_puzzle_hint(puzzle_progress)
         view_puzzle_word()
 
