@@ -846,7 +846,11 @@ elif menu.endswith("拼图游戏"):
         "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。它是一种非常有效的学习方式，可以帮助我们提高词汇量、拼写能力、思维能力和解决问题能力。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
 
-    puzzle_progress = st.empty()
+    update_and_display_progress(
+        st.session_state.puzzle_idx + 1,
+        len(st.session_state.puzzle_words),
+        st.empty(),
+    )
 
     puzzle_cols = st.columns(10)
     puzzle_prev_btn = puzzle_cols[0].button(
@@ -904,11 +908,6 @@ elif menu.endswith("拼图游戏"):
             col.image(urls[i], use_column_width=True, caption=caption[i])
 
         handle_puzzle_input()
-        update_and_display_progress(
-            st.session_state.puzzle_idx + 1,
-            len(st.session_state.puzzle_words),
-            puzzle_progress,
-        )
 
     if puzzle_add_btn:
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
