@@ -456,9 +456,9 @@ if menu.endswith("闪卡记忆"):
         help="✨ 将当前单词从个人词库中删除",
         disabled=st.session_state.current_flashcard_word_index == -1,
     )
-    update_flashcard_wordbank_button = btn_cols[6].button(
-        ":arrows_counterclockwise:", key="refresh", help="✨ 左侧菜单改变词库或记忆数量后，请重新生成闪卡单词"
-    )
+    # update_flashcard_wordbank_button = btn_cols[6].button(
+    #     ":arrows_counterclockwise:", key="refresh", help="✨ 左侧菜单改变词库或记忆数量后，请重新生成闪卡单词"
+    # )
 
     placeholder = st.empty()
 
@@ -479,11 +479,11 @@ if menu.endswith("闪卡记忆"):
         audio_html = get_audio_html(word, voice_style)
         components.html(audio_html)
 
-    if update_flashcard_wordbank_button:
-        # 恢复初始显示状态
-        st.session_state.flashcard_display_state = "全部"
-        st.session_state["current_flashcard_word_index"] = -1
-        generate_flashcard_words()
+    # if update_flashcard_wordbank_button:
+    #     # 恢复初始显示状态
+    #     st.session_state.flashcard_display_state = "全部"
+    #     st.session_state["current_flashcard_word_index"] = -1
+    #     generate_flashcard_words()
 
     if add_btn:
         word = st.session_state.flashcard_words[
@@ -503,6 +503,7 @@ if menu.endswith("闪卡记忆"):
     # 初始化闪卡单词
     if len(st.session_state.flashcard_words) == 0:
         generate_flashcard_words()
+    
     view_flash_word(container, tip_placeholder)
 
 # endregion
