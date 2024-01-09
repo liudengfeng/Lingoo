@@ -409,7 +409,7 @@ def view_puzzle_word():
             st.rerun()
 
 
-def display_puzzle_hint(placeholder):
+def display_puzzle_hint():
     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
     definition = get_word_definition(word)
     t_word = st.session_state.mini_dict[word].get("translation", "")
@@ -419,7 +419,7 @@ def display_puzzle_hint(placeholder):
 - 中译文：{t_word}
 {definition}
 """
-    placeholder.markdown(msg)
+    st.markdown(msg)
 
 
 def on_prev_puzzle_btn_click():
@@ -681,7 +681,7 @@ elif menu.endswith("拼图游戏"):
         disabled=st.session_state.puzzle_idx == -1,
     )
 
-    puzzle_tip_placeholder = st.empty()
+    # puzzle_tip_placeholder = st.empty()
     puzzle_image_placeholder = st.empty()
     # puzzle_word_container = st.container()
 
@@ -697,7 +697,7 @@ elif menu.endswith("拼图游戏"):
         prepare_puzzle()
 
     if st.session_state.puzzle_idx != -1:
-        display_puzzle_hint(puzzle_tip_placeholder)
+        display_puzzle_hint()
         view_puzzle_word()
         handle_puzzle_input()
         update_and_display_progress(
