@@ -692,11 +692,6 @@ def on_next_test_btn_click():
     st.session_state["word_test_idx"] += 1
 
 
-@st.spinner("AI🤖正在生成单词理解测试题，请稍候...")
-def gen_word_test(word, level):
-    st.session_state.word_tests[word] = generate_word_test(word, level)
-
-
 def check_answer():
     if len(st.session_state.user_answer) == 0:
         st.warning("您尚未答题。")
@@ -1182,14 +1177,22 @@ elif menu.endswith("单词测验"):
         idx = st.session_state.word_test_idx
         word = st.session_state.words_for_test[idx]
         if word not in st.session_state.word_tests:
-            gen_word_test(word, level)
+            with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
+                model = load_vertex_model("gemini-pro")
+                st.session_state.word_tests[word] = generate_word_test(
+                    model, word, level
+                )
         view_test_word()
 
     if next_test_btn:
         idx = st.session_state.word_test_idx
         word = st.session_state.words_for_test[idx]
         if word not in st.session_state.word_tests:
-            gen_word_test(word, level)
+            with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
+                model = load_vertex_model("gemini-pro")
+                st.session_state.word_tests[word] = generate_word_test(
+                    model, word, level
+                )
         view_test_word()
 
     if sumbit_test_btn:
