@@ -139,3 +139,37 @@ def select_best_images_for_word(model, word, images: List[Part]):
         stream=False,
         parser=lambda x: json.loads(x.replace("```python", "").replace("```", "")),
     )
+
+
+WORD_TEST_PROMPT_TEMPLATE = """
+你是一名专业英语老师，需要出题考察学生对英语词汇含义的理解，要求：
+单选题，每道题只有唯一正确的答案；
+选项的排列顺序通常是随机的;
+正确答案随机分布，不要总集中在某个选项；
+选项与题干密切相关，且互补重复；
+选项之间区分度高，不要造成困扰；
+选项使用A、B、C、D标识，以"."与选项分离；
+正确答案只需要输出字符标识；
+针对的受众是英语语言能力为CEFR标准{level}的人群；
+输出中不需要使用非必要的格式标注，如加黑等等；
+
+输出键为"问题"、"选项"、"答案"、"解释"的字典，JSON格式。
+
+单词：{word}
+"""
+
+
+def generate_word_test(model, word, level):
+    prompt = WORD_TEST_PROMPT_TEMPLATE.format(word=word, level=level)
+    contents = [Part.from_text(prompt)]
+    generation_config = GenerationConfig(
+        max_output_tokens=2048, temperature=0.4, top_p=1.0
+    )
+    return parse_generated_content_and_update_token(
+        "单词理解考题",
+        model,
+        contents,
+        generation_config,
+        stream=False,
+        parser=lambda x: json.loads(x.replace("```python", "").replace("```", "")),
+    )

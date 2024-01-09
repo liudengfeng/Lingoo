@@ -13,7 +13,8 @@ import streamlit.components.v1 as components
 from PIL import Image as PILImage
 from vertexai.preview.generative_models import Image
 
-from mypylib.google_ai import select_best_images_for_word
+from mypylib.constants import CEFR_LEVEL_MAPS
+from mypylib.google_ai import generate_word_test, select_best_images_for_word
 from mypylib.st_helper import (
     check_access,
     check_and_force_logout,
@@ -48,7 +49,7 @@ sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
 check_and_force_logout(sidebar_status)
 
-menu_names = ["闪卡记忆", "拼图游戏", "看图测词", "单词测验", "管理词库"]
+menu_names = ["闪卡记忆", "拼图游戏", "看图测词", "单词测验", "词库管理"]
 menu_emoji = [
     "📚",
     "🧩",
@@ -664,6 +665,131 @@ def check_pic_answer(container):
 
 # endregion
 
+# region 单词测验辅助函数
+
+# 单词序号
+
+if "word_test_idx" not in st.session_state:
+    st.session_state["word_test_idx"] = -1
+# 用于测试的单词
+if "words_for_test" not in st.session_state:
+    st.session_state["words_for_test"] = []
+# 单词理解测试题，以单词为键，值为测试题、选项、答案、解释
+if "word_tests" not in st.session_state:
+    st.session_state["word_tests"] = {}
+# 用户答案
+if "user_answer" not in st.session_state:
+    st.session_state["user_answer"] = {}
+
+
+def reset_test_words():
+    st.session_state.word_test_idx = -1
+    st.session_state.word_tests = {}
+    st.session_state.user_answer = {}
+
+
+def generate_test_words(word_lib, num_words, word_key):
+    # 获取选中的单词列表
+    words = st.session_state.word_dict[word_lib]
+    n = min(num_words, len(words))
+    # 随机选择单词
+    st.session_state[word_key] = random.sample(words, n)
+    name = word_lib.split("-", maxsplit=1)[1]
+    st.toast(f"当前单词列表名称：{name} 单词数量: {len(st.session_state[word_key])}")
+
+
+def on_prev_test_btn_click():
+    st.session_state["word_test_idx"] -= 1
+
+
+def on_next_test_btn_click():
+    st.session_state["word_test_idx"] += 1
+
+
+@st.spinner("AI🤖正在生成单词理解测试题，请稍候...")
+def gen_word_test(word, level):
+    st.session_state.word_tests[word] = generate_word_test(word, level)
+
+
+def check_answer():
+    if len(st.session_state.user_answer) == 0:
+        st.warning("您尚未答题。")
+        st.stop()
+
+    score = 0
+    n = len(st.session_state.word_tests)
+    for word, test in st.session_state.word_tests.items():
+        question = test["question"]
+        options = test["options"]
+        answer = test["answer"]
+        explanation = test["explanation"]
+
+        user_answer = st.session_state.user_answer.get(word, "")
+        user_answer_idx = options.index(user_answer) if user_answer else None
+        st.divider()
+        st.markdown(question)
+        st.radio(
+            "选项",
+            options,
+            # horizontal=True,
+            index=user_answer_idx,
+            disabled=True,
+            label_visibility="collapsed",
+            key=f"test-options-{word}",
+        )
+        msg = ""
+        # 用户答案是选项，而提供的标准答案是A、B、C、D
+        if user_answer.startswith(answer):
+            score += 1
+            msg = f"正确答案：{answer} :white_check_mark:"
+        else:
+            msg = f"正确答案：{answer} :x:"
+        st.markdown(msg)
+        st.markdown(f"解释：{explanation}")
+    percentage = score / n * 100
+    if percentage >= 75:
+        st.balloons()
+    st.divider()
+    st.markdown(f":red[得分：{percentage:.0f}%]")
+    st.divider()
+
+
+# def on_radio_change(idx):
+#     # 保存用户答案
+#     st.session_state.user_answer[idx] = st.session_state["test_options"]
+
+
+def view_test_word():
+    n = len(st.session_state.words_for_test)
+    idx = st.session_state.word_test_idx
+    word = st.session_state.words_for_test[idx]
+    test = st.session_state.word_tests[word]
+    question = test["question"]
+    options = test["options"]
+    user_answer = st.session_state.user_answer.get(word, options[0])
+    user_answer_idx = options.index(user_answer)
+
+    st.markdown(question)
+    answer = st.radio(
+        "选项",
+        options,
+        # horizontal=True,
+        index=user_answer_idx,
+        label_visibility="collapsed",
+        # key=f"test_options_{idx}",
+        # on_change=on_radio_change,
+        # args=(
+        #     word,
+        #     idx,
+        # ),
+        key="test_options",
+    )
+    # 保存用户答案
+    st.session_state.user_answer[word] = answer
+
+
+# endregion
+
 # region 会话状态
 
 if "mini_dict" not in st.session_state:
@@ -998,6 +1124,107 @@ elif menu.endswith("看图测词"):
 
 # endregion
 
+# region 单词测验
+
+elif menu.endswith("单词测验"):
+    # region 边栏
+    level = st.sidebar.selectbox(
+        "CEFR分级",
+        CEFR_LEVEL_MAPS.keys(),
+        key="test-word-level",
+    )
+    include_cb = st.sidebar.checkbox(
+        "包含个人词库？",
+        key="test-personal-dictionary",
+        value=True,
+    )
+    # 添加或删减个人词库
+    add_personal_dictionary(include_cb)
+    # 在侧边栏添加一个选项卡让用户选择一个单词列表
+    word_lib = st.sidebar.selectbox(
+        "词库",
+        sorted(list(st.session_state.word_dict.keys())),
+        key="test-word-selected",
+        on_change=reset_test_words,
+        format_func=lambda x: x.split("-", maxsplit=1)[1],
+        help="✨ 选择一个单词列表，用于生成单词词义理解测试题。",
+    )
+    test_num = st.sidebar.number_input(
+        "试题数量",
+        1,
+        20,
+        value=10,
+        step=1,
+        key="test-word-num",
+        on_change=reset_test_words,
+    )
+    # 挑选单词
+    st.session_state.words_for_test = generate_test_words(
+        word_lib, test_num, "words_for_test"
+    )
+    # endregion
+    st.subheader(":pencil: 单词测验", divider="rainbow", anchor=False)
+    st.markdown("""英语单选单词词义理解测试是指给出一个单词和四个含义，要求考生选择正确的含义。这种测试题型简单易行，适用于各个英语水平的考生。""")
+    update_and_display_progress(
+        st.session_state.word_test_idx + 1,
+        len(st.session_state.word_tests),
+        st.empty(),
+        message=""
+        if st.session_state.word_test_idx == -1
+        else st.session_state.words_for_test[st.session_state.word_test_idx],
+    )
+
+    test_btns = st.columns(10)
+    # gen_test_btn = test_btns[0].button(
+    #     ":arrows_counterclockwise:", key="gen-test-word", help="✨ 点击按钮，生成单词理解测试题。"
+    # )
+    prev_test_btn = test_btns[0].button(
+        ":leftwards_arrow_with_hook:",
+        key="prev-test-word",
+        help="✨ 点击按钮，切换到上一题。",
+        on_click=on_prev_test_btn_click,
+        disabled=st.session_state.word_test_idx < 0,
+    )
+    next_test_btn = test_btns[1].button(
+        ":arrow_right_hook:",
+        key="next-test-word",
+        help="✨ 点击按钮，切换到下一题。",
+        on_click=on_next_test_btn_click,
+        disabled=st.session_state.word_test_idx
+        == len(st.session_state.words_for_test) - 1,
+    )
+    # 答题即可提交检查
+    sumbit_test_btn = test_btns[2].button(
+        ":mag:",
+        key="submit-test-word",
+        disabled=st.session_state.word_test_idx == -1
+        or len(st.session_state.user_answer) == 0,
+        help="✨ 至少完成一道测试题后，才可点击按钮，显示测验得分。",
+    )
+
+    if prev_test_btn:
+        idx = st.session_state.word_test_idx
+        word = st.session_state.words_for_test[idx]
+        if word not in st.session_state.word_tests:
+            gen_word_test(word, level)
+        view_test_word()
+
+    if next_test_btn:
+        idx = st.session_state.word_test_idx
+        word = st.session_state.words_for_test[idx]
+        if word not in st.session_state.word_tests:
+            gen_word_test(word, level)
+        view_test_word()
+
+    if sumbit_test_btn:
+        if len(st.session_state.user_answer) != len(st.session_state.word_tests):
+            st.warning("您尚未完成测试。")
+        check_answer()
+
+
+# endregion
+
+
 # # region 个人词库辅助
 
 # add_my_word_lib_column_config = {
@@ -1124,178 +1351,5 @@ elif menu.endswith("看图测词"):
 #                 st.session_state.dbi.remove_words_from_personal_dictionary(word)
 #                 st.toast(f"已从个人词库中删除：{word}。")
 #         st.rerun()
-
-# # endregion
-
-# # region 单词测验辅助
-
-# if "test_idx" not in st.session_state:
-#     st.session_state["test_idx"] = -1
-
-
-# if "tests" not in st.session_state:
-#     st.session_state["tests"] = []
-
-# if "user_answer" not in st.session_state:
-#     st.session_state["user_answer"] = {}
-
-
-# def on_prev_test_btn_click():
-#     st.session_state["test_idx"] -= 1
-
-
-# def on_next_test_btn_click():
-#     st.session_state["test_idx"] += 1
-
-
-# # @st.spinner("AI🤖正在生成单词理解测试题，请稍候...")
-# # def gen_test(level, test_num):
-# #     words = random.sample(st.session_state.flashcard_words, test_num)
-# #     for word in words:
-# #         st.session_state.tests.append(generate_word_test(word, level))
-
-
-# def check_answer(test_container):
-#     if len(st.session_state.user_answer) == 0:
-#         st.warning("您尚未答题。")
-#         st.stop()
-
-#     score = 0
-#     n = len(st.session_state.tests)
-#     for idx in range(n):
-#         question = st.session_state.tests[idx]["question"]
-#         options = st.session_state.tests[idx]["options"]
-#         answer = st.session_state.tests[idx]["answer"]
-#         explanation = st.session_state.tests[idx]["explanation"]
-
-#         user_answer = st.session_state.user_answer.get(idx, options[0])
-#         user_answer_idx = options.index(user_answer)
-#         test_container.divider()
-#         test_container.markdown(question)
-#         test_container.radio(
-#             "选项",
-#             options,
-#             # horizontal=True,
-#             index=user_answer_idx,
-#             disabled=True,
-#             label_visibility="collapsed",
-#             key=f"test_options_{idx}",
-#         )
-#         msg = ""
-#         # 用户答案是选项，而提供的标准答案是A、B、C、D
-#         if user_answer.split(".")[0] == answer:
-#             score += 1
-#             msg = f"正确答案：{answer} :white_check_mark:"
-#         else:
-#             msg = f"正确答案：{answer} :x:"
-#         test_container.markdown(msg)
-#         test_container.markdown(f"解释：{explanation}")
-#     percentage = score / n * 100
-#     if percentage >= 75:
-#         st.balloons()
-#     test_container.divider()
-#     test_container.markdown(f":red[得分：{percentage:.0f}%]")
-#     test_container.divider()
-
-
-# def on_radio_change(idx):
-#     # 保存用户答案
-#     st.session_state.user_answer[idx] = st.session_state["test_options"]
-
-
-# def view_question(test_container):
-#     if len(st.session_state.tests) == 0:
-#         return
-
-#     progress_text = "答题进度"
-#     n = len(st.session_state.tests)
-#     idx = st.session_state.test_idx
-#     question = st.session_state.tests[idx]["question"]
-#     options = st.session_state.tests[idx]["options"]
-#     user_answer = st.session_state.user_answer.get(idx, options[0])
-#     user_answer_idx = options.index(user_answer)
-
-#     cols = test_container.columns(3)
-#     my_bar = cols[0].progress(0, text=progress_text)
-#     test_container.divider()
-#     test_container.markdown(question)
-#     test_container.radio(
-#         "选项",
-#         options,
-#         # horizontal=True,
-#         index=user_answer_idx,
-#         label_visibility="collapsed",
-#         # key=f"test_options_{idx}",
-#         on_change=on_radio_change,
-#         args=(
-#             test_container,
-#             idx,
-#         ),
-#         key="test_options",
-#     )
-#     # 保存用户答案
-#     st.session_state.user_answer[idx] = st.session_state["test_options"]
-#     # test_container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_answer}>")
-#     my_bar.progress((idx + 1) / n, text=progress_text)
-#     test_container.divider()
-
-
-# # endregion
-
-# # region 单词测验
-
-# with tabs[tab_items.index(":memo: 单词测验")]:
-#     st.info("试题词汇来源于【记忆闪卡】生成的单词列表。")
-#     cols = st.columns(4)
-#     level = cols[0].selectbox("单词级别", ("A1", "A2", "B1", "B2", "C1", "C2"))
-
-#     test_num = cols[1].number_input("试题数量", 1, 20, value=10, step=1)
-
-#     test_container = st.container()
-
-#     test_btns = st.columns(6)
-#     gen_test_btn = test_btns[1].button(
-#         ":arrows_counterclockwise:", key="gen-test", help="✨ 点击按钮，生成单词理解测试题。"
-#     )
-#     prev_test_btn = test_btns[2].button(
-#         ":leftwards_arrow_with_hook:",
-#         key="prev-test",
-#         help="✨ 点击按钮，切换到上一题。",
-#         on_click=on_prev_test_btn_click,
-#         args=(test_container,),
-#         disabled=st.session_state.test_idx <= 0,
-#     )
-#     next_test_btn = test_btns[3].button(
-#         ":arrow_right_hook:",
-#         key="next-test",
-#         help="✨ 点击按钮，切换到下一题。",
-#         on_click=on_next_test_btn_click,
-#         args=(test_container,),
-#         disabled=st.session_state.test_idx == test_num - 1,
-#     )
-#     # 答题即可提交检查
-#     sumbit_test_btn = test_btns[4].button(
-#         ":mag:",
-#         key="submit-test",
-#         disabled=len(st.session_state.tests) == 0
-#         or len(st.session_state.user_answer) == 0,
-#         help="✨ 至少完成一道测试题后，才可点击按钮，显示测验得分。",
-#     )
-
-#     if gen_test_btn:
-#         # 重置考题
-#         st.session_state.test_idx = 0
-#         st.session_state.user_answer = {}
-#         st.session_state.tests = []
-#         test_container.empty()
-#         # gen_test(level, test_num)
-
-#     if sumbit_test_btn:
-#         if len(st.session_state.user_answer) != len(st.session_state.tests):
-#             st.toast("您尚未完成测试。")
-#         check_answer(test_container)
-#     else:
-#         view_question(test_container)
-
 
 # # endregion
