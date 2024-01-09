@@ -560,6 +560,14 @@ def gen_pic_tests(category, num):
     st.session_state["pic_tests"] = data
 
 
+def pic_word_test_reset():
+    st.session_state.user_pic_answer = {}
+    st.session_state.pic_idx = -1
+    category = st.session_state["pic_category"]
+    num = st.session_state["pic_num"]
+    gen_pic_tests(category, num)
+
+
 def on_pic_radio_change(idx):
     # 保存用户答案
     st.session_state.user_pic_answer[idx] = st.session_state["pic_options"]
@@ -925,13 +933,23 @@ elif menu.endswith("看图测词"):
         "看图测词是一种记忆单词的游戏，其玩法是给出一个图片，玩家需要根据图片内容来猜测图片所代表的单词。这种游戏可以帮助玩家记忆单词的含义。需要注意的是，这个游戏只针对特定类别，例如只包括某个特定级别的词汇。如果你对某个领域不熟悉，由于需要根据图片来猜测单词，这个游戏的难度相对较大，可能需要投入更多的精力。我们建议只在你感兴趣的范围内尝试这个游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
     pic_cols = st.columns(2)
-    category = pic_cols[0].selectbox("请选择图片类别", pic_categories)
-    pic_num = pic_cols[1].number_input("请选择图片测词考题数量", 1, 20, value=10, step=1)
+    category = pic_cols[0].selectbox(
+        "请选择图片类别", pic_categories, key="pic-category", on_change=pic_word_test_reset
+    )
+    pic_num = pic_cols[1].number_input(
+        "请选择图片测词题数量",
+        1,
+        20,
+        value=10,
+        step=1,
+        key="pic-num",
+        on_change=pic_word_test_reset,
+    )
 
-    pic_test_cols = st.columns(10)
+    pic_word_test_btn_cols = st.columns(10)
 
     # 创建按钮
-    pic_test_cols[0].button(
+    pic_word_test_btn_cols[0].button(
         ":leftwards_arrow_with_hook:",
         help="✨ 点击按钮，切换到上一题。",
         on_click=on_prev_pic_btn_click,
@@ -939,7 +957,7 @@ elif menu.endswith("看图测词"):
         disabled=st.session_state.pic_idx < 0,
     )
 
-    pic_test_cols[1].button(
+    pic_word_test_btn_cols[1].button(
         ":arrow_right_hook:",
         help="✨ 点击按钮，切换到下一题。",
         on_click=on_next_pic_btn_click,
@@ -947,7 +965,7 @@ elif menu.endswith("看图测词"):
         disabled=st.session_state.pic_idx == pic_num - 1,
     )
     # 答题即可提交检查
-    sumbit_pic_btn = pic_test_cols[2].button(
+    sumbit_pic_btn = pic_word_test_btn_cols[2].button(
         ":mag:",
         key="submit-pic",
         disabled=len(st.session_state.pic_tests) == 0
@@ -955,13 +973,13 @@ elif menu.endswith("看图测词"):
         help="✨ 至少完成一道测试题后，才可点击按钮，显示测验得分。",
     )
 
-    if pic_test_cols[3].button(
-        ":arrows_counterclockwise:", key="refresh-pic", help="✨ 点击按钮，重新生成图片测试题。"
-    ):
-        gen_pic_tests(category, pic_num)
-        st.session_state.user_pic_answer = {}
-        st.session_state.pic_idx = -1
-        st.rerun()
+    # if pic_word_test_btn_cols[3].button(
+    #     ":arrows_counterclockwise:", key="refresh-pic", help="✨ 点击按钮，重新生成图片测试题。"
+    # ):
+    #     gen_pic_tests(category, pic_num)
+    #     st.session_state.user_pic_answer = {}
+    #     st.session_state.pic_idx = -1
+    #     st.rerun()
 
     if len(st.session_state.pic_tests) == 0:
         gen_pic_tests(category, pic_num)
