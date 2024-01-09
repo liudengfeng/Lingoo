@@ -158,7 +158,7 @@ def select_word_image_urls(word: str):
             # 生成 image_indices
             image_indices = select_best_images_for_word(model, word, images)
         except:
-            image_indices = [0, 1, 2, 3]
+            image_indices = list(range(len(images)))[:4]
 
         # 检查 indices 是否为列表
         if not isinstance(image_indices, list):
