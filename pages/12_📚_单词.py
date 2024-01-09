@@ -1143,7 +1143,7 @@ elif menu.endswith("单词测验"):
     st.markdown("""英语单选单词词义理解测试是指给出一个单词和四个含义，要求考生选择正确的含义。这种测试题型简单易行，适用于各个英语水平的考生。""")
     update_and_display_progress(
         st.session_state.word_test_idx + 1,
-        len(st.session_state.word_tests),
+        len(st.session_state.words_for_test),
         st.empty(),
         message=""
         if st.session_state.word_test_idx == -1
