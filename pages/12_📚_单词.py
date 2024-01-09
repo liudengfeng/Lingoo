@@ -929,11 +929,10 @@ elif menu.endswith("拼图游戏"):
 
 elif menu.endswith("看图测词"):
     # region 边栏
-    pic_cols = st.sidebar.columns(2)
-    category = pic_cols[0].selectbox(
+    category = st.sidebar.selectbox(
         "请选择图片类别", pic_categories, key="pic-category", on_change=pic_word_test_reset
     )
-    pic_num = pic_cols[1].number_input(
+    pic_num = st.sidebar.number_input(
         "请选择图片测词题数量",
         1,
         20,
