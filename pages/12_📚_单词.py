@@ -853,7 +853,7 @@ if menu.endswith("闪卡记忆"):
     refresh_btn = btn_cols[4].button(
         ":arrows_counterclockwise:",
         key="flashcard-refresh",
-        help="✨ 点击按钮，刷新单词。",
+        help="✨ 点击按钮后，将从词库中重新抽取单词。",
         on_click=generate_page_words,
         args=(word_lib, num_word, "flashcard_words"),
     )
@@ -979,7 +979,7 @@ elif menu.endswith("拼图游戏"):
     refresh_btn = puzzle_cols[2].button(
         ":arrows_counterclockwise:",
         key="puzzle-refresh",
-        help="✨ 点击按钮，刷新单词。",
+        help="✨ 点击按钮后，将从词库中重新抽取单词。",
         on_click=generate_page_words,
         args=(word_lib, num_word, "puzzle_words"),
     )
@@ -1167,7 +1167,7 @@ elif menu.endswith("单词测验"):
     refresh_btn = test_btns[3].button(
         ":arrows_counterclockwise:",
         key="test-word-refresh",
-        help="✨ 点击按钮，刷新单词。",
+        help="✨ 点击按钮后，将从词库中重新抽取单词。",
         on_click=generate_page_words,
         args=(word_lib, test_num, "words_for_test"),
     )
