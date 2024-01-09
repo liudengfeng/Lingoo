@@ -3,12 +3,12 @@ import random
 import string
 import uuid
 from datetime import datetime, timedelta, timezone
+from typing import List, Union
 
 from cachetools import TTLCache
 from faker import Faker
 from google.cloud import firestore
 from google.cloud.firestore import FieldFilter
-
 
 from .constants import FAKE_EMAIL_DOMAIN
 from .db_model import Payment, PaymentStatus, PurchaseType, TokenUsageRecord, User
@@ -193,19 +193,47 @@ class DbInterface:
         else:
             return []
 
-    def add_word_to_personal_dictionary(self, word):
-        phone_number = self.cache["phone_number"]
-        # 获取用户文档的引用
-        user_doc_ref = self.db.collection("users").document(phone_number)
-        # 使用 arrayUnion 方法添加单词到个人词典
-        user_doc_ref.update({"personal_vocabulary": firestore.ArrayUnion([word])})
+    def add_word_to_personal_dictionary(self, word: Union[str, List[str]]):
+        """
+        将单词添加到个人词典中。
 
-    def remove_word_from_personal_dictionary(self, word):
+        参数：
+        word：要添加到个人词典的单词，可以是一个字符串或字符串列表。
+
+        示例：
+        db_interface.add_word_to_personal_dictionary("apple")
+        db_interface.add_word_to_personal_dictionary(["apple", "banana"])
+        """
+
         phone_number = self.cache["phone_number"]
         # 获取用户文档的引用
         user_doc_ref = self.db.collection("users").document(phone_number)
-        # 使用 arrayRemove 方法从个人词典中移除单词
-        user_doc_ref.update({"personal_vocabulary": firestore.ArrayRemove([word])})
+        # 如果 word 是一个列表，那么使用 arrayUnion 方法添加多个单词到个人词典
+        # 否则，添加一个单词
+        if isinstance(word, list):
+            user_doc_ref.update({"personal_vocabulary": firestore.ArrayUnion(word)})
+        else:
+            user_doc_ref.update({"personal_vocabulary": firestore.ArrayUnion([word])})
+
+    def remove_word_from_personal_dictionary(self, word: Union[str, List[str]]):
+        """
+        从个人词典中移除单词或多个单词。
+
+        参数：
+        word：要移除的单词，可以是一个字符串或字符串列表。
+
+        返回：
+        无返回值。
+        """
+        phone_number = self.cache["phone_number"]
+        # 获取用户文档的引用
+        user_doc_ref = self.db.collection("users").document(phone_number)
+        # 如果 word 是一个列表，那么使用 arrayRemove 方法从个人词典中移除多个单词
+        # 否则，移除一个单词
+        if isinstance(word, list):
+            user_doc_ref.update({"personal_vocabulary": firestore.ArrayRemove(word)})
+        else:
+            user_doc_ref.update({"personal_vocabulary": firestore.ArrayRemove([word])})
 
     # endregion
 

@@ -3,6 +3,7 @@ import logging
 import os
 import random
 import re
+import time
 from datetime import timedelta
 from pathlib import Path
 
@@ -66,6 +67,22 @@ st.sidebar.divider()
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 DICT_DIR = CURRENT_CWD / "resource/dictionary"
+
+# endregion
+
+# region 通用状态
+
+THRESHOLD = 20  # 阈值
+TIME_LIMIT = 10 * 60  # 10分钟
+
+if "pending_add_words" not in st.session_state:
+    st.session_state.pending_add_words = set()
+
+if "pending_del_words" not in st.session_state:
+    st.session_state.pending_del_words = set()
+
+if "last_update_time" not in st.session_state:
+    st.session_state.last_update_time = time.time()
 
 # endregion
 
@@ -158,6 +175,40 @@ def select_word_image_urls(word: str):
         st.session_state.dbi.update_image_urls(word, urls)
 
     return urls
+
+
+def process_pending_words(add_words, del_words):
+    # 计算净添加和净删除的单词
+    net_add_words = add_words - del_words
+    net_del_words = del_words - add_words
+
+    # 提交净添加的单词到数据库
+    if net_add_words:
+        st.session_state.dbi.add_words_to_personal_dictionary(list(net_add_words))
+        add_words -= net_add_words
+
+    # 从数据库中删除净删除的单词
+    if net_del_words:
+        st.session_state.dbi.remove_words_from_personal_dictionary(list(net_del_words))
+        del_words -= net_del_words
+
+    return add_words, del_words
+
+
+def update_pending_words():
+    current_time = time.time()
+    if (
+        len(st.session_state.pending_add_words) >= THRESHOLD
+        or len(st.session_state.pending_del_words) >= THRESHOLD
+        or current_time - st.session_state.last_update_time >= TIME_LIMIT
+    ):
+        (
+            st.session_state.pending_add_words,
+            st.session_state.pending_del_words,
+        ) = process_pending_words(
+            st.session_state.pending_add_words, st.session_state.pending_del_words
+        )
+        st.session_state.last_update_time = current_time
 
 
 # endregion
@@ -593,15 +644,18 @@ if menu.endswith("闪卡记忆"):
         word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
         ]
-        st.session_state.dbi.add_word_to_personal_dictionary(word)
+        st.session_state.pending_add_words.add(word)
         st.toast(f"添加单词：{word} 到个人词库。")
 
     if del_btn:
         word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
         ]
-        st.session_state.dbi.remove_word_from_personal_dictionary(word)
+        st.session_state.pending_del_words.add(word)
         st.toast(f"从个人词库中删除单词：{word}。")
+
+    # 更新待处理的单词
+    update_pending_words()
 
     # 初始化闪卡单词
     if len(st.session_state.flashcard_words) == 0:
@@ -712,6 +766,19 @@ elif menu.endswith("拼图游戏"):
             len(st.session_state.puzzle_words),
             puzzle_progress,
         )
+
+    if puzzle_add_btn:
+        word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+        st.session_state.pending_add_words.add(word)
+        st.toast(f"添加单词：{word} 到个人词库。")
+
+    if puzzle_del_btn:
+        word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+        st.session_state.pending_del_words.add(word)
+        st.toast(f"从个人词库中删除单词：{word}。")
+
+    # 更新待处理的单词
+    update_pending_words()
 
 # endregion
 
