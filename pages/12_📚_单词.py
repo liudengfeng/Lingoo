@@ -390,16 +390,10 @@ def prepare_puzzle():
     st.session_state.puzzle_answer_value = ""
 
 
-def view_puzzle_word():
-    if st.session_state.puzzle_idx == -1:
-        return
-
-    if len(st.session_state.puzzle_view_word) == 0:
-        prepare_puzzle()
-
-    ws = st.session_state["puzzle_view_word"]
+def view_puzzle_word(container):
+    ws = st.session_state.puzzle_view_word
     n = len(ws)
-    cols = st.columns(60)
+    cols = container.columns(60)
     button_placeholders = [cols[i].empty() for i in range(n)]
     for i in range(n):
         if button_placeholders[i].button(
@@ -411,7 +405,7 @@ def view_puzzle_word():
         ):
             st.session_state.puzzle_answer_value += ws[i]
             st.session_state.clicked_character[i] = True
-    st.rerun()
+            # st.rerun()
 
 
 def display_puzzle_hint(placeholder):
@@ -681,6 +675,7 @@ elif menu.endswith("拼图游戏"):
 
     puzzle_tip_placeholder = st.empty()
     puzzle_image_placeholder = st.empty()
+    puzzle_word_container = st.container()
 
     # 使用默认值初始化
     if len(st.session_state.puzzle_words) == 0:
@@ -695,7 +690,7 @@ elif menu.endswith("拼图游戏"):
             puzzle_progress,
         )
         display_puzzle_hint(puzzle_tip_placeholder)
-        view_puzzle_word()
+        view_puzzle_word(puzzle_word_container)
 
     if puzzle_next_btn:
         prepare_puzzle()
@@ -705,7 +700,7 @@ elif menu.endswith("拼图游戏"):
             puzzle_progress,
         )
         display_puzzle_hint(puzzle_tip_placeholder)
-        view_puzzle_word()
+        view_puzzle_word(puzzle_word_container)
 
     # 在需要的地方调用这个函数
     if st.session_state.puzzle_idx != -1:
