@@ -150,7 +150,7 @@ def select_word_image_urls(word: str):
         for i, url in enumerate(full_urls):
             try:
                 image_bytes = load_image_bytes_from_url(url)
-                images.append(Image.from_bytes(image_bytes))
+                images.append(PILImage.from_bytes(image_bytes))
             except Exception as e:
                 logger.error(f"加载单词{word}第{i+1}张图片时出错:{str(e)}")
                 continue
@@ -579,7 +579,7 @@ def view_pic_question(container):
     for f, o in zip("ABC", o_options):
         options.append(f"{f}. {o}")
 
-    image = Image.open(tests[idx]["image_fp"])  # type: ignore
+    image = PILImage.open(tests[idx]["image_fp"])  # type: ignore
 
     user_answer = st.session_state.user_pic_answer.get(idx, options[0])
     user_answer_idx = options.index(user_answer)
@@ -622,7 +622,7 @@ def check_pic_answer(container):
         for f, o in zip("ABC", o_options):
             options.append(f"{f}. {o}")
         answer = tests[idx]["answer"]
-        image = Image.open(tests[idx]["image_fp"])  # type: ignore
+        image = PILImage.open(tests[idx]["image_fp"])  # type: ignore
 
         user_answer = st.session_state.user_pic_answer.get(idx, options[0])
         user_answer_idx = options.index(user_answer)
