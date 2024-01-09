@@ -732,7 +732,7 @@ elif menu.endswith("拼图游戏"):
 
     current_puzzle_word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
     update_and_display_progress(
-        st.session_state.puzzle_idx + 1,
+        st.session_state.puzzle_idx,
         len(st.session_state.puzzle_words),
         puzzle_progress,
         current_puzzle_word,
