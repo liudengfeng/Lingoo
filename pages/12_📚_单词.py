@@ -182,13 +182,6 @@ sidebar_status = st.sidebar.empty()
 check_and_force_logout(sidebar_status)
 
 menu_names = ["闪卡记忆", "拼图游戏", "图片游戏", "单词测验", "管理词库"]
-# menu_emoji = [
-#     ":book:",
-#     ":jigsaw:",
-#     ":frame_with_picture:",
-#     ":memo:",
-#     ":books:",
-# ]
 menu_emoji = [
     "📚",
     "🧩",
@@ -394,7 +387,7 @@ def view_flash_word(container, tip_placeholder):
 
 # region 记忆闪卡
 
-if menu == "闪卡记忆":
+if menu.endswith("闪卡记忆"):
     # region 词库管理
     # 让用户选择语音风格
     pronunciation = st.sidebar.radio("请选择发音标准", ("美式", "英式"))
