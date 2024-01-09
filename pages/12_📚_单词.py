@@ -390,10 +390,10 @@ def prepare_puzzle():
     st.session_state.puzzle_answer_value = ""
 
 
-def view_puzzle_word(container):
+def view_puzzle_word():
     ws = st.session_state.puzzle_view_word
     n = len(ws)
-    cols = container.columns(40)
+    cols = st.columns(40)
     button_placeholders = [cols[i].empty() for i in range(n)]
     for i in range(n):
         if button_placeholders[i].button(
@@ -676,7 +676,7 @@ elif menu.endswith("拼图游戏"):
 
     puzzle_tip_placeholder = st.empty()
     puzzle_image_placeholder = st.empty()
-    puzzle_word_container = st.container()
+    # puzzle_word_container = st.container()
 
     # 使用默认值初始化
     if len(st.session_state.puzzle_words) == 0:
@@ -699,10 +699,9 @@ elif menu.endswith("拼图游戏"):
             puzzle_progress,
         )
 
-    # 在需要的地方调用这个函数
     if st.session_state.puzzle_idx != -1:
         display_puzzle_hint(puzzle_tip_placeholder)
-        view_puzzle_word(puzzle_word_container)
+        view_puzzle_word()
         handle_puzzle_input()
 
 # endregion
