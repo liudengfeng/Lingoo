@@ -511,6 +511,7 @@ if menu.endswith("闪卡记忆"):
     st.markdown(
         """✨ 闪卡记忆是一种记忆单词的游戏，其玩法是将单词或短语的中英文对照显示在屏幕上，玩家需要根据提示信息，尽可能多地记住单词或短语的含义。"""
     )
+
     btn_cols = st.columns(10)
     tip_placeholder = st.empty()
     container = st.container()
@@ -610,9 +611,37 @@ if menu.endswith("闪卡记忆"):
 # region 单词拼图
 
 elif menu.endswith("拼图游戏"):
+    # region 边栏
+    include_cb = st.sidebar.checkbox(
+        "包含个人词库？",
+        key="include_personal_dictionary",
+        # on_change=add_personal_dictionary,
+        value=True,
+    )
+    # 添加或删减个人词库
+    add_personal_dictionary(include_cb)
+    # 在侧边栏添加一个选项卡让用户选择一个单词列表
+    st.sidebar.selectbox(
+        "请选择单词列表",
+        sorted(list(st.session_state.word_dict.keys())),
+        key="selected_list",
+        on_change=reset_flashcard_word,
+        format_func=lambda x: x.split("-", maxsplit=1)[1],
+    )
+
+    # 在侧边栏添加一个滑块让用户选择记忆的单词数量
+    st.sidebar.slider(
+        "请选择计划记忆的单词数量",
+        10,
+        50,
+        step=5,
+        key="num_words_key",
+        on_change=reset_flashcard_word,
+    )
+    # endregion
     st.subheader(":jigsaw: 拼图游戏", divider="rainbow", anchor=False)
     st.markdown(
-        "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。它是一种非常有效的学习方式，可以帮助我们提高词汇量、拼写能力、思维能力和解决问题能力。单词来自于您的记忆闪卡。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
+        "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。它是一种非常有效的学习方式，可以帮助我们提高词汇量、拼写能力、思维能力和解决问题能力。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
     puzzle_progress = st.empty()
     puzzle_cols = st.columns(10)
