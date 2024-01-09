@@ -414,6 +414,7 @@ def display_puzzle_hint(placeholder):
     definition = get_word_definition(word)
     t_word = st.session_state.mini_dict[word].get("translation", "")
     msg = f"""提示信息：
+
 如果字符中含义空格表明这是一个复合词或者词组
 - 中译文：{t_word}
 {definition}
