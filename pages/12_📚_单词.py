@@ -101,12 +101,12 @@ def get_mini_dict():
 
 def reset_flashcard_word():
     # 恢复初始显示状态
+    st.session_state.flashcard_words = []
     st.session_state.flashcard_display_state = "全部"
     st.session_state["current_flashcard_word_index"] = -1
 
 
 def generate_flashcard_words():
-    reset_flashcard_word()
     # 获取选中的单词列表
     word_lib_name = st.session_state["selected_list"]
     words = st.session_state.word_dict[word_lib_name]
@@ -209,21 +209,6 @@ with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
 
 # endregion
 
-
-# region tabs
-# 将二者分离，避免格式经常被重置
-# tab_names = ["记忆闪卡", "单词拼图", "图片测词", "单词测验", "个人词库", "个人统计"]
-# tab_emoji = [
-#     ":book:",
-#     ":jigsaw:",
-#     ":frame_with_picture:",
-#     ":memo:",
-#     ":books:",
-#     ":bar_chart:",
-# ]
-# tab_items = [e + " " + n for e, n in zip(tab_emoji, tab_names)]
-# tabs = st.tabs(tab_items)
-# endregion
 
 # region 记忆闪卡辅助
 
@@ -409,7 +394,7 @@ if menu.endswith("闪卡记忆"):
         "请选择单词列表",
         sorted(list(st.session_state.word_dict.keys())),
         key="selected_list",
-        on_change=generate_flashcard_words,
+        on_change=reset_flashcard_word,
         format_func=lambda x: x.split("-", maxsplit=1)[1],
     )
 
@@ -420,7 +405,7 @@ if menu.endswith("闪卡记忆"):
         50,
         step=5,
         key="num_words_key",
-        on_change=generate_flashcard_words,
+        on_change=reset_flashcard_word,
     )
     # endregion
     st.subheader(":book: 记忆闪卡", divider="rainbow", anchor=False)
@@ -495,10 +480,10 @@ if menu.endswith("闪卡记忆"):
         components.html(audio_html)
 
     if update_flashcard_wordbank_button:
-        generate_flashcard_words()
         # 恢复初始显示状态
         st.session_state.flashcard_display_state = "全部"
         st.session_state["current_flashcard_word_index"] = -1
+        generate_flashcard_words()
 
     if add_btn:
         word = st.session_state.flashcard_words[
