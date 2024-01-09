@@ -10,7 +10,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
-from PIL import Image as PILImage
+import PIL.Image
 from vertexai.preview.generative_models import Image
 
 from mypylib.constants import CEFR_LEVEL_MAPS
@@ -151,7 +151,7 @@ def select_word_image_urls(word: str):
         for i, url in enumerate(full_urls):
             try:
                 image_bytes = load_image_bytes_from_url(url)
-                images.append(PILImage.from_bytes(image_bytes))
+                images.append(Image.from_bytes(image_bytes))
             except Exception as e:
                 logger.error(f"加载单词{word}第{i+1}张图片时出错:{str(e)}")
                 continue
@@ -588,7 +588,7 @@ def view_pic_question(container):
     for f, o in zip("ABC", o_options):
         options.append(f"{f}. {o}")
 
-    image = PILImage.open(tests[idx]["image_fp"])  # type: ignore
+    image = PIL.Image.open(tests[idx]["image_fp"])  # type: ignore
 
     user_answer = st.session_state.user_pic_answer.get(idx, options[0])
     user_answer_idx = options.index(user_answer)
