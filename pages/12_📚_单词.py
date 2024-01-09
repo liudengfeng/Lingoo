@@ -818,10 +818,8 @@ if menu.endswith("闪卡记忆"):
         on_change=reset_flashcard_word,
         help="✨ 请选择计划记忆的单词数量。",
     )
-
-    # generate_page_words(word_lib, num_word, "flashcard_words")
-
     # endregion
+    
     st.subheader(":book: 记忆闪卡", divider="rainbow", anchor=False)
     st.markdown(
         """✨ 闪卡记忆是一种记忆单词的游戏，其玩法是将单词或短语的中英文对照显示在屏幕上，玩家需要根据提示信息，尽可能多地记住单词或短语的含义。"""
@@ -948,20 +946,19 @@ elif menu.endswith("拼图游戏"):
         on_change=reset_puzzle_word,
         help="✨ 单词拼图的数量。",
     )
-
-    generate_page_words(word_lib, num_word, "puzzle_words")
-
     # endregion
+    
     st.subheader(":jigsaw: 拼图游戏", divider="rainbow", anchor=False)
     st.markdown(
         "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。它是一种非常有效的学习方式，可以帮助我们提高词汇量、拼写能力、思维能力和解决问题能力。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
 
-    update_and_display_progress(
-        st.session_state.puzzle_idx + 1,
-        len(st.session_state.puzzle_words),
-        st.empty(),
-    )
+    if st.session_state.puzzle_idx != -1:
+        update_and_display_progress(
+            st.session_state.puzzle_idx + 1,
+            len(st.session_state.puzzle_words),
+            st.empty(),
+        )
 
     puzzle_cols = st.columns(10)
     puzzle_prev_btn = puzzle_cols[0].button(
@@ -979,22 +976,25 @@ elif menu.endswith("拼图游戏"):
         disabled=len(st.session_state["puzzle_words"])
         and st.session_state.puzzle_idx == len(st.session_state["puzzle_words"]) - 1,
     )
-    puzzle_add_btn = puzzle_cols[2].button(
+    refresh_btn = puzzle_cols[2].button(
+        ":arrows_counterclockwise:",
+        key="puzzle-refresh",
+        help="✨ 点击按钮，刷新单词。",
+        on_click=generate_page_words,
+        args=(word_lib, num_word, "puzzle_words"),
+    )
+    puzzle_add_btn = puzzle_cols[3].button(
         ":heavy_plus_sign:",
         key="puzzle-add",
         help="✨ 将当前单词添加到个人词库",
         disabled=st.session_state.puzzle_idx == -1,
     )
-    puzzle_del_btn = puzzle_cols[3].button(
+    puzzle_del_btn = puzzle_cols[4].button(
         ":heavy_minus_sign:",
         key="puzzle-del",
         help="✨ 将当前单词从个人词库中删除",
         disabled=st.session_state.puzzle_idx == -1,
     )
-
-    # puzzle_tip_placeholder = st.empty()
-    puzzle_image_placeholder = st.empty()
-    # puzzle_word_container = st.container()
 
     # 使用默认值初始化
     if len(st.session_state.puzzle_words) == 0:
@@ -1087,6 +1087,7 @@ elif menu.endswith("看图测词"):
         help="✨ 至少完成一道测试题后，才可点击按钮，显示测验得分。",
     )
 
+    # TODO:修改
     pic_test_container = st.container()
 
     if sumbit_pic_btn:
@@ -1133,24 +1134,21 @@ elif menu.endswith("单词测验"):
         key="test-word-num",
         on_change=reset_test_words,
     )
-    # 挑选单词
-    generate_page_words(word_lib, test_num, "words_for_test")
     # endregion
+
     st.subheader(":pencil: 单词测验", divider="rainbow", anchor=False)
     st.markdown("""英语单选单词词义理解测试是指给出一个单词和四个含义，要求考生选择正确的含义。这种测试题型简单易行，适用于各个英语水平的考生。""")
-    update_and_display_progress(
-        st.session_state.word_test_idx + 1,
-        len(st.session_state.words_for_test),
-        st.empty(),
-        message=""
-        if st.session_state.word_test_idx == -1
-        else st.session_state.words_for_test[st.session_state.word_test_idx],
-    )
+
+    if st.session_state.word_test_idx != -1:
+        update_and_display_progress(
+            st.session_state.word_test_idx + 1,
+            len(st.session_state.words_for_test),
+            st.empty(),
+            message=st.session_state.words_for_test[st.session_state.word_test_idx],
+        )
 
     test_btns = st.columns(10)
-    # gen_test_btn = test_btns[0].button(
-    #     ":arrows_counterclockwise:", key="gen-test-word", help="✨ 点击按钮，生成单词理解测试题。"
-    # )
+
     prev_test_btn = test_btns[0].button(
         ":leftwards_arrow_with_hook:",
         key="prev-test-word",
@@ -1166,6 +1164,14 @@ elif menu.endswith("单词测验"):
         disabled=st.session_state.word_test_idx
         == len(st.session_state.words_for_test) - 1,
     )
+    refresh_btn = test_btns[3].button(
+        ":arrows_counterclockwise:",
+        key="test-word-refresh",
+        help="✨ 点击按钮，刷新单词。",
+        on_click=generate_page_words,
+        args=(word_lib, test_num, "words_for_test"),
+    )
+    
     # 答题即可提交检查
     sumbit_test_btn = test_btns[2].button(
         ":mag:",
