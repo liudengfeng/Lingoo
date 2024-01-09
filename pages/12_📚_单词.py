@@ -48,7 +48,7 @@ sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
 check_and_force_logout(sidebar_status)
 
-menu_names = ["闪卡记忆", "拼图游戏", "图片游戏", "单词测验", "管理词库"]
+menu_names = ["闪卡记忆", "拼图游戏", "看图测词", "单词测验", "管理词库"]
 menu_emoji = [
     "📚",
     "🧩",
@@ -919,10 +919,10 @@ elif menu.endswith("拼图游戏"):
 
 # region 图片测词
 
-elif menu.endswith("图片测词"):
-    st.subheader(":frame_with_picture: 图片测词", divider="rainbow", anchor=False)
+elif menu.endswith("看图测词"):
+    st.subheader(":frame_with_picture: 看图测词", divider="rainbow", anchor=False)
     st.markdown(
-        "图片测词是一种记忆单词的游戏，其玩法是给出一个图片，玩家需要根据图片内容来猜测图片所代表的单词。这种游戏可以帮助玩家记忆单词的含义。需要注意的是，这个游戏只针对特定类别，例如只包括某个特定级别的词汇。如果你对某个领域不熟悉，由于需要根据图片来猜测单词，这个游戏的难度相对较大，可能需要投入更多的精力。我们建议只在你感兴趣的范围内尝试这个游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
+        "看图测词是一种记忆单词的游戏，其玩法是给出一个图片，玩家需要根据图片内容来猜测图片所代表的单词。这种游戏可以帮助玩家记忆单词的含义。需要注意的是，这个游戏只针对特定类别，例如只包括某个特定级别的词汇。如果你对某个领域不熟悉，由于需要根据图片来猜测单词，这个游戏的难度相对较大，可能需要投入更多的精力。我们建议只在你感兴趣的范围内尝试这个游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
     pic_cols = st.columns(4)
     category = pic_cols[0].selectbox("请选择图片类别", pic_categories)
