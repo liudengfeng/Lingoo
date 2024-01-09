@@ -610,7 +610,7 @@ if menu.endswith("闪卡记忆"):
 # region 单词拼图
 
 elif menu.endswith("拼图游戏"):
-    st.subheader(":book: 拼图游戏", divider="rainbow", anchor=False)
+    st.subheader(":jigsaw: 拼图游戏", divider="rainbow", anchor=False)
     st.markdown(
         "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。它是一种非常有效的学习方式，可以帮助我们提高词汇量、拼写能力、思维能力和解决问题能力。单词来自于您的记忆闪卡。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
