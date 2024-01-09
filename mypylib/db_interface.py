@@ -193,7 +193,7 @@ class DbInterface:
         else:
             return []
 
-    def add_word_to_personal_dictionary(self, word: Union[str, List[str]]):
+    def add_words_to_personal_dictionary(self, word: Union[str, List[str]]):
         """
         将单词添加到个人词典中。
 
@@ -201,8 +201,8 @@ class DbInterface:
         word：要添加到个人词典的单词，可以是一个字符串或字符串列表。
 
         示例：
-        db_interface.add_word_to_personal_dictionary("apple")
-        db_interface.add_word_to_personal_dictionary(["apple", "banana"])
+        db_interface.add_words_to_personal_dictionary("apple")
+        db_interface.add_words_to_personal_dictionary(["apple", "banana"])
         """
 
         phone_number = self.cache["phone_number"]
@@ -215,7 +215,7 @@ class DbInterface:
         else:
             user_doc_ref.update({"personal_vocabulary": firestore.ArrayUnion([word])})
 
-    def remove_word_from_personal_dictionary(self, word: Union[str, List[str]]):
+    def remove_words_from_personal_dictionary(self, word: Union[str, List[str]]):
         """
         从个人词典中移除单词或多个单词。
 

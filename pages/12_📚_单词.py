@@ -1079,7 +1079,7 @@ elif menu.endswith("图片测词"):
 #         for idx, d in edited_rows.items():
 #             word = df.iloc[idx]["单词"]  # type: ignore
 #             if d["添加"]:
-#                 st.session_state.dbi.add_word_to_personal_dictionary(word)
+#                 st.session_state.dbi.add_words_to_personal_dictionary(word)
 #                 st.toast(f"已添加到个人词库中：{word}。")
 
 #         word_lib["edited_rows"] = {}
@@ -1101,7 +1101,7 @@ elif menu.endswith("图片测词"):
 #         for idx, d in my_word_edited_rows.items():
 #             word = my_word_df.iloc[idx]["单词"]  # type: ignore
 #             if d["删除"]:
-#                 st.session_state.dbi.remove_word_from_personal_dictionary(word)
+#                 st.session_state.dbi.remove_words_from_personal_dictionary(word)
 #                 st.toast(f"已从个人词库中删除：{word}。")
 #         st.rerun()
 
