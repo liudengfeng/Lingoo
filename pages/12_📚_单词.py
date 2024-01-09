@@ -182,7 +182,15 @@ sidebar_status = st.sidebar.empty()
 check_and_force_logout(sidebar_status)
 
 menu_names = ["闪卡记忆", "拼图游戏", "图片游戏", "单词测验", "管理词库"]
-menu = st.sidebar.selectbox("菜单", menu_names, help="在这里选择你想要进行的操作。")
+menu_emoji = [
+    ":book:",
+    ":jigsaw:",
+    ":frame_with_picture:",
+    ":memo:",
+    ":books:",
+]
+menu_opts = [e + " " + n for e, n in zip(menu_emoji, menu_names)]
+menu = st.sidebar.selectbox("菜单", menu_opts, help="在这里选择你想要进行的操作。")
 st.sidebar.divider()
 
 # endregion
