@@ -399,7 +399,7 @@ def view_puzzle_word():
 
     ws = st.session_state["puzzle_view_word"]
     n = len(ws)
-    cols = st.columns(n + 8)
+    cols = st.columns(60)
     button_placeholders = [cols[i].empty() for i in range(n)]
     for i in range(n):
         if button_placeholders[i].button(
@@ -415,8 +415,6 @@ def view_puzzle_word():
 
 
 def display_puzzle_hint(placeholder):
-    # if st.session_state.puzzle_idx == -1:
-    #     return
     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
     definition = get_word_definition(word)
     placeholder.markdown(f"提示信息：\n {definition}")
@@ -681,8 +679,8 @@ elif menu.endswith("拼图游戏"):
         disabled=st.session_state.puzzle_idx == -1,
     )
     
-    puzzle_word_placeholder = st.empty()
     puzzle_tip_placeholder = st.empty()
+    puzzle_image_placeholder = st.empty()
     
     if puzzle_prev_btn:
         prepare_puzzle()
@@ -694,6 +692,7 @@ elif menu.endswith("拼图游戏"):
             current_puzzle_word,
         )
         display_puzzle_hint(puzzle_tip_placeholder)
+        view_puzzle_word()
     
     if puzzle_next_btn:
         prepare_puzzle()
@@ -705,6 +704,7 @@ elif menu.endswith("拼图游戏"):
             current_puzzle_word,
         )
         display_puzzle_hint(puzzle_tip_placeholder)
+        view_puzzle_word()
     
     # if len(st.session_state.puzzle_words) == 0:
     #     generate_page_words("puzzle")
