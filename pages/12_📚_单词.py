@@ -685,24 +685,19 @@ elif menu.endswith("拼图游戏"):
 
     if puzzle_prev_btn:
         prepare_puzzle()
-        update_and_display_progress(
-            st.session_state.puzzle_idx,
-            len(st.session_state.puzzle_words),
-            puzzle_progress,
-        )
 
     if puzzle_next_btn:
         prepare_puzzle()
-        update_and_display_progress(
-            st.session_state.puzzle_idx + 1,
-            len(st.session_state.puzzle_words),
-            puzzle_progress,
-        )
 
     if st.session_state.puzzle_idx != -1:
         display_puzzle_hint(puzzle_tip_placeholder)
         view_puzzle_word()
         handle_puzzle_input()
+        update_and_display_progress(
+            st.session_state.puzzle_idx + 1,
+            len(st.session_state.puzzle_words),
+            puzzle_progress,
+        )
 
 # endregion
 
