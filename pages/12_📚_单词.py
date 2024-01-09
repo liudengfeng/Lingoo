@@ -1054,6 +1054,7 @@ elif menu.endswith("看图测词"):
         key="pic-num",
         on_change=pic_word_test_reset,
     )
+    gen_pic_tests(category, pic_num)
     # endregion
     st.subheader(":frame_with_picture: 看图测词", divider="rainbow", anchor=False)
     st.markdown(
@@ -1088,17 +1089,6 @@ elif menu.endswith("看图测词"):
         or len(st.session_state.user_pic_answer) == 0,
         help="✨ 至少完成一道测试题后，才可点击按钮，显示测验得分。",
     )
-
-    # if pic_word_test_btn_cols[3].button(
-    #     ":arrows_counterclockwise:", key="refresh-pic", help="✨ 点击按钮，重新生成图片测试题。"
-    # ):
-    #     gen_pic_tests(category, pic_num)
-    #     st.session_state.user_pic_answer = {}
-    #     st.session_state.pic_idx = -1
-    #     st.rerun()
-
-    if len(st.session_state.pic_tests) == 0:
-        gen_pic_tests(category, pic_num)
 
     pic_test_container = st.container()
 
