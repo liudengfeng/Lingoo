@@ -393,7 +393,7 @@ def prepare_puzzle():
 def view_puzzle_word(container):
     ws = st.session_state.puzzle_view_word
     n = len(ws)
-    cols = container.columns(60)
+    cols = container.columns(30)
     button_placeholders = [cols[i].empty() for i in range(n)]
     for i in range(n):
         if button_placeholders[i].button(
@@ -402,10 +402,11 @@ def view_puzzle_word(container):
             disabled=st.session_state.clicked_character[i],
             help="✨ 点击按钮，选择单词拼图中的字母。",
             type="primary",
+            use_container_width=True,
         ):
             st.session_state.puzzle_answer_value += ws[i]
             st.session_state.clicked_character[i] = True
-            # st.rerun()
+            st.rerun()
 
 
 def display_puzzle_hint(placeholder):
