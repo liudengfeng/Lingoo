@@ -414,13 +414,12 @@ def view_puzzle_word():
             st.rerun()
 
 
-def display_puzzle_hint():
-    if st.session_state.puzzle_idx == -1:
-        return
+def display_puzzle_hint(placeholder):
+    # if st.session_state.puzzle_idx == -1:
+    #     return
     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
     definition = get_word_definition(word)
-    st.write("提示信息：")
-    st.markdown(definition)
+    placeholder.markdown(f"提示信息：\n {definition}")
 
 
 def on_prev_puzzle_btn_click():
@@ -681,17 +680,36 @@ elif menu.endswith("拼图游戏"):
         help="✨ 将当前单词从个人词库中删除",
         disabled=st.session_state.puzzle_idx == -1,
     )
-
+    
+    puzzle_word_placeholder = st.empty()
+    puzzle_tip_placeholder = st.empty()
+    
     if puzzle_prev_btn:
         prepare_puzzle()
-
+        current_puzzle_word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+        update_and_display_progress(
+            st.session_state.puzzle_idx,
+            len(st.session_state.puzzle_words),
+            puzzle_progress,
+            current_puzzle_word,
+        )
+        display_puzzle_hint(puzzle_tip_placeholder)
+    
     if puzzle_next_btn:
         prepare_puzzle()
-
-    if len(st.session_state.puzzle_words) == 0:
-        generate_page_words("puzzle")
-        display_puzzle_hint()
-        view_puzzle_word()
+        current_puzzle_word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+        update_and_display_progress(
+            st.session_state.puzzle_idx,
+            len(st.session_state.puzzle_words),
+            puzzle_progress,
+            current_puzzle_word,
+        )
+        display_puzzle_hint(puzzle_tip_placeholder)
+    
+    # if len(st.session_state.puzzle_words) == 0:
+    #     generate_page_words("puzzle")
+    #     display_puzzle_hint()
+    #     view_puzzle_word()
 
         # if st.session_state.puzzle_idx != -1:
         #     user_input = st.text_input(
@@ -730,13 +748,6 @@ elif menu.endswith("拼图游戏"):
         #         msg = f":red[您的得分：{score:.0f}%]\t{msg}"
         #         puzzle_score.markdown(msg)
 
-    current_puzzle_word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-    update_and_display_progress(
-        st.session_state.puzzle_idx,
-        len(st.session_state.puzzle_words),
-        puzzle_progress,
-        current_puzzle_word,
-    )
     # 在需要的地方调用这个函数
     if st.session_state.puzzle_idx != -1:
         handle_puzzle_input(st)
