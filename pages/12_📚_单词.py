@@ -734,6 +734,7 @@ elif menu.endswith("拼图游戏"):
     update_and_display_progress(
         st.session_state.puzzle_idx + 1,
         len(st.session_state.puzzle_words),
+        puzzle_progress,
         current_puzzle_word,
     )
     # 在需要的地方调用这个函数
