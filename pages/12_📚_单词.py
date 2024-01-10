@@ -819,7 +819,7 @@ if menu.endswith("闪卡记忆"):
         help="✨ 请选择计划记忆的单词数量。",
     )
     # endregion
-    
+
     st.subheader(":book: 闪卡记忆", divider="rainbow", anchor=False)
     st.markdown(
         """✨ 闪卡记忆是一种记忆单词的游戏，其玩法是将单词或短语的中英文对照显示在屏幕上，玩家需要根据提示信息，尽可能多地记住单词或短语的含义。"""
@@ -893,6 +893,9 @@ if menu.endswith("闪卡记忆"):
         audio_html = get_audio_html(word, voice_style)
         components.html(audio_html)
 
+    if refresh_btn:
+        reset_flashcard_word()
+
     if add_btn:
         word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
@@ -947,7 +950,7 @@ elif menu.endswith("拼图游戏"):
         help="✨ 单词拼图的数量。",
     )
     # endregion
-    
+
     st.subheader(":jigsaw: 拼图游戏", divider="rainbow", anchor=False)
     st.markdown(
         "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。它是一种非常有效的学习方式，可以帮助我们提高词汇量、拼写能力、思维能力和解决问题能力。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
@@ -1006,6 +1009,9 @@ elif menu.endswith("拼图游戏"):
 
     if puzzle_next_btn:
         prepare_puzzle()
+
+    if refresh_btn:
+        reset_puzzle_word()
 
     if st.session_state.puzzle_idx != -1:
         display_puzzle_hint()
@@ -1164,14 +1170,7 @@ elif menu.endswith("单词测验"):
         disabled=st.session_state.word_test_idx
         == len(st.session_state.words_for_test) - 1,
     )
-    refresh_btn = test_btns[3].button(
-        ":arrows_counterclockwise:",
-        key="test-word-refresh",
-        help="✨ 点击按钮后，将从词库中重新抽取单词。",
-        on_click=generate_page_words,
-        args=(word_lib, test_num, "words_for_test"),
-    )
-    
+
     # 答题即可提交检查
     sumbit_test_btn = test_btns[2].button(
         ":mag:",
@@ -1179,6 +1178,14 @@ elif menu.endswith("单词测验"):
         disabled=st.session_state.word_test_idx == -1
         or len(st.session_state.user_answer) == 0,
         help="✨ 至少完成一道测试题后，才可点击按钮，显示测验得分。",
+    )
+
+    refresh_btn = test_btns[3].button(
+        ":arrows_counterclockwise:",
+        key="test-word-refresh",
+        help="✨ 点击按钮后，将从词库中重新抽取单词。",
+        on_click=generate_page_words,
+        args=(word_lib, test_num, "words_for_test"),
     )
 
     if prev_test_btn:
@@ -1208,6 +1215,9 @@ elif menu.endswith("单词测验"):
             st.warning("您尚未完成测试。")
         check_answer()
 
+    if refresh_btn:
+        reset_test_words()
+        # st.rerun()
 
 # endregion
 
