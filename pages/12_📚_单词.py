@@ -602,16 +602,6 @@ def on_pic_radio_change(idx):
     # 保存用户答案
     current = st.session_state["pic_options"]
     st.session_state.user_pic_answer[idx] = current
-    # if current:
-    #     st.session_state.user_pic_answer[idx] = current
-    # else:
-    #     prev = st.session_state.user_pic_answer.get(idx, "")
-    #     if prev:
-    #         st.session_state["pic_options"] = prev
-    #     else:
-    #         st.session_state["pic_options"] = st.session_state.pic_tests[idx][
-    #             "options"
-    #         ][0]
 
 
 def view_pic_question():
@@ -640,17 +630,13 @@ def view_pic_question():
         index=user_prev_answer_idx,
         label_visibility="collapsed",
         key="pic_options",
-        on_change=on_pic_radio_change,
-        args=(idx,),
+        # on_change=on_pic_radio_change,
+        # args=(idx,),
     )
     container.write(f"idx: {idx} 用户选择答案：{user_answer}")
     # 保存用户答案
-    st.session_state.user_pic_answer[idx] = user_prev_answer
-    # if user_answer is None:
-    #     st.session_state.user_pic_answer[idx] = user_prev_answer
-    # elif user_answer and user_answer != user_prev_answer:
-    #     st.session_state.user_pic_answer[idx] = user_answer
-    container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_pic_answer}>")
+    st.session_state.user_pic_answer[idx] = user_answer
+    # container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_pic_answer}>")
 
 
 def check_pic_answer(container):
