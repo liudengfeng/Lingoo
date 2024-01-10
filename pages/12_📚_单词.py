@@ -780,7 +780,7 @@ with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
 
 # endregion
 
-# region 记忆闪卡
+# region 闪卡记忆
 
 if menu.endswith("闪卡记忆"):
     # region 词库管理
@@ -820,7 +820,7 @@ if menu.endswith("闪卡记忆"):
     )
     # endregion
     
-    st.subheader(":book: 记忆闪卡", divider="rainbow", anchor=False)
+    st.subheader(":book: 闪卡记忆", divider="rainbow", anchor=False)
     st.markdown(
         """✨ 闪卡记忆是一种记忆单词的游戏，其玩法是将单词或短语的中英文对照显示在屏幕上，玩家需要根据提示信息，尽可能多地记住单词或短语的含义。"""
     )
