@@ -645,11 +645,11 @@ def view_pic_question():
     )
     container.write(f"idx: {idx} 用户选择答案：{user_answer}")
     # 保存用户答案
-    if user_answer is None:
-        st.session_state.user_pic_answer[idx] = user_prev_answer
-    elif user_answer and user_answer != user_prev_answer:
-        st.session_state.user_pic_answer[idx] = user_answer
-
+    st.session_state.user_pic_answer[idx] = user_prev_answer
+    # if user_answer is None:
+    #     st.session_state.user_pic_answer[idx] = user_prev_answer
+    # elif user_answer and user_answer != user_prev_answer:
+    #     st.session_state.user_pic_answer[idx] = user_answer
     container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_pic_answer}>")
 
 
