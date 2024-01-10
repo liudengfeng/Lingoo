@@ -937,9 +937,6 @@ if menu.endswith("闪卡记忆"):
         audio_html = get_audio_html(word, voice_style)
         components.html(audio_html)
 
-    if refresh_btn:
-        reset_flashcard_word()
-
     if add_btn:
         word = st.session_state.flashcard_words[
             st.session_state.current_flashcard_word_index
