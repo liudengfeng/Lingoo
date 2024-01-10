@@ -576,7 +576,8 @@ def get_pic_categories():
     return sorted([d.name for d in pic_dir.iterdir() if d.is_dir()])
 
 
-def gen_pic_tests(category, num):
+@st.cache_data(ttl=timedelta(hours=24))
+def load_pic_tests(category, num):
     pic_qa_path = CURRENT_CWD / "resource/quiz/quiz_image_qa.json"
     pic_qa = {}
     with open(pic_qa_path, "r", encoding="utf-8") as f:
@@ -587,15 +588,14 @@ def gen_pic_tests(category, num):
     data = qa_filtered[:num]
     for d in data:
         random.shuffle(d["options"])
-    st.session_state["pic_tests"] = data
+    return data
 
 
-def pic_word_test_reset():
+def pic_word_test_reset(category, num):
     st.session_state.user_pic_answer = {}
     st.session_state.pic_idx = -1
-    category = st.session_state["pic-category"]
-    num = st.session_state["pic-num"]
-    gen_pic_tests(category, num)
+    data = load_pic_tests(category, num)
+    st.session_state["pic_tests"] = data
 
 
 def on_pic_radio_change(idx):
@@ -603,12 +603,9 @@ def on_pic_radio_change(idx):
     st.session_state.user_pic_answer[idx] = st.session_state["pic_options"]
 
 
-def view_pic_question(container):
-    if st.session_state.pic_idx == -1:
-        return
-    # progress_text = "答题进度"
+def view_pic_question():
+    container = st.container()
     tests = st.session_state.pic_tests
-    n = len(tests)
     idx = st.session_state.pic_idx
 
     question = tests[idx]["question"]
@@ -622,34 +619,28 @@ def view_pic_question(container):
     user_answer = st.session_state.user_pic_answer.get(idx, options[0])
     user_answer_idx = options.index(user_answer)
 
-    cols = container.columns(3)
     container.divider()
     container.markdown(question)
     container.image(image, caption=tests[idx]["iamge_label"], width=400)  # type: ignore
 
-    container.radio(
+    user_answer = container.radio(
         "选项",
         options,
-        # horizontal=True,
         index=user_answer_idx,
         label_visibility="collapsed",
-        # key=f"test_options_{idx}",
-        on_change=on_pic_radio_change,
-        args=(idx,),
         key="pic_options",
     )
     # 保存用户答案
-    st.session_state.user_pic_answer[idx] = st.session_state["pic_options"]
-    # container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_answer}>")
-    # my_bar.progress((idx + 1) / n, text=progress_text)
-    container.divider()
+    st.session_state.user_pic_answer[idx] = user_answer
+    container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_answer}>")
 
 
-def check_pic_answer(container):
+def check_pic_answer():
     if len(st.session_state.user_pic_answer) == 0:
         st.warning("您尚未答题。")
         st.stop()
 
+    container = st.container()
     score = 0
     tests = st.session_state.pic_tests
     n = len(tests)
@@ -1088,7 +1079,6 @@ elif menu.endswith("看图测词"):
         get_pic_categories(),
         format_func=lambda x: PICTURE_CATEGORY_MAPS[x],
         key="pic-category",
-        on_change=pic_word_test_reset,
     )
     pic_num = st.sidebar.number_input(
         "请选择生成的图片测词题目数量",
@@ -1097,21 +1087,22 @@ elif menu.endswith("看图测词"):
         value=10,
         step=1,
         key="pic-num",
-        on_change=pic_word_test_reset,
     )
-    gen_pic_tests(category, pic_num)
     # endregion
     st.subheader(":frame_with_picture: 看图测词", divider="rainbow", anchor=False)
     st.markdown(
         "看图测词是一种记忆单词的游戏，其玩法是给出一个图片，玩家需要根据图片内容来猜测图片所代表的单词。这种游戏可以帮助玩家记忆单词的含义。需要注意的是，这个游戏只针对特定类别，例如只包括某个特定级别的词汇。如果你对某个领域不熟悉，由于需要根据图片来猜测单词，这个游戏的难度相对较大，可能需要投入更多的精力。我们建议只在你感兴趣的范围内尝试这个游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
-    update_and_display_progress(
-        st.session_state.pic_idx + 1, len(st.session_state.pic_tests), st.empty()
-    )
+
+    if st.session_state.pic_idx != -1:
+        update_and_display_progress(
+            st.session_state.pic_idx + 1, len(st.session_state.pic_tests), st.empty()
+        )
+
     pic_word_test_btn_cols = st.columns(10)
 
     # 创建按钮
-    pic_word_test_btn_cols[0].button(
+    prev_pic_btn = pic_word_test_btn_cols[0].button(
         ":leftwards_arrow_with_hook:",
         help="✨ 点击按钮，切换到上一题。",
         on_click=on_prev_pic_btn_click,
@@ -1119,7 +1110,7 @@ elif menu.endswith("看图测词"):
         disabled=st.session_state.pic_idx < 0,
     )
 
-    pic_word_test_btn_cols[1].button(
+    next_pic_btn = pic_word_test_btn_cols[1].button(
         ":arrow_right_hook:",
         help="✨ 点击按钮，切换到下一题。",
         on_click=on_next_pic_btn_click,
@@ -1134,16 +1125,28 @@ elif menu.endswith("看图测词"):
         or len(st.session_state.user_pic_answer) == 0,
         help="✨ 至少完成一道测试题后，才可点击按钮，显示测验得分。",
     )
+    refresh_btn = pic_word_test_btn_cols[3].button(
+        ":arrows_counterclockwise:",
+        key="refresh-pic",
+        help="✨ 点击按钮后，重新开始看图测词。",
+        on_click=pic_word_test_reset,
+        args=(category, pic_num),
+    )
 
-    # TODO:修改
-    pic_test_container = st.container()
+    # # TODO:修改
+    # pic_test_container = st.container()
+
+    if prev_pic_btn:
+        view_pic_question()
+
+    if next_pic_btn:
+        view_pic_question()
 
     if sumbit_pic_btn:
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
             st.toast("您尚未完成测试。")
-        check_pic_answer(pic_test_container)
-    else:
-        view_pic_question(pic_test_container)
+        check_pic_answer()
+
 
 
 # endregion
