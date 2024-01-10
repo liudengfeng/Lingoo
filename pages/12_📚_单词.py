@@ -883,15 +883,15 @@ if menu.endswith("闪卡记忆"):
         key="flashcard-prev",
         help="✨ 点击按钮，切换到上一个单词。",
         on_click=on_prev_btn_click,
-        disabled=st.session_state.current_flashcard_word_index <= 0,
+        disabled=st.session_state.current_flashcard_word_index < 0,
     )
     btn_cols[2].button(
         ":arrow_right_hook:",
         key="flashcard-next",
         help="✨ 点击按钮，切换到下一个单词。",
         on_click=on_next_btn_click,
-        disabled=len(st.session_state.flashcard_words)
-        and st.session_state.current_flashcard_word_index
+        disabled=st.session_state.current_flashcard_word_index == -1
+        or st.session_state.current_flashcard_word_index
         == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
     btn_cols[4].button(
