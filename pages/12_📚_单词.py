@@ -352,7 +352,7 @@ def view_flash_word(container):
 
     # if st.session_state.current_flashcard_word_index == -1:
     #     return
-    st.write(st.session_state.current_flashcard_word_index)
+    # st.write(st.session_state.current_flashcard_word_index)
     word = st.session_state.flashcard_words[
         st.session_state.current_flashcard_word_index
     ]
@@ -954,7 +954,8 @@ if menu.endswith("闪卡记忆"):
         st.toast(f"从个人词库中删除单词：{word}。")
 
     # 显示闪卡单词
-    view_flash_word(container)
+    if st.session_state["current_flashcard_word_index"] != -1:
+        view_flash_word(container)
 
 # endregion
 
