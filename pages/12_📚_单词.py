@@ -245,9 +245,10 @@ if "flashcard_idx" not in st.session_state:
 # region 闪卡辅助函数
 
 
-def reset_flashcard_word():
+def reset_flashcard_word(clear=True):
     # 恢复初始显示状态
-    st.session_state.flashcard_words = []
+    if clear:
+        st.session_state.flashcard_words = []
     st.session_state.flashcard_display_state = "全部"
     st.session_state["flashcard_idx"] = -1
 
@@ -936,16 +937,16 @@ if menu.endswith("闪卡记忆"):
 
     if prev_btn:
         if len(st.session_state.flashcard_words) == 0:
-            st.warning("请先点击右侧`🔄`按钮生成记忆闪卡。")
+            st.warning("请先点击`🔄`按钮生成记忆闪卡。")
             st.stop()
 
     if next_btn:
         if len(st.session_state.flashcard_words) == 0:
-            st.warning("请先点击右侧`🔄`按钮生成记忆闪卡。")
+            st.warning("请先点击`🔄`按钮生成记忆闪卡。")
             st.stop()
 
     if refresh_btn:
-        reset_flashcard_word()
+        reset_flashcard_word(False)
         st.rerun()
 
     if play_btn:
