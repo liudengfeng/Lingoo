@@ -632,7 +632,7 @@ def view_pic_question():
 
     st.divider()
     container.markdown(question)
-    image_element.image(image, caption=tests[idx]["iamge_label"], width=400)  # type: ignore
+    container.image(image, caption=tests[idx]["iamge_label"], width=400)  # type: ignore
 
     user_answer = container.radio(
         "选项",
