@@ -380,11 +380,6 @@ def view_flash_word(container):
     container.divider()
     container.markdown(md)
 
-    # urls = select_word_image_urls(s_word)
-    # cols = container.columns(len(urls))
-    # caption = [f"图片 {i+1}" for i in range(len(urls))]
-    # for i, col in enumerate(cols):
-    #     col.image(urls[i], use_column_width=True, caption=caption[i])
     display_word_images(s_word, container)
     view_pos(container, word_info, word)
 
@@ -464,16 +459,31 @@ def view_puzzle_word():
             st.rerun()
 
 
-def display_puzzle_hint():
+# def display_puzzle_hint():
+#     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+#     definition = get_word_definition(word)
+#     t_word = st.session_state.mini_dict[word].get("translation", "")
+#     msg = f"""提示信息：
+
+# 如果字符中含义空格表明这是一个复合词或者词组
+# - 中译文：{t_word}
+# {definition}
+# """
+#     st.markdown(msg)
+
+
+def display_puzzle_translation():
+    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+    t_word = st.session_state.mini_dict[word].get("translation", "")
+    msg = f"中译文：{t_word}"
+    st.markdown(msg)
+    st.info("如果字符中含义空格表明这是一个复合词或者词组", icon=":information_source:")
+
+
+def display_puzzle_definition():
     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
     definition = get_word_definition(word)
-    t_word = st.session_state.mini_dict[word].get("translation", "")
-    msg = f"""提示信息：
-
-如果字符中含义空格表明这是一个复合词或者词组
-- 中译文：{t_word}
-{definition}
-"""
+    msg = f"{definition}"
     st.markdown(msg)
 
 
@@ -1049,11 +1059,12 @@ elif menu.endswith("拼图游戏"):
         reset_puzzle_word()
 
     if st.session_state.puzzle_idx != -1:
-        display_puzzle_hint()
+        display_puzzle_translation()
         view_puzzle_word()
         handle_puzzle_input()
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
         container = st.container()
+        display_puzzle_definition()
         display_word_images(
             word,
             container,
