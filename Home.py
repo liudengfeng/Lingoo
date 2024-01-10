@@ -72,7 +72,9 @@ login_btn = s_cols[0].button(
     disabled=True,
 )
 
-logout_btn = s_cols[1].button("退出", help="✨ 在公共场所使用本产品时，请在离开前退出登录，以保护您的隐私和安全。")
+logout_btn = s_cols[1].button(
+    "退出", help="✨ 在公共场所使用本产品时，请在离开前退出登录，以保护您的隐私和安全。", disabled=not is_logged_in
+)
 
 
 sidebar_status = st.sidebar.empty()
