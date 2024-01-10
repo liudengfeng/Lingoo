@@ -1145,20 +1145,24 @@ elif menu.endswith("看图测词"):
     options_element = st.empty()
     answer_element = st.empty()
 
-    if prev_pic_btn:
-        view_pic_question(
-            question_element, image_element, options_element, answer_element
-        )
+    # if prev_pic_btn:
+    #     view_pic_question(
+    #         question_element, image_element, options_element, answer_element
+    #     )
 
-    if next_pic_btn:
-        view_pic_question(
-            question_element, image_element, options_element, answer_element
-        )
+    # if next_pic_btn:
+    #     view_pic_question(
+    #         question_element, image_element, options_element, answer_element
+    #     )
 
     if sumbit_pic_btn:
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
             st.toast("您尚未完成测试。")
         check_pic_answer(container)
+    else:
+        view_pic_question(
+            question_element, image_element, options_element, answer_element
+        )
 
 
 # endregion
