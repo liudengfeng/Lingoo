@@ -459,25 +459,12 @@ def view_puzzle_word():
             st.rerun()
 
 
-# def display_puzzle_hint():
-#     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-#     definition = get_word_definition(word)
-#     t_word = st.session_state.mini_dict[word].get("translation", "")
-#     msg = f"""提示信息：
-
-# 如果字符中含义空格表明这是一个复合词或者词组
-# - 中译文：{t_word}
-# {definition}
-# """
-#     st.markdown(msg)
-
-
 def display_puzzle_translation():
     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
     t_word = st.session_state.mini_dict[word].get("translation", "")
     msg = f"中译文：{t_word}"
     st.markdown(msg)
-    st.info("如果字符中含义空格表明这是一个复合词或者词组", icon="ℹ️")
+    st.info("如果字符中包含空格，这可能表示该单词是一个复合词或短语。", icon="ℹ️")
 
 
 def display_puzzle_definition():
@@ -485,6 +472,13 @@ def display_puzzle_definition():
     definition = get_word_definition(word)
     msg = f"{definition}"
     st.markdown(msg)
+
+
+# 前后移动时删除原有文本
+if st.session_state.get("puzzle-prev"):
+    st.session_state["puzzle_answer_value"] = ""
+if st.session_state.get("puzzle-next"):
+    st.session_state["puzzle_answer_value"] = ""
 
 
 def on_prev_puzzle_btn_click():
@@ -505,8 +499,9 @@ def handle_puzzle_input():
         key="puzzle_answer",
         label_visibility="collapsed",
     )
+
     puzzle_score = st.empty()
-    sumbit_cols = st.columns(6)
+    sumbit_cols = st.columns(5)
 
     if sumbit_cols[0].button("重试", help="✨ 恢复初始状态，重新开始。"):
         prepare_puzzle()
