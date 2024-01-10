@@ -1063,9 +1063,9 @@ elif menu.endswith("拼图游戏"):
     )
 
     # 使用默认值初始化
-    if len(st.session_state.puzzle_words) == 0:
-        reset_puzzle_word()
-        st.rerun()
+    # if len(st.session_state.puzzle_words) == 0:
+    #     reset_puzzle_word()
+    #     st.rerun()
 
     if puzzle_prev_btn:
         prepare_puzzle()
