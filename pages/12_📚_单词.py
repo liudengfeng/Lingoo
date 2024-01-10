@@ -914,7 +914,7 @@ if menu.endswith("闪卡记忆"):
         ":heavy_plus_sign:",
         key="flashcard-add",
         help="✨ 将当前单词添加到个人词库",
-        disabled=st.session_state.flashcard_idx == -1,
+        disabled=st.session_state.flashcard_idx == -1 or "个人词库" in word_lib,
     )
     del_btn = btn_cols[6].button(
         ":heavy_minus_sign:",
@@ -1039,7 +1039,7 @@ elif menu.endswith("拼图游戏"):
         ":heavy_plus_sign:",
         key="puzzle-add",
         help="✨ 将当前单词添加到个人词库",
-        disabled=st.session_state.puzzle_idx == -1,
+        disabled=st.session_state.puzzle_idx == -1 or "个人词库" in word_lib,
     )
     del_btn = puzzle_cols[4].button(
         ":heavy_minus_sign:",
@@ -1276,7 +1276,7 @@ elif menu.endswith("词义理解"):
         ":heavy_plus_sign:",
         key="test-word-add",
         help="✨ 将当前单词添加到个人词库",
-        disabled=st.session_state.word_test_idx == -1,
+        disabled=st.session_state.word_test_idx == -1 or "个人词库" in word_lib,
     )
     del_btn = test_btns[5].button(
         ":heavy_minus_sign:",
