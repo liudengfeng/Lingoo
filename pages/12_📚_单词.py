@@ -1158,7 +1158,7 @@ elif menu.endswith("看图测词"):
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
             st.warning("您尚未完成测试。")
         check_pic_answer()
-    else:
+    elif st.session_state.pic_idx != -1:
         view_pic_question()
 
 
