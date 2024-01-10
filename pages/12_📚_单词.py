@@ -1094,6 +1094,10 @@ elif menu.endswith("看图测词"):
         "看图测词是一种记忆单词的游戏，其玩法是给出一个图片，玩家需要根据图片内容来猜测图片所代表的单词。这种游戏可以帮助玩家记忆单词的含义。需要注意的是，这个游戏只针对特定类别，例如只包括某个特定级别的词汇。如果你对某个领域不熟悉，由于需要根据图片来猜测单词，这个游戏的难度相对较大，可能需要投入更多的精力。我们建议只在你感兴趣的范围内尝试这个游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
 
+    if len(st.session_state.pic_tests) == 0:
+        pic_word_test_reset(category, pic_num)
+        st.rerun()
+
     if st.session_state.pic_idx != -1:
         update_and_display_progress(
             st.session_state.pic_idx + 1, len(st.session_state.pic_tests), st.empty()
@@ -1132,10 +1136,6 @@ elif menu.endswith("看图测词"):
         on_click=pic_word_test_reset,
         args=(category, pic_num),
     )
-
-    if len(st.session_state.pic_tests) == 0:
-        pic_word_test_reset(category, pic_num)
-        st.rerun()
 
     if prev_pic_btn:
         view_pic_question()
