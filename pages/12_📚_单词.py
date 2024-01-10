@@ -1091,7 +1091,7 @@ elif menu.endswith("看图测词"):
         on_change=pic_word_test_reset,
     )
     pic_num = st.sidebar.number_input(
-        "请选择图片测词题数量",
+        "请选择生成的图片测词题目数量",
         1,
         20,
         value=10,
