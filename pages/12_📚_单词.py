@@ -784,9 +784,9 @@ with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
 
 
 def on_include_cb_change():
-    st.write("on_include_cb_change",st.session_state["personal-dictionary"])
+    st.write("on_include_cb_change", st.session_state["include-personal-dictionary"])
     # 更新个人词库
-    add_personal_dictionary(st.session_state["personal-dictionary"])
+    add_personal_dictionary(st.session_state["include-personal-dictionary"])
 
 
 if menu.endswith("闪卡记忆"):
