@@ -635,7 +635,7 @@ def view_pic_question():
     )
     container.write(f"idx: {idx} 用户选择答案：{user_answer}")
     # 保存用户答案
-    st.session_state.user_pic_answer[idx] = user_prev_answer
+    # st.session_state.user_pic_answer[idx] = user_prev_answer
     container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_pic_answer}>")
 
 
