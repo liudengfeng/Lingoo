@@ -477,7 +477,7 @@ def display_puzzle_translation():
     t_word = st.session_state.mini_dict[word].get("translation", "")
     msg = f"中译文：{t_word}"
     st.markdown(msg)
-    st.info("如果字符中含义空格表明这是一个复合词或者词组", icon=":information_source:")
+    st.info("如果字符中含义空格表明这是一个复合词或者词组", icon="ℹ️")
 
 
 def display_puzzle_definition():
