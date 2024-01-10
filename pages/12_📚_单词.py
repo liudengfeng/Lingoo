@@ -878,14 +878,14 @@ if menu.endswith("闪卡记忆"):
         key="flashcard-mask",
         help="✨ 点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。",
     )
-    prev_btn = btn_cols[1].button(
+    btn_cols[1].button(
         ":leftwards_arrow_with_hook:",
         key="flashcard-prev",
         help="✨ 点击按钮，切换到上一个单词。",
         on_click=on_prev_btn_click,
         disabled=st.session_state.current_flashcard_word_index <= 0,
     )
-    next_btn = btn_cols[2].button(
+    btn_cols[2].button(
         ":arrow_right_hook:",
         key="flashcard-next",
         help="✨ 点击按钮，切换到下一个单词。",
@@ -894,7 +894,7 @@ if menu.endswith("闪卡记忆"):
         and st.session_state.current_flashcard_word_index
         == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
-    refresh_btn = btn_cols[4].button(
+    btn_cols[4].button(
         ":arrows_counterclockwise:",
         key="flashcard-refresh",
         help="✨ 点击按钮后，将从词库中重新抽取单词。",
