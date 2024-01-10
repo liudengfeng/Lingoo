@@ -929,6 +929,7 @@ if menu.endswith("闪卡记忆"):
             st.session_state.flashcard_display_state = "全部"
 
     if refresh_btn:
+        reset_flashcard_word()
         generate_page_words(word_lib, num_word, "flashcard_words")
 
     if play_btn:
