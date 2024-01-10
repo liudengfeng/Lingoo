@@ -868,13 +868,16 @@ if menu.endswith("闪卡记忆"):
         """✨ 闪卡记忆是一种记忆单词的游戏，其玩法是将单词或短语的中英文对照显示在屏幕上，玩家需要根据提示信息，尽可能多地记住单词或短语的含义。"""
     )
 
-    if st.session_state.current_flashcard_word_index != -1:
-        update_and_display_progress(
-            st.session_state.current_flashcard_word_index + 1,
-            len(st.session_state.flashcard_words),
-            st.empty(),
-            f"\t 当前单词：{st.session_state.flashcard_words[st.session_state.current_flashcard_word_index]}",
-        )
+    update_and_display_progress(
+        st.session_state.current_flashcard_word_index + 1
+        if st.session_state.current_flashcard_word_index != -1
+        else 0,
+        len(st.session_state.flashcard_words)
+        if len(st.session_state.flashcard_words) != 0
+        else 1,
+        st.empty(),
+        f"\t 当前单词：{st.session_state.flashcard_words[st.session_state.current_flashcard_word_index] if st.session_state.current_flashcard_word_index != -1 else ''}",
+    )
 
     btn_cols = st.columns(10)
     container = st.container()
@@ -1015,12 +1018,13 @@ elif menu.endswith("拼图游戏"):
         "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。它是一种非常有效的学习方式，可以帮助我们提高词汇量、拼写能力、思维能力和解决问题能力。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
 
-    if st.session_state.puzzle_idx != -1:
-        update_and_display_progress(
-            st.session_state.puzzle_idx + 1,
-            len(st.session_state.puzzle_words),
-            st.empty(),
-        )
+    update_and_display_progress(
+        st.session_state.puzzle_idx + 1 if st.session_state.puzzle_idx != -1 else 0,
+        len(st.session_state.puzzle_words)
+        if len(st.session_state.puzzle_words) != 0
+        else 1,
+        st.empty(),
+    )
 
     puzzle_cols = st.columns(10)
     puzzle_prev_btn = puzzle_cols[0].button(
@@ -1127,10 +1131,11 @@ elif menu.endswith("看图测词"):
         pic_word_test_reset(category, pic_num)
         st.rerun()
 
-    if st.session_state.pic_idx != -1:
-        update_and_display_progress(
-            st.session_state.pic_idx + 1, len(st.session_state.pic_tests), st.empty()
-        )
+    update_and_display_progress(
+        st.session_state.pic_idx + 1 if st.session_state.pic_idx != -1 else 0,
+        len(st.session_state.pic_tests) if len(st.session_state.pic_tests) != 0 else 1,
+        st.empty(),
+    )
 
     pic_word_test_btn_cols = st.columns(10)
 
@@ -1215,13 +1220,18 @@ elif menu.endswith("词义理解"):
     st.subheader(":pencil: 英语单词理解测试", divider="rainbow", anchor=False)
     st.markdown("""英语单词理解测试是一种测试方式，它提供一个英语单词和四个可能的含义，要求你选择唯一正确的含义。""")
 
-    if st.session_state.word_test_idx != -1:
-        update_and_display_progress(
-            st.session_state.word_test_idx + 1,
-            len(st.session_state.words_for_test),
-            st.empty(),
-            message=st.session_state.words_for_test[st.session_state.word_test_idx],
-        )
+    update_and_display_progress(
+        st.session_state.word_test_idx + 1
+        if st.session_state.word_test_idx != -1
+        else 0,
+        len(st.session_state.words_for_test)
+        if len(st.session_state.words_for_test) != 0
+        else 1,
+        st.empty(),
+        message=st.session_state.words_for_test[st.session_state.word_test_idx]
+        if st.session_state.word_test_idx != -1
+        else "",
+    )
 
     test_btns = st.columns(10)
 
