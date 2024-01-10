@@ -647,7 +647,7 @@ def view_pic_question():
     # 保存用户答案
     if user_answer and user_answer != user_prev_answer:
         st.session_state.user_pic_answer[idx] = user_answer
-    container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_answer}>")
+    container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_pic_answer}>")
 
 
 def check_pic_answer(container):
