@@ -882,6 +882,8 @@ if menu.endswith("闪卡记忆"):
     refresh_btn = btn_cols[0].button(
         ":arrows_counterclockwise:",
         key="flashcard-refresh",
+        on_click=generate_page_words,
+        args=(word_lib, num_word, "flashcard_words"),
         help="✨ 点击按钮，从词库中抽取单词，（重新）开始记忆闪卡游戏。",
     )
     display_status_button = btn_cols[1].button(
@@ -948,7 +950,6 @@ if menu.endswith("闪卡记忆"):
 
     if refresh_btn:
         reset_flashcard_word()
-        generate_page_words(word_lib, num_word, "flashcard_words")
         st.rerun()
 
     if play_btn:
