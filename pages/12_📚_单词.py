@@ -1076,13 +1076,13 @@ elif menu.endswith("拼图游戏"):
 elif menu.endswith("看图测词"):
     # region 边栏
     category = st.sidebar.selectbox(
-        "请选择图片类别",
+        "请选择图片类别以生成对应的看图测词题目",
         get_pic_categories(),
         format_func=lambda x: PICTURE_CATEGORY_MAPS[x],
         key="pic-category",
     )
     pic_num = st.sidebar.number_input(
-        "请选择生成的图片测词题目数量",
+        "请选择您希望生成的看图测词题目的数量",
         1,
         20,
         value=10,
@@ -1092,9 +1092,9 @@ elif menu.endswith("看图测词"):
     # endregion
     st.subheader(":frame_with_picture: 看图测词", divider="rainbow", anchor=False)
     st.markdown(
-        """看图测词是一种记忆单词的游戏，其玩法是给出一个图片，玩家需要根据图片内容来猜测图片所代表的单词。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)
+        """看图测词是一种记忆单词的方法，它通过提供图片，让用户根据图片内容猜测对应的单词。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)
 
-请注意，由于专业领域内的单词可能比较生僻，这个游戏的难度可能会相对较大。如果你对某个领域不熟悉，可能需要投入更多的精力。因此，我们建议你只在你感兴趣或熟悉的领域尝试这个游戏。
+请注意，专业领域的单词可能较为生僻，因此这种方法可能具有一定的难度。如果你对某个领域不熟悉，可能需要投入更多的精力。因此，我们建议你只在你感兴趣或熟悉的领域尝试这种方法。
         """
     )
 
@@ -1131,12 +1131,12 @@ elif menu.endswith("看图测词"):
         key="submit-pic",
         disabled=len(st.session_state.pic_tests) == 0
         or len(st.session_state.user_pic_answer) == 0,
-        help="✨ 至少完成一道测试题后，才可点击按钮，显示测验得分。",
+        help="✨ 只有在完成至少一道测试题后，才能点击按钮查看测验得分。",
     )
     refresh_btn = pic_word_test_btn_cols[3].button(
         ":arrows_counterclockwise:",
         key="refresh-pic",
-        help="✨ 点击按钮后，重新开始看图测词。",
+        help="✨ 点击按钮，重新开始看图测词。",
         on_click=pic_word_test_reset,
         args=(category, pic_num),
     )
@@ -1144,7 +1144,7 @@ elif menu.endswith("看图测词"):
     container = st.container()
     if sumbit_pic_btn:
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
-            st.warning("您尚未完成测试。")
+            st.warning("您尚未完成全部测试题目。")
         check_pic_answer(container)
     elif st.session_state.pic_idx != -1:
         view_pic_question(container)
