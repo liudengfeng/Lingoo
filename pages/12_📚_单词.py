@@ -623,7 +623,7 @@ def view_pic_question(container):
     container.markdown(question)
     container.image(image, caption=tests[idx]["iamge_label"], width=400)  # type: ignore
 
-    user_answer = container.radio(
+    container.radio(
         "选项",
         options,
         index=user_prev_answer_idx,
@@ -632,13 +632,11 @@ def view_pic_question(container):
         on_change=on_pic_radio_change,
         args=(idx,),
     )
-    # container.write(f"idx: {idx} 用户选择答案：{user_answer}")
-    # Note:
-    # 目前唯一正确的方式是 user_prev_answer
+    # 🎀
+    # 兼顾 改变选项和默认二者的影响
     # on_change 选项变化时赋值
     # 没有赋值时使用 user_prev_answer
     st.session_state.user_pic_answer[idx] = user_prev_answer
-    # container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_pic_answer}>")
 
 
 def check_pic_answer(container):
