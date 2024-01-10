@@ -239,6 +239,12 @@ if "current_flashcard_word_index" not in st.session_state:
 # region 闪卡辅助函数
 
 
+def on_include_cb_change():
+    # st.write("on_include_cb_change", st.session_state["include-personal-dictionary"])
+    # 更新个人词库
+    add_personal_dictionary(st.session_state["include-personal-dictionary"])
+
+
 def reset_flashcard_word():
     # 恢复初始显示状态
     st.session_state.flashcard_words = []
@@ -344,8 +350,8 @@ def view_flash_word(container):
         None
     """
 
-    if st.session_state.current_flashcard_word_index == -1:
-        return
+    # if st.session_state.current_flashcard_word_index == -1:
+    #     return
 
     word = st.session_state.flashcard_words[
         st.session_state.current_flashcard_word_index
@@ -821,12 +827,6 @@ with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
 # region 闪卡记忆
 
 
-def on_include_cb_change():
-    st.write("on_include_cb_change", st.session_state["include-personal-dictionary"])
-    # 更新个人词库
-    add_personal_dictionary(st.session_state["include-personal-dictionary"])
-
-
 if menu.endswith("闪卡记忆"):
     # region 词库管理
     # 让用户选择语音风格
@@ -839,7 +839,6 @@ if menu.endswith("闪卡记忆"):
     st.sidebar.checkbox(
         "包含个人词库？",
         key="include-personal-dictionary",
-        value=True,
         on_change=on_include_cb_change,
     )
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
@@ -966,7 +965,7 @@ elif menu.endswith("拼图游戏"):
     include_cb = st.sidebar.checkbox(
         "包含个人词库？",
         key="include-personal-dictionary",
-        value=True,
+        value=False,
         on_change=on_include_cb_change,
     )
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
@@ -1170,7 +1169,7 @@ elif menu.endswith("词义理解"):
     include_cb = st.sidebar.checkbox(
         "包含个人词库？",
         key="include-personal-dictionary",
-        value=True,
+        value=False,
         on_change=on_include_cb_change,
     )
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
