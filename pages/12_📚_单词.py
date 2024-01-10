@@ -868,6 +868,14 @@ if menu.endswith("闪卡记忆"):
         """✨ 闪卡记忆是一种记忆单词的游戏，其玩法是将单词或短语的中英文对照显示在屏幕上，玩家需要根据提示信息，尽可能多地记住单词或短语的含义。"""
     )
 
+    if st.session_state.current_flashcard_word_index != -1:
+        update_and_display_progress(
+            st.session_state.current_flashcard_word_index + 1,
+            len(st.session_state.flashcard_words),
+            st.empty(),
+            f"\t 当前单词：{st.session_state.flashcard_words[st.session_state.current_flashcard_word_index]}",
+        )
+
     btn_cols = st.columns(10)
     container = st.container()
 
@@ -926,17 +934,17 @@ if menu.endswith("闪卡记忆"):
             st.session_state.flashcard_display_state = "中文"
         else:
             st.session_state.flashcard_display_state = "全部"
-    
+
     if prev_btn:
         if len(st.session_state.flashcard_words) == 0:
             st.warning("请先点击右侧`🔄`按钮生成记忆闪卡。")
             st.stop()
-    
+
     if next_btn:
         if len(st.session_state.flashcard_words) == 0:
             st.warning("请先点击右侧`🔄`按钮生成记忆闪卡。")
             st.stop()
-    
+
     if refresh_btn:
         reset_flashcard_word()
         generate_page_words(word_lib, num_word, "flashcard_words")
