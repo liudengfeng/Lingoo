@@ -890,6 +890,9 @@ if menu.endswith("闪卡记忆"):
         ":recycle:",
         key="flashcard-mask",
         help="✨ 点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。",
+        disabled=st.session_state.current_flashcard_word_index == -1
+        or st.session_state.current_flashcard_word_index
+        == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
     prev_btn = btn_cols[2].button(
         ":leftwards_arrow_with_hook:",
@@ -903,7 +906,8 @@ if menu.endswith("闪卡记忆"):
         key="flashcard-next",
         help="✨ 点击按钮，切换到下一个单词。如果按钮不可用，请点击右侧按钮生成记忆闪卡。",
         on_click=on_next_btn_click,
-        disabled=st.session_state.current_flashcard_word_index
+        disabled=st.session_state.current_flashcard_word_index == -1
+        or st.session_state.current_flashcard_word_index
         == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
     play_btn = btn_cols[4].button(
@@ -947,7 +951,8 @@ if menu.endswith("闪卡记忆"):
     if refresh_btn:
         reset_flashcard_word()
         generate_page_words(word_lib, num_word, "flashcard_words")
-        st.rerun()
+        st.session_state.current_flashcard_word_index = 0
+        # st.rerun()
 
     if play_btn:
         word = st.session_state.flashcard_words[
@@ -1043,8 +1048,9 @@ elif menu.endswith("拼图游戏"):
         key="puzzle-next",
         help="✨ 点击按钮，切换到下一单词拼图。",
         on_click=on_next_puzzle_btn_click,
-        disabled=len(st.session_state["puzzle_words"])
-        and st.session_state.puzzle_idx == len(st.session_state["puzzle_words"]) - 1,
+        disabled=st.session_state.puzzle_idx == -1
+        or st.session_state.puzzle_idx
+        == len(st.session_state.puzzle_words) - 1,  # type: ignore
     )
     add_btn = puzzle_cols[3].button(
         ":heavy_plus_sign:",
@@ -1120,10 +1126,6 @@ elif menu.endswith("看图测词"):
         """
     )
 
-    if len(st.session_state.pic_tests) == 0:
-        pic_word_test_reset(category, pic_num)
-        st.rerun()
-
     update_and_display_progress(
         st.session_state.pic_idx + 1 if st.session_state.pic_idx != -1 else 0,
         len(st.session_state.pic_tests) if len(st.session_state.pic_tests) != 0 else 1,
@@ -1147,13 +1149,13 @@ elif menu.endswith("看图测词"):
         key="prev-pic",
         disabled=st.session_state.pic_idx < 0,
     )
-
     next_pic_btn = pic_word_test_btn_cols[2].button(
         ":arrow_right_hook:",
         help="✨ 点击按钮，切换到下一题。",
         on_click=on_next_pic_btn_click,
         key="next-pic",
-        disabled=st.session_state.pic_idx == pic_num - 1,
+        disabled=st.session_state.pic_idx == -1
+        or st.session_state.pic_idx == len(st.session_state.pic_tests) - 1,
     )
     # 答题即可提交检查
     sumbit_pic_btn = pic_word_test_btn_cols[3].button(
@@ -1272,8 +1274,8 @@ elif menu.endswith("词义理解"):
         key="next-test-word",
         help="✨ 点击按钮，切换到下一题。",
         on_click=on_next_test_btn_click,
-        disabled=st.session_state.word_test_idx
-        == len(st.session_state.words_for_test) - 1,
+        disabled=st.session_state.word_test_idx == -1
+        or st.session_state.word_test_idx == len(st.session_state.words_for_test) - 1,
     )
     # 答题即可提交检查
     sumbit_test_btn = test_btns[3].button(
