@@ -1089,7 +1089,9 @@ elif menu.endswith("看图测词"):
     # endregion
     st.subheader(":frame_with_picture: 看图测词", divider="rainbow", anchor=False)
     st.markdown(
-        "看图测词是一种记忆单词的游戏，其玩法是给出一个图片，玩家需要根据图片内容来猜测图片所代表的单词。这种游戏可以帮助玩家记忆单词的含义。需要注意的是，这个游戏只针对特定类别，例如只包括某个特定级别的词汇。如果你对某个领域不熟悉，由于需要根据图片来猜测单词，这个游戏的难度相对较大，可能需要投入更多的精力。我们建议只在你感兴趣的范围内尝试这个游戏。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
+        """看图测词是一种记忆单词的游戏，其玩法是给出一个图片，玩家需要根据图片内容来猜测图片所代表的单词。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)
+请注意，由于专业领域内的单词可能比较生僻，这个游戏的难度可能会相对较大。如果你对某个领域不熟悉，可能需要投入更多的精力。因此，我们建议你只在你感兴趣或熟悉的领域尝试这个游戏。
+        """
     )
 
     if len(st.session_state.pic_tests) == 0:
