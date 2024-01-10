@@ -540,7 +540,7 @@ def on_next_pic_btn_click():
 
 
 PICTURE_CATEGORY_MAPS = {
-    "aninmals": "动物",
+    "animals": "动物",
     "animals-not-mammals": "非哺乳动物",
     "arts-and-crafts": "艺术与手工",
     "at-random": "随机",
