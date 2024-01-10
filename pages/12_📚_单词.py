@@ -207,7 +207,14 @@ def update_pending_words():
             st.session_state.pending_add_words, st.session_state.pending_del_words
         )
         st.session_state.last_update_time = current_time
-        st.write(current_time)
+
+
+def display_word_images(word, container):
+    urls = select_word_image_urls(word)
+    cols = container.columns(len(urls))
+    caption = [f"图片 {i+1}" for i in range(len(urls))]
+    for i, col in enumerate(cols):
+        col.image(urls[i], use_column_width=True, caption=caption[i])
 
 
 # endregion
@@ -373,12 +380,12 @@ def view_flash_word(container):
     container.divider()
     container.markdown(md)
 
-    urls = select_word_image_urls(s_word)
-    cols = container.columns(len(urls))
-    caption = [f"图片 {i+1}" for i in range(len(urls))]
-    for i, col in enumerate(cols):
-        col.image(urls[i], use_column_width=True, caption=caption[i])
-
+    # urls = select_word_image_urls(s_word)
+    # cols = container.columns(len(urls))
+    # caption = [f"图片 {i+1}" for i in range(len(urls))]
+    # for i, col in enumerate(cols):
+    #     col.image(urls[i], use_column_width=True, caption=caption[i])
+    display_word_images(s_word, container)
     view_pos(container, word_info, word)
 
 
@@ -942,9 +949,6 @@ if menu.endswith("闪卡记忆"):
         st.session_state.pending_del_words.add(word)
         st.toast(f"从个人词库中删除单词：{word}。")
 
-    # 更新待处理的单词
-    update_pending_words()
-
     # 显示闪卡单词
     view_flash_word(container)
 
@@ -1047,15 +1051,13 @@ elif menu.endswith("拼图游戏"):
     if st.session_state.puzzle_idx != -1:
         display_puzzle_hint()
         view_puzzle_word()
-
-        word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-        urls = select_word_image_urls(word)
-        cols = st.columns(len(urls))
-        caption = [f"图片 {i+1}" for i in range(len(urls))]
-        for i, col in enumerate(cols):
-            col.image(urls[i], use_column_width=True, caption=caption[i])
-
         handle_puzzle_input()
+        word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+        container = st.container()
+        display_word_images(
+            word,
+            container,
+        )
 
     if puzzle_add_btn:
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
@@ -1066,9 +1068,6 @@ elif menu.endswith("拼图游戏"):
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
         st.session_state.pending_del_words.add(word)
         st.toast(f"从个人词库中删除单词：{word}。")
-
-    # 更新待处理的单词
-    update_pending_words()
 
 # endregion
 
@@ -1396,3 +1395,7 @@ elif menu.endswith("词义理解"):
 #         st.rerun()
 
 # # endregion
+
+
+# 更新待处理的单词
+update_pending_words()
