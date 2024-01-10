@@ -603,8 +603,7 @@ def on_pic_radio_change(idx):
     st.session_state.user_pic_answer[idx] = st.session_state["pic_options"]
 
 
-def view_pic_question():
-    container = st.container()
+def view_pic_question(container):
     tests = st.session_state.pic_tests
     idx = st.session_state.pic_idx
 
@@ -635,12 +634,11 @@ def view_pic_question():
     container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_answer}>")
 
 
-def check_pic_answer():
+def check_pic_answer(container):
     if len(st.session_state.user_pic_answer) == 0:
         st.warning("您尚未答题。")
         st.stop()
-
-    container = st.container()
+    container.empty()
     score = 0
     tests = st.session_state.pic_tests
     n = len(tests)
@@ -1137,16 +1135,18 @@ elif menu.endswith("看图测词"):
         args=(category, pic_num),
     )
 
+    container = st.container()
+
     if prev_pic_btn:
-        view_pic_question()
+        view_pic_question(container)
 
     if next_pic_btn:
-        view_pic_question()
+        view_pic_question(container)
 
     if sumbit_pic_btn:
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
             st.toast("您尚未完成测试。")
-        check_pic_answer()
+        check_pic_answer(container)
 
 
 # endregion
