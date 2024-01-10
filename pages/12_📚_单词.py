@@ -603,7 +603,7 @@ def on_pic_radio_change(idx):
     st.session_state.user_pic_answer[idx] = st.session_state["pic_options"]
 
 
-def view_pic_question(container):
+def view_pic_question(question_element, image_element, options_element, answer_element):
     tests = st.session_state.pic_tests
     idx = st.session_state.pic_idx
 
@@ -615,23 +615,23 @@ def view_pic_question(container):
 
     image = PIL.Image.open(tests[idx]["image_fp"])  # type: ignore
 
-    user_answer = st.session_state.user_pic_answer.get(idx, options[0])
-    user_answer_idx = options.index(user_answer)
+    user_prev_answer = st.session_state.user_pic_answer.get(idx, options[0])
+    user_prev_answer_idx = options.index(user_prev_answer)
 
-    container.divider()
-    container.markdown(question)
-    container.image(image, caption=tests[idx]["iamge_label"], width=400)  # type: ignore
+    st.divider()
+    question_element.markdown(question)
+    image_element.image(image, caption=tests[idx]["iamge_label"], width=400)  # type: ignore
 
-    user_answer = container.radio(
+    user_answer = options_element.radio(
         "选项",
         options,
-        index=user_answer_idx,
+        index=user_prev_answer_idx,
         label_visibility="collapsed",
         key="pic_options",
     )
     # 保存用户答案
     st.session_state.user_pic_answer[idx] = user_answer if user_answer else options[0]
-    container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_answer}>")
+    answer_element.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_answer}>")
 
 
 def check_pic_answer(container):
@@ -1138,13 +1138,22 @@ elif menu.endswith("看图测词"):
         args=(category, pic_num),
     )
 
-    container = st.container()
+    # container = st.container()
+
+    question_element = st.empty()
+    image_element = st.empty()
+    options_element = st.empty()
+    answer_element = st.empty()
 
     if prev_pic_btn:
-        view_pic_question(container)
+        view_pic_question(
+            question_element, image_element, options_element, answer_element
+        )
 
     if next_pic_btn:
-        view_pic_question(container)
+        view_pic_question(
+            question_element, image_element, options_element, answer_element
+        )
 
     if sumbit_pic_btn:
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
