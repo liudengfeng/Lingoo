@@ -877,20 +877,19 @@ if menu.endswith("闪卡记忆"):
         key="flashcard-mask",
         help="✨ 点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。",
     )
-    btn_cols[1].button(
+    prev_btn = btn_cols[1].button(
         ":leftwards_arrow_with_hook:",
         key="flashcard-prev",
         help="✨ 点击按钮，切换到上一个单词。",
         on_click=on_prev_btn_click,
         disabled=st.session_state.current_flashcard_word_index < 0,
     )
-    btn_cols[2].button(
+    next_btn = btn_cols[2].button(
         ":arrow_right_hook:",
         key="flashcard-next",
         help="✨ 点击按钮，切换到下一个单词。如果按钮不可用，请点击右侧按钮生成记忆闪卡。",
         on_click=on_next_btn_click,
-        disabled=st.session_state.current_flashcard_word_index == -1
-        or st.session_state.current_flashcard_word_index
+        disabled=st.session_state.current_flashcard_word_index
         == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
     refresh_btn = btn_cols[4].button(
@@ -927,7 +926,17 @@ if menu.endswith("闪卡记忆"):
             st.session_state.flashcard_display_state = "中文"
         else:
             st.session_state.flashcard_display_state = "全部"
-
+    
+    if prev_btn:
+        if len(st.session_state.flashcard_words) == 0:
+            st.warning("请先点击右侧`🔄`按钮生成记忆闪卡。")
+            st.stop()
+    
+    if next_btn:
+        if len(st.session_state.flashcard_words) == 0:
+            st.warning("请先点击右侧`🔄`按钮生成记忆闪卡。")
+            st.stop()
+    
     if refresh_btn:
         reset_flashcard_word()
         generate_page_words(word_lib, num_word, "flashcard_words")
