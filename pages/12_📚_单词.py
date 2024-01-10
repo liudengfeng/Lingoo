@@ -604,8 +604,7 @@ def on_pic_radio_change(idx):
     st.session_state.user_pic_answer[idx] = current
 
 
-def view_pic_question():
-    container = st.container()
+def view_pic_question(container):
     tests = st.session_state.pic_tests
     idx = st.session_state.pic_idx
 
@@ -633,14 +632,13 @@ def view_pic_question():
         on_change=on_pic_radio_change,
         args=(idx,),
     )
-    container.write(f"idx: {idx} 用户选择答案：{user_answer}")
+    # container.write(f"idx: {idx} 用户选择答案：{user_answer}")
     # Note:
     # 目前唯一正确的方式是 user_prev_answer
     # on_change 选项变化时赋值
     # 没有赋值时使用 user_prev_answer
-    # 保存用户答案
     st.session_state.user_pic_answer[idx] = user_prev_answer
-    container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_pic_answer}>")
+    # container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_pic_answer}>")
 
 
 def check_pic_answer(container):
@@ -1147,12 +1145,13 @@ elif menu.endswith("看图测词"):
         args=(category, pic_num),
     )
 
+    container = st.container()
     if sumbit_pic_btn:
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
             st.warning("您尚未完成测试。")
-        check_pic_answer()
+        check_pic_answer(container)
     elif st.session_state.pic_idx != -1:
-        view_pic_question()
+        view_pic_question(container)
 
 
 # endregion
