@@ -474,21 +474,21 @@ def display_puzzle_definition():
     st.markdown(msg)
 
 
-# 前后移动时删除原有文本
-if st.session_state.get("puzzle-prev"):
-    st.session_state["puzzle_answer_value"] = ""
-if st.session_state.get("puzzle-next"):
-    st.session_state["puzzle_answer_value"] = ""
+# # 前后移动时删除原有文本
+# if st.session_state.get("puzzle-prev"):
+#     st.session_state["puzzle_answer_value"] = ""
+# if st.session_state.get("puzzle-next"):
+#     st.session_state["puzzle_answer_value"] = ""
 
 
 def on_prev_puzzle_btn_click():
     st.session_state["puzzle_idx"] -= 1
-    st.session_state.puzzle_answer_value = ""
+    # st.session_state.puzzle_answer_value = ""
 
 
 def on_next_puzzle_btn_click():
     st.session_state["puzzle_idx"] += 1
-    st.session_state.puzzle_answer_value = ""
+    # st.session_state.puzzle_answer_value = ""
 
 
 def handle_puzzle_input():
