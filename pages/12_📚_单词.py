@@ -1217,7 +1217,7 @@ elif menu.endswith("单词测验"):
 
     if refresh_btn:
         reset_test_words()
-        # st.rerun()
+        st.rerun()
 
 # endregion
 
