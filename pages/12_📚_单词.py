@@ -940,13 +940,11 @@ if menu.endswith("闪卡记忆"):
         if len(st.session_state.flashcard_words) == 0:
             st.warning("请先点击右侧`🔄`按钮生成记忆闪卡。")
             st.stop()
-        view_flash_word(st.container())
 
     if next_btn:
         if len(st.session_state.flashcard_words) == 0:
             st.warning("请先点击右侧`🔄`按钮生成记忆闪卡。")
             st.stop()
-        view_flash_word(st.container())
 
     if refresh_btn:
         reset_flashcard_word()
@@ -969,7 +967,8 @@ if menu.endswith("闪卡记忆"):
         st.session_state.pending_del_words.add(word)
         st.toast(f"从个人词库中删除单词：{word}。")
 
-
+    if st.session_state.flashcard_idx != -1:
+        view_flash_word(st.container())
 # endregion
 
 # region 单词拼图
