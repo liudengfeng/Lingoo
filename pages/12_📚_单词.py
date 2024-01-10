@@ -903,7 +903,7 @@ if menu.endswith("闪卡记忆"):
     refresh_btn = btn_cols[4].button(
         ":arrows_counterclockwise:",
         key="flashcard-refresh",
-        help="✨ 点击按钮，从词库中重新生成记忆闪卡。",
+        help="✨ 点击按钮，从词库中生成记忆闪卡。",
         # on_click=reset_flashcard_word,
         # args=(word_lib, num_word, "flashcard_words"),
     )
