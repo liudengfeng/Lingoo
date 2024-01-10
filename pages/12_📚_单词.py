@@ -600,10 +600,22 @@ def pic_word_test_reset(category, num):
 
 def on_pic_radio_change(idx):
     # 保存用户答案
-    st.session_state.user_pic_answer[idx] = st.session_state["pic_options"]
+    current = st.session_state["pic_options"]
+    st.session_state.user_pic_answer[idx] = current
+    # if current:
+    #     st.session_state.user_pic_answer[idx] = current
+    # else:
+    #     prev = st.session_state.user_pic_answer.get(idx, "")
+    #     if prev:
+    #         st.session_state["pic_options"] = prev
+    #     else:
+    #         st.session_state["pic_options"] = st.session_state.pic_tests[idx][
+    #             "options"
+    #         ][0]
 
 
-def view_pic_question(question_element, image_element, options_element, answer_element):
+def view_pic_question():
+    container = st.container()
     tests = st.session_state.pic_tests
     idx = st.session_state.pic_idx
 
@@ -619,19 +631,23 @@ def view_pic_question(question_element, image_element, options_element, answer_e
     user_prev_answer_idx = options.index(user_prev_answer)
 
     st.divider()
-    question_element.markdown(question)
+    container.markdown(question)
     image_element.image(image, caption=tests[idx]["iamge_label"], width=400)  # type: ignore
 
-    user_answer = options_element.radio(
+    user_answer = container.radio(
         "选项",
         options,
         index=user_prev_answer_idx,
         label_visibility="collapsed",
         key="pic_options",
+        on_change=on_pic_radio_change,
+        args=(idx,),
     )
+    container.write(f"idx: {idx} 用户选择答案：{user_answer}")
     # 保存用户答案
-    st.session_state.user_pic_answer[idx] = user_answer if user_answer else options[0]
-    answer_element.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_answer}>")
+    if user_answer and user_answer != user_prev_answer:
+        st.session_state.user_pic_answer[idx] = user_answer
+    container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_answer}>")
 
 
 def check_pic_answer(container):
@@ -1138,31 +1154,12 @@ elif menu.endswith("看图测词"):
         args=(category, pic_num),
     )
 
-    # container = st.container()
-
-    question_element = st.empty()
-    image_element = st.empty()
-    options_element = st.empty()
-    answer_element = st.empty()
-
-    # if prev_pic_btn:
-    #     view_pic_question(
-    #         question_element, image_element, options_element, answer_element
-    #     )
-
-    # if next_pic_btn:
-    #     view_pic_question(
-    #         question_element, image_element, options_element, answer_element
-    #     )
-
     if sumbit_pic_btn:
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
-            st.toast("您尚未完成测试。")
-        check_pic_answer(container)
+            st.warning("您尚未完成测试。")
+        check_pic_answer()
     else:
-        view_pic_question(
-            question_element, image_element, options_element, answer_element
-        )
+        view_pic_question()
 
 
 # endregion
