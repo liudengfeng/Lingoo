@@ -881,12 +881,12 @@ if menu.endswith("闪卡记忆"):
         key="flashcard-refresh",
         on_click=generate_page_words,
         args=(word_lib, num_word, "flashcard_words"),
-        help="✨ 点击按钮，从词库中抽取单词，（重新）开始记忆闪卡游戏。",
+        help="✨ 点击按钮，从词库中抽取单词，开始或重新开始记忆闪卡游戏。",
     )
     display_status_button = btn_cols[1].button(
         ":recycle:",
         key="flashcard-mask",
-        help="✨ 点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。",
+        help="✨ 点击按钮可以在中英对照、只显示英文和只显示中文三种显示状态之间切换。初始状态为中英对照。",
     )
     prev_btn = btn_cols[2].button(
         ":leftwards_arrow_with_hook:",
@@ -1015,7 +1015,7 @@ elif menu.endswith("拼图游戏"):
     refresh_btn = puzzle_cols[0].button(
         ":arrows_counterclockwise:",
         key="puzzle-refresh",
-        help="✨ 点击按钮，从词库抽取单词，（重新）开始单词拼图游戏。",
+        help="✨ 点击按钮，将从词库中抽取单词，开始或重新开始单词拼图游戏。",
         on_click=generate_page_words,
         args=(word_lib, num_word, "puzzle_words"),
     )
@@ -1121,7 +1121,7 @@ elif menu.endswith("看图猜词"):
     refresh_btn = pic_word_test_btn_cols[0].button(
         ":arrows_counterclockwise:",
         key="refresh-pic",
-        help="✨ 点击按钮，从词库中抽取单词，（重新）开始看图测词。",
+        help="✨ 点击按钮，将从题库中抽取测试题，开始或重新开始看图测词游戏。",
         on_click=pic_word_test_reset,
         args=(category, pic_num),
     )
@@ -1245,7 +1245,7 @@ elif menu.endswith("词义理解"):
     refresh_btn = test_btns[0].button(
         ":arrows_counterclockwise:",
         key="test-word-refresh",
-        help="✨ 点击按钮后，从词库中抽取单词，（重新）开始单词理解测试。",
+        help="✨ 点击按钮，将从词库中抽取单词，开始或重新开始单词理解测试。",
         on_click=generate_page_words,
         args=(word_lib, test_num, "words_for_test"),
     )
