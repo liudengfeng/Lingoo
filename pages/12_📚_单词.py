@@ -237,8 +237,8 @@ if "flashcard_display_state" not in st.session_state:
     st.session_state["flashcard_display_state"] = "全部"
 
 # 初始化单词的索引
-if "current_flashcard_word_index" not in st.session_state:
-    st.session_state["current_flashcard_word_index"] = -1
+if "flashcard_idx" not in st.session_state:
+    st.session_state["flashcard_idx"] = -1
 
 # endregion
 
@@ -249,15 +249,15 @@ def reset_flashcard_word():
     # 恢复初始显示状态
     st.session_state.flashcard_words = []
     st.session_state.flashcard_display_state = "全部"
-    st.session_state["current_flashcard_word_index"] = -1
+    st.session_state["flashcard_idx"] = -1
 
 
 def on_prev_btn_click():
-    st.session_state["current_flashcard_word_index"] -= 1
+    st.session_state["flashcard_idx"] -= 1
 
 
 def on_next_btn_click():
-    st.session_state["current_flashcard_word_index"] += 1
+    st.session_state["flashcard_idx"] += 1
 
 
 template = """
@@ -350,12 +350,10 @@ def view_flash_word(container):
         None
     """
 
-    # if st.session_state.current_flashcard_word_index == -1:
+    # if st.session_state.flashcard_idx == -1:
     #     return
-    # st.write(st.session_state.current_flashcard_word_index)
-    word = st.session_state.flashcard_words[
-        st.session_state.current_flashcard_word_index
-    ]
+    # st.write(st.session_state.flashcard_idx)
+    word = st.session_state.flashcard_words[st.session_state.flashcard_idx]
     if word not in st.session_state.flashcard_word_info:
         st.session_state.flashcard_word_info[word] = get_word_info(word)
 
@@ -869,14 +867,14 @@ if menu.endswith("闪卡记忆"):
     )
 
     update_and_display_progress(
-        st.session_state.current_flashcard_word_index + 1
-        if st.session_state.current_flashcard_word_index != -1
+        st.session_state.flashcard_idx + 1
+        if st.session_state.flashcard_idx != -1
         else 0,
         len(st.session_state.flashcard_words)
         if len(st.session_state.flashcard_words) != 0
         else 1,
         st.empty(),
-        f"\t 当前单词：{st.session_state.flashcard_words[st.session_state.current_flashcard_word_index] if st.session_state.current_flashcard_word_index != -1 else ''}",
+        f"\t 当前单词：{st.session_state.flashcard_words[st.session_state.flashcard_idx] if st.session_state.flashcard_idx != -1 else ''}",
     )
 
     btn_cols = st.columns(10)
@@ -890,8 +888,8 @@ if menu.endswith("闪卡记忆"):
         ":recycle:",
         key="flashcard-mask",
         help="✨ 点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。",
-        disabled=st.session_state.current_flashcard_word_index == -1
-        or st.session_state.current_flashcard_word_index
+        disabled=st.session_state.flashcard_idx == -1
+        or st.session_state.flashcard_idx
         == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
     prev_btn = btn_cols[2].button(
@@ -899,34 +897,35 @@ if menu.endswith("闪卡记忆"):
         key="flashcard-prev",
         help="✨ 点击按钮，切换到上一个单词。",
         on_click=on_prev_btn_click,
-        disabled=st.session_state.current_flashcard_word_index < 0,
+        disabled=st.session_state.flashcard_idx < 0,
     )
     next_btn = btn_cols[3].button(
         ":arrow_right_hook:",
         key="flashcard-next",
         help="✨ 点击按钮，切换到下一个单词。如果按钮不可用，请点击右侧按钮生成记忆闪卡。",
         on_click=on_next_btn_click,
-        disabled=st.session_state.current_flashcard_word_index == -1
-        or st.session_state.current_flashcard_word_index
+        disabled=st.session_state.flashcard_idx == -1
+        or len(st.session_state.flashcard_words) == 0
+        or st.session_state.flashcard_idx
         == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
     play_btn = btn_cols[4].button(
         ":sound:",
         key="flashcard-play",
         help="✨ 聆听单词发音",
-        disabled=st.session_state.current_flashcard_word_index == -1,
+        disabled=st.session_state.flashcard_idx == -1,
     )
     add_btn = btn_cols[5].button(
         ":heavy_plus_sign:",
         key="flashcard-add",
         help="✨ 将当前单词添加到个人词库",
-        disabled=st.session_state.current_flashcard_word_index == -1,
+        disabled=st.session_state.flashcard_idx == -1,
     )
     del_btn = btn_cols[6].button(
         ":heavy_minus_sign:",
         key="flashcard-del",
         help="✨ 将当前单词从个人词库中删除",
-        disabled=st.session_state.current_flashcard_word_index == -1,
+        disabled=st.session_state.flashcard_idx == -1,
     )
 
     # 创建按钮
@@ -953,28 +952,21 @@ if menu.endswith("闪卡记忆"):
     if refresh_btn:
         reset_flashcard_word()
         generate_page_words(word_lib, num_word, "flashcard_words")
-        st.session_state.current_flashcard_word_index = 0
-        # st.rerun()
+        st.rerun()
 
     if play_btn:
-        word = st.session_state.flashcard_words[
-            st.session_state.current_flashcard_word_index
-        ]
+        word = st.session_state.flashcard_words[st.session_state.flashcard_idx]
         # 使用会话缓存，避免重复请求
         audio_html = get_audio_html(word, voice_style)
         components.html(audio_html)
 
     if add_btn:
-        word = st.session_state.flashcard_words[
-            st.session_state.current_flashcard_word_index
-        ]
+        word = st.session_state.flashcard_words[st.session_state.flashcard_idx]
         st.session_state.pending_add_words.add(word)
         st.toast(f"添加单词：{word} 到个人词库。")
 
     if del_btn:
-        word = st.session_state.flashcard_words[
-            st.session_state.current_flashcard_word_index
-        ]
+        word = st.session_state.flashcard_words[st.session_state.flashcard_idx]
         st.session_state.pending_del_words.add(word)
         st.toast(f"从个人词库中删除单词：{word}。")
 
@@ -1287,13 +1279,13 @@ elif menu.endswith("词义理解"):
         ":heavy_plus_sign:",
         key="test-word-add",
         help="✨ 将当前单词添加到个人词库",
-        disabled=st.session_state.current_flashcard_word_index == -1,
+        disabled=st.session_state.flashcard_idx == -1,
     )
     del_btn = test_btns[5].button(
         ":heavy_minus_sign:",
         key="test-word-del",
         help="✨ 将当前单词从个人词库中删除",
-        disabled=st.session_state.current_flashcard_word_index == -1,
+        disabled=st.session_state.flashcard_idx == -1,
     )
 
     if prev_test_btn:
