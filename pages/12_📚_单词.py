@@ -944,7 +944,7 @@ if menu.endswith("闪卡记忆"):
 
     if refresh_btn:
         reset_flashcard_word(False)
-        # st.rerun()
+        st.rerun()
 
     if play_btn:
         word = st.session_state.flashcard_words[st.session_state.flashcard_idx]
