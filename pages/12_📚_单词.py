@@ -640,8 +640,8 @@ def view_pic_question():
         index=user_prev_answer_idx,
         label_visibility="collapsed",
         key="pic_options",
-        # on_change=on_pic_radio_change,
-        # args=(idx,),
+        on_change=on_pic_radio_change,
+        args=(idx,),
     )
     container.write(f"idx: {idx} 用户选择答案：{user_answer}")
     # 保存用户答案
