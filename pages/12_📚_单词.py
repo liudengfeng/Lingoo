@@ -904,8 +904,7 @@ if menu.endswith("闪卡记忆"):
         key="flashcard-next",
         help="✨ 点击按钮，切换到下一个单词。如果按钮不可用，请点击右侧按钮生成记忆闪卡。",
         on_click=on_next_btn_click,
-        disabled=st.session_state.flashcard_idx == -1
-        or len(st.session_state.flashcard_words) == 0
+        disabled=len(st.session_state.flashcard_words) == 0
         or st.session_state.flashcard_idx
         == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
