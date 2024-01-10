@@ -1133,8 +1133,9 @@ elif menu.endswith("看图测词"):
         args=(category, pic_num),
     )
 
-    # # TODO:修改
-    # pic_test_container = st.container()
+    if len(st.session_state.pic_tests) == 0:
+        pic_word_test_reset(category, pic_num)
+        st.rerun()
 
     if prev_pic_btn:
         view_pic_question()
@@ -1146,7 +1147,6 @@ elif menu.endswith("看图测词"):
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
             st.toast("您尚未完成测试。")
         check_pic_answer()
-
 
 
 # endregion
