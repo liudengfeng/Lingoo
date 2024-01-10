@@ -902,7 +902,7 @@ if menu.endswith("闪卡记忆"):
     next_btn = btn_cols[3].button(
         ":arrow_right_hook:",
         key="flashcard-next",
-        help="✨ 点击按钮，切换到下一个单词。如果按钮不可用，请点击右侧按钮生成记忆闪卡。",
+        help="✨ 点击按钮，切换到下一个单词。",
         on_click=on_next_btn_click,
         disabled=len(st.session_state.flashcard_words) == 0
         or st.session_state.flashcard_idx
@@ -1024,19 +1024,19 @@ elif menu.endswith("拼图游戏"):
         on_click=generate_page_words,
         args=(word_lib, num_word, "puzzle_words"),
     )
-    puzzle_prev_btn = puzzle_cols[1].button(
+    prev_btn = puzzle_cols[1].button(
         ":leftwards_arrow_with_hook:",
         key="puzzle-prev",
         help="✨ 点击按钮，切换到上一单词拼图。",
         on_click=on_prev_puzzle_btn_click,
         disabled=st.session_state.puzzle_idx < 0,
     )
-    puzzle_next_btn = puzzle_cols[2].button(
+    next_btn = puzzle_cols[2].button(
         ":arrow_right_hook:",
         key="puzzle-next",
         help="✨ 点击按钮，切换到下一单词拼图。",
         on_click=on_next_puzzle_btn_click,
-        disabled=st.session_state.puzzle_idx == -1
+        disabled=len(st.session_state.puzzle_words) == 0
         or st.session_state.puzzle_idx
         == len(st.session_state.puzzle_words) - 1,  # type: ignore
     )
@@ -1053,10 +1053,10 @@ elif menu.endswith("拼图游戏"):
         disabled=st.session_state.puzzle_idx == -1,
     )
 
-    if puzzle_prev_btn:
+    if prev_btn:
         prepare_puzzle()
 
-    if puzzle_next_btn:
+    if next_btn:
         prepare_puzzle()
 
     if refresh_btn:
@@ -1137,12 +1137,12 @@ elif menu.endswith("看图测词"):
         key="prev-pic",
         disabled=st.session_state.pic_idx < 0,
     )
-    next_pic_btn = pic_word_test_btn_cols[2].button(
+    next_btn = pic_word_test_btn_cols[2].button(
         ":arrow_right_hook:",
         help="✨ 点击按钮，切换到下一题。",
         on_click=on_next_pic_btn_click,
         key="next-pic",
-        disabled=st.session_state.pic_idx == -1
+        disabled=len(st.session_state.pic_tests) == 0
         or st.session_state.pic_idx == len(st.session_state.pic_tests) - 1,
     )
     # 答题即可提交检查
@@ -1262,8 +1262,8 @@ elif menu.endswith("词义理解"):
         key="next-test-word",
         help="✨ 点击按钮，切换到下一题。",
         on_click=on_next_test_btn_click,
-        disabled=st.session_state.word_test_idx == -1
-        or st.session_state.word_test_idx == len(st.session_state.words_for_test) - 1,
+        disabled=len(st.session_state.word_tests) == 0
+        or st.session_state.word_test_idx == len(st.session_state.word_tests) - 1,
     )
     # 答题即可提交检查
     sumbit_test_btn = test_btns[3].button(
@@ -1277,7 +1277,7 @@ elif menu.endswith("词义理解"):
         ":heavy_plus_sign:",
         key="test-word-add",
         help="✨ 将当前单词添加到个人词库",
-        disabled=st.session_state.flashcard_idx == -1,
+        disabled=st.session_state.word_test_idx == -1,
     )
     del_btn = test_btns[5].button(
         ":heavy_minus_sign:",
