@@ -888,7 +888,7 @@ if menu.endswith("闪卡记忆"):
     btn_cols[2].button(
         ":arrow_right_hook:",
         key="flashcard-next",
-        help="✨ 点击按钮，切换到下一个单词。",
+        help="✨ 点击按钮，切换到下一个单词。如果按钮不可用，请点击右侧按钮生成记忆闪卡。",
         on_click=on_next_btn_click,
         disabled=st.session_state.current_flashcard_word_index == -1
         or st.session_state.current_flashcard_word_index
@@ -897,7 +897,7 @@ if menu.endswith("闪卡记忆"):
     btn_cols[4].button(
         ":arrows_counterclockwise:",
         key="flashcard-refresh",
-        help="✨ 点击按钮后，将从词库中重新抽取单词。",
+        help="✨ 点击按钮，从词库中重新生成记忆闪卡。",
         on_click=reset_flashcard_word,
         args=(word_lib, num_word, "flashcard_words"),
     )
