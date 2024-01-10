@@ -352,7 +352,7 @@ def view_flash_word(container):
 
     # if st.session_state.current_flashcard_word_index == -1:
     #     return
-
+    st.write(st.session_state.current_flashcard_word_index)
     word = st.session_state.flashcard_words[
         st.session_state.current_flashcard_word_index
     ]
@@ -837,7 +837,7 @@ if menu.endswith("闪卡记忆"):
     voice_style = voice_style_options[style][0]
     st.sidebar.info(f"语音风格：{voice_style[0]}({voice_style[1]})")
     st.sidebar.checkbox(
-        "包含个人词库？",
+        "是否包含个人词库？",
         key="include-personal-dictionary",
         on_change=on_include_cb_change,
     )
@@ -963,7 +963,7 @@ if menu.endswith("闪卡记忆"):
 elif menu.endswith("拼图游戏"):
     # region 边栏
     include_cb = st.sidebar.checkbox(
-        "包含个人词库？",
+        "是否包含个人词库？",
         key="include-personal-dictionary",
         value=False,
         on_change=on_include_cb_change,
@@ -1167,7 +1167,7 @@ elif menu.endswith("词义理解"):
         key="test-word-level",
     )
     include_cb = st.sidebar.checkbox(
-        "包含个人词库？",
+        "是否包含个人词库？",
         key="include-personal-dictionary",
         value=False,
         on_change=on_include_cb_change,
