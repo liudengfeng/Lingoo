@@ -49,7 +49,7 @@ sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
 check_and_force_logout(sidebar_status)
 
-menu_names = ["闪卡记忆", "拼图游戏", "看图测词", "单词测验", "词库管理"]
+menu_names = ["闪卡记忆", "拼图游戏", "看图测词", "词义理解", "词库管理"]
 menu_emoji = [
     "📚",
     "🧩",
@@ -782,6 +782,13 @@ with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
 
 # region 闪卡记忆
 
+
+def on_include_cb_change():
+    st.write("on_include_cb_change",st.session_state["personal-dictionary"])
+    # 更新个人词库
+    add_personal_dictionary(st.session_state["personal-dictionary"])
+
+
 if menu.endswith("闪卡记忆"):
     # region 词库管理
     # 让用户选择语音风格
@@ -791,13 +798,14 @@ if menu.endswith("闪卡记忆"):
     # 固定语音风格
     voice_style = voice_style_options[style][0]
     st.sidebar.info(f"语音风格：{voice_style[0]}({voice_style[1]})")
-    include_cb = st.sidebar.checkbox(
+    st.sidebar.checkbox(
         "包含个人词库？",
-        key="flashcard-personal-dictionary",
+        key="include-personal-dictionary",
         value=True,
+        on_change=on_include_cb_change,
     )
     # 添加或删减个人词库
-    add_personal_dictionary(include_cb)
+    # add_personal_dictionary(include_cb)
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
     word_lib = st.sidebar.selectbox(
         "词库",
@@ -924,11 +932,12 @@ elif menu.endswith("拼图游戏"):
     # region 边栏
     include_cb = st.sidebar.checkbox(
         "包含个人词库？",
-        key="puzzle-personal-dictionary",
+        key="include-personal-dictionary",
         value=True,
+        on_change=on_include_cb_change,
     )
     # 添加或删减个人词库
-    add_personal_dictionary(include_cb)
+    # add_personal_dictionary(include_cb)
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
     word_lib = st.sidebar.selectbox(
         "词库",
@@ -1106,9 +1115,9 @@ elif menu.endswith("看图测词"):
 
 # endregion
 
-# region 单词测验
+# region 词义理解
 
-elif menu.endswith("单词测验"):
+elif menu.endswith("词义理解"):
     # region 边栏
     level = st.sidebar.selectbox(
         "CEFR分级",
@@ -1117,11 +1126,12 @@ elif menu.endswith("单词测验"):
     )
     include_cb = st.sidebar.checkbox(
         "包含个人词库？",
-        key="test-personal-dictionary",
+        key="include-personal-dictionary",
         value=True,
+        on_change=on_include_cb_change,
     )
     # 添加或删减个人词库
-    add_personal_dictionary(include_cb)
+    # add_personal_dictionary(include_cb)
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
     word_lib = st.sidebar.selectbox(
         "词库",
@@ -1142,8 +1152,8 @@ elif menu.endswith("单词测验"):
     )
     # endregion
 
-    st.subheader(":pencil: 单词测验", divider="rainbow", anchor=False)
-    st.markdown("""英语单选单词词义理解测试是指给出一个单词和四个含义，要求考生选择正确的含义。这种测试题型简单易行，适用于各个英语水平的考生。""")
+    st.subheader(":pencil: 英语单词理解测试", divider="rainbow", anchor=False)
+    st.markdown("""英语单词理解测试是一种测试方式，它提供一个英语单词和四个可能的含义，要求你选择唯一正确的含义。""")
 
     if st.session_state.word_test_idx != -1:
         update_and_display_progress(
