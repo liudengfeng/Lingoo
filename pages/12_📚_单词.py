@@ -49,7 +49,7 @@ sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
 check_and_force_logout(sidebar_status)
 
-menu_names = ["闪卡记忆", "拼图游戏", "看图测词", "词义理解", "词库管理"]
+menu_names = ["闪卡记忆", "拼图游戏", "看图猜词", "词义理解", "词库管理"]
 menu_emoji = [
     "📚",
     "🧩",
@@ -657,10 +657,6 @@ def view_pic_question(container):
 
 
 def check_pic_answer(container):
-    if len(st.session_state.user_pic_answer) == 0:
-        st.warning("您尚未答题。")
-        st.stop()
-    container.empty()
     score = 0
     tests = st.session_state.pic_tests
     n = len(tests)
@@ -734,7 +730,7 @@ def on_next_test_btn_click():
     st.session_state["word_test_idx"] += 1
 
 
-def check_answer():
+def check_word_test_answer():
     if len(st.session_state.user_answer) == 0:
         st.warning("您尚未答题。")
         st.stop()
@@ -1090,16 +1086,16 @@ elif menu.endswith("拼图游戏"):
 
 # region 图片测词
 
-elif menu.endswith("看图测词"):
+elif menu.endswith("看图猜词"):
     # region 边栏
     category = st.sidebar.selectbox(
-        "请选择图片类别以生成对应的看图测词题目",
+        "请选择图片类别以生成对应的看图猜词题目",
         get_pic_categories(),
         format_func=lambda x: PICTURE_CATEGORY_MAPS[x],
         key="pic-category",
     )
     pic_num = st.sidebar.number_input(
-        "请选择您希望生成的看图测词题目的数量",
+        "请选择您希望生成的看图猜词题目的数量",
         1,
         20,
         value=10,
@@ -1107,9 +1103,9 @@ elif menu.endswith("看图测词"):
         key="pic-num",
     )
     # endregion
-    st.subheader(":frame_with_picture: 看图测词", divider="rainbow", anchor=False)
+    st.subheader(":frame_with_picture: 看图猜词", divider="rainbow", anchor=False)
     st.markdown(
-        """看图测词是一种记忆单词的方法，它通过提供图片，让用户根据图片内容猜测对应的单词。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)
+        """看图猜词是一种记忆单词的方法，它通过提供图片，让用户根据图片内容猜测对应的单词。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)
 
 请注意，专业领域的单词可能较为生僻，因此这种方法可能具有一定的难度。如果你对某个领域不熟悉，可能需要投入更多的精力。因此，我们建议你只在你感兴趣或熟悉的领域尝试这种方法。
         """
@@ -1170,8 +1166,12 @@ elif menu.endswith("看图测词"):
 
     container = st.container()
     if sumbit_pic_btn:
+        if len(st.session_state.user_pic_answer) == 0:
+            st.warning("您尚未答题。")
+            st.stop()
+        container.empty()
         if len(st.session_state.user_pic_answer) != len(st.session_state.pic_tests):
-            st.warning("您尚未完成全部测试题目。")
+            container.warning("您尚未完成全部测试题目。")
         check_pic_answer(container)
     elif st.session_state.pic_idx != -1:
         view_pic_question(container)
@@ -1312,7 +1312,7 @@ elif menu.endswith("词义理解"):
     if sumbit_test_btn:
         if len(st.session_state.user_answer) != len(st.session_state.word_tests):
             st.warning("您尚未完成测试。")
-        check_answer()
+        check_word_test_answer()
 
     if refresh_btn:
         reset_test_words()
