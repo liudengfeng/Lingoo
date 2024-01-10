@@ -804,8 +804,6 @@ if menu.endswith("闪卡记忆"):
         value=True,
         on_change=on_include_cb_change,
     )
-    # 添加或删减个人词库
-    # add_personal_dictionary(include_cb)
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
     word_lib = st.sidebar.selectbox(
         "词库",
@@ -936,8 +934,6 @@ elif menu.endswith("拼图游戏"):
         value=True,
         on_change=on_include_cb_change,
     )
-    # 添加或删减个人词库
-    # add_personal_dictionary(include_cb)
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
     word_lib = st.sidebar.selectbox(
         "词库",
@@ -1130,8 +1126,6 @@ elif menu.endswith("词义理解"):
         value=True,
         on_change=on_include_cb_change,
     )
-    # 添加或删减个人词库
-    # add_personal_dictionary(include_cb)
     # 在侧边栏添加一个选项卡让用户选择一个单词列表
     word_lib = st.sidebar.selectbox(
         "词库",
