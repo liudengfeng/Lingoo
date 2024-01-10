@@ -534,6 +534,16 @@ def handle_puzzle_input():
         puzzle_score.markdown(msg)
 
 
+def handle_puzzle():
+    display_puzzle_translation()
+    view_puzzle_word()
+    handle_puzzle_input()
+    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+    container = st.container()
+    display_puzzle_definition()
+    display_word_images(word, container)
+
+
 # endregion
 
 # region 图片测词辅助
@@ -1047,32 +1057,19 @@ elif menu.endswith("拼图游戏"):
         help="✨ 将当前单词从个人词库中删除",
         disabled=st.session_state.puzzle_idx == -1,
     )
-    
+
     if refresh_btn:
         reset_puzzle_word()
-        st.write(st.session_state.puzzle_words)
         st.rerun()
 
     if prev_btn:
-        st.write(st.session_state.puzzle_words)
         prepare_puzzle()
 
     if next_btn:
-        st.write(st.session_state.puzzle_words)
         prepare_puzzle()
 
-
     if st.session_state.puzzle_idx != -1:
-        display_puzzle_translation()
-        view_puzzle_word()
-        handle_puzzle_input()
-        word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-        container = st.container()
-        display_puzzle_definition()
-        display_word_images(
-            word,
-            container,
-        )
+        handle_puzzle()
 
     if add_btn:
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
