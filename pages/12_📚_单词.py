@@ -887,9 +887,6 @@ if menu.endswith("闪卡记忆"):
         ":recycle:",
         key="flashcard-mask",
         help="✨ 点击按钮，可切换显示状态。初始状态显示中英对照。点击按钮，切换为只显示英文。再次点击按钮，切换为只显示中文。",
-        disabled=st.session_state.flashcard_idx == -1
-        or st.session_state.flashcard_idx
-        == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
     prev_btn = btn_cols[2].button(
         ":leftwards_arrow_with_hook:",
