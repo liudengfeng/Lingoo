@@ -631,7 +631,7 @@ def view_pic_question():
         key="pic_options",
     )
     # 保存用户答案
-    st.session_state.user_pic_answer[idx] = user_answer
+    st.session_state.user_pic_answer[idx] = user_answer if user_answer else options[0]
     container.write(f"显示 idx: {idx} 用户答案：<{st.session_state.user_answer}>")
 
 
