@@ -207,6 +207,7 @@ def update_pending_words():
             st.session_state.pending_add_words, st.session_state.pending_del_words
         )
         st.session_state.last_update_time = current_time
+        st.write(current_time)
 
 
 # endregion
