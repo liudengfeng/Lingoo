@@ -209,6 +209,12 @@ def update_pending_words():
         st.session_state.last_update_time = current_time
 
 
+def on_include_cb_change():
+    # st.write("on_include_cb_change", st.session_state["include-personal-dictionary"])
+    # 更新个人词库
+    add_personal_dictionary(st.session_state["include-personal-dictionary"])
+
+
 def display_word_images(word, container):
     urls = select_word_image_urls(word)
     cols = container.columns(len(urls))
@@ -239,17 +245,12 @@ if "current_flashcard_word_index" not in st.session_state:
 # region 闪卡辅助函数
 
 
-def on_include_cb_change():
-    # st.write("on_include_cb_change", st.session_state["include-personal-dictionary"])
-    # 更新个人词库
-    add_personal_dictionary(st.session_state["include-personal-dictionary"])
-
-
-def reset_flashcard_word():
+def reset_flashcard_word(word_lib, num_word, key):
     # 恢复初始显示状态
     st.session_state.flashcard_words = []
     st.session_state.flashcard_display_state = "全部"
     st.session_state["current_flashcard_word_index"] = -1
+    generate_page_words(word_lib, num_word, key)
 
 
 def on_prev_btn_click():
@@ -897,7 +898,7 @@ if menu.endswith("闪卡记忆"):
         ":arrows_counterclockwise:",
         key="flashcard-refresh",
         help="✨ 点击按钮后，将从词库中重新抽取单词。",
-        on_click=generate_page_words,
+        on_click=reset_flashcard_word,
         args=(word_lib, num_word, "flashcard_words"),
     )
     play_btn = btn_cols[3].button(
