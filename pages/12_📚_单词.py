@@ -944,7 +944,7 @@ if menu.endswith("闪卡记忆"):
 
     if refresh_btn:
         reset_flashcard_word(False)
-        st.rerun()
+        # st.rerun()
 
     if play_btn:
         word = st.session_state.flashcard_words[st.session_state.flashcard_idx]
@@ -1047,16 +1047,20 @@ elif menu.endswith("拼图游戏"):
         help="✨ 将当前单词从个人词库中删除",
         disabled=st.session_state.puzzle_idx == -1,
     )
+    
+    if refresh_btn:
+        reset_puzzle_word()
+        st.write(st.session_state.puzzle_words)
+        st.rerun()
 
     if prev_btn:
+        st.write(st.session_state.puzzle_words)
         prepare_puzzle()
 
     if next_btn:
+        st.write(st.session_state.puzzle_words)
         prepare_puzzle()
 
-    if refresh_btn:
-        reset_puzzle_word()
-        st.rerun()
 
     if st.session_state.puzzle_idx != -1:
         display_puzzle_translation()
