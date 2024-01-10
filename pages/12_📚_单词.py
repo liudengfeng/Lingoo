@@ -245,13 +245,11 @@ if "current_flashcard_word_index" not in st.session_state:
 # region 闪卡辅助函数
 
 
-def reset_flashcard_word(word_lib, num_word, key):
+def reset_flashcard_word():
     # 恢复初始显示状态
     st.session_state.flashcard_words = []
     st.session_state.flashcard_display_state = "全部"
     st.session_state["current_flashcard_word_index"] = -1
-    generate_page_words(word_lib, num_word, key)
-    st.rerun()
 
 
 def on_prev_btn_click():
@@ -895,12 +893,12 @@ if menu.endswith("闪卡记忆"):
         or st.session_state.current_flashcard_word_index
         == len(st.session_state.flashcard_words) - 1,  # type: ignore
     )
-    btn_cols[4].button(
+    refresh_btn = btn_cols[4].button(
         ":arrows_counterclockwise:",
         key="flashcard-refresh",
         help="✨ 点击按钮，从词库中重新生成记忆闪卡。",
-        on_click=reset_flashcard_word,
-        args=(word_lib, num_word, "flashcard_words"),
+        # on_click=reset_flashcard_word,
+        # args=(word_lib, num_word, "flashcard_words"),
     )
     play_btn = btn_cols[3].button(
         ":sound:",
@@ -929,6 +927,9 @@ if menu.endswith("闪卡记忆"):
             st.session_state.flashcard_display_state = "中文"
         else:
             st.session_state.flashcard_display_state = "全部"
+
+    if refresh_btn:
+        generate_page_words(word_lib, num_word, "flashcard_words")
 
     if play_btn:
         word = st.session_state.flashcard_words[
