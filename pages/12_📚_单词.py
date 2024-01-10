@@ -251,6 +251,7 @@ def reset_flashcard_word(word_lib, num_word, key):
     st.session_state.flashcard_display_state = "全部"
     st.session_state["current_flashcard_word_index"] = -1
     generate_page_words(word_lib, num_word, key)
+    st.rerun()
 
 
 def on_prev_btn_click():
