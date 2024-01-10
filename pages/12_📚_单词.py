@@ -656,7 +656,7 @@ def check_pic_answer(container):
         for f, o in zip("ABC", o_options):
             options.append(f"{f}. {o}")
         answer = tests[idx]["answer"]
-        image = PILImage.open(tests[idx]["image_fp"])  # type: ignore
+        image = PIL.Image.open(tests[idx]["image_fp"])  # type: ignore
 
         user_answer = st.session_state.user_pic_answer.get(idx, options[0])
         user_answer_idx = options.index(user_answer)
@@ -666,7 +666,6 @@ def check_pic_answer(container):
         container.radio(
             "选项",
             options,
-            # horizontal=True,
             index=user_answer_idx,
             disabled=True,
             label_visibility="collapsed",
@@ -674,7 +673,7 @@ def check_pic_answer(container):
         )
         msg = ""
         # container.write(f"显示 idx: {idx} 用户答案：{user_answer.split('.')[1]} 正确答案：{answer}")
-        if user_answer.split(".")[1].strip() == answer.strip():
+        if user_answer.strip().endswith(answer.strip()):
             score += 1
             msg = f"正确答案：{answer} :white_check_mark:"
         else:
@@ -685,7 +684,6 @@ def check_pic_answer(container):
         st.balloons()
     container.divider()
     container.markdown(f":red[得分：{percentage:.0f}%]")
-    container.divider()
 
 
 # endregion
