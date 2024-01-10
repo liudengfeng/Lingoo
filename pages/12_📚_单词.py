@@ -539,8 +539,41 @@ def on_next_pic_btn_click():
     st.session_state["pic_idx"] += 1
 
 
-pic_dir = CURRENT_CWD / "resource/quiz/images"
-pic_categories = sorted([d.name for d in pic_dir.iterdir() if d.is_dir()])
+PICTURE_CATEGORY_MAPS = {
+    "aninmals": "动物",
+    "animals-not-mammals": "非哺乳动物",
+    "arts-and-crafts": "艺术与手工",
+    "at-random": "随机",
+    "at-work-and-school": "工作与学校",
+    "boats-aircraft-and-trains": "船、飞机与火车",
+    "buildings": "建筑物",
+    "colours-shapes-and-patterns": "颜色、形状与图案",
+    "computers-and-technology": "计算机与技术",
+    "cooking-and-kitchen-equipment": "烹饪与厨房设备",
+    "food-and-drink": "食物与饮料",
+    "fruit-vegetables-herbs-and-spices": "水果、蔬菜、草药与香料",
+    "furniture-and-household-equipment": "家具与家用设备",
+    "gardens-and-farms": "花园与农场",
+    "holidays-vacations": "假期与度假",
+    "in-the-past": "过去",
+    "in-town-and-shopping": "城镇与购物",
+    "music": "音乐",
+    "nature-and-weather": "自然与天气",
+    "on-the-road": "在路上",
+    "plants-trees-and-flowers": "植物、树木与花朵",
+    "sports": "运动",
+    "taking-care-of-yourself": "照顾自己",
+    "the-body": "身体",
+    "things-you-wear": "穿着",
+    "tools-and-machines": "工具与机器",
+    "toys-games-and-entertainment": "玩具、游戏与娱乐",
+}
+
+
+@st.cache_data
+def get_pic_categories():
+    pic_dir = CURRENT_CWD / "resource/quiz/images"
+    return sorted([d.name for d in pic_dir.iterdir() if d.is_dir()])
 
 
 def gen_pic_tests(category, num):
@@ -1051,7 +1084,11 @@ elif menu.endswith("拼图游戏"):
 elif menu.endswith("看图测词"):
     # region 边栏
     category = st.sidebar.selectbox(
-        "请选择图片类别", pic_categories, key="pic-category", on_change=pic_word_test_reset
+        "请选择图片类别",
+        get_pic_categories(),
+        format_func=lambda x: PICTURE_CATEGORY_MAPS[x],
+        key="pic-category",
+        on_change=pic_word_test_reset,
     )
     pic_num = st.sidebar.number_input(
         "请选择图片测词题数量",
