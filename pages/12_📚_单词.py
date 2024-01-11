@@ -1467,7 +1467,7 @@ elif menu.endswith("词库管理"):
         for idx in deleted_rows:
             word = base_lib_df.iloc[idx]["单词"]  # type: ignore
             to_add.append(word)
-        to_add_placeholder.markdown(f'待添加：{", ".join(to_add)}。')
+        to_add_placeholder.markdown(f'待添加：\n{", ".join(to_add)}。')
 
     if add_lib_btn and st.session_state.get("base_lib_edited_df", {}).get(
         "deleted_rows", []
