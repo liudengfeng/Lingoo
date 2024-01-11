@@ -1437,7 +1437,7 @@ elif menu.endswith("词库管理"):
         "添加[:heavy_plus_sign:]", key="add-lib-btn", help="✨ 点击按钮，将'基础词库'中已选单词添加到个人词库。"
     )
     del_lib_btn = lib_cols[1].button(
-        "删除[:heavy_minus_sign:]", key="del-lib-btn", help="✨ 点击按钮，将已选单词从'个人词库'中删除。"
+        "删除[:heavy_minus_sign:]", key="del-lib-btn", help="✨ 点击按钮，将'可删列表'中选定单词从'个人词库'中删除。"
     )
     view_lib_btn = lib_cols[2].button(
         "查看[:eye:]", key="view-lib-btn", help="✨ 点击按钮，查看'个人词库'最新数据。"
