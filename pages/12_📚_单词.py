@@ -1492,7 +1492,7 @@ elif menu.endswith("词库管理"):
             # st.write("删除的行号:\n", my_word_deleted_rows)
             to_del = []
             for idx in my_word_deleted_rows:
-                word = my_lib_df.iloc[idx]["单词"]  # type: ignore
+                word = lib_df.iloc[idx]["单词"]  # type: ignore
                 to_del.append(word)
                 # st.session_state.lib_pending_del_words.add(word)
             st.session_state.dbi.remove_words_from_personal_dictionary(to_del)
