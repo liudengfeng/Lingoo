@@ -890,8 +890,8 @@ def gen_my_word_lib():
     # 将 my_words 转换为 set
     my_words_set = set(my_words)
     # 使用集合运算更新 my_words_set
-    my_words_set = my_words_set.union(st.session_state.pending_add_words)
-    my_words_set = my_words_set.difference(st.session_state.pending_del_words)
+    my_words_set = my_words_set.union(st.session_state.lib_pending_add_words)
+    my_words_set = my_words_set.difference(st.session_state.lib_pending_del_words)
     # 将 my_words_set 转换回 list
     my_words = list(my_words_set)    
     data = []
