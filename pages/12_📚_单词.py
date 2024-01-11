@@ -70,8 +70,9 @@ st.sidebar.divider()
 CURRENT_CWD: Path = Path(__file__).parent.parent
 DICT_DIR = CURRENT_CWD / "resource/dictionary"
 
-THRESHOLD = 20  # 阈值
-TIME_LIMIT = 30 * 60  # 30分钟
+THRESHOLD = 100  # 阈值
+TIME_LIMIT = 10 * 60  # 10分钟
+OP_THRESHOLD = 10000  # 操作阈值
 
 if "wld_pending_add_words" not in st.session_state:
     st.session_state.wld_pending_add_words = set()
@@ -348,7 +349,7 @@ def get_audio_html(word, voice_style):
     返回值：
     - 音频的HTML代码（字符串）
     """
-    audio_data = get_or_create_and_return_audio_data(word, voice_style[0], st.secrets)
+    audio_data = get_or_create_and_return_audio_data(word, voice_style[0], st.secrets) # type: ignore
     return audio_autoplay_elem(audio_data)
 
 
@@ -713,7 +714,6 @@ def check_pic_answer(container):
             key=f"pic_options_{idx}",
         )
         msg = ""
-        # container.write(f"显示 idx: {idx} 用户答案：{user_answer.split('.')[1]} 正确答案：{answer}")
         if user_answer.strip().endswith(answer.strip()):
             score += 1
             msg = f"正确答案：{answer} :white_check_mark:"
@@ -908,7 +908,7 @@ with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
 # region 闪卡记忆
 
 
-if menu.endswith("闪卡记忆"):
+if menu and menu.endswith("闪卡记忆"):
     # region 词库管理
     # 让用户选择语音风格
     pronunciation = st.sidebar.radio("请选择发音标准", ("美式", "英式"))
@@ -928,7 +928,6 @@ if menu.endswith("闪卡记忆"):
         sorted(list(st.session_state.word_dict.keys())),
         key="flashcard-selected",
         on_change=reset_flashcard_word,
-        # format_func=lambda x: x.split("-", maxsplit=1)[1],
         format_func=word_lib_format_func,
         help="✨ 选择一个单词列表，用于生成闪卡单词。",
     )
@@ -1001,7 +1000,7 @@ if menu.endswith("闪卡记忆"):
         "添加[:heavy_plus_sign:]",
         key="flashcard-add",
         help="✨ 将当前单词添加到个人词库",
-        disabled=st.session_state.flashcard_idx == -1 or "个人词库" in word_lib,
+        disabled=st.session_state.flashcard_idx == -1 or "个人词库" in word_lib, # type: ignore
     )
     del_btn = btn_cols[6].button(
         "删除[:heavy_minus_sign:]",
@@ -1055,7 +1054,7 @@ if menu.endswith("闪卡记忆"):
 
 # region 单词拼图
 
-elif menu.endswith("拼图游戏"):
+elif  menu and menu.endswith("拼图游戏"):
     # region 边栏
     include_cb = st.sidebar.checkbox(
         "是否包含个人词库？",
@@ -1069,7 +1068,6 @@ elif menu.endswith("拼图游戏"):
         sorted(list(st.session_state.word_dict.keys())),
         key="puzzle-selected",
         on_change=reset_puzzle_word,
-        # format_func=lambda x: x.split("-", maxsplit=1)[1],
         format_func=word_lib_format_func,
         help="✨ 选择一个词库，用于生成单词拼图。",
     )
@@ -1127,7 +1125,7 @@ elif menu.endswith("拼图游戏"):
         "添加[:heavy_plus_sign:]",
         key="puzzle-add",
         help="✨ 将当前单词添加到个人词库",
-        disabled=st.session_state.puzzle_idx == -1 or "个人词库" in word_lib,
+        disabled=st.session_state.puzzle_idx == -1 or "个人词库" in word_lib, # type: ignore
     )
     del_btn = puzzle_cols[4].button(
         "删除[:heavy_minus_sign:]",
@@ -1163,7 +1161,7 @@ elif menu.endswith("拼图游戏"):
 
 # region 图片测词
 
-elif menu.endswith("看图猜词"):
+elif menu and menu.endswith("看图猜词"):
     # region 边栏
     category = st.sidebar.selectbox(
         "请选择图片类别以生成对应的看图猜词题目",
@@ -1271,7 +1269,7 @@ elif menu.endswith("看图猜词"):
 
 # region 词义理解
 
-elif menu.endswith("词义理解"):
+elif menu and menu.endswith("词义理解"):
     # region 边栏
     level = st.sidebar.selectbox(
         "CEFR分级",
@@ -1290,7 +1288,6 @@ elif menu.endswith("词义理解"):
         sorted(list(st.session_state.word_dict.keys())),
         key="test-word-selected",
         on_change=reset_test_words,
-        # format_func=lambda x: x.split("-", maxsplit=1)[1],
         format_func=word_lib_format_func,
         help="✨ 选择一个单词列表，用于生成单词词义理解测试题。",
     )
@@ -1361,7 +1358,7 @@ elif menu.endswith("词义理解"):
         "添加[:heavy_plus_sign:]",
         key="test-word-add",
         help="✨ 将当前单词添加到个人词库",
-        disabled=st.session_state.word_test_idx == -1 or "个人词库" in word_lib,
+        disabled=st.session_state.word_test_idx == -1 or "个人词库" in word_lib, # type: ignore
     )
     del_btn = test_btns[5].button(
         "删除[:heavy_minus_sign:]",
@@ -1412,7 +1409,7 @@ elif menu.endswith("词义理解"):
 # endregion
 
 # region 个人词库
-elif menu.endswith("词库管理"):
+elif menu and menu.endswith("词库管理"):
     # 基准词库不包含个人词库
     if "个人词库" in st.session_state.word_dict:
         st.session_state.word_dict.pop("个人词库")
@@ -1421,7 +1418,6 @@ elif menu.endswith("词库管理"):
         "词库",
         sorted(list(st.session_state.word_dict.keys())),
         key="lib-selected",
-        # format_func=lambda x: x.split("-", maxsplit=1)[1],
         format_func=word_lib_format_func,
         help="✨ 选择一个基准词库，用于生成个人词库。",
     )
@@ -1437,7 +1433,9 @@ elif menu.endswith("词库管理"):
         "添加[:heavy_plus_sign:]", key="add-lib-btn", help="✨ 点击按钮，将'基础词库'中选定单词添加到个人词库。"
     )
     del_lib_btn = lib_cols[1].button(
-        "删除[:heavy_minus_sign:]", key="del-lib-btn", help="✨ 点击按钮，将'可删列表'中选定单词从'个人词库'中删除。"
+        "删除[:heavy_minus_sign:]",
+        key="del-lib-btn",
+        help="✨ 点击按钮，将'可删列表'中选定单词从'个人词库'中删除。",
     )
     view_lib_btn = lib_cols[2].button(
         "查看[:eye:]", key="view-lib-btn", help="✨ 点击按钮，查看'个人词库'最新数据。"
@@ -1448,7 +1446,7 @@ elif menu.endswith("词库管理"):
     mylib_placeholder = content_cols[1].container()
     view_placeholder = content_cols[2].container()
 
-    view_selected_list = word_lib.split("-", maxsplit=1)[1]
+    view_selected_list = word_lib.split("-", 1)[1]
     base_placeholder.text(f"基础词库({view_selected_list})")
     mylib_placeholder.text("可删列表", help="在这里删除你的个人词库中的单词（显示的是最近1小时的缓存数据）")
     view_placeholder.text("个人词库", help="在这里查看你的个人词库所有单词（显示的最新数据）")
