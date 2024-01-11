@@ -71,8 +71,8 @@ CURRENT_CWD: Path = Path(__file__).parent.parent
 DICT_DIR = CURRENT_CWD / "resource/dictionary"
 
 THRESHOLD = 100  # 阈值
-TIME_LIMIT = 1 * 60  # 10分钟
-OP_THRESHOLD = 1000  # 操作阈值
+TIME_LIMIT = 10 * 60  # 10分钟
+OP_THRESHOLD = 10000  # 操作阈值
 
 if "wld_pending_add_words" not in st.session_state:
     st.session_state.wld_pending_add_words = set()
