@@ -1407,7 +1407,7 @@ elif menu.endswith("词义理解"):
 # endregion
 
 # region 个人词库
-elif menu.endswith("个人词库"):
+elif menu.endswith("词库管理"):
     # 基准词库不包含个人词库
     if "个人词库" in st.session_state.word_dict:
         st.session_state.word_dict.pop("个人词库")
@@ -1420,7 +1420,7 @@ elif menu.endswith("个人词库"):
         format_func=lambda x: x.split("-", maxsplit=1)[1],
         help="✨ 选择一个基准词库，用于生成个人词库。",
     )   
-    st.subheader(":books: 个人词库", divider="rainbow", anchor=False)
+    st.subheader(":books: 词库管理", divider="rainbow", anchor=False)
     lib_cols = st.columns(2)
     view_selected_list = ""
     if st.session_state["selected_list"] is not None:
