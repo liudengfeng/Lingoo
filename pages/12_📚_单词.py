@@ -507,10 +507,6 @@ def on_next_puzzle_btn_click():
     st.session_state.puzzle_answer_value = ""
 
 
-def clear_puzzle_answer():
-    st.session_state.puzzle_answer_value = ""
-
-
 # def handle_puzzle_input():
 #     user_input = st.text_input(
 #         "点击字符按钮或输入您的答案",
@@ -554,11 +550,16 @@ def clear_puzzle_answer():
 
 
 def handle_puzzle_input():
+    # Use the get method since the keys won't be in session_state
+    # on the first script run
+    if st.session_state.get("clear_answer"):
+        st.session_state["puzzle_answer"] = ""
+
     user_input = st.text_input(
         "点击字符按钮或输入您的答案",
         placeholder="点击字符按钮或直接输入您的答案",
         value=st.session_state.puzzle_answer_value,
-        # key="puzzle_answer",
+        key="puzzle_answer",
         label_visibility="collapsed",
     )
 
@@ -570,7 +571,7 @@ def handle_puzzle_input():
         st.rerun()
 
     sumbit_cols[1].button(
-        "清除[:wastebasket:]", on_click=clear_puzzle_answer, help="✨ 清除用户输入的答案文本。"
+        "清除[:wastebasket:]", key="clear_answer", help="✨ 清除用户输入的答案文本。"
     )
 
     if sumbit_cols[2].button("检查[:mag:]", help="✨ 点击按钮，检查您的答案是否正确。"):
