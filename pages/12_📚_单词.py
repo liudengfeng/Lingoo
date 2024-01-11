@@ -1490,18 +1490,14 @@ elif menu.endswith("词库管理"):
         height=500,
     )
 
-    # st.write(st.session_state.lib_pending_add_words)
-    # st.write(st.session_state.lib_pending_del_words)
-
     if del_lib_btn and st.session_state.get("my_word_lib", None):
         my_word_lib = st.session_state["my_word_lib"]
-        my_word_edited_rows = my_word_lib["edited_rows"]
-        st.write("编辑的行：", my_word_edited_rows)
-        for idx, d in my_word_edited_rows.items():
+        my_word_deleted_rows = my_word_lib["deleted_rows"]
+        st.write("编辑的行：", my_word_deleted_rows)
+        for idx in my_word_deleted_rows:
             word = my_lib_df.iloc[idx]["单词"]  # type: ignore
-            if d["删除"]:
-                st.session_state.lib_pending_del_words.add(word)
-                st.toast(f"已从个人词库中删除：{word}。")
+            st.session_state.lib_pending_del_words.add(word)
+            st.toast(f"已添加到个人词库中：{word}。")
         st.rerun()
 
     with st.expander(":bulb: 小提示", expanded=False):
