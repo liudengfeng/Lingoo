@@ -1508,7 +1508,6 @@ elif menu.endswith("词库管理"):
 
 # endregion
 
-
 # 更新
 (
     st.session_state.pending_add_words,
@@ -1528,3 +1527,6 @@ elif menu.endswith("词库管理"):
     st.session_state.lib_pending_del_words,
     st.session_state.lib_last_update_time,
 )
+
+logger.info(f"待添加单词：{st.session_state.lib_pending_add_words}")
+logger.info(f"待删除单词：{st.session_state.lib_pending_del_words}")
