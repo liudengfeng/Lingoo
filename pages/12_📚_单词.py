@@ -886,7 +886,7 @@ if menu.endswith("闪卡记忆"):
 
     st.subheader(":book: 闪卡记忆", divider="rainbow", anchor=False)
     st.markdown(
-        """✨ 闪卡记忆是一种记忆单词的游戏，其玩法是将单词或短语的中英文对照显示在屏幕上，玩家需要根据提示信息，尽可能多地记住单词或短语的含义。"""
+        """✨ 闪卡记忆是一种依赖视觉记忆的学习策略，通过展示与单词或短语含义相关的四幅图片，帮助用户建立和强化单词或短语与其含义之间的关联。这四幅图片的共同特性可以引导用户快速理解和记忆单词或短语的含义，从而提高记忆效率和效果。"""
     )
 
     update_and_display_progress(
@@ -1026,7 +1026,7 @@ elif menu.endswith("拼图游戏"):
 
     st.subheader(":jigsaw: 拼图游戏", divider="rainbow", anchor=False)
     st.markdown(
-        "单词拼图是一种记忆单词的游戏，其玩法是将一些字母打乱，玩家需要根据这些字母，结合提示信息拼出正确的单词。它是一种非常有效的学习方式，可以帮助我们提高词汇量、拼写能力、思维能力和解决问题能力。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
+        "✨ 单词拼图是一种记忆单词的游戏，玩家需根据打乱的字母和提示信息拼出正确的单词，有助于提高词汇量、拼写能力和解决问题能力。参考：[Cambridge Dictionary](https://dictionary.cambridge.org/)"
     )
 
     update_and_display_progress(
@@ -1120,9 +1120,9 @@ elif menu.endswith("看图猜词"):
     # endregion
     st.subheader(":frame_with_picture: 看图猜词", divider="rainbow", anchor=False)
     st.markdown(
-        """看图猜词是一种记忆单词的方法，它通过提供图片，让用户根据图片内容猜测对应的单词。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)
+        """✨ 看图猜词是一种记忆单词的方法，通过图片提示，用户需猜出对应的单词。数据来源：[Cambridge Dictionary](https://dictionary.cambridge.org/)
 
-请注意，专业领域的单词可能较为生僻，因此这种方法可能具有一定的难度。如果你对某个领域不熟悉，可能需要投入更多的精力。因此，我们建议你只在你感兴趣或熟悉的领域尝试这种方法。
+请注意，专业领域的单词可能较为生僻，对于不熟悉的领域，可能需要投入更多的精力。
         """
     )
 
@@ -1243,7 +1243,7 @@ elif menu.endswith("词义理解"):
     # endregion
 
     st.subheader(":pencil: 英语单词理解测试", divider="rainbow", anchor=False)
-    st.markdown("""英语单词理解测试是一种测试方式，它提供一个英语单词和四个可能的含义，要求你选择唯一正确的含义。""")
+    st.markdown("""✨ 英语单词理解测试是一种选择题形式的测试，提供一个英语单词和四个选项，要求选出正确的词义。""")
 
     if "gemini-pro-model" not in st.session_state:
         st.session_state["gemini-pro-model"] = load_vertex_model("gemini-pro")
