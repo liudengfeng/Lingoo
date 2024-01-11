@@ -1489,7 +1489,7 @@ elif menu.endswith("词库管理"):
             word = my_lib_df.iloc[idx]["单词"]  # type: ignore
             to_del.append(word)
             # st.session_state.lib_pending_del_words.add(word)
-        st.session_state.dbi.delete_words_from_personal_dictionary(to_del)
+        st.session_state.dbi.remove_words_from_personal_dictionary(to_del)
         logger.info(f"从个人词库中已经删除：{to_del}。")
 
     with st.expander(":bulb: 小提示", expanded=False):
