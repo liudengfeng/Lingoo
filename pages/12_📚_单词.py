@@ -192,16 +192,16 @@ def process_pending_words(add_words, del_words):
     # 计算净添加和净删除的单词
     net_add_words = add_words - del_words
     net_del_words = del_words - add_words
-    logger.info(f"净添加单词：{net_add_words}")
-    logger.info(f"净删除单词：{net_del_words}")
     # 提交净添加的单词到数据库
     if net_add_words:
         st.session_state.dbi.add_words_to_personal_dictionary(list(net_add_words))
+        logger.info(f"净添加单词：{net_add_words}")
         add_words -= net_add_words
 
     # 从数据库中删除净删除的单词
     if net_del_words:
         st.session_state.dbi.remove_words_from_personal_dictionary(list(net_del_words))
+        logger.info(f"净删除单词：{net_del_words}")
         del_words -= net_del_words
 
     return add_words, del_words
@@ -1486,7 +1486,8 @@ elif menu.endswith("词库管理"):
     with st.expander(":bulb: 小提示", expanded=False):
         st.markdown(
             """
-- `coca20000`包含了大量常用英语单词，可作为基础词库供用户参考。
+- 词库`coca20000`包含了大量常用英语单词，可作为基础词库供用户参考。
+- 基础词库的删除操作不会影响到基础词库本身的内容，只将基础词库删除部分单词添加到个人词库。
 - 如需从基础词库中添加单词到个人词库，用户需在基础词库左侧的复选框中选择一行或多行，单击删除`图标 (delete)`或按键盘上的`删除键`，最后点击`添加[➕]`按钮，即可将选中的单词添加到个人词库。
 - 如需将整个基础词库添加到个人词库，用户需在基础词库标题行的第一列进行全选，然后点击`添加[➕]`按钮，即可将所有单词添加到个人词库。
 """
@@ -1494,9 +1495,6 @@ elif menu.endswith("词库管理"):
 
 # endregion
 
-# 更新
+# 任何插件都会触发更新
 update_pending_words(st.session_state, "wld")
 update_pending_words(st.session_state, "lib")
-
-logger.info(f"待添加单词：{st.session_state.lib_pending_add_words}")
-logger.info(f"待删除单词：{st.session_state.lib_pending_del_words}")
