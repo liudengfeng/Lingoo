@@ -71,8 +71,7 @@ CURRENT_CWD: Path = Path(__file__).parent.parent
 DICT_DIR = CURRENT_CWD / "resource/dictionary"
 
 THRESHOLD = 20  # 阈值
-# TIME_LIMIT = 30 * 60  # 30分钟
-TIME_LIMIT = 10  # 30分钟
+TIME_LIMIT = 30 * 60  # 30分钟
 
 if "wld_pending_add_words" not in st.session_state:
     st.session_state.wld_pending_add_words = set()
@@ -195,13 +194,13 @@ def process_pending_words(add_words, del_words):
     # 提交净添加的单词到数据库
     if net_add_words:
         st.session_state.dbi.add_words_to_personal_dictionary(list(net_add_words))
-        logger.info(f"净添加单词：{net_add_words}")
+        # logger.info(f"净添加单词：{net_add_words}")
         add_words -= net_add_words
 
     # 从数据库中删除净删除的单词
     if net_del_words:
         st.session_state.dbi.remove_words_from_personal_dictionary(list(net_del_words))
-        logger.info(f"净删除单词：{net_del_words}")
+        # logger.info(f"净删除单词：{net_del_words}")
         del_words -= net_del_words
 
     return add_words, del_words
@@ -856,7 +855,7 @@ def gen_base_lib(word_lib):
 
 # 确保数据先储存，然后再读取
 @st.cache_data(
-    ttl=timedelta(seconds=TIME_LIMIT + 2), max_entries=1000, show_spinner="获取个人词库..."
+    ttl=timedelta(seconds=TIME_LIMIT + 10), max_entries=1000, show_spinner="获取个人词库..."
 )
 def get_my_word_lib_from_db():
     return st.session_state.dbi.find_personal_dictionary()
@@ -864,14 +863,18 @@ def get_my_word_lib_from_db():
 
 def gen_my_word_lib():
     # 返回单词列表
+    # if "init_my_word_lib" not in st.session_state:
+    #     st.session_state["init_my_word_lib"] = get_my_word_lib_from_db()
+    # my_words = st.session_state["init_my_word_lib"]
     my_words = get_my_word_lib_from_db()
     # 将 my_words 转换为 set
-    my_words_set = set(my_words)
-    # 使用集合运算更新 my_words_set
-    my_words_set = my_words_set.union(st.session_state.lib_pending_add_words)
-    my_words_set = my_words_set.difference(st.session_state.lib_pending_del_words)
-    # 将 my_words_set 转换回 list
-    my_words = list(my_words_set)
+    # my_words_set = set(my_words)
+    # # 使用集合运算更新 my_words_set
+    # my_words_set = my_words_set.union(st.session_state.lib_pending_add_words)
+    # my_words_set = my_words_set.difference(st.session_state.lib_pending_del_words)
+    # logger.info(f"difference: {my_words_set}")
+    # # 将 my_words_set 转换回 list
+    # my_words = list(my_words_set)
     data = []
     for word in my_words:
         w = word.replace("/", " or ")
@@ -1459,10 +1462,13 @@ elif menu.endswith("词库管理"):
         "deleted_rows", []
     ):
         deleted_rows = st.session_state["base_lib_edited_df"]["deleted_rows"]
+        to_add = []
         for idx in deleted_rows:
             word = base_lib_df.iloc[idx]["单词"]  # type: ignore
-            st.session_state.lib_pending_add_words.add(word)
-            logger.info(f"已添加到个人词库中：{word}。")
+            to_add.append(word)
+            # st.session_state.lib_pending_add_words.add(word)
+        st.session_state.dbi.add_words_to_personal_dictionary(to_add)
+        logger.info(f"已添加到个人词库中：{to_add}。")
 
     my_lib_df = gen_my_word_lib()
 
@@ -1478,10 +1484,13 @@ elif menu.endswith("词库管理"):
     if del_lib_btn and st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
         my_word_deleted_rows = st.session_state["my_word_lib"]["deleted_rows"]
         # st.write("删除的行号:\n", my_word_deleted_rows)
+        to_del = []
         for idx in my_word_deleted_rows:
             word = my_lib_df.iloc[idx]["单词"]  # type: ignore
-            st.session_state.lib_pending_del_words.add(word)
-            logger.info(f"从个人词库中已经删除：{word}。")
+            to_del.append(word)
+            # st.session_state.lib_pending_del_words.add(word)
+        st.session_state.dbi.delete_words_from_personal_dictionary(to_del)
+        logger.info(f"从个人词库中已经删除：{to_del}。")
 
     with st.expander(":bulb: 小提示", expanded=False):
         st.markdown(
@@ -1497,4 +1506,6 @@ elif menu.endswith("词库管理"):
 
 # 任何插件都会触发更新
 update_pending_words(st.session_state, "wld")
-update_pending_words(st.session_state, "lib")
+# update_pending_words(st.session_state, "lib")
+# 临时测试
+logger.info(time.time())
