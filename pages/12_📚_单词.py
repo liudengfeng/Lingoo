@@ -513,8 +513,12 @@ def handle_puzzle_input():
     if sumbit_cols[0].button("重试", help="✨ 恢复初始状态，重新开始。"):
         prepare_puzzle()
         st.rerun()
+    
+    if sumbit_cols[1].button(":wastebasket:", help="✨ 恢复初始状态，重新开始。"):
+        st.session_state.puzzle_answer_value = ""
+        st.rerun()
 
-    if sumbit_cols[1].button("检查", help="✨ 点击按钮，检查您的答案是否正确。"):
+    if sumbit_cols[2].button("检查", help="✨ 点击按钮，检查您的答案是否正确。"):
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
         if word not in st.session_state.flashcard_word_info:
             st.session_state.flashcard_word_info[word] = get_word_info(word)
