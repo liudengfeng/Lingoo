@@ -474,6 +474,15 @@ def display_puzzle_translation():
     st.info("如果字符中包含空格，这可能表示该单词是一个复合词或短语。", icon="ℹ️")
 
 
+def display_puzzle_translation_new():
+    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+    t_word = st.session_state.mini_dict[word.replace("/", " or ")].get(
+        "translation", ""
+    )
+    msg = f"中译文：{t_word}"
+    st.markdown(msg)
+
+
 def display_puzzle_definition():
     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
     definition = get_word_definition(word)
@@ -514,7 +523,7 @@ def handle_puzzle_input():
     puzzle_score = st.empty()
     sumbit_cols = st.columns(5)
 
-    if sumbit_cols[0].button("重试[:repeat:]", help="✨ 恢复初始状态，重新开始。"):
+    if sumbit_cols[0].button("重试[:repeat:]", help="✨ 恢复初始状态，重新开始拼图游戏。"):
         prepare_puzzle()
         st.rerun()
 
@@ -550,6 +559,18 @@ def handle_puzzle():
     handle_puzzle_input()
     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
     container = st.container()
+    display_puzzle_definition()
+    display_word_images(word, container)
+
+
+def handle_puzzle_new():
+    display_puzzle_translation_new()
+    view_puzzle_word()
+    handle_puzzle_input()
+
+    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+    container = st.container()
+    st.info("如果字符中包含空格，这可能表示该单词是一个复合词或短语。", icon="ℹ️")
     display_puzzle_definition()
     display_word_images(word, container)
 
@@ -1078,9 +1099,6 @@ elif menu.endswith("拼图游戏"):
     if next_btn:
         prepare_puzzle()
 
-    if st.session_state.puzzle_idx != -1:
-        handle_puzzle()
-
     if add_btn:
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
         st.session_state.pending_add_words.add(word)
@@ -1090,6 +1108,9 @@ elif menu.endswith("拼图游戏"):
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
         st.session_state.pending_del_words.add(word)
         st.toast(f"从个人词库中删除单词：{word}。")
+
+    if st.session_state.puzzle_idx != -1:
+        handle_puzzle_new()
 
 # endregion
 
