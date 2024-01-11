@@ -192,7 +192,8 @@ def process_pending_words(add_words, del_words):
     # 计算净添加和净删除的单词
     net_add_words = add_words - del_words
     net_del_words = del_words - add_words
-
+    logger.info(f"净添加单词：{net_add_words}")
+    logger.info(f"净删除单词：{net_del_words}")
     # 提交净添加的单词到数据库
     if net_add_words:
         st.session_state.dbi.add_words_to_personal_dictionary(list(net_add_words))
