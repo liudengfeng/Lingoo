@@ -1439,15 +1439,15 @@ elif menu.endswith("词库管理"):
     baselib_placeholder = lib_cols[0].empty()
     mylib_placeholder = lib_cols[1].empty()
 
-    to_add_placeholder = lib_cols[0].empty()
-    to_del_placeholder = lib_cols[1].empty()
-
     add_lib_btn = lib_cols[0].button(
         "添加[:heavy_plus_sign:]", key="add-lib-btn", help="✨ 点击按钮，将'基础词库'中已选单词添加到个人词库。"
     )
     del_lib_btn = lib_cols[1].button(
         "删除[:heavy_minus_sign:]", key="del-lib-btn", help="✨ 点击按钮，将已选单词从'个人词库'中删除。"
     )
+
+    to_add_placeholder = lib_cols[0].empty()
+    to_del_placeholder = lib_cols[1].empty()
 
     base_lib_df = gen_base_lib(word_lib)
 
@@ -1467,7 +1467,11 @@ elif menu.endswith("词库管理"):
         for idx in deleted_rows:
             word = base_lib_df.iloc[idx]["单词"]  # type: ignore
             to_add.append(word)
-        to_add_placeholder.markdown(f'待添加：\n{", ".join(to_add)}。')
+        to_add_placeholder.markdown(
+            f"""待添加：
+
+{", ".join(to_add)}。"""
+        )
 
     if add_lib_btn and st.session_state.get("base_lib_edited_df", {}).get(
         "deleted_rows", []
@@ -1491,6 +1495,18 @@ elif menu.endswith("词库管理"):
         num_rows="dynamic",
         height=500,
     )
+
+    if st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
+        my_word_deleted_rows = st.session_state["my_word_lib"]["deleted_rows"]
+        to_del = []
+        for idx in my_word_deleted_rows:
+            word = my_lib_df.iloc[idx]["单词"]
+            to_del.append(word)
+        to_del_placeholder.markdown(
+            f"""待删除：{
+
+", ".join(to_del)}。"""
+        )
 
     if del_lib_btn and st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
         my_word_deleted_rows = st.session_state["my_word_lib"]["deleted_rows"]
