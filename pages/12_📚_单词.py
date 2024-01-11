@@ -1245,6 +1245,9 @@ elif menu.endswith("词义理解"):
     st.subheader(":pencil: 英语单词理解测试", divider="rainbow", anchor=False)
     st.markdown("""英语单词理解测试是一种测试方式，它提供一个英语单词和四个可能的含义，要求你选择唯一正确的含义。""")
 
+    if "gemini-pro-model" not in st.session_state:
+        st.session_state["gemini-pro-model"] = load_vertex_model("gemini-pro")
+
     update_and_display_progress(
         st.session_state.word_test_idx + 1
         if st.session_state.word_test_idx != -1
@@ -1259,6 +1262,7 @@ elif menu.endswith("词义理解"):
     )
 
     test_btns = st.columns(8)
+
     refresh_btn = test_btns[0].button(
         "重置[:arrows_counterclockwise:]",
         key="test-word-refresh",
@@ -1307,9 +1311,8 @@ elif menu.endswith("词义理解"):
         word = st.session_state.words_for_test[idx]
         if word not in st.session_state.word_tests:
             with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
-                model = load_vertex_model("gemini-pro")
                 st.session_state.word_tests[word] = generate_word_test(
-                    model, word, level
+                    st.session_state["gemini-pro-model"], word, level
                 )
         view_test_word()
 
@@ -1318,9 +1321,8 @@ elif menu.endswith("词义理解"):
         word = st.session_state.words_for_test[idx]
         if word not in st.session_state.word_tests:
             with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
-                model = load_vertex_model("gemini-pro")
                 st.session_state.word_tests[word] = generate_word_test(
-                    model, word, level
+                    st.session_state["gemini-pro-model"], word, level
                 )
         view_test_word()
 
