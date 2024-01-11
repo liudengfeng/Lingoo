@@ -854,7 +854,9 @@ def gen_base_lib(word_lib):
     return pd.DataFrame.from_records(data)
 
 
-@st.cache_data(ttl=timedelta(seconds=TIME_LIMIT), max_entries=100, show_spinner="获取个人词库...")
+@st.cache_data(
+    ttl=timedelta(seconds=TIME_LIMIT), max_entries=100, show_spinner="获取个人词库..."
+)
 def get_cached_my_word_lib():
     # 返回单词列表
     my_words = st.session_state.dbi.find_personal_dictionary()
@@ -1050,7 +1052,7 @@ if menu and menu.endswith("闪卡记忆"):
 
     if st.session_state.flashcard_idx != -1:
         view_flash_word(st.container())
-    
+
 # endregion
 
 # region 单词拼图
@@ -1473,12 +1475,16 @@ elif menu and menu.endswith("词库管理"):
     mylib_placeholder = content_cols[1].container()
     view_placeholder = content_cols[2].container()
 
+    base_lib_df = gen_base_lib(word_lib)
+    lib_df = get_cached_my_word_lib()
+
     view_selected_list = word_lib.split("-", 1)[1]
     base_placeholder.text(f"基础词库({view_selected_list})")
-    mylib_placeholder.text("可删列表", help="在这里删除你的个人词库中的单词（显示的是最近1小时的缓存数据）")
-    view_placeholder.text("个人词库", help="在这里查看你的个人词库所有单词（显示的最新数据）")
+    mylib_placeholder.text(
+        f"可删列表（{0 if lib_df.empty else lib_df.shape[0]}） 个单词",
+        help="在这里删除你的个人词库中的单词（显示的是最近1小时的缓存数据）",
+    )
 
-    base_lib_df = gen_base_lib(word_lib)
     base_placeholder.data_editor(
         base_lib_df,
         key="base_lib_edited_df",
@@ -1488,7 +1494,6 @@ elif menu and menu.endswith("词库管理"):
         height=500,
     )
 
-    lib_df = get_cached_my_word_lib()
     mylib_placeholder.data_editor(
         lib_df,
         key="my_word_lib",
@@ -1527,6 +1532,7 @@ elif menu and menu.endswith("词库管理"):
 
     if view_lib_btn:
         df = get_my_word_lib()
+        view_placeholder.text(f"个人词库（{0 if df.empty else df.shape[0]}） 个单词", help="在这里查看你的个人词库所有单词（显示的最新数据）")
         view_placeholder.dataframe(df, height=500)
 
     with st.expander(":bulb: 小提示", expanded=False):
@@ -1544,4 +1550,3 @@ elif menu and menu.endswith("词库管理"):
 
 # 任何插件都会触发更新
 update_pending_words(st.session_state, "wld")
-
