@@ -490,13 +490,6 @@ def display_puzzle_definition():
     st.markdown(msg)
 
 
-# # 前后移动时删除原有文本
-# if st.session_state.get("puzzle-prev"):
-#     st.session_state["puzzle_answer_value"] = ""
-# if st.session_state.get("puzzle-next"):
-#     st.session_state["puzzle_answer_value"] = ""
-
-
 def on_prev_puzzle_btn_click():
     st.session_state["puzzle_idx"] -= 1
     st.session_state.puzzle_answer_value = ""
@@ -505,48 +498,6 @@ def on_prev_puzzle_btn_click():
 def on_next_puzzle_btn_click():
     st.session_state["puzzle_idx"] += 1
     st.session_state.puzzle_answer_value = ""
-
-
-# def handle_puzzle_input():
-#     user_input = st.text_input(
-#         "点击字符按钮或输入您的答案",
-#         placeholder="点击字符按钮或直接输入您的答案",
-#         value=st.session_state.puzzle_answer_value,
-#         key="puzzle_answer",
-#         label_visibility="collapsed",
-#     )
-
-#     puzzle_score = st.empty()
-#     sumbit_cols = st.columns(5)
-
-#     if sumbit_cols[0].button("重试[:repeat:]", help="✨ 恢复初始状态，重新开始拼图游戏。"):
-#         prepare_puzzle()
-#         st.rerun()
-
-#     sumbit_cols[1].button(
-#         "清除[:wastebasket:]", on_click=clear_puzzle_answer, help="✨ 清除用户输入的答案文本。"
-#     )
-
-#     if sumbit_cols[2].button("检查[:mag:]", help="✨ 点击按钮，检查您的答案是否正确。"):
-#         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-#         if word not in st.session_state.flashcard_word_info:
-#             st.session_state.flashcard_word_info[word] = get_word_info(word)
-
-#         msg = f'单词：{word}\t翻译：{st.session_state.flashcard_word_info[word]["zh-CN"]["translation"]}'
-#         if user_input == word:
-#             st.balloons()
-#             st.session_state.puzzle_test_score[word] = True
-#         else:
-#             st.write(f"对不起，您回答错误。正确的单词应该为：{word}")
-#             st.session_state.puzzle_test_score[word] = False
-
-#         score = (
-#             sum(st.session_state.puzzle_test_score.values())
-#             / len(st.session_state["puzzle_words"])
-#             * 100
-#         )
-#         msg = f":red[您的得分：{score:.0f}%]\t{msg}"
-#         puzzle_score.markdown(msg)
 
 
 def handle_puzzle_input():
@@ -594,16 +545,6 @@ def handle_puzzle_input():
         )
         msg = f":red[您的得分：{score:.0f}%]\t{msg}"
         puzzle_score.markdown(msg)
-
-
-# def handle_puzzle():
-#     display_puzzle_translation()
-#     view_puzzle_word()
-#     handle_puzzle_input()
-#     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-#     container = st.container()
-#     display_puzzle_definition()
-#     display_word_images(word, container)
 
 
 def handle_puzzle():
@@ -962,7 +903,7 @@ if menu.endswith("闪卡记忆"):
     btn_cols = st.columns(10)
 
     refresh_btn = btn_cols[0].button(
-        ":arrows_counterclockwise:",
+        "重置[:arrows_counterclockwise:]",
         key="flashcard-refresh",
         on_click=generate_page_words,
         args=(word_lib, num_word, "flashcard_words"),
@@ -1098,7 +1039,7 @@ elif menu.endswith("拼图游戏"):
 
     puzzle_cols = st.columns(10)
     refresh_btn = puzzle_cols[0].button(
-        ":arrows_counterclockwise:",
+        "重置[:arrows_counterclockwise:]",
         key="puzzle-refresh",
         help="✨ 点击按钮，将从词库中抽取单词，开始或重新开始单词拼图游戏。",
         on_click=generate_page_words,
@@ -1195,7 +1136,7 @@ elif menu.endswith("看图猜词"):
 
     # 创建按钮
     refresh_btn = pic_word_test_btn_cols[0].button(
-        ":arrows_counterclockwise:",
+        "重置[:arrows_counterclockwise:]",
         key="refresh-pic",
         help="✨ 点击按钮，将从题库中抽取测试题，开始或重新开始看图测词游戏。",
         on_click=pic_word_test_reset,
@@ -1319,7 +1260,7 @@ elif menu.endswith("词义理解"):
 
     test_btns = st.columns(10)
     refresh_btn = test_btns[0].button(
-        ":arrows_counterclockwise:",
+        "重置[:arrows_counterclockwise:]",
         key="test-word-refresh",
         help="✨ 点击按钮，将从词库中抽取单词，开始或重新开始单词理解测试。",
         on_click=generate_page_words,
