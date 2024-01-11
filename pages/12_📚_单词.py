@@ -1411,7 +1411,7 @@ elif menu.endswith("词库管理"):
     # 基准词库不包含个人词库
     if "个人词库" in st.session_state.word_dict:
         st.session_state.word_dict.pop("个人词库")
-    
+
     word_lib = st.sidebar.selectbox(
         "词库",
         sorted(list(st.session_state.word_dict.keys())),
@@ -1419,13 +1419,16 @@ elif menu.endswith("词库管理"):
         on_change=reset_flashcard_word,
         format_func=lambda x: x.split("-", maxsplit=1)[1],
         help="✨ 选择一个基准词库，用于生成个人词库。",
-    )   
+    )
+
     st.subheader(":books: 词库管理", divider="rainbow", anchor=False)
-    st.markdown("""✨ 词库管理包括基础词库和个人词库。基础词库包含了常用的单词，个人词库包含了用户自己添加的单词。""")
+    st.markdown(
+        """✨ 词库管理分为基础词库和个人词库两部分。基础词库包含常用单词，供所有用户使用。个人词库则是用户自定义的部分，用户可以根据自己的需求添加或删除单词，以便进行个性化的学习和复习。"""
+    )
+
     lib_cols = st.columns(2)
-    view_selected_list = ""
-    if st.session_state["selected_list"] is not None:
-        view_selected_list = st.session_state["selected_list"].split("-", maxsplit=1)[1]
+    view_selected_list = word_lib.split("-", maxsplit=1)[1]
+
     lib_cols[0].markdown(f"#### 基础词库({view_selected_list})")
     placeholder = lib_cols[0].empty()
     lib_cols[1].markdown("#### 个人词库")
