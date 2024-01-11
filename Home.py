@@ -193,7 +193,7 @@ if not is_logged_in:
             help="✨ 输入个人登录密码",
             placeholder="输入个人登录密码",
         )
-        sub_btn = st.form_submit_button(label="确认")
+        sub_btn = st.form_submit_button(label="登录")
         if sub_btn:
             if not is_valid_phone_number(phone_number):
                 sidebar_status.error(f"请输入有效的手机号码。您输入的号码是：{phone_number}")
