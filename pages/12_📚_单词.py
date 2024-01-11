@@ -464,17 +464,17 @@ def view_puzzle_word():
             st.rerun()
 
 
+# def display_puzzle_translation():
+#     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+#     t_word = st.session_state.mini_dict[word.replace("/", " or ")].get(
+#         "translation", ""
+#     )
+#     msg = f"中译文：{t_word}"
+#     st.markdown(msg)
+#     st.info("如果字符中包含空格，这可能表示该单词是一个复合词或短语。", icon="ℹ️")
+
+
 def display_puzzle_translation():
-    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-    t_word = st.session_state.mini_dict[word.replace("/", " or ")].get(
-        "translation", ""
-    )
-    msg = f"中译文：{t_word}"
-    st.markdown(msg)
-    st.info("如果字符中包含空格，这可能表示该单词是一个复合词或短语。", icon="ℹ️")
-
-
-def display_puzzle_translation_new():
     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
     t_word = st.session_state.mini_dict[word.replace("/", " or ")].get(
         "translation", ""
@@ -511,12 +511,54 @@ def clear_puzzle_answer():
     st.session_state.puzzle_answer_value = ""
 
 
+# def handle_puzzle_input():
+#     user_input = st.text_input(
+#         "点击字符按钮或输入您的答案",
+#         placeholder="点击字符按钮或直接输入您的答案",
+#         value=st.session_state.puzzle_answer_value,
+#         key="puzzle_answer",
+#         label_visibility="collapsed",
+#     )
+
+#     puzzle_score = st.empty()
+#     sumbit_cols = st.columns(5)
+
+#     if sumbit_cols[0].button("重试[:repeat:]", help="✨ 恢复初始状态，重新开始拼图游戏。"):
+#         prepare_puzzle()
+#         st.rerun()
+
+#     sumbit_cols[1].button(
+#         "清除[:wastebasket:]", on_click=clear_puzzle_answer, help="✨ 清除用户输入的答案文本。"
+#     )
+
+#     if sumbit_cols[2].button("检查[:mag:]", help="✨ 点击按钮，检查您的答案是否正确。"):
+#         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+#         if word not in st.session_state.flashcard_word_info:
+#             st.session_state.flashcard_word_info[word] = get_word_info(word)
+
+#         msg = f'单词：{word}\t翻译：{st.session_state.flashcard_word_info[word]["zh-CN"]["translation"]}'
+#         if user_input == word:
+#             st.balloons()
+#             st.session_state.puzzle_test_score[word] = True
+#         else:
+#             st.write(f"对不起，您回答错误。正确的单词应该为：{word}")
+#             st.session_state.puzzle_test_score[word] = False
+
+#         score = (
+#             sum(st.session_state.puzzle_test_score.values())
+#             / len(st.session_state["puzzle_words"])
+#             * 100
+#         )
+#         msg = f":red[您的得分：{score:.0f}%]\t{msg}"
+#         puzzle_score.markdown(msg)
+
+
 def handle_puzzle_input():
     user_input = st.text_input(
         "点击字符按钮或输入您的答案",
         placeholder="点击字符按钮或直接输入您的答案",
         value=st.session_state.puzzle_answer_value,
-        key="puzzle_answer",
+        # key="puzzle_answer",
         label_visibility="collapsed",
     )
 
@@ -553,18 +595,18 @@ def handle_puzzle_input():
         puzzle_score.markdown(msg)
 
 
+# def handle_puzzle():
+#     display_puzzle_translation()
+#     view_puzzle_word()
+#     handle_puzzle_input()
+#     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
+#     container = st.container()
+#     display_puzzle_definition()
+#     display_word_images(word, container)
+
+
 def handle_puzzle():
     display_puzzle_translation()
-    view_puzzle_word()
-    handle_puzzle_input()
-    word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-    container = st.container()
-    display_puzzle_definition()
-    display_word_images(word, container)
-
-
-def handle_puzzle_new():
-    display_puzzle_translation_new()
     view_puzzle_word()
     handle_puzzle_input()
 
@@ -1111,7 +1153,7 @@ elif menu.endswith("拼图游戏"):
         st.toast(f"从个人词库中删除单词：{word}。")
 
     if st.session_state.puzzle_idx != -1:
-        handle_puzzle_new()
+        handle_puzzle()
 
 # endregion
 
