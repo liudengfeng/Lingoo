@@ -1461,18 +1461,6 @@ elif menu.endswith("词库管理"):
         height=500,
     )
 
-    # if st.session_state.get("base_lib_edited_df", {}).get("deleted_rows", []):
-    deleted_rows = st.session_state.get("base_lib_edited_df", {}).get("deleted_rows", [])
-    to_add = []
-    for idx in deleted_rows:
-        word = base_lib_df.iloc[idx]["单词"]  # type: ignore
-        to_add.append(word)
-    to_add_placeholder.markdown(
-            f"""待添加：
-
-{", ".join(to_add)}。"""
-        )
-
     if add_lib_btn and st.session_state.get("base_lib_edited_df", {}).get(
         "deleted_rows", []
     ):
@@ -1486,6 +1474,20 @@ elif menu.endswith("词库管理"):
         del st.session_state["base_lib_edited_df"]["deleted_rows"]
         logger.info(f"已添加到个人词库中：{to_add}。")
 
+    # if st.session_state.get("base_lib_edited_df", {}).get("deleted_rows", []):
+    deleted_rows = st.session_state.get("base_lib_edited_df", {}).get(
+        "deleted_rows", []
+    )
+    to_add = []
+    for idx in deleted_rows:
+        word = base_lib_df.iloc[idx]["单词"]  # type: ignore
+        to_add.append(word)
+    to_add_placeholder.markdown(
+        f"""待添加：
+
+{", ".join(to_add)}"""
+    )
+
     my_lib_df = gen_my_word_lib()
 
     mylib_placeholder.data_editor(
@@ -1496,18 +1498,6 @@ elif menu.endswith("词库管理"):
         num_rows="dynamic",
         height=500,
     )
-
-    # if st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
-    my_word_deleted_rows = st.session_state.get("my_word_lib", {}).get("deleted_rows", [])
-    to_del = []
-    for idx in my_word_deleted_rows:
-        word = my_lib_df.iloc[idx]["单词"]
-        to_del.append(word)
-    to_del_placeholder.markdown(
-        f"""待删除：
-            
-{", ".join(to_del)}。"""
-        )
 
     if del_lib_btn and st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
         my_word_deleted_rows = st.session_state["my_word_lib"]["deleted_rows"]
@@ -1520,6 +1510,20 @@ elif menu.endswith("词库管理"):
         st.session_state.dbi.remove_words_from_personal_dictionary(to_del)
         del st.session_state["my_word_lib"]["deleted_rows"]
         logger.info(f"从个人词库中已经删除：{to_del}。")
+
+    # if st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
+    my_word_deleted_rows = st.session_state.get("my_word_lib", {}).get(
+        "deleted_rows", []
+    )
+    to_del = []
+    for idx in my_word_deleted_rows:
+        word = my_lib_df.iloc[idx]["单词"]
+        to_del.append(word)
+    to_del_placeholder.markdown(
+        f"""待删除：
+            
+{", ".join(to_del)}"""
+    )
 
     with st.expander(":bulb: 小提示", expanded=False):
         st.markdown(
