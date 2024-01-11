@@ -63,18 +63,15 @@ st.sidebar.divider()
 
 # endregion
 
-# region 常量
+# region 通用
+
 # streamlit中各页都是相对当前根目录
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 DICT_DIR = CURRENT_CWD / "resource/dictionary"
 
-# endregion
-
-# region 通用状态
-
 THRESHOLD = 20  # 阈值
-TIME_LIMIT = 10 * 60  # 10分钟
+TIME_LIMIT = 30 * 60  # 30分钟
 
 if "pending_add_words" not in st.session_state:
     st.session_state.pending_add_words = set()
@@ -84,6 +81,15 @@ if "pending_del_words" not in st.session_state:
 
 if "last_update_time" not in st.session_state:
     st.session_state.last_update_time = time.time()
+
+if "lib_pending_add_words" not in st.session_state:
+    st.session_state.lib_pending_add_words = set()
+
+if "lib_pending_del_words" not in st.session_state:
+    st.session_state.lib_pending_del_words = set()
+
+if "lib_last_update_time" not in st.session_state:
+    st.session_state.lib_last_update_time = time.time()
 
 # endregion
 
@@ -199,20 +205,35 @@ def process_pending_words(add_words, del_words):
     return add_words, del_words
 
 
-def update_pending_words():
+# def update_pending_words():
+#     current_time = time.time()
+#     if (
+#         len(st.session_state.pending_add_words) >= THRESHOLD
+#         or len(st.session_state.pending_del_words) >= THRESHOLD
+#         or current_time - st.session_state.last_update_time >= TIME_LIMIT
+#     ):
+#         (
+#             st.session_state.pending_add_words,
+#             st.session_state.pending_del_words,
+#         ) = process_pending_words(
+#             st.session_state.pending_add_words, st.session_state.pending_del_words
+#         )
+#         st.session_state.last_update_time = current_time
+
+
+def update_pending_words(pending_add_words, pending_del_words, last_update_time):
     current_time = time.time()
     if (
-        len(st.session_state.pending_add_words) >= THRESHOLD
-        or len(st.session_state.pending_del_words) >= THRESHOLD
-        or current_time - st.session_state.last_update_time >= TIME_LIMIT
+        len(pending_add_words) >= THRESHOLD
+        or len(pending_del_words) >= THRESHOLD
+        or current_time - last_update_time >= TIME_LIMIT
     ):
         (
-            st.session_state.pending_add_words,
-            st.session_state.pending_del_words,
-        ) = process_pending_words(
-            st.session_state.pending_add_words, st.session_state.pending_del_words
-        )
-        st.session_state.last_update_time = current_time
+            pending_add_words,
+            pending_del_words,
+        ) = process_pending_words(pending_add_words, pending_del_words)
+        last_update_time = current_time
+    return pending_add_words, pending_del_words, last_update_time
 
 
 def on_include_cb_change():
@@ -855,9 +876,24 @@ def gen_base_lib(word_lib):
         )
     return pd.DataFrame.from_records(data)
 
+# 确保数据先储存，然后再读取
+@st.cache_data(
+    ttl=timedelta(seconds=TIME_LIMIT + 20), max_entries=1000, show_spinner="获取个人词库..."
+)
+def get_my_word_lib_from_db():
+    return st.session_state.dbi.find_personal_dictionary()
+
 
 def gen_my_word_lib():
-    my_words = st.session_state.dbi.find_personal_dictionary()
+    # 返回单词列表
+    my_words = get_my_word_lib_from_db()
+    # 将 my_words 转换为 set
+    my_words_set = set(my_words)
+    # 使用集合运算更新 my_words_set
+    my_words_set = my_words_set.union(st.session_state.pending_add_words)
+    my_words_set = my_words_set.difference(st.session_state.pending_del_words)
+    # 将 my_words_set 转换回 list
+    my_words = list(my_words_set)    
     data = []
     for word in my_words:
         w = word.replace("/", " or ")
@@ -1454,7 +1490,7 @@ elif menu.endswith("词库管理"):
         for idx, d in edited_rows.items():
             word = base_lib_df.iloc[idx]["单词"]  # type: ignore
             if d["添加"]:
-                st.session_state.pending_add_words.add(word)
+                st.session_state.lib_pending_add_words.add(word)
                 st.toast(f"已添加到个人词库中：{word}。")
         st.rerun()
 
@@ -1476,7 +1512,7 @@ elif menu.endswith("词库管理"):
         for idx, d in my_word_edited_rows.items():
             word = my_lib_df.iloc[idx]["单词"]  # type: ignore
             if d["删除"]:
-                st.session_state.pending_del_words.add(word)
+                st.session_state.lib_pending_del_words.add(word)
                 st.toast(f"已从个人词库中删除：{word}。")
         st.rerun()
 
@@ -1492,5 +1528,22 @@ elif menu.endswith("词库管理"):
 # endregion
 
 
-# 更新待处理的单词
-update_pending_words()
+# 更新
+(
+    st.session_state.pending_add_words,
+    st.session_state.pending_del_words,
+    st.session_state.last_update_time,
+) = update_pending_words(
+    st.session_state.pending_add_words,
+    st.session_state.pending_del_words,
+    st.session_state.last_update_time,
+)
+(
+    st.session_state.lib_pending_add_words,
+    st.session_state.lib_pending_del_words,
+    st.session_state.lib_last_update_time,
+) = update_pending_words(
+    st.session_state.lib_pending_add_words,
+    st.session_state.lib_pending_del_words,
+    st.session_state.lib_last_update_time,
+)
