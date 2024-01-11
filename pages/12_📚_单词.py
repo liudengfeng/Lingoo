@@ -1159,7 +1159,7 @@ elif menu.endswith("看图猜词"):
     )
     # 答题即可提交检查
     sumbit_pic_btn = pic_word_test_btn_cols[3].button(
-        ":mag:",
+        "提交[:mag:]",
         key="submit-pic",
         disabled=len(st.session_state.pic_tests) == 0
         or len(st.session_state.user_pic_answer) == 0,
@@ -1288,7 +1288,7 @@ elif menu.endswith("词义理解"):
     )
     # 答题即可提交检查
     sumbit_test_btn = test_btns[3].button(
-        ":mag:",
+        "检查[:mag:]",
         key="submit-test-word",
         disabled=st.session_state.word_test_idx == -1
         or len(st.session_state.user_answer) == 0,
