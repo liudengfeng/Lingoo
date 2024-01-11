@@ -1282,7 +1282,8 @@ elif menu.endswith("词义理解"):
         key="next-test-word",
         help="✨ 点击按钮，切换到下一题。",
         on_click=on_next_test_btn_click,
-        disabled=len(st.session_state.word_tests) == 0
+        # 选择单词后才开始出题
+        disabled=len(st.session_state.words_for_test) == 0
         or st.session_state.word_test_idx == len(st.session_state.word_tests) - 1,
     )
     # 答题即可提交检查
