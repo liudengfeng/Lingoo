@@ -498,6 +498,10 @@ def on_next_puzzle_btn_click():
     st.session_state.puzzle_answer_value = ""
 
 
+def clear_puzzle_answer():
+    st.session_state.puzzle_answer_value = ""
+
+
 def handle_puzzle_input():
     user_input = st.text_input(
         "点击字符按钮或输入您的答案",
@@ -510,15 +514,15 @@ def handle_puzzle_input():
     puzzle_score = st.empty()
     sumbit_cols = st.columns(5)
 
-    if sumbit_cols[0].button("重试", help="✨ 恢复初始状态，重新开始。"):
+    if sumbit_cols[0].button("重试[:repeat:]", help="✨ 恢复初始状态，重新开始。"):
         prepare_puzzle()
         st.rerun()
-    
-    if sumbit_cols[1].button(":wastebasket:", help="✨ 恢复初始状态，重新开始。"):
-        st.session_state.puzzle_answer = ""
-        st.rerun()
 
-    if sumbit_cols[2].button("检查", help="✨ 点击按钮，检查您的答案是否正确。"):
+    sumbit_cols[1].button(
+        "清除[:wastebasket:]", on_click=clear_puzzle_answer, help="✨ 清除用户输入的答案文本。"
+    )
+
+    if sumbit_cols[2].button("检查[:mag:]", help="✨ 点击按钮，检查您的答案是否正确。"):
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
         if word not in st.session_state.flashcard_word_info:
             st.session_state.flashcard_word_info[word] = get_word_info(word)
