@@ -1496,7 +1496,7 @@ elif menu.endswith("词库管理"):
         for idx in my_word_deleted_rows:
             word = mylib_edited_df.iloc[idx]["单词"]  # type: ignore
             st.session_state.lib_pending_del_words.add(word)
-            st.toast(f"从个人词库中以及删除：{word}。")
+            logger.info(f"从个人词库中以及删除：{word}。")
 
     with st.expander(":bulb: 小提示", expanded=False):
         st.markdown(
