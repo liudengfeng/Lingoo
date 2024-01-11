@@ -490,12 +490,12 @@ def display_puzzle_definition():
 
 def on_prev_puzzle_btn_click():
     st.session_state["puzzle_idx"] -= 1
-    # st.session_state.puzzle_answer_value = ""
+    st.session_state.puzzle_answer_value = ""
 
 
 def on_next_puzzle_btn_click():
     st.session_state["puzzle_idx"] += 1
-    # st.session_state.puzzle_answer_value = ""
+    st.session_state.puzzle_answer_value = ""
 
 
 def handle_puzzle_input():
