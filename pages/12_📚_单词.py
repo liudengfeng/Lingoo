@@ -69,6 +69,7 @@ st.sidebar.divider()
 
 CURRENT_CWD: Path = Path(__file__).parent.parent
 DICT_DIR = CURRENT_CWD / "resource/dictionary"
+VIDEO_DIR = CURRENT_CWD / "resource/video_tip"
 
 THRESHOLD = 100  # 阈值
 TIME_LIMIT = 10 * 60  # 10分钟
@@ -1532,8 +1533,18 @@ elif menu and menu.endswith("词库管理"):
 
     if view_lib_btn:
         df = get_my_word_lib()
-        view_placeholder.text(f"个人词库（{0 if df.empty else df.shape[0]}） 个单词", help="在这里查看你的个人词库所有单词（显示的最新数据）")
+        view_placeholder.text(
+            f"个人词库（{0 if df.empty else df.shape[0]}） 个单词",
+            help="在这里查看你的个人词库所有单词（显示的最新数据）",
+        )
         view_placeholder.dataframe(df, height=500)
+
+    with st.expander(":bulb: 如何从个人词库中删除一个或多个单词", expanded=False):
+        # video_file = open('myvideo.mp4', 'rb')
+        # video_bytes = video_file.read()
+        # st.video(video_bytes)
+        vfp = VIDEO_DIR / "个人词库逐个删除.mp4"
+        st.video(vfp)
 
     with st.expander(":bulb: 小提示", expanded=False):
         st.markdown(
