@@ -1284,7 +1284,7 @@ elif menu.endswith("词义理解"):
         on_click=on_next_test_btn_click,
         # 选择单词后才开始出题
         disabled=len(st.session_state.words_for_test) == 0
-        or st.session_state.word_test_idx == len(st.session_state.word_tests) - 1,
+        or st.session_state.word_test_idx == len(st.session_state.words_for_test) - 1,
     )
     # 答题即可提交检查
     sumbit_test_btn = test_btns[3].button(
