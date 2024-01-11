@@ -458,7 +458,7 @@ def prepare_puzzle():
     st.session_state.puzzle_view_word = ws
     st.session_state.clicked_character = [False] * len(ws)
     # st.session_state.puzzle_answer_value = ""
-    st.session_state.puzzle_answer = ""
+    # st.session_state.puzzle_answer = ""
 
 
 def view_puzzle_word():
@@ -518,7 +518,6 @@ def handle_puzzle_input():
     user_input = st.text_input(
         "点击字符按钮或输入您的答案",
         placeholder="点击字符按钮或直接输入您的答案",
-        # value=st.session_state.puzzle_answer_value,
         key="puzzle_answer",
         label_visibility="collapsed",
     )
