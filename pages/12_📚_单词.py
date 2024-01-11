@@ -1469,10 +1469,10 @@ elif menu.endswith("词库管理"):
         height=500,
     )
 
-    if add_lib_btn and st.session_state.get("base_lib_edited_df", None):
-        to_add = st.session_state["base_lib_edited_df"]
-        deleted_rows = to_add["deleted_rows"]
-        # st.write("删除的行：", deleted_rows)
+    if add_lib_btn and st.session_state.get("base_lib_edited_df", {}).get(
+        "deleted_rows", []
+    ):
+        deleted_rows = st.session_state["base_lib_edited_df"]["deleted_rows"]
         for idx in deleted_rows:
             word = base_lib_df.iloc[idx]["单词"]  # type: ignore
             st.session_state.lib_pending_add_words.add(word)
@@ -1490,13 +1490,9 @@ elif menu.endswith("词库管理"):
         height=500,
     )
 
-    # if del_lib_btn and st.session_state.get("my_word_lib", None):
-    if del_lib_btn:
-        my_word_lib = st.session_state["my_word_lib"]
-        st.write("对象\n", my_word_lib)
-
-        # my_word_deleted_rows = my_word_lib["deleted_rows"]
-        # st.write("编辑的行：", my_word_deleted_rows)
+    if del_lib_btn and st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
+        my_word_deleted_rows = st.session_state["my_word_lib"]["deleted_rows"]
+        st.write("删除的行号:\n", my_word_deleted_rows)
         # for idx in my_word_deleted_rows:
         #     word = my_lib_df.iloc[idx]["单词"]  # type: ignore
         #     st.session_state.lib_pending_del_words.add(word)
