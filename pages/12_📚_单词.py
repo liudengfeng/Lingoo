@@ -1478,6 +1478,11 @@ elif menu.endswith("词库管理"):
                 st.toast(f"已从个人词库中删除：{word}。")
         st.rerun()
 
+    with st.expander(":bulb: 小提示", expanded=False):
+        st.markdown("""
+- coca20000 包含了大多数英语单词，可以作为基础词库
+""")
+
 # endregion
 
 
