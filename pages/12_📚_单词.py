@@ -823,7 +823,7 @@ def view_test_word():
 
 # region 个人词库辅助
 
-add_my_word_lib_column_config = {
+ADD_MY_WORD_LIB_COLUMN_CONFIG = {
     "添加": st.column_config.CheckboxColumn(
         "添加",
         help="✨ 点击复选框，选中单词添加到个人词库",
@@ -832,7 +832,7 @@ add_my_word_lib_column_config = {
     )
 }
 
-del_my_word_lib_column_config = {
+DEL_MY_WORD_LIB_COLUMN_CONFIG = {
     "删除": st.column_config.CheckboxColumn(
         "删除",
         help="✨ 点击复选框，从个人词库中删除该单词",
@@ -1441,7 +1441,7 @@ elif menu.endswith("词库管理"):
         df,
         key="word_lib",
         hide_index=True,
-        column_config=add_my_word_lib_column_config,
+        column_config=ADD_MY_WORD_LIB_COLUMN_CONFIG,
         height=500,
         disabled=[col for col in df.columns if col not in EDITABLE_COLS],
     )
@@ -1462,7 +1462,7 @@ elif menu.endswith("词库管理"):
         my_word_df,
         key="my_word_lib",
         hide_index=True,
-        column_config=del_my_word_lib_column_config,
+        column_config=DEL_MY_WORD_LIB_COLUMN_CONFIG,
         height=500,
         disabled=[col for col in df.columns if col not in EDITABLE_COLS],
     )
