@@ -512,9 +512,6 @@ def on_next_puzzle_btn_click():
 def handle_puzzle_input():
     # Use the get method since the keys won't be in session_state
     # on the first script run
-    if st.session_state.get("clear_answer"):
-        st.session_state["puzzle_answer"] = ""
-    
     if st.session_state.get("retry"):
         st.session_state["puzzle_answer"] = ""
 
@@ -532,11 +529,7 @@ def handle_puzzle_input():
         prepare_puzzle()
         st.rerun()
 
-    sumbit_cols[1].button(
-        "清除[:wastebasket:]", key="clear_answer", help="✨ 清除用户输入的答案文本。"
-    )
-
-    if sumbit_cols[2].button("检查[:mag:]", help="✨ 点击按钮，检查您的答案是否正确。"):
+    if sumbit_cols[1].button("检查[:mag:]", help="✨ 点击按钮，检查您的答案是否正确。"):
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
         if word not in st.session_state.flashcard_word_info:
             st.session_state.flashcard_word_info[word] = get_word_info(word)
