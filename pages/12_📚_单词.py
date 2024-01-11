@@ -1492,12 +1492,12 @@ elif menu.endswith("词库管理"):
 
     if del_lib_btn and st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
         my_word_deleted_rows = st.session_state["my_word_lib"]["deleted_rows"]
-        st.write("删除的行号:\n", my_word_deleted_rows)
-        # for idx in my_word_deleted_rows:
-        #     word = my_lib_df.iloc[idx]["单词"]  # type: ignore
-        #     st.session_state.lib_pending_del_words.add(word)
-        #     st.toast(f"从个人词库中以及删除：{word}。")
-        # st.rerun()
+        # st.write("删除的行号:\n", my_word_deleted_rows)
+        for idx in my_word_deleted_rows:
+            word = my_lib_df.iloc[idx]["单词"]  # type: ignore
+            st.session_state.lib_pending_del_words.add(word)
+            st.toast(f"从个人词库中以及删除：{word}。")
+        st.rerun()
 
     with st.expander(":bulb: 小提示", expanded=False):
         st.markdown(
