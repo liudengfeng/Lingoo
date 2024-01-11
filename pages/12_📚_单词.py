@@ -854,7 +854,7 @@ def gen_base_lib(word_lib):
     return pd.DataFrame.from_records(data)
 
 
-@st.cache_data(ttl=timedelta(hours=1), max_entries=100, show_spinner="获取个人词库...")
+@st.cache_data(ttl=timedelta(seconds=TIME_LIMIT), max_entries=100, show_spinner="获取个人词库...")
 def get_cached_my_word_lib():
     # 返回单词列表
     my_words = st.session_state.dbi.find_personal_dictionary()
@@ -909,6 +909,7 @@ with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
 
 
 if menu and menu.endswith("闪卡记忆"):
+    # region 侧边栏
     # 让用户选择语音风格
     pronunciation = st.sidebar.radio("请选择发音标准", ("美式", "英式"))
     style = "en-US" if pronunciation == "美式" else "en-GB"
@@ -1049,6 +1050,7 @@ if menu and menu.endswith("闪卡记忆"):
 
     if st.session_state.flashcard_idx != -1:
         view_flash_word(st.container())
+    
 # endregion
 
 # region 单词拼图
@@ -1542,4 +1544,4 @@ elif menu and menu.endswith("词库管理"):
 
 # 任何插件都会触发更新
 update_pending_words(st.session_state, "wld")
-# update_pending_words(st.session_state, "lib")
+
