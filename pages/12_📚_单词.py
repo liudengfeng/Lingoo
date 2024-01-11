@@ -1494,6 +1494,8 @@ elif menu.endswith("词库管理"):
                 st.toast(f"已添加到个人词库中：{word}。")
         st.rerun()
 
+    st.write(st.session_state.lib_pending_add_words)
+    st.write(st.session_state.lib_pending_del_words)
     my_lib_df = gen_my_word_lib()
 
     mylib_placeholder.data_editor(
