@@ -1464,7 +1464,7 @@ elif menu.endswith("词库管理"):
             deleted_rows = st.session_state["base_lib_edited_df"]["deleted_rows"]
             to_add = []
             for idx in deleted_rows:
-                word = df.iloc[idx]["单词"]  # type: ignore
+                word = base_lib_df.iloc[idx]["单词"]  # type: ignore
                 to_add.append(word)
                 # st.session_state.lib_pending_add_words.add(word)
             st.session_state.dbi.add_words_to_personal_dictionary(to_add)
