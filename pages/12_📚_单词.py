@@ -1503,9 +1503,9 @@ elif menu.endswith("词库管理"):
             word = my_lib_df.iloc[idx]["单词"]
             to_del.append(word)
         to_del_placeholder.markdown(
-            f"""待删除：{
-
-", ".join(to_del)}。"""
+            f"""待删除：
+            
+{", ".join(to_del)}。"""
         )
 
     if del_lib_btn and st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
