@@ -1421,6 +1421,7 @@ elif menu.endswith("词库管理"):
         help="✨ 选择一个基准词库，用于生成个人词库。",
     )   
     st.subheader(":books: 词库管理", divider="rainbow", anchor=False)
+    st.markdown("""✨ 词库管理包括基础词库和个人词库。基础词库包含了常用的单词，个人词库包含了用户自己添加的单词。""")
     lib_cols = st.columns(2)
     view_selected_list = ""
     if st.session_state["selected_list"] is not None:
