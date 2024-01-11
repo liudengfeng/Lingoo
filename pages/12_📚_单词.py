@@ -1476,7 +1476,7 @@ elif menu.endswith("词库管理"):
         for idx in deleted_rows:
             word = base_lib_df.iloc[idx]["单词"]  # type: ignore
             st.session_state.lib_pending_add_words.add(word)
-            logger.debug(f"已添加到个人词库中：{word}。")
+            logger.info(f"已添加到个人词库中：{word}。")
 
     my_lib_df = gen_my_word_lib()
 
@@ -1495,7 +1495,7 @@ elif menu.endswith("词库管理"):
         for idx in my_word_deleted_rows:
             word = my_lib_df.iloc[idx]["单词"]  # type: ignore
             st.session_state.lib_pending_del_words.add(word)
-            logger.debug(f"从个人词库中以及删除：{word}。")
+            logger.info(f"从个人词库中以及删除：{word}。")
 
     with st.expander(":bulb: 小提示", expanded=False):
         st.markdown(
