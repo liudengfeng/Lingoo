@@ -900,7 +900,7 @@ if menu.endswith("闪卡记忆"):
         f"\t 当前单词：{st.session_state.flashcard_words[st.session_state.flashcard_idx] if st.session_state.flashcard_idx != -1 else ''}",
     )
 
-    btn_cols = st.columns(10)
+    btn_cols = st.columns(8)
 
     refresh_btn = btn_cols[0].button(
         "重置[:arrows_counterclockwise:]",
@@ -1037,7 +1037,7 @@ elif menu.endswith("拼图游戏"):
         st.empty(),
     )
 
-    puzzle_cols = st.columns(10)
+    puzzle_cols = st.columns(8)
     refresh_btn = puzzle_cols[0].button(
         "重置[:arrows_counterclockwise:]",
         key="puzzle-refresh",
@@ -1132,7 +1132,7 @@ elif menu.endswith("看图猜词"):
         st.empty(),
     )
 
-    pic_word_test_btn_cols = st.columns(10)
+    pic_word_test_btn_cols = st.columns(8)
 
     # 创建按钮
     refresh_btn = pic_word_test_btn_cols[0].button(
@@ -1258,7 +1258,7 @@ elif menu.endswith("词义理解"):
         else "",
     )
 
-    test_btns = st.columns(10)
+    test_btns = st.columns(8)
     refresh_btn = test_btns[0].button(
         "重置[:arrows_counterclockwise:]",
         key="test-word-refresh",
