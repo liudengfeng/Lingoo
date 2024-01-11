@@ -851,16 +851,6 @@ def view_test_word():
 # region 个人词库辅助
 
 
-DEL_MY_WORD_LIB_COLUMN_CONFIG = {
-    "删除": st.column_config.CheckboxColumn(
-        "删除",
-        help="✨ 点击复选框，从个人词库中删除该单词",
-        width="small",
-        required=True,
-    )
-}
-
-
 def gen_base_lib(word_lib):
     words = st.session_state.word_dict[word_lib]
     data = []
@@ -875,6 +865,7 @@ def gen_base_lib(word_lib):
             }
         )
     return pd.DataFrame.from_records(data)
+
 
 # 确保数据先储存，然后再读取
 @st.cache_data(
@@ -893,7 +884,7 @@ def gen_my_word_lib():
     my_words_set = my_words_set.union(st.session_state.lib_pending_add_words)
     my_words_set = my_words_set.difference(st.session_state.lib_pending_del_words)
     # 将 my_words_set 转换回 list
-    my_words = list(my_words_set)    
+    my_words = list(my_words_set)
     data = []
     for word in my_words:
         w = word.replace("/", " or ")
@@ -908,11 +899,6 @@ def gen_my_word_lib():
         )
     return pd.DataFrame.from_records(data)
 
-
-EDITABLE_COLS: list[str] = [
-    "删除",
-    "添加",
-]
 
 # endregion
 
@@ -1477,39 +1463,40 @@ elif menu.endswith("词库管理"):
         base_lib_df,
         key="base_lib_edited_df",
         hide_index=True,
+        disabled=["单词", "CEFR最低分级", "翻译"],
         # column_config=ADD_MY_WORD_LIB_COLUMN_CONFIG,
         num_rows="dynamic",
         height=500,
-        disabled=[col for col in base_lib_df.columns if col not in EDITABLE_COLS],
     )
 
     if add_lib_btn and st.session_state.get("base_lib_edited_df", None):
         to_add = st.session_state["base_lib_edited_df"]
         deleted_rows = to_add["deleted_rows"]
-        st.write("删除的行：", deleted_rows)
+        # st.write("删除的行：", deleted_rows)
         for idx in deleted_rows:
             word = base_lib_df.iloc[idx]["单词"]  # type: ignore
             st.session_state.lib_pending_add_words.add(word)
             st.toast(f"已添加到个人词库中：{word}。")
         st.rerun()
 
-    st.write(st.session_state.lib_pending_add_words)
-    st.write(st.session_state.lib_pending_del_words)
     my_lib_df = gen_my_word_lib()
 
     mylib_placeholder.data_editor(
         my_lib_df,
         key="my_word_lib",
         hide_index=True,
-        column_config=DEL_MY_WORD_LIB_COLUMN_CONFIG,
+        disabled=["单词", "CEFR最低分级", "翻译"],
+        num_rows="dynamic",
         height=500,
-        disabled=[col for col in base_lib_df.columns if col not in EDITABLE_COLS],
     )
+
+    # st.write(st.session_state.lib_pending_add_words)
+    # st.write(st.session_state.lib_pending_del_words)
 
     if del_lib_btn and st.session_state.get("my_word_lib", None):
         my_word_lib = st.session_state["my_word_lib"]
         my_word_edited_rows = my_word_lib["edited_rows"]
-        # st.write("编辑的行：", edited_rows)
+        st.write("编辑的行：", my_word_edited_rows)
         for idx, d in my_word_edited_rows.items():
             word = my_lib_df.iloc[idx]["单词"]  # type: ignore
             if d["删除"]:
@@ -1521,7 +1508,7 @@ elif menu.endswith("词库管理"):
         st.markdown(
             """
 - `coca20000`包含了大量常用英语单词，可作为基础词库供用户参考。
-- 如需从基础词库中添加单词到个人词库，用户需在基础词库左侧的复选框中选择一行或多行，然后点击`加[➕]`按钮，即可将选中的单词添加到个人词库。
+- 如需从基础词库中添加单词到个人词库，用户需在基础词库左侧的复选框中选择一行或多行，单击删除`图标 (delete)`或按键盘上的`删除键`，最后点击`添加[➕]`按钮，即可将选中的单词添加到个人词库。
 - 如需将整个基础词库添加到个人词库，用户需在基础词库标题行的第一列进行全选，然后点击`添加[➕]`按钮，即可将所有单词添加到个人词库。
 """
         )
