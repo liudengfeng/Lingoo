@@ -72,7 +72,7 @@ DICT_DIR = CURRENT_CWD / "resource/dictionary"
 
 THRESHOLD = 20  # 阈值
 # TIME_LIMIT = 30 * 60  # 30分钟
-TIME_LIMIT = 60  # 30分钟
+TIME_LIMIT = 40  # 30分钟
 
 if "pending_add_words" not in st.session_state:
     st.session_state.pending_add_words = set()
