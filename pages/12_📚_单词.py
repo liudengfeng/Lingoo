@@ -1430,14 +1430,10 @@ elif menu.endswith("词库管理"):
     st.markdown(
         """✨ 词库管理分为基础词库和个人词库两部分。基础词库包含常用单词，供所有用户使用。个人词库则是用户自定义的部分，用户可以根据自己的需求添加或删除单词，以便进行个性化的学习和复习。"""
     )
-
-    lib_cols = st.columns(2)
     view_selected_list = word_lib.split("-", maxsplit=1)[1]
-    lib_cols[0].subheader(f"基础词库({view_selected_list})", anchor=False)
-    lib_cols[1].subheader("个人词库", anchor=False)
+    st.subheader(f"基础词库({view_selected_list})", anchor=False)
 
-    baselib_placeholder = lib_cols[0].empty()
-    mylib_placeholder = lib_cols[1].empty()
+    lib_cols = st.columns(8)
 
     add_lib_btn = lib_cols[0].button(
         "添加[:heavy_plus_sign:]", key="add-lib-btn", help="✨ 点击按钮，将'基础词库'中已选单词添加到个人词库。"
@@ -1446,84 +1442,115 @@ elif menu.endswith("词库管理"):
         "删除[:heavy_minus_sign:]", key="del-lib-btn", help="✨ 点击按钮，将已选单词从'个人词库'中删除。"
     )
 
-    to_add_placeholder = lib_cols[0].empty()
-    to_del_placeholder = lib_cols[1].empty()
+    content_cols = st.columns(2)
+    placeholder = content_cols[0].empty()
 
-    base_lib_df = gen_base_lib(word_lib)
+    if add_lib_btn:
+        df = gen_base_lib(word_lib)
+        placeholder.data_editor(
+            df,
+            key="base_lib_edited_df",
+            hide_index=True,
+            disabled=["单词", "CEFR最低分级", "翻译"],
+            # column_config=ADD_MY_WORD_LIB_COLUMN_CONFIG,
+            num_rows="dynamic",
+            height=500,
+        )
 
-    baselib_placeholder.data_editor(
-        base_lib_df,
-        key="base_lib_edited_df",
-        hide_index=True,
-        disabled=["单词", "CEFR最低分级", "翻译"],
-        # column_config=ADD_MY_WORD_LIB_COLUMN_CONFIG,
-        num_rows="dynamic",
-        height=500,
-    )
+    if del_lib_btn:
+        df = gen_my_word_lib()
+        placeholder.data_editor(
+            df,
+            key="my_word_lib",
+            hide_index=True,
+            disabled=["单词", "CEFR最低分级", "翻译"],
+            num_rows="dynamic",
+            height=500,
+        )
 
-    if add_lib_btn and st.session_state.get("base_lib_edited_df", {}).get(
-        "deleted_rows", []
-    ):
-        deleted_rows = st.session_state["base_lib_edited_df"]["deleted_rows"]
-        to_add = []
-        for idx in deleted_rows:
-            word = base_lib_df.iloc[idx]["单词"]  # type: ignore
-            to_add.append(word)
-            # st.session_state.lib_pending_add_words.add(word)
-        st.session_state.dbi.add_words_to_personal_dictionary(to_add)
-        del st.session_state["base_lib_edited_df"]["deleted_rows"]
-        logger.info(f"已添加到个人词库中：{to_add}。")
 
-    # if st.session_state.get("base_lib_edited_df", {}).get("deleted_rows", []):
-    deleted_rows = st.session_state.get("base_lib_edited_df", {}).get(
-        "deleted_rows", []
-    )
-    to_add = []
-    for idx in deleted_rows:
-        word = base_lib_df.iloc[idx]["单词"]  # type: ignore
-        to_add.append(word)
-    to_add_placeholder.markdown(
-        f"""待添加：
+#     baselib_placeholder = lib_cols[0].empty()
+#     mylib_placeholder = lib_cols[1].empty()
 
-{", ".join(to_add)}"""
-    )
 
-    my_lib_df = gen_my_word_lib()
+#     to_add_placeholder = lib_cols[0].empty()
+#     to_del_placeholder = lib_cols[1].empty()
 
-    mylib_placeholder.data_editor(
-        my_lib_df,
-        key="my_word_lib",
-        hide_index=True,
-        disabled=["单词", "CEFR最低分级", "翻译"],
-        num_rows="dynamic",
-        height=500,
-    )
+#     base_lib_df = gen_base_lib(word_lib)
 
-    if del_lib_btn and st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
-        my_word_deleted_rows = st.session_state["my_word_lib"]["deleted_rows"]
-        # st.write("删除的行号:\n", my_word_deleted_rows)
-        to_del = []
-        for idx in my_word_deleted_rows:
-            word = my_lib_df.iloc[idx]["单词"]  # type: ignore
-            to_del.append(word)
-            # st.session_state.lib_pending_del_words.add(word)
-        st.session_state.dbi.remove_words_from_personal_dictionary(to_del)
-        del st.session_state["my_word_lib"]["deleted_rows"]
-        logger.info(f"从个人词库中已经删除：{to_del}。")
+#     baselib_placeholder.data_editor(
+#         base_lib_df,
+#         key="base_lib_edited_df",
+#         hide_index=True,
+#         disabled=["单词", "CEFR最低分级", "翻译"],
+#         # column_config=ADD_MY_WORD_LIB_COLUMN_CONFIG,
+#         num_rows="dynamic",
+#         height=500,
+#     )
 
-    # if st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
-    my_word_deleted_rows = st.session_state.get("my_word_lib", {}).get(
-        "deleted_rows", []
-    )
-    to_del = []
-    for idx in my_word_deleted_rows:
-        word = my_lib_df.iloc[idx]["单词"]
-        to_del.append(word)
-    to_del_placeholder.markdown(
-        f"""待删除：
+#     if add_lib_btn and st.session_state.get("base_lib_edited_df", {}).get(
+#         "deleted_rows", []
+#     ):
+#         deleted_rows = st.session_state["base_lib_edited_df"]["deleted_rows"]
+#         to_add = []
+#         for idx in deleted_rows:
+#             word = base_lib_df.iloc[idx]["单词"]  # type: ignore
+#             to_add.append(word)
+#             # st.session_state.lib_pending_add_words.add(word)
+#         st.session_state.dbi.add_words_to_personal_dictionary(to_add)
+#         del st.session_state["base_lib_edited_df"]["deleted_rows"]
+#         logger.info(f"已添加到个人词库中：{to_add}。")
+
+#     # if st.session_state.get("base_lib_edited_df", {}).get("deleted_rows", []):
+#     deleted_rows = st.session_state.get("base_lib_edited_df", {}).get(
+#         "deleted_rows", []
+#     )
+#     to_add = []
+#     for idx in deleted_rows:
+#         word = base_lib_df.iloc[idx]["单词"]  # type: ignore
+#         to_add.append(word)
+#     to_add_placeholder.markdown(
+#         f"""待添加：
+
+# {", ".join(to_add)}"""
+#     )
+
+#     my_lib_df = gen_my_word_lib()
+
+#     mylib_placeholder.data_editor(
+#         my_lib_df,
+#         key="my_word_lib",
+#         hide_index=True,
+#         disabled=["单词", "CEFR最低分级", "翻译"],
+#         num_rows="dynamic",
+#         height=500,
+#     )
+
+#     if del_lib_btn and st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
+#         my_word_deleted_rows = st.session_state["my_word_lib"]["deleted_rows"]
+#         # st.write("删除的行号:\n", my_word_deleted_rows)
+#         to_del = []
+#         for idx in my_word_deleted_rows:
+#             word = my_lib_df.iloc[idx]["单词"]  # type: ignore
+#             to_del.append(word)
+#             # st.session_state.lib_pending_del_words.add(word)
+#         st.session_state.dbi.remove_words_from_personal_dictionary(to_del)
+#         del st.session_state["my_word_lib"]["deleted_rows"]
+#         logger.info(f"从个人词库中已经删除：{to_del}。")
+
+#     # if st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
+#     my_word_deleted_rows = st.session_state.get("my_word_lib", {}).get(
+#         "deleted_rows", []
+#     )
+#     to_del = []
+#     for idx in my_word_deleted_rows:
+#         word = my_lib_df.iloc[idx]["单词"]
+#         to_del.append(word)
+#     to_del_placeholder.markdown(
+#         f"""待删除：
             
-{", ".join(to_del)}"""
-    )
+# {", ".join(to_del)}"""
+#     )
 
     with st.expander(":bulb: 小提示", expanded=False):
         st.markdown(
