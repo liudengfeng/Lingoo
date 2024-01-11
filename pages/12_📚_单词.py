@@ -513,7 +513,7 @@ def handle_puzzle_input():
     user_input = st.text_input(
         "点击字符按钮或输入您的答案",
         placeholder="点击字符按钮或直接输入您的答案",
-        value=st.session_state.puzzle_answer_value,
+        # value=st.session_state.puzzle_answer_value,
         key="puzzle_answer",
         label_visibility="collapsed",
     )
@@ -1367,7 +1367,7 @@ elif menu and menu.endswith("词义理解"):
     )
     
     st.divider()
-    
+
     if prev_test_btn:
         idx = st.session_state.word_test_idx
         word = st.session_state.words_for_test[idx]
