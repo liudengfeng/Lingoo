@@ -852,7 +852,7 @@ def gen_base_lib(word_lib):
             {
                 "单词": w,
                 "CEFR最低分级": info.get("level", "") if info else "",
-                "翻译": info["zh-CN"].get("translation", "") if info else "",
+                "翻译": info.get("translation", "") if info else "",
                 "添加": False,
             }
         )
@@ -869,7 +869,7 @@ def gen_my_word_lib():
             {
                 "单词": w,
                 "CEFR最低分级": info.get("level", "") if info else "",
-                "翻译": info["zh-CN"].get("translation", "") if info else "",
+                "翻译": info.get("translation", "") if info else "",
                 "删除": False,
             }
         )
