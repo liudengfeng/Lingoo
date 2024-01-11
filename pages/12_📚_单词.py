@@ -915,7 +915,7 @@ if menu.endswith("闪卡记忆"):
         help="✨ 点击按钮可以在中英对照、只显示英文和只显示中文三种显示状态之间切换。初始状态为中英对照。",
     )
     prev_btn = btn_cols[2].button(
-        ":leftwards_arrow_with_hook:",
+        "向前[:leftwards_arrow_with_hook:]",
         key="flashcard-prev",
         help="✨ 点击按钮，切换到上一个单词。",
         on_click=on_prev_btn_click,
@@ -1046,7 +1046,7 @@ elif menu.endswith("拼图游戏"):
         args=(word_lib, num_word, "puzzle_words"),
     )
     prev_btn = puzzle_cols[1].button(
-        ":leftwards_arrow_with_hook:",
+        "向前[:leftwards_arrow_with_hook:]",
         key="puzzle-prev",
         help="✨ 点击按钮，切换到上一单词拼图。",
         on_click=on_prev_puzzle_btn_click,
@@ -1143,7 +1143,7 @@ elif menu.endswith("看图猜词"):
         args=(category, pic_num),
     )
     prev_pic_btn = pic_word_test_btn_cols[1].button(
-        ":leftwards_arrow_with_hook:",
+        "向前[:leftwards_arrow_with_hook:]",
         help="✨ 点击按钮，切换到上一题。",
         on_click=on_prev_pic_btn_click,
         key="prev-pic",
@@ -1267,7 +1267,7 @@ elif menu.endswith("词义理解"):
         args=(word_lib, test_num, "words_for_test"),
     )
     prev_test_btn = test_btns[1].button(
-        ":leftwards_arrow_with_hook:",
+        "向前[:leftwards_arrow_with_hook:]",
         key="prev-test-word",
         help="✨ 点击按钮，切换到上一题。",
         on_click=on_prev_test_btn_click,
