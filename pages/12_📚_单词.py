@@ -1485,9 +1485,9 @@ elif menu.endswith("词库管理"):
 
     if add_lib_btn and st.session_state.get("base_lib_edited_df", None):
         to_add = st.session_state["base_lib_edited_df"]
-        edited_rows = to_add["edited_rows"]
-        st.write("编辑的行：", edited_rows)
-        for idx, d in edited_rows.items():
+        deleted_rows = to_add["deleted_rows"]
+        st.write("编辑的行：", deleted_rows)
+        for idx, d in deleted_rows.items():
             word = base_lib_df.iloc[idx]["单词"]  # type: ignore
             st.session_state.lib_pending_add_words.add(word)
             st.toast(f"已添加到个人词库中：{word}。")
