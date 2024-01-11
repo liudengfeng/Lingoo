@@ -910,7 +910,7 @@ if menu.endswith("闪卡记忆"):
         help="✨ 点击按钮，从词库中抽取单词，开始或重新开始记忆闪卡游戏。",
     )
     display_status_button = btn_cols[1].button(
-        ":recycle:",
+        "切换[:recycle:]",
         key="flashcard-mask",
         help="✨ 点击按钮可以在中英对照、只显示英文和只显示中文三种显示状态之间切换。初始状态为中英对照。",
     )
