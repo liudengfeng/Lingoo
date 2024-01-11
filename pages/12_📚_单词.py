@@ -514,6 +514,9 @@ def handle_puzzle_input():
     # on the first script run
     if st.session_state.get("clear_answer"):
         st.session_state["puzzle_answer"] = ""
+    
+    if st.session_state.get("retry"):
+        st.session_state["puzzle_answer"] = ""
 
     user_input = st.text_input(
         "点击字符按钮或输入您的答案",
@@ -525,7 +528,7 @@ def handle_puzzle_input():
     puzzle_score = st.empty()
     sumbit_cols = st.columns(5)
 
-    if sumbit_cols[0].button("重试[:repeat:]", help="✨ 恢复初始状态，重新开始拼图游戏。"):
+    if sumbit_cols[0].button("重试[:repeat:]", key="retry", help="✨ 恢复初始状态，重新开始拼图游戏。"):
         prepare_puzzle()
         st.rerun()
 
@@ -1369,7 +1372,7 @@ elif menu and menu.endswith("词义理解"):
         help="✨ 将当前单词从个人词库中删除",
         disabled=st.session_state.word_test_idx == -1,
     )
-    
+
     st.divider()
 
     if prev_test_btn:
@@ -1434,7 +1437,7 @@ elif menu and menu.endswith("词库管理"):
         # 重置操作计数器和时间戳
         st.session_state.operation_counter = 0
         st.session_state.last_operation_time = current_time
-    
+
     word_lib = st.sidebar.selectbox(
         "词库",
         sorted(list(st.session_state.word_dict.keys())),
