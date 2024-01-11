@@ -1450,8 +1450,8 @@ elif menu.endswith("词库管理"):
 
     view_selected_list = word_lib.split("-", maxsplit=1)[1]
     base_placeholder.text(f"基础词库({view_selected_list})")
-    mylib_placeholder.text("可删列表", help="你可以在这里删除你的个人词库中的单词（显示的是最近1小时的缓存数据）")
-    view_placeholder.text("个人词库", help="你可以在这里查看你的个人词库中的所有单词（显示的是实时的数据库数据）")
+    mylib_placeholder.text("可删列表", help="在这里删除你的个人词库中的单词（显示的是最近1小时的缓存数据）")
+    view_placeholder.text("个人词库", help="在这里查看你的个人词库所有单词（显示的最新数据）")
 
     base_lib_df = gen_base_lib(word_lib)
     base_placeholder.data_editor(
