@@ -1365,7 +1365,9 @@ elif menu and menu.endswith("词义理解"):
         help="✨ 将当前单词从个人词库中删除",
         disabled=st.session_state.word_test_idx == -1,
     )
-
+    
+    st.divider()
+    
     if prev_test_btn:
         idx = st.session_state.word_test_idx
         word = st.session_state.words_for_test[idx]
