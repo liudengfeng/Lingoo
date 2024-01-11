@@ -38,7 +38,7 @@ setup_logger(logger)
 # region 页设置
 
 st.set_page_config(
-    page_title="记忆单词",
+    page_title="单词",
     page_icon=":books:",
     layout="wide",
 )
