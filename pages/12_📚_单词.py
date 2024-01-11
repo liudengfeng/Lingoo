@@ -842,14 +842,12 @@ DEL_MY_WORD_LIB_COLUMN_CONFIG = {
 }
 
 
-def gen_word_lib():
-    words = st.session_state.word_dict[st.session_state["selected_list"]]
-    for word in words:
-        if word not in st.session_state.flashcard_word_info:
-            st.session_state.flashcard_word_info[word] = get_word_info(word)
+def gen_base_lib(word_lib):
+    words = st.session_state.word_dict[word_lib]
     data = []
-    for w in words:
-        info = st.session_state.flashcard_word_info[w]
+    for word in words:
+        w = word.replace("/", " or ")
+        info = st.session_state.mini_dict.get(w, {})
         data.append(
             {
                 "单词": w,
@@ -863,19 +861,15 @@ def gen_word_lib():
 
 def gen_my_word_lib():
     my_words = st.session_state.dbi.find_personal_dictionary()
-    # st.write("个人词库：", my_words)
-    for word in my_words:
-        if word not in st.session_state.flashcard_word_info:
-            st.session_state.flashcard_word_info[word] = get_word_info(word)
     data = []
-    for w in my_words:
+    for word in my_words:
+        w = word.replace("/", " or ")
+        info = st.session_state.mini_dict.get(w, {})
         data.append(
             {
                 "单词": w,
-                "CEFR最低分级": st.session_state.flashcard_word_info[w].get("level", ""),
-                "翻译": st.session_state.flashcard_word_info[w]["zh-CN"].get(
-                    "translation", ""
-                ),
+                "CEFR最低分级": info.get("level", "") if info else "",
+                "翻译": info["zh-CN"].get("translation", "") if info else "",
                 "删除": False,
             }
         )
@@ -889,7 +883,7 @@ EDITABLE_COLS: list[str] = [
 
 # endregion
 
-# region 会话状态
+# region 加载数据
 
 if "mini_dict" not in st.session_state:
     st.session_state["mini_dict"] = get_mini_dict()
@@ -1428,46 +1422,49 @@ elif menu.endswith("词库管理"):
 
     lib_cols = st.columns(2)
     view_selected_list = word_lib.split("-", maxsplit=1)[1]
+    lib_cols[0].subheader(f"基础词库({view_selected_list})", anchor=False)
+    lib_cols[1].subheader("个人词库", anchor=False)
 
-    lib_cols[0].markdown(f"#### 基础词库({view_selected_list})")
-    placeholder = lib_cols[0].empty()
-    lib_cols[1].markdown("#### 个人词库")
-    mywords_placeholder = lib_cols[1].empty()
+    baselib_placeholder = lib_cols[0].empty()
+    mylib_placeholder = lib_cols[1].empty()
+
     add_lib_btn = lib_cols[0].button(
         "添加[:heavy_plus_sign:]", key="add-lib-btn", help="✨ 点击按钮，将'基础词库'中已选单词添加到个人词库。"
     )
     del_lib_btn = lib_cols[1].button(
         "删除[:heavy_minus_sign:]", key="del-lib-btn", help="✨ 点击按钮，将已选单词从'个人词库'中删除。"
     )
-    df = gen_word_lib()
-    edited_df = placeholder.data_editor(
-        df,
-        key="word_lib",
+
+    base_lib_df = gen_base_lib(word_lib)
+
+    edited_df = baselib_placeholder.data_editor(
+        base_lib_df,
+        key="base_lib_edited_df",
         hide_index=True,
         column_config=ADD_MY_WORD_LIB_COLUMN_CONFIG,
         height=500,
-        disabled=[col for col in df.columns if col not in EDITABLE_COLS],
+        disabled=[col for col in base_lib_df.columns if col not in EDITABLE_COLS],
     )
-    if add_lib_btn and st.session_state.get("word_lib", None):
-        word_lib = st.session_state["word_lib"]
-        edited_rows = word_lib["edited_rows"]
+
+    if add_lib_btn and st.session_state.get("base_lib_edited_df", None):
+        to_add = st.session_state["base_lib_edited_df"]
+        edited_rows = to_add["edited_rows"]
         # st.write("编辑的行：", edited_rows)
         for idx, d in edited_rows.items():
-            word = df.iloc[idx]["单词"]  # type: ignore
+            word = base_lib_df.iloc[idx]["单词"]  # type: ignore
             if d["添加"]:
-                st.session_state.dbi.add_words_to_personal_dictionary(word)
+                st.session_state.pending_add_words.add(word)
                 st.toast(f"已添加到个人词库中：{word}。")
 
-        word_lib["edited_rows"] = {}
+    my_lib_df = gen_my_word_lib()
 
-    my_word_df = gen_my_word_lib()
-    mywords_placeholder.data_editor(
-        my_word_df,
+    mylib_placeholder.data_editor(
+        my_lib_df,
         key="my_word_lib",
         hide_index=True,
         column_config=DEL_MY_WORD_LIB_COLUMN_CONFIG,
         height=500,
-        disabled=[col for col in df.columns if col not in EDITABLE_COLS],
+        disabled=[col for col in base_lib_df.columns if col not in EDITABLE_COLS],
     )
 
     if del_lib_btn and st.session_state.get("my_word_lib", None):
@@ -1475,9 +1472,9 @@ elif menu.endswith("词库管理"):
         my_word_edited_rows = my_word_lib["edited_rows"]
         # st.write("编辑的行：", edited_rows)
         for idx, d in my_word_edited_rows.items():
-            word = my_word_df.iloc[idx]["单词"]  # type: ignore
+            word = my_lib_df.iloc[idx]["单词"]  # type: ignore
             if d["删除"]:
-                st.session_state.dbi.remove_words_from_personal_dictionary(word)
+                st.session_state.pending_del_words.add(word)
                 st.toast(f"已从个人词库中删除：{word}。")
         st.rerun()
 
