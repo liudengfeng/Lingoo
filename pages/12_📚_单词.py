@@ -1481,7 +1481,7 @@ elif menu.endswith("词库管理"):
 
     my_lib_df = gen_my_word_lib()
 
-    mylib_placeholder.data_editor(
+    mylib_edited_df = mylib_placeholder.data_editor(
         my_lib_df,
         key="my_word_lib",
         hide_index=True,
@@ -1489,7 +1489,8 @@ elif menu.endswith("词库管理"):
         num_rows="dynamic",
         height=500,
     )
-
+    st.write(mylib_edited_df)
+    st.write("删除的行号:\n", st.session_state.get("my_word_lib", {}).get("deleted_rows", []))
     if del_lib_btn and st.session_state.get("my_word_lib", {}).get("deleted_rows", []):
         my_word_deleted_rows = st.session_state["my_word_lib"]["deleted_rows"]
         # st.write("删除的行号:\n", my_word_deleted_rows)
