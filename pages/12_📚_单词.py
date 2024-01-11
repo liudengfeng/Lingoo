@@ -1446,11 +1446,12 @@ elif menu.endswith("词库管理"):
 
     base_lib_df = gen_base_lib(word_lib)
 
-    edited_df = baselib_placeholder.data_editor(
+    baselib_placeholder.data_editor(
         base_lib_df,
         key="base_lib_edited_df",
         hide_index=True,
         column_config=ADD_MY_WORD_LIB_COLUMN_CONFIG,
+        num_rows="dynamic",
         height=500,
         disabled=[col for col in base_lib_df.columns if col not in EDITABLE_COLS],
     )
@@ -1464,6 +1465,7 @@ elif menu.endswith("词库管理"):
             if d["添加"]:
                 st.session_state.pending_add_words.add(word)
                 st.toast(f"已添加到个人词库中：{word}。")
+        st.rerun()
 
     my_lib_df = gen_my_word_lib()
 
