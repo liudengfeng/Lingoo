@@ -569,8 +569,9 @@ def handle_puzzle_new():
     handle_puzzle_input()
 
     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-    container = st.container()
+    st.divider()
     st.info("如果字符中包含空格，这可能表示该单词是一个复合词或短语。", icon="ℹ️")
+    container = st.container()
     display_puzzle_definition()
     display_word_images(word, container)
 
