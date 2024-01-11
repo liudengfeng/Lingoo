@@ -854,11 +854,11 @@ def gen_base_lib(word_lib):
 
 
 # 确保数据先储存，然后再读取
-@st.cache_data(
-    ttl=timedelta(seconds=TIME_LIMIT + 10), max_entries=1000, show_spinner="获取个人词库..."
-)
-def get_my_word_lib_from_db():
-    return st.session_state.dbi.find_personal_dictionary()
+# @st.cache_data(
+#     ttl=timedelta(seconds=TIME_LIMIT + 10), max_entries=1000, show_spinner="获取个人词库..."
+# )
+# def get_my_word_lib_from_db():
+#     return st.session_state.dbi.find_personal_dictionary()
 
 
 def gen_my_word_lib():
@@ -866,7 +866,7 @@ def gen_my_word_lib():
     # if "init_my_word_lib" not in st.session_state:
     #     st.session_state["init_my_word_lib"] = get_my_word_lib_from_db()
     # my_words = st.session_state["init_my_word_lib"]
-    my_words = get_my_word_lib_from_db()
+    my_words = st.session_state.dbi.find_personal_dictionary()
     # 将 my_words 转换为 set
     # my_words_set = set(my_words)
     # # 使用集合运算更新 my_words_set
