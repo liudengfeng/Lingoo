@@ -1444,7 +1444,7 @@ elif menu and menu.endswith("词库管理"):
     status_elem = st.empty()
     if disabled:
         status_elem.warning(
-            f"🚫 您的操作过于频繁，请{TIME_LIMIT // 60}分钟后再试。"
+            f"🚫 您的操作过于频繁，请{TIME_LIMIT // 60}分钟后再试。例如，如果用户在 {TIME_LIMIT} 秒内反复大量增加和删除个人词库的单词，超过了系统设定的阈值（{OP_THRESHOLD}）。"
         )
     lib_cols = st.columns(8)
 
