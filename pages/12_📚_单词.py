@@ -74,14 +74,14 @@ THRESHOLD = 20  # 阈值
 # TIME_LIMIT = 30 * 60  # 30分钟
 TIME_LIMIT = 10  # 30分钟
 
-if "pending_add_words" not in st.session_state:
-    st.session_state.pending_add_words = set()
+if "wld_pending_add_words" not in st.session_state:
+    st.session_state.wld_pending_add_words = set()
 
-if "pending_del_words" not in st.session_state:
-    st.session_state.pending_del_words = set()
+if "wld_pending_del_words" not in st.session_state:
+    st.session_state.wld_pending_del_words = set()
 
-if "last_update_time" not in st.session_state:
-    st.session_state.last_update_time = time.time()
+if "wld_last_update_time" not in st.session_state:
+    st.session_state.wld_last_update_time = time.time()
 
 if "lib_pending_add_words" not in st.session_state:
     st.session_state.lib_pending_add_words = set()
@@ -206,35 +206,20 @@ def process_pending_words(add_words, del_words):
     return add_words, del_words
 
 
-# def update_pending_words():
-#     current_time = time.time()
-#     if (
-#         len(st.session_state.pending_add_words) >= THRESHOLD
-#         or len(st.session_state.pending_del_words) >= THRESHOLD
-#         or current_time - st.session_state.last_update_time >= TIME_LIMIT
-#     ):
-#         (
-#             st.session_state.pending_add_words,
-#             st.session_state.pending_del_words,
-#         ) = process_pending_words(
-#             st.session_state.pending_add_words, st.session_state.pending_del_words
-#         )
-#         st.session_state.last_update_time = current_time
-
-
-def update_pending_words(pending_add_words, pending_del_words, last_update_time):
+def update_pending_words(state, prefix):
     current_time = time.time()
     if (
-        len(pending_add_words) >= THRESHOLD
-        or len(pending_del_words) >= THRESHOLD
-        or current_time - last_update_time >= TIME_LIMIT
+        len(state[f"{prefix}_pending_add_words"]) >= THRESHOLD
+        or len(state[f"{prefix}_pending_del_words"]) >= THRESHOLD
+        or current_time - state[f"{prefix}_last_update_time"] >= TIME_LIMIT
     ):
         (
-            pending_add_words,
-            pending_del_words,
-        ) = process_pending_words(pending_add_words, pending_del_words)
-        last_update_time = current_time
-    return pending_add_words, pending_del_words, last_update_time
+            state[f"{prefix}_pending_add_words"],
+            state[f"{prefix}_pending_del_words"],
+        ) = process_pending_words(
+            state[f"{prefix}_pending_add_words"], state[f"{prefix}_pending_del_words"]
+        )
+        state[f"{prefix}_last_update_time"] = current_time
 
 
 def on_include_cb_change():
@@ -1052,12 +1037,12 @@ if menu.endswith("闪卡记忆"):
 
     if add_btn:
         word = st.session_state.flashcard_words[st.session_state.flashcard_idx]
-        st.session_state.pending_add_words.add(word)
+        st.session_state.wld_pending_add_words.add(word)
         st.toast(f"添加单词：{word} 到个人词库。")
 
     if del_btn:
         word = st.session_state.flashcard_words[st.session_state.flashcard_idx]
-        st.session_state.pending_del_words.add(word)
+        st.session_state.wld_pending_del_words.add(word)
         st.toast(f"从个人词库中删除单词：{word}。")
 
     if st.session_state.flashcard_idx != -1:
@@ -1159,12 +1144,12 @@ elif menu.endswith("拼图游戏"):
 
     if add_btn:
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-        st.session_state.pending_add_words.add(word)
+        st.session_state.wld_pending_add_words.add(word)
         st.toast(f"添加单词：{word} 到个人词库。")
 
     if del_btn:
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-        st.session_state.pending_del_words.add(word)
+        st.session_state.wld_pending_del_words.add(word)
         st.toast(f"从个人词库中删除单词：{word}。")
 
     if st.session_state.puzzle_idx != -1:
@@ -1268,14 +1253,14 @@ elif menu.endswith("看图猜词"):
         tests = st.session_state.pic_tests
         idx = st.session_state.pic_idx
         word = tests[idx]["answer"]
-        st.session_state.pending_add_words.add(word)
+        st.session_state.wld_pending_add_words.add(word)
         st.toast(f"添加单词：{word} 到个人词库。")
 
     if del_btn:
         tests = st.session_state.pic_tests
         idx = st.session_state.pic_idx
         word = tests[idx]["answer"]
-        st.session_state.pending_del_words.add(word)
+        st.session_state.wld_pending_del_words.add(word)
         st.toast(f"从个人词库中删除单词：{word}。")
 
 # endregion
@@ -1412,12 +1397,12 @@ elif menu.endswith("词义理解"):
 
     if add_btn:
         word = st.session_state.words_for_test[st.session_state.word_test_idx]
-        st.session_state.pending_add_words.add(word)
+        st.session_state.wld_pending_add_words.add(word)
         st.toast(f"添加单词：{word} 到个人词库。")
 
     if del_btn:
         word = st.session_state.words_for_test[st.session_state.word_test_idx]
-        st.session_state.pending_del_words.add(word)
+        st.session_state.wld_pending_del_words.add(word)
         st.toast(f"从个人词库中删除单词：{word}。")
 
 # endregion
@@ -1495,7 +1480,7 @@ elif menu.endswith("词库管理"):
         for idx in my_word_deleted_rows:
             word = my_lib_df.iloc[idx]["单词"]  # type: ignore
             st.session_state.lib_pending_del_words.add(word)
-            logger.info(f"从个人词库中以及删除：{word}。")
+            logger.info(f"从个人词库中已经删除：{word}。")
 
     with st.expander(":bulb: 小提示", expanded=False):
         st.markdown(
@@ -1509,24 +1494,8 @@ elif menu.endswith("词库管理"):
 # endregion
 
 # 更新
-(
-    st.session_state.pending_add_words,
-    st.session_state.pending_del_words,
-    st.session_state.last_update_time,
-) = update_pending_words(
-    st.session_state.pending_add_words,
-    st.session_state.pending_del_words,
-    st.session_state.last_update_time,
-)
-(
-    st.session_state.lib_pending_add_words,
-    st.session_state.lib_pending_del_words,
-    st.session_state.lib_last_update_time,
-) = update_pending_words(
-    st.session_state.lib_pending_add_words,
-    st.session_state.lib_pending_del_words,
-    st.session_state.lib_last_update_time,
-)
+update_pending_words(st.session_state, "wld")
+update_pending_words(st.session_state, "lib")
 
 logger.info(f"待添加单词：{st.session_state.lib_pending_add_words}")
 logger.info(f"待删除单词：{st.session_state.lib_pending_del_words}")
