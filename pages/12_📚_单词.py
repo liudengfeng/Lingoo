@@ -837,6 +837,7 @@ def view_test_word():
 # region 个人词库辅助
 
 
+@st.cache_data(ttl=timedelta(hours=24), max_entries=100, show_spinner="获取基础词库...")
 def gen_base_lib(word_lib):
     words = st.session_state.word_dict[word_lib]
     data = []
@@ -1448,17 +1449,17 @@ elif menu.endswith("词库管理"):
     content_cols = st.columns(2)
     placeholder = content_cols[0].empty()
 
+    base_lib_df = gen_base_lib(word_lib)
+    placeholder.data_editor(
+        base_lib_df,
+        key="base_lib_edited_df",
+        hide_index=True,
+        disabled=["单词", "CEFR最低分级", "翻译"],
+        num_rows="dynamic",
+        height=500,
+    )
+
     if add_lib_btn:
-        df = gen_base_lib(word_lib)
-        placeholder.data_editor(
-            df,
-            key="base_lib_edited_df",
-            hide_index=True,
-            disabled=["单词", "CEFR最低分级", "翻译"],
-            # column_config=ADD_MY_WORD_LIB_COLUMN_CONFIG,
-            num_rows="dynamic",
-            height=500,
-        )
         if st.session_state.get("base_lib_edited_df", {}).get("deleted_rows", []):
             deleted_rows = st.session_state["base_lib_edited_df"]["deleted_rows"]
             to_add = []
