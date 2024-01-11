@@ -515,7 +515,7 @@ def handle_puzzle_input():
         st.rerun()
     
     if sumbit_cols[1].button(":wastebasket:", help="✨ 恢复初始状态，重新开始。"):
-        st.session_state.puzzle_answer_value = ""
+        st.session_state.puzzle_answer = ""
         st.rerun()
 
     if sumbit_cols[2].button("检查", help="✨ 点击按钮，检查您的答案是否正确。"):
