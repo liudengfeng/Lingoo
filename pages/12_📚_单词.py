@@ -466,7 +466,9 @@ def view_puzzle_word():
 
 def display_puzzle_translation():
     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-    t_word = st.session_state.mini_dict[word].get("translation", "")
+    t_word = st.session_state.mini_dict[word.replace("/", " or ")].get(
+        "translation", ""
+    )
     msg = f"中译文：{t_word}"
     st.markdown(msg)
     st.info("如果字符中包含空格，这可能表示该单词是一个复合词或短语。", icon="ℹ️")
