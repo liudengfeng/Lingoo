@@ -1431,7 +1431,7 @@ elif menu.endswith("词库管理"):
         """✨ 词库管理分为基础词库和个人词库两部分。基础词库包含常用单词，供所有用户使用。个人词库则是用户自定义的部分，用户可以根据自己的需求添加或删除单词，以便进行个性化的学习和复习。"""
     )
     view_selected_list = word_lib.split("-", maxsplit=1)[1]
-    st.subheader(f"基础词库({view_selected_list})", anchor=False)
+    st.info(f"基础词库({view_selected_list})", icon="ℹ️")
 
     lib_cols = st.columns(8)
 
