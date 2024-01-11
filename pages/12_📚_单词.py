@@ -72,7 +72,7 @@ DICT_DIR = CURRENT_CWD / "resource/dictionary"
 
 THRESHOLD = 20  # 阈值
 # TIME_LIMIT = 30 * 60  # 30分钟
-TIME_LIMIT = 40  # 30分钟
+TIME_LIMIT = 10  # 30分钟
 
 if "pending_add_words" not in st.session_state:
     st.session_state.pending_add_words = set()
@@ -870,7 +870,7 @@ def gen_base_lib(word_lib):
 
 # 确保数据先储存，然后再读取
 @st.cache_data(
-    ttl=timedelta(seconds=TIME_LIMIT + 20), max_entries=1000, show_spinner="获取个人词库..."
+    ttl=timedelta(seconds=TIME_LIMIT + 2), max_entries=1000, show_spinner="获取个人词库..."
 )
 def get_my_word_lib_from_db():
     return st.session_state.dbi.find_personal_dictionary()
