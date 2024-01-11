@@ -71,8 +71,8 @@ CURRENT_CWD: Path = Path(__file__).parent.parent
 DICT_DIR = CURRENT_CWD / "resource/dictionary"
 
 THRESHOLD = 100  # 阈值
-TIME_LIMIT = 10 * 60  # 10分钟
-OP_THRESHOLD = 10000  # 操作阈值
+TIME_LIMIT = 1 * 60  # 10分钟
+OP_THRESHOLD = 1000  # 操作阈值
 
 if "wld_pending_add_words" not in st.session_state:
     st.session_state.wld_pending_add_words = set()
@@ -349,7 +349,7 @@ def get_audio_html(word, voice_style):
     返回值：
     - 音频的HTML代码（字符串）
     """
-    audio_data = get_or_create_and_return_audio_data(word, voice_style[0], st.secrets) # type: ignore
+    audio_data = get_or_create_and_return_audio_data(word, voice_style[0], st.secrets)  # type: ignore
     return audio_autoplay_elem(audio_data)
 
 
@@ -909,7 +909,6 @@ with open(CURRENT_CWD / "resource/voices.json", "r", encoding="utf-8") as f:
 
 
 if menu and menu.endswith("闪卡记忆"):
-    # region 词库管理
     # 让用户选择语音风格
     pronunciation = st.sidebar.radio("请选择发音标准", ("美式", "英式"))
     style = "en-US" if pronunciation == "美式" else "en-GB"
@@ -1000,7 +999,7 @@ if menu and menu.endswith("闪卡记忆"):
         "添加[:heavy_plus_sign:]",
         key="flashcard-add",
         help="✨ 将当前单词添加到个人词库",
-        disabled=st.session_state.flashcard_idx == -1 or "个人词库" in word_lib, # type: ignore
+        disabled=st.session_state.flashcard_idx == -1 or "个人词库" in word_lib,  # type: ignore
     )
     del_btn = btn_cols[6].button(
         "删除[:heavy_minus_sign:]",
@@ -1054,7 +1053,7 @@ if menu and menu.endswith("闪卡记忆"):
 
 # region 单词拼图
 
-elif  menu and menu.endswith("拼图游戏"):
+elif menu and menu.endswith("拼图游戏"):
     # region 边栏
     include_cb = st.sidebar.checkbox(
         "是否包含个人词库？",
@@ -1125,7 +1124,7 @@ elif  menu and menu.endswith("拼图游戏"):
         "添加[:heavy_plus_sign:]",
         key="puzzle-add",
         help="✨ 将当前单词添加到个人词库",
-        disabled=st.session_state.puzzle_idx == -1 or "个人词库" in word_lib, # type: ignore
+        disabled=st.session_state.puzzle_idx == -1 or "个人词库" in word_lib,  # type: ignore
     )
     del_btn = puzzle_cols[4].button(
         "删除[:heavy_minus_sign:]",
@@ -1358,7 +1357,7 @@ elif menu and menu.endswith("词义理解"):
         "添加[:heavy_plus_sign:]",
         key="test-word-add",
         help="✨ 将当前单词添加到个人词库",
-        disabled=st.session_state.word_test_idx == -1 or "个人词库" in word_lib, # type: ignore
+        disabled=st.session_state.word_test_idx == -1 or "个人词库" in word_lib,  # type: ignore
     )
     del_btn = test_btns[5].button(
         "删除[:heavy_minus_sign:]",
@@ -1414,6 +1413,22 @@ elif menu and menu.endswith("词库管理"):
     if "个人词库" in st.session_state.word_dict:
         st.session_state.word_dict.pop("个人词库")
 
+    # 在开始时初始化操作计数器和时间戳
+    if "operation_counter" not in st.session_state:
+        st.session_state.operation_counter = 0
+        st.session_state.last_operation_time = time.time()
+
+    # 检查操作计数器和时间戳
+    current_time = time.time()
+    disabled = False
+    if current_time - st.session_state.last_operation_time < TIME_LIMIT:  # 10分钟
+        if st.session_state.operation_counter >= OP_THRESHOLD:  # 阈值
+            disabled = True
+    else:
+        # 重置操作计数器和时间戳
+        st.session_state.operation_counter = 0
+        st.session_state.last_operation_time = current_time
+    
     word_lib = st.sidebar.selectbox(
         "词库",
         sorted(list(st.session_state.word_dict.keys())),
@@ -1426,14 +1441,22 @@ elif menu and menu.endswith("词库管理"):
     st.markdown(
         """✨ 词库分基础词库和个人词库两部分。基础词库包含常用单词，供所有用户使用。个人词库则是用户自定义的部分，用户可以根据自己的需求添加或删除单词，以便进行个性化的学习和复习。"""
     )
-
+    status_elem = st.empty()
+    if disabled:
+        status_elem.warning(
+            f"🚫 您的操作过于频繁，请{TIME_LIMIT // 60}分钟后再试。"
+        )
     lib_cols = st.columns(8)
 
     add_lib_btn = lib_cols[0].button(
-        "添加[:heavy_plus_sign:]", key="add-lib-btn", help="✨ 点击按钮，将'基础词库'中选定单词添加到个人词库。"
+        "添加[:heavy_plus_sign:]",
+        key="add-lib-btn",
+        disabled=disabled,
+        help="✨ 点击按钮，将'基础词库'中选定单词添加到个人词库。",
     )
     del_lib_btn = lib_cols[1].button(
         "删除[:heavy_minus_sign:]",
+        disabled=disabled,
         key="del-lib-btn",
         help="✨ 点击按钮，将'可删列表'中选定单词从'个人词库'中删除。",
     )
@@ -1478,6 +1501,7 @@ elif menu and menu.endswith("词库管理"):
             for idx in deleted_rows:
                 word = base_lib_df.iloc[idx]["单词"]  # type: ignore
                 to_add.append(word)
+                st.session_state.operation_counter += 1
                 # st.session_state.lib_pending_add_words.add(word)
             st.session_state.dbi.add_words_to_personal_dictionary(to_add)
             logger.info(f"已添加到个人词库中：{to_add}。")
@@ -1492,6 +1516,7 @@ elif menu and menu.endswith("词库管理"):
             for idx in my_word_deleted_rows:
                 word = lib_df.iloc[idx]["单词"]  # type: ignore
                 to_del.append(word)
+                st.session_state.operation_counter += 1
                 # st.session_state.lib_pending_del_words.add(word)
             st.session_state.dbi.remove_words_from_personal_dictionary(to_del)
             logger.info(f"从个人词库中已经删除：{to_del}。")
