@@ -175,6 +175,12 @@ def select_word_image_urls(word: str):
     return urls
 
 
+def word_lib_format_func(word_lib_name):
+    name = word_lib_name.split("-", maxsplit=1)[1]
+    num = len(st.session_state.word_dict[word_lib_name])
+    return f"{name} ({num})"
+
+
 def process_pending_words(add_words, del_words):
     # 计算净添加和净删除的单词
     net_add_words = add_words - del_words
@@ -920,7 +926,8 @@ if menu.endswith("闪卡记忆"):
         sorted(list(st.session_state.word_dict.keys())),
         key="flashcard-selected",
         on_change=reset_flashcard_word,
-        format_func=lambda x: x.split("-", maxsplit=1)[1],
+        # format_func=lambda x: x.split("-", maxsplit=1)[1],
+        format_func=word_lib_format_func,
         help="✨ 选择一个单词列表，用于生成闪卡单词。",
     )
 
@@ -1060,7 +1067,8 @@ elif menu.endswith("拼图游戏"):
         sorted(list(st.session_state.word_dict.keys())),
         key="puzzle-selected",
         on_change=reset_puzzle_word,
-        format_func=lambda x: x.split("-", maxsplit=1)[1],
+        # format_func=lambda x: x.split("-", maxsplit=1)[1],
+        format_func=word_lib_format_func,
         help="✨ 选择一个词库，用于生成单词拼图。",
     )
 
@@ -1280,7 +1288,8 @@ elif menu.endswith("词义理解"):
         sorted(list(st.session_state.word_dict.keys())),
         key="test-word-selected",
         on_change=reset_test_words,
-        format_func=lambda x: x.split("-", maxsplit=1)[1],
+        # format_func=lambda x: x.split("-", maxsplit=1)[1],
+        format_func=word_lib_format_func,
         help="✨ 选择一个单词列表，用于生成单词词义理解测试题。",
     )
     test_num = st.sidebar.number_input(
@@ -1409,9 +1418,9 @@ elif menu.endswith("词库管理"):
     word_lib = st.sidebar.selectbox(
         "词库",
         sorted(list(st.session_state.word_dict.keys())),
-        key="flashcard-selected",
-        on_change=reset_flashcard_word,
-        format_func=lambda x: x.split("-", maxsplit=1)[1],
+        key="lib-selected",
+        # format_func=lambda x: x.split("-", maxsplit=1)[1],
+        format_func=word_lib_format_func,
         help="✨ 选择一个基准词库，用于生成个人词库。",
     )
 
@@ -1479,9 +1488,11 @@ elif menu.endswith("词库管理"):
         st.rerun()
 
     with st.expander(":bulb: 小提示", expanded=False):
-        st.markdown("""
+        st.markdown(
+            """
 - coca20000 包含了大多数英语单词，可以作为基础词库
-""")
+"""
+        )
 
 # endregion
 
