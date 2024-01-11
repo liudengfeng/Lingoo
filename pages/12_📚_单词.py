@@ -1304,7 +1304,7 @@ elif menu.endswith("词义理解"):
         "删除[:heavy_minus_sign:]",
         key="test-word-del",
         help="✨ 将当前单词从个人词库中删除",
-        disabled=st.session_state.flashcard_idx == -1,
+        disabled=st.session_state.word_test_idx == -1,
     )
 
     if prev_test_btn:
