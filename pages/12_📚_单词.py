@@ -829,14 +829,6 @@ def view_test_word():
 
 # region 个人词库辅助
 
-ADD_MY_WORD_LIB_COLUMN_CONFIG = {
-    "添加": st.column_config.CheckboxColumn(
-        "添加",
-        help="✨ 点击复选框，选中单词添加到个人词库",
-        width="small",
-        required=True,
-    )
-}
 
 DEL_MY_WORD_LIB_COLUMN_CONFIG = {
     "删除": st.column_config.CheckboxColumn(
@@ -859,7 +851,6 @@ def gen_base_lib(word_lib):
                 "单词": w,
                 "CEFR最低分级": info.get("level", "") if info else "",
                 "翻译": info.get("translation", "") if info else "",
-                "添加": False,
             }
         )
     return pd.DataFrame.from_records(data)
@@ -1450,7 +1441,7 @@ elif menu.endswith("词库管理"):
         base_lib_df,
         key="base_lib_edited_df",
         hide_index=True,
-        column_config=ADD_MY_WORD_LIB_COLUMN_CONFIG,
+        # column_config=ADD_MY_WORD_LIB_COLUMN_CONFIG,
         num_rows="dynamic",
         height=500,
         disabled=[col for col in base_lib_df.columns if col not in EDITABLE_COLS],
