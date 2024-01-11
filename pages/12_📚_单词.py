@@ -413,8 +413,8 @@ if "puzzle_idx" not in st.session_state:
 if "puzzle_words" not in st.session_state:
     st.session_state["puzzle_words"] = []
 
-if "puzzle_answer_value" not in st.session_state:
-    st.session_state["puzzle_answer_value"] = ""
+# if "puzzle_answer_value" not in st.session_state:
+#     st.session_state["puzzle_answer_value"] = ""
 
 if "puzzle_view_word" not in st.session_state:
     st.session_state["puzzle_view_word"] = []
@@ -435,7 +435,8 @@ def reset_puzzle_word():
     st.session_state.puzzle_idx = -1
     st.session_state["puzzle_view_word"] = []
     st.session_state["puzzle_test_score"] = {}
-    st.session_state.puzzle_answer_value = ""
+    # st.session_state.puzzle_answer_value = ""
+    st.session_state.puzzle_answer = ""
 
 
 def get_word_definition(word):
@@ -456,7 +457,8 @@ def prepare_puzzle():
     random.shuffle(ws)
     st.session_state.puzzle_view_word = ws
     st.session_state.clicked_character = [False] * len(ws)
-    st.session_state.puzzle_answer_value = ""
+    # st.session_state.puzzle_answer_value = ""
+    st.session_state.puzzle_answer = ""
 
 
 def view_puzzle_word():
@@ -473,7 +475,8 @@ def view_puzzle_word():
             type="primary",
             use_container_width=True,
         ):
-            st.session_state.puzzle_answer_value += ws[i]
+            # st.session_state.puzzle_answer_value += ws[i]
+            st.session_state.puzzle_answer += ws[i]
             st.session_state.clicked_character[i] = True
             st.rerun()
 
@@ -496,12 +499,14 @@ def display_puzzle_definition():
 
 def on_prev_puzzle_btn_click():
     st.session_state["puzzle_idx"] -= 1
-    st.session_state.puzzle_answer_value = ""
+    # st.session_state.puzzle_answer_value = ""
+    st.session_state.puzzle_answer = ""
 
 
 def on_next_puzzle_btn_click():
     st.session_state["puzzle_idx"] += 1
-    st.session_state.puzzle_answer_value = ""
+    # st.session_state.puzzle_answer_value = ""
+    st.session_state.puzzle_answer = ""
 
 
 def handle_puzzle_input():
