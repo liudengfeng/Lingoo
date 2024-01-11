@@ -1483,6 +1483,7 @@ elif menu.endswith("词库管理"):
             to_add.append(word)
             # st.session_state.lib_pending_add_words.add(word)
         st.session_state.dbi.add_words_to_personal_dictionary(to_add)
+        del st.session_state["base_lib_edited_df"]["deleted_rows"]
         logger.info(f"已添加到个人词库中：{to_add}。")
 
     my_lib_df = gen_my_word_lib()
@@ -1517,6 +1518,7 @@ elif menu.endswith("词库管理"):
             to_del.append(word)
             # st.session_state.lib_pending_del_words.add(word)
         st.session_state.dbi.remove_words_from_personal_dictionary(to_del)
+        del st.session_state["my_word_lib"]["deleted_rows"]
         logger.info(f"从个人词库中已经删除：{to_del}。")
 
     with st.expander(":bulb: 小提示", expanded=False):
