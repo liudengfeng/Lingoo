@@ -1459,7 +1459,7 @@ elif menu.endswith("词库管理"):
 
     base_lib_df = gen_base_lib(word_lib)
 
-    base_lib_edited_df = baselib_placeholder.data_editor(
+    baselib_placeholder.data_editor(
         base_lib_df,
         key="base_lib_edited_df",
         hide_index=True,
@@ -1474,14 +1474,13 @@ elif menu.endswith("词库管理"):
     ):
         deleted_rows = st.session_state["base_lib_edited_df"]["deleted_rows"]
         for idx in deleted_rows:
-            word = base_lib_edited_df.iloc[idx]["单词"]  # type: ignore
+            word = base_lib_df.iloc[idx]["单词"]  # type: ignore
             st.session_state.lib_pending_add_words.add(word)
-            st.toast(f"已添加到个人词库中：{word}。")
+            logger.info(f"已添加到个人词库中：{word}。")
 
     my_lib_df = gen_my_word_lib()
 
-    # 维持对象 mylib_edited_df
-    mylib_edited_df = mylib_placeholder.data_editor(
+    mylib_placeholder.data_editor(
         my_lib_df,
         key="my_word_lib",
         hide_index=True,
@@ -1494,7 +1493,7 @@ elif menu.endswith("词库管理"):
         my_word_deleted_rows = st.session_state["my_word_lib"]["deleted_rows"]
         # st.write("删除的行号:\n", my_word_deleted_rows)
         for idx in my_word_deleted_rows:
-            word = mylib_edited_df.iloc[idx]["单词"]  # type: ignore
+            word = my_lib_df.iloc[idx]["单词"]  # type: ignore
             st.session_state.lib_pending_del_words.add(word)
             logger.info(f"从个人词库中以及删除：{word}。")
 
