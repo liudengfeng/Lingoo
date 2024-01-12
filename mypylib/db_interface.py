@@ -204,7 +204,9 @@ class DbInterface:
         # 获取用户文档的引用
         user_doc_ref = self.db.collection("users").document(phone_number)
         # 从数据库中读取个人词库
-        personal_vocabulary_in_db = user_doc_ref.get().to_dict()["personal_vocabulary"]
+        personal_vocabulary_in_db = (
+            user_doc_ref.get().to_dict().get("personal_vocabulary", [])
+        )
         # 计算需要添加和删除的单词
         words_to_add = list(
             set(self.cache["personal_vocabulary"]["words"])
