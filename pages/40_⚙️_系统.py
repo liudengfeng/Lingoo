@@ -56,7 +56,9 @@ st.set_page_config(
 check_access(True)
 configure_google_apis()
 
-tz = pytz.timezone(st.session_state.dbi.cache.get("timezone", "Asia/Shanghai"))
+tz = pytz.timezone(
+    st.session_state.dbi.cache.get("user_info", {}).get("timezone", "Asia/Shanghai")
+)
 # endregion
 
 # region 常量配置
@@ -677,8 +679,7 @@ if menu == "支付管理":
                     remark=remark,
                 )
                 st.session_state.dbi.add_payment(payment)
-                st.toast(f"成功登记，订单号:{order_id}", icon="🎉")
-
+                st.toast(f"成功登记，订单号:{order_id}", icon="🎉"
 
     with tabs[items.index("支付管理")]:
         st.subheader("查询参数")

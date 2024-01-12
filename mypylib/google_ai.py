@@ -45,9 +45,7 @@ def display_generated_content_and_update_token(
     placeholder.markdown(full_response)
 
     # 添加记录到数据库
-    st.session_state.dbi.add_token_record(
-        st.session_state.dbi.cache["phone_number"], item_name, total_tokens
-    )
+    st.session_state.dbi.add_token_record(item_name, total_tokens)
     # 修改会话中的令牌数
     st.session_state.current_token_count = total_tokens
     st.session_state.total_token_count += total_tokens
@@ -83,9 +81,7 @@ def parse_generated_content_and_update_token(
         total_tokens += responses._raw_response.usage_metadata.total_token_count
 
     # 添加记录到数据库
-    st.session_state.dbi.add_token_record(
-        st.session_state.dbi.cache["phone_number"], item_name, total_tokens
-    )
+    st.session_state.dbi.add_token_record(item_name, total_tokens)
     # 修改会话中的令牌数
     st.session_state.current_token_count = total_tokens
     st.session_state.total_token_count += total_tokens

@@ -40,14 +40,16 @@ def check_and_force_logout(status):
     Returns:
         None
     """
-    if "session_id" in st.session_state.dbi.cache:
+    if "session_id" in st.session_state.dbi.cache["user_info"]:
         dbi = st.session_state.dbi
         # 存在会话id，说明用户已经登录
-        phone_number = dbi.cache["phone_number"]
+        phone_number = dbi.cache["user_info"]["phone_number"]
         # 获取除最后一个登录事件外的所有未退出的登录事件
         active_sessions = dbi.get_active_sessions()
         for session in active_sessions:
-            if session["session_id"] == dbi.cache.get("session_id", ""):
+            if session["session_id"] == dbi.cache.get("user_info", {}).get(
+                "session_id", ""
+            ):
                 # 如果 st.session_state 中的会话ID在需要强制退出的列表中，处理强制退出
                 dbi.force_logout_session(phone_number, session["session_id"])
                 st.session_state.clear()
@@ -102,7 +104,10 @@ def check_access(is_admin_page):
         st.error("您尚未登录。请点击屏幕左侧的 `Home` 菜单进行登录。")
         st.stop()
 
-    if is_admin_page and st.session_state.dbi.cache.get("user_role") != "管理员":
+    if (
+        is_admin_page
+        and st.session_state.dbi.cache.get("user_info", {}).get("user_role") != "管理员"
+    ):
         st.error("您没有权限访问此页面。此页面仅供系统管理员使用。")
         st.stop()
 

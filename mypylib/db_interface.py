@@ -34,7 +34,7 @@ class DbInterface:
 
     def cache_user_login_info(self, user, session_id):
         phone_number = user.phone_number
-        self.cache = {
+        self.cache["user_info"] = {
             "is_logged_in": True,
             "phone_number": phone_number,
             "display_name": user.display_name,
@@ -47,7 +47,7 @@ class DbInterface:
     # region 用户管理
 
     def get_user(self, return_object=True):
-        phone_number = self.cache.get("phone_number", "")
+        phone_number = self.cache.get("user_info", {}).get("phone_number", "")
         if not phone_number:
             return None
         doc_ref = self.db.collection("users").document(phone_number)
@@ -63,7 +63,7 @@ class DbInterface:
             return None
 
     def update_user(self, update_fields: dict):
-        phone_number = self.cache["phone_number"]
+        phone_number = self.cache["user_info"]["phone_number"]
         doc_ref = self.db.collection("users").document(phone_number)
         try:
             del update_fields["phone_number"]  # 删除手机号码
@@ -102,11 +102,11 @@ class DbInterface:
         return session_id
 
     def is_logged_in(self):
-        return self.cache.get("is_logged_in", False)
+        return self.cache.get("user_info", {}).get("is_logged_in", False)
 
     def login(self, phone_number, password):
         # 在缓存中查询是否已经正常登录
-        if self.cache.get("is_logged_in", False):
+        if self.cache.get("user_info", {}).get("is_logged_in", False):
             return {"status": "warning", "message": "您已登录"}
         # 检查用户的凭据
         users_ref = self.db.collection("users")
@@ -160,9 +160,9 @@ class DbInterface:
             }
 
     def logout(self):
-        phone_number = self.cache["phone_number"]
+        phone_number = self.cache["user_info"]["phone_number"]
         # 从缓存中删除用户的登录状态
-        self.cache = {}
+        self.cache["user_info"] = {}
 
         login_events_ref = self.db.collection("login_events")
         login_events = (
@@ -183,7 +183,7 @@ class DbInterface:
     # region 个人词库管理
 
     def find_personal_dictionary(self):
-        phone_number = self.cache["phone_number"]
+        phone_number = self.cache["user_info"]["phone_number"]
         # 获取用户文档的引用
         user_doc_ref = self.db.collection("users").document(phone_number)
         user_doc = user_doc_ref.get()
@@ -205,7 +205,7 @@ class DbInterface:
         db_interface.add_words_to_personal_dictionary(["apple", "banana"])
         """
 
-        phone_number = self.cache["phone_number"]
+        phone_number = self.cache["user_info"]["phone_number"]
         # 获取用户文档的引用
         user_doc_ref = self.db.collection("users").document(phone_number)
         # 如果 word 是一个列表，那么使用 arrayUnion 方法添加多个单词到个人词典
@@ -225,7 +225,7 @@ class DbInterface:
         返回：
         无返回值。
         """
-        phone_number = self.cache["phone_number"]
+        phone_number = self.cache["user_info"]["phone_number"]
         # 获取用户文档的引用
         user_doc_ref = self.db.collection("users").document(phone_number)
         # 如果 word 是一个列表，那么使用 arrayRemove 方法从个人词典中移除多个单词
@@ -240,7 +240,7 @@ class DbInterface:
     # region token
 
     def get_token_count(self):
-        phone_number = self.cache["phone_number"]
+        phone_number = self.cache["user_info"]["phone_number"]
         # 获取用户文档的引用
         user_doc_ref = self.db.collection("users").document(phone_number)
         user_doc = user_doc_ref.get()
@@ -250,7 +250,8 @@ class DbInterface:
         else:
             return 0
 
-    def add_token_record(self, phone_number, token_type, used_token_count):
+    def add_token_record(self, token_type, used_token_count):
+        phone_number = self.cache["user_info"]["phone_number"]
         used_token = TokenUsageRecord(
             token_type=token_type,
             used_token_count=used_token_count,
@@ -274,7 +275,9 @@ class DbInterface:
         payments_ref = self.db.collection("payments")
         query = (
             payments_ref.where(
-                filter=FieldFilter("phone_number", "==", self.cache["phone_number"])
+                filter=FieldFilter(
+                    "phone_number", "==", self.cache["user_info"]["phone_number"]
+                )
             )
             .where(filter=FieldFilter("status", "==", PaymentStatus.IN_SERVICE))
             .order_by("payment_time", direction=firestore.Query.DESCENDING)
@@ -457,7 +460,7 @@ class DbInterface:
 
     def login_with_verification_code(self, phone_number: str, verification_code: str):
         # 在缓存中查询是否已经正常登录
-        if self.cache[phone_number].get("is_logged_in", False):
+        if self.cache.get("user_info", {}).get("is_logged_in", False):
             return {"status": "warning", "message": "您已登录"}
 
         # 获取用户文档的引用
@@ -501,7 +504,7 @@ class DbInterface:
             }
 
     def get_active_sessions(self):
-        phone_number = self.cache.get("phone_number", "")
+        phone_number = self.cache.get("user_info", {}).get("phone_number", "")
         if not phone_number:
             return []
         login_events_ref = self.db.collection("login_events")

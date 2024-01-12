@@ -220,7 +220,7 @@ with tabs[items.index(":memo: 问题反馈")]:
                 # print("Container does not exist.")
 
             # 将标题和内容存储为文本文件
-            text_data = f"用户：{st.session_state.dbi.cache['phone_number']}\n标题: {title}\n内容: {content}"
+            text_data = f"用户：{st.session_state.dbi.cache['user_info']['phone_number']}\n标题: {title}\n内容: {content}"
 
             blob_name = str(uuid.uuid4())
             text_blob_client = blob_service_client.get_blob_client(

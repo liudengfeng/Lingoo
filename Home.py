@@ -64,7 +64,7 @@ if need_update:
 # endregion
 
 s_cols = st.sidebar.columns(3)
-is_logged_in = st.session_state.dbi.cache.get("is_logged_in", False)
+is_logged_in = st.session_state.dbi.cache.get("user_info", {}).get("is_logged_in", False)
 
 login_btn = s_cols[0].button(
     label="离线" if not is_logged_in else ":bust_in_silhouette: 在线",
@@ -213,7 +213,7 @@ if not is_logged_in:
                     sidebar_status.error(info["message"])
                     st.stop()
 else:
-    sidebar_status.success(f"您已登录，{st.session_state.dbi.cache['display_name']} 您好！")
+    sidebar_status.success(f"您已登录，{st.session_state.dbi.cache['user_info']['display_name']} 您好！")
 
 col1, col2 = st.columns(2)
 
@@ -273,7 +273,7 @@ LinGoo，让你学好英语，so easy！
     unsafe_allow_html=True,
 )
 
-if st.session_state.dbi.cache.get("is_logged_in", False):
+if is_logged_in:
     if logout_btn:
         st.session_state.dbi.logout()
         sidebar_status.success("已退出登录")
