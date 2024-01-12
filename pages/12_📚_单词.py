@@ -1559,7 +1559,7 @@ elif menu and menu.endswith("词库管理"):
                 st.session_state.operation_counter += 1
                 # st.session_state.lib_pending_add_words.add(word)
             st.session_state.dbi.add_words_to_personal_dictionary(to_add)
-            logger.info(f"已添加到个人词库中：{to_add}。")
+            # logger.info(f"已添加到个人词库中：{to_add}。")
 
     if del_lib_btn:
         if del_lib_btn and st.session_state.get("my_word_lib", {}).get(
@@ -1574,7 +1574,7 @@ elif menu and menu.endswith("词库管理"):
                 st.session_state.operation_counter += 1
                 # st.session_state.lib_pending_del_words.add(word)
             st.session_state.dbi.remove_words_from_personal_dictionary(to_del)
-            logger.info(f"从个人词库中已经删除：{to_del}。")
+            # logger.info(f"从个人词库中已经删除：{to_del}。")
 
     if view_lib_btn:
         df = get_my_word_lib()
