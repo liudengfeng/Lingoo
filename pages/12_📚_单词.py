@@ -16,9 +16,11 @@ from vertexai.preview.generative_models import Image
 from mypylib.constants import CEFR_LEVEL_MAPS
 from mypylib.google_ai import generate_word_test, select_best_images_for_word
 from mypylib.st_helper import (
+    TOEKN_HELP_INFO,
     check_access,
     check_and_force_logout,
     configure_google_apis,
+    format_token_count,
     load_vertex_model,
     setup_logger,
     update_and_display_progress,
@@ -49,7 +51,7 @@ sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
 check_and_force_logout(sidebar_status)
 
-menu_names = ["闪卡记忆", "拼图游戏", "看图猜词", "词义测试", "词库管理"]
+menu_names = ["闪卡记忆", "拼图游戏", "看图猜词", "词意测试", "词库管理"]
 menu_emoji = [
     "📚",
     "🧩",
@@ -1236,9 +1238,13 @@ elif menu and menu.endswith("看图猜词"):
 
 # endregion
 
-# region 词义测试
+# region 词意测试
 
-elif menu and menu.endswith("词义测试"):
+elif menu and menu.endswith("词意测试"):
+    sidebar_status.markdown(
+        f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{format_token_count(st.session_state.total_token_count)}",
+        help=TOEKN_HELP_INFO,
+    )
     # region 边栏
     level = st.sidebar.selectbox(
         "CEFR分级",

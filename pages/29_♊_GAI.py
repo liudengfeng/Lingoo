@@ -10,6 +10,7 @@ from vertexai.preview.generative_models import GenerationConfig, Part
 from mypylib.google_ai import display_generated_content_and_update_token
 from mypylib.google_cloud_configuration import DEFAULT_SAFETY_SETTINGS
 from mypylib.st_helper import (
+    TOEKN_HELP_INFO,
     check_access,
     check_and_force_logout,
     configure_google_apis,
@@ -33,7 +34,7 @@ st.set_page_config(
 )
 check_access(False)
 configure_google_apis()
-help_info = "✨ 对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。"
+
 # endregion
 
 # region 会话状态
@@ -278,7 +279,7 @@ if menu == "聊天机器人":
     sidebar_status = st.sidebar.empty()
     sidebar_status.markdown(
         f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{format_token_count(st.session_state.total_token_count)}",
-        help=help_info,
+        help=TOEKN_HELP_INFO,
     )
     # endregion
 
@@ -386,7 +387,7 @@ elif menu == "多模态AI":
     sidebar_status = st.sidebar.empty()
     sidebar_status.markdown(
         f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{format_token_count(st.session_state.total_token_count)}",
-        help=help_info,
+        help=TOEKN_HELP_INFO,
     )
 
     # endregion
@@ -574,7 +575,7 @@ elif menu == "示例教程":
     sidebar_status = st.sidebar.empty()
     sidebar_status.markdown(
         f"当前令牌数：{st.session_state.current_token_count}，累计令牌数：{format_token_count(st.session_state.total_token_count)}",
-        help=help_info,
+        help=TOEKN_HELP_INFO,
     )
     # endregion
 

@@ -17,6 +17,7 @@ from .google_cloud_configuration import (
     google_configure,
 )
 
+TOEKN_HELP_INFO = "✨ 对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。"
 
 def setup_logger(logger, level="INFO"):
     # 设置日志的时间戳为 Asia/Shanghai 时区
