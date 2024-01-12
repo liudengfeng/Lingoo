@@ -87,27 +87,9 @@ CURRENT_CWD: Path = Path(__file__).parent.parent
 DICT_DIR = CURRENT_CWD / "resource/dictionary"
 VIDEO_DIR = CURRENT_CWD / "resource/video_tip"
 
-THRESHOLD = 100  # 阈值
 TIME_LIMIT = 10 * 60  # 10分钟
 OP_THRESHOLD = 10000  # 操作阈值
 
-if "wld_pending_add_words" not in st.session_state:
-    st.session_state.wld_pending_add_words = set()
-
-if "wld_pending_del_words" not in st.session_state:
-    st.session_state.wld_pending_del_words = set()
-
-if "wld_last_update_time" not in st.session_state:
-    st.session_state.wld_last_update_time = time.time()
-
-if "lib_pending_add_words" not in st.session_state:
-    st.session_state.lib_pending_add_words = set()
-
-if "lib_pending_del_words" not in st.session_state:
-    st.session_state.lib_pending_del_words = set()
-
-if "lib_last_update_time" not in st.session_state:
-    st.session_state.lib_last_update_time = time.time()
 
 # endregion
 
@@ -225,41 +207,6 @@ def word_lib_format_func(word_lib_name):
     name = word_lib_name.split("-", maxsplit=1)[1]
     num = len(st.session_state.word_dict[word_lib_name])
     return f"{name} ({num})"
-
-
-def process_pending_words(add_words, del_words):
-    # 计算净添加和净删除的单词
-    net_add_words = add_words - del_words
-    net_del_words = del_words - add_words
-    # 提交净添加的单词到数据库
-    if net_add_words:
-        st.session_state.dbi.add_words_to_personal_dictionary(list(net_add_words))
-        # logger.info(f"净添加单词：{net_add_words}")
-        add_words -= net_add_words
-
-    # 从数据库中删除净删除的单词
-    if net_del_words:
-        st.session_state.dbi.remove_words_from_personal_dictionary(list(net_del_words))
-        # logger.info(f"净删除单词：{net_del_words}")
-        del_words -= net_del_words
-
-    return add_words, del_words
-
-
-def update_pending_words(state, prefix):
-    current_time = time.time()
-    if (
-        len(state[f"{prefix}_pending_add_words"]) >= THRESHOLD
-        or len(state[f"{prefix}_pending_del_words"]) >= THRESHOLD
-        or current_time - state[f"{prefix}_last_update_time"] >= TIME_LIMIT
-    ):
-        (
-            state[f"{prefix}_pending_add_words"],
-            state[f"{prefix}_pending_del_words"],
-        ) = process_pending_words(
-            state[f"{prefix}_pending_add_words"], state[f"{prefix}_pending_del_words"]
-        )
-        state[f"{prefix}_last_update_time"] = current_time
 
 
 def on_include_cb_change():
@@ -893,26 +840,6 @@ def gen_base_lib(word_lib):
     return pd.DataFrame.from_records(data)
 
 
-@st.cache_data(
-    ttl=timedelta(seconds=TIME_LIMIT), max_entries=100, show_spinner="获取个人词库..."
-)
-def get_cached_my_word_lib():
-    # 返回单词列表
-    my_words = st.session_state.dbi.find_personal_dictionary()
-    data = []
-    for word in my_words:
-        w = word.replace("/", " or ")
-        info = st.session_state.mini_dict.get(w, {})
-        data.append(
-            {
-                "单词": w,
-                "CEFR最低分级": info.get("level", "") if info else "",
-                "翻译": info.get("translation", "") if info else "",
-            }
-        )
-    return pd.DataFrame.from_records(data)
-
-
 def get_my_word_lib():
     # 返回实时的个人词库
     my_words = st.session_state.dbi.find_personal_dictionary()
@@ -1081,12 +1008,12 @@ if menu and menu.endswith("闪卡记忆"):
 
     if add_btn:
         word = st.session_state.flashcard_words[st.session_state.flashcard_idx]
-        st.session_state.wld_pending_add_words.add(word)
+        st.session_state.dbi.add_words_to_personal_dictionary([word])
         st.toast(f"添加单词：{word} 到个人词库。")
 
     if del_btn:
         word = st.session_state.flashcard_words[st.session_state.flashcard_idx]
-        st.session_state.wld_pending_del_words.add(word)
+        st.session_state.dbi.delete_words_from_personal_dictionary([word])
         st.toast(f"从个人词库中删除单词：{word}。")
 
     if st.session_state.flashcard_idx != -1:
@@ -1188,12 +1115,12 @@ elif menu and menu.endswith("拼图游戏"):
 
     if add_btn:
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-        st.session_state.wld_pending_add_words.add(word)
+        st.session_state.dbi.add_words_to_personal_dictionary([word])
         st.toast(f"添加单词：{word} 到个人词库。")
 
     if del_btn:
         word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-        st.session_state.wld_pending_del_words.add(word)
+        st.session_state.dbi.delete_words_from_personal_dictionary([word])
         st.toast(f"从个人词库中删除单词：{word}。")
 
     if st.session_state.puzzle_idx != -1:
@@ -1297,14 +1224,14 @@ elif menu and menu.endswith("看图猜词"):
         tests = st.session_state.pic_tests
         idx = st.session_state.pic_idx
         word = tests[idx]["answer"]
-        st.session_state.wld_pending_add_words.add(word)
+        st.session_state.dbi.add_words_to_personal_dictionary([word])
         st.toast(f"添加单词：{word} 到个人词库。")
 
     if del_btn:
         tests = st.session_state.pic_tests
         idx = st.session_state.pic_idx
         word = tests[idx]["answer"]
-        st.session_state.wld_pending_del_words.add(word)
+        st.session_state.dbi.delete_words_from_personal_dictionary([word])
         st.toast(f"从个人词库中删除单词：{word}。")
 
 # endregion
@@ -1465,12 +1392,12 @@ elif menu and menu.endswith("词义测试"):
 
     if add_btn:
         word = st.session_state.words_for_test[st.session_state.word_test_idx]
-        st.session_state.wld_pending_add_words.add(word)
+        st.session_state.dbi.add_words_to_personal_dictionary([word])
         st.toast(f"添加单词：{word} 到个人词库。")
 
     if del_btn:
         word = st.session_state.words_for_test[st.session_state.word_test_idx]
-        st.session_state.wld_pending_del_words.add(word)
+        st.session_state.dbi.delete_words_from_personal_dictionary([word])
         st.toast(f"从个人词库中删除单词：{word}。")
 
 # endregion
@@ -1480,22 +1407,6 @@ elif menu and menu.endswith("词库管理"):
     # 基准词库不包含个人词库
     if "个人词库" in st.session_state.word_dict:
         st.session_state.word_dict.pop("个人词库")
-
-    # 在开始时初始化操作计数器和时间戳
-    if "operation_counter" not in st.session_state:
-        st.session_state.operation_counter = 0
-        st.session_state.last_operation_time = time.time()
-
-    # 检查操作计数器和时间戳
-    current_time = time.time()
-    disabled = False
-    if current_time - st.session_state.last_operation_time < TIME_LIMIT:  # 10分钟
-        if st.session_state.operation_counter >= OP_THRESHOLD:  # 阈值
-            disabled = True
-    else:
-        # 重置操作计数器和时间戳
-        st.session_state.operation_counter = 0
-        st.session_state.last_operation_time = current_time
 
     word_lib = st.sidebar.selectbox(
         "词库",
@@ -1510,21 +1421,16 @@ elif menu and menu.endswith("词库管理"):
         """✨ 词库分基础词库和个人词库两部分。基础词库包含常用单词，供所有用户使用。个人词库则是用户自定义的部分，用户可以根据自己的需求添加或删除单词，以便进行个性化的学习和复习。"""
     )
     status_elem = st.empty()
-    if disabled:
-        status_elem.warning(
-            f"🚫 您的操作过于频繁，请{TIME_LIMIT // 60}分钟后再试。例如，如果用户在 {TIME_LIMIT} 秒内反复大量增加和删除个人词库的单词，超过了系统设定的阈值（{OP_THRESHOLD}）。"
-        )
+
     lib_cols = st.columns(8)
 
     add_lib_btn = lib_cols[0].button(
         "添加[:heavy_plus_sign:]",
         key="add-lib-btn",
-        disabled=disabled,
         help="✨ 点击按钮，将'基础词库'中选定单词添加到个人词库。",
     )
     del_lib_btn = lib_cols[1].button(
         "删除[:heavy_minus_sign:]",
-        disabled=disabled,
         key="del-lib-btn",
         help="✨ 点击按钮，将'可删列表'中选定单词从'个人词库'中删除。",
     )
@@ -1538,7 +1444,7 @@ elif menu and menu.endswith("词库管理"):
     view_placeholder = content_cols[2].container()
 
     base_lib_df = gen_base_lib(word_lib)
-    lib_df = get_cached_my_word_lib()
+    lib_df = get_my_word_lib()
 
     view_selected_list = word_lib.split("-", 1)[1]
     base_placeholder.text(f"基础词库({view_selected_list})")
@@ -1573,9 +1479,8 @@ elif menu and menu.endswith("词库管理"):
                 word = base_lib_df.iloc[idx]["单词"]  # type: ignore
                 to_add.append(word)
                 st.session_state.operation_counter += 1
-                # st.session_state.lib_pending_add_words.add(word)
             st.session_state.dbi.add_words_to_personal_dictionary(to_add)
-            # logger.info(f"已添加到个人词库中：{to_add}。")
+            logger.info(f"已添加到个人词库中：{to_add}。")
 
     if del_lib_btn:
         if del_lib_btn and st.session_state.get("my_word_lib", {}).get(
@@ -1588,9 +1493,8 @@ elif menu and menu.endswith("词库管理"):
                 word = lib_df.iloc[idx]["单词"]  # type: ignore
                 to_del.append(word)
                 st.session_state.operation_counter += 1
-                # st.session_state.lib_pending_del_words.add(word)
             st.session_state.dbi.remove_words_from_personal_dictionary(to_del)
-            # logger.info(f"从个人词库中已经删除：{to_del}。")
+            logger.info(f"从个人词库中已经删除：{to_del}。")
 
     if view_lib_btn:
         df = get_my_word_lib()
@@ -1628,6 +1532,3 @@ elif menu and menu.endswith("词库管理"):
         )
 
 # endregion
-
-# 任何插件都会触发更新
-update_pending_words(st.session_state, "wld")

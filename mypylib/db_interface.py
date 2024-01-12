@@ -1,11 +1,12 @@
 import logging
 import random
 import string
+import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import List, Union
 
-from cachetools import TTLCache
+# from cachetools import TTLCache
 from faker import Faker
 from google.cloud import firestore
 from google.cloud.firestore import FieldFilter
@@ -26,11 +27,24 @@ PRICES = {
 }
 
 
+CACHE_TRIGGER_SIZE = 100
+MAX_TIME_INTERVAL = 10 * 60  # 10 分钟
+
+
 class DbInterface:
     def __init__(self, firestore_client):
         self.faker = Faker("zh_CN")
         self.db = firestore_client
-        self.cache = TTLCache(maxsize=1000, ttl=86400)  # 24 hours cache
+        # self.cache = TTLCache(maxsize=1000, ttl=86400)  # 24 hours cache
+        self.cache = {
+            "user_info": {},
+            "personal_vocabulary": {
+                "words": set(),
+                "last_commit_time": time.time(),
+                "to_add": [],
+                "to_delete": [],
+            },
+        }
 
     def cache_user_login_info(self, user, session_id):
         phone_number = user.phone_number
@@ -182,58 +196,110 @@ class DbInterface:
 
     # region 个人词库管理
 
+    def _commit_personal_vocabulary_to_db(self):
+        """
+        将缓存中的个人词库提交到数据库。
+        """
+        phone_number = self.cache["user_info"]["phone_number"]
+        # 获取用户文档的引用
+        user_doc_ref = self.db.collection("users").document(phone_number)
+        # 从数据库中读取个人词库
+        personal_vocabulary_in_db = user_doc_ref.get().to_dict()["personal_vocabulary"]
+        # 计算需要添加和删除的单词
+        words_to_add = list(
+            set(self.cache["personal_vocabulary"]["words"])
+            - set(personal_vocabulary_in_db)
+        )
+        words_to_delete = list(
+            set(personal_vocabulary_in_db)
+            - set(self.cache["personal_vocabulary"]["words"])
+        )
+        # 使用 arrayUnion 方法添加单词到数据库中的个人词库
+        if words_to_add:
+            user_doc_ref.update(
+                {"personal_vocabulary": firestore.ArrayUnion(words_to_add)}
+            )
+        # 使用 arrayRemove 方法从数据库中的个人词库中移除单词
+        if words_to_delete:
+            user_doc_ref.update(
+                {"personal_vocabulary": firestore.ArrayRemove(words_to_delete)}
+            )
+        # 更新最后提交时间
+        self.cache["personal_vocabulary"]["last_commit_time"] = time.time()
+        # 清理 to_add 和 to_delete 列表
+        self.cache["personal_vocabulary"]["to_add"] = []
+        self.cache["personal_vocabulary"]["to_delete"] = []
+
     def find_personal_dictionary(self):
+        # 如果缓存中存在个人词库，直接返回
+        if (
+            "personal_vocabulary" in self.cache
+            and self.cache["personal_vocabulary"]["words"]
+        ):
+            return list(self.cache["personal_vocabulary"]["words"])
+
         phone_number = self.cache["user_info"]["phone_number"]
         # 获取用户文档的引用
         user_doc_ref = self.db.collection("users").document(phone_number)
         user_doc = user_doc_ref.get()
         if user_doc.exists:
             user_data = user_doc.to_dict()
-            return user_data.get("personal_vocabulary", [])
+            # 从数据库中读取个人词库，并缓存
+            self.cache["personal_vocabulary"] = {
+                "words": set(user_data.get("personal_vocabulary", [])),
+                "last_commit_time": time.time(),
+                "to_add": [],
+                "to_delete": [],
+            }
         else:
-            return []
+            self.cache["personal_vocabulary"] = {
+                "words": set(),
+                "last_commit_time": time.time(),
+                "to_add": [],
+                "to_delete": [],
+            }
+
+        return list(self.cache["personal_vocabulary"]["words"])
 
     def add_words_to_personal_dictionary(self, word: Union[str, List[str]]):
         """
-        将单词添加到个人词典中。
-
-        参数：
-        word：要添加到个人词典的单词，可以是一个字符串或字符串列表。
-
-        示例：
-        db_interface.add_words_to_personal_dictionary("apple")
-        db_interface.add_words_to_personal_dictionary(["apple", "banana"])
+        将单词添加到缓存中的个人词库。
         """
-
-        phone_number = self.cache["user_info"]["phone_number"]
-        # 获取用户文档的引用
-        user_doc_ref = self.db.collection("users").document(phone_number)
-        # 如果 word 是一个列表，那么使用 arrayUnion 方法添加多个单词到个人词典
-        # 否则，添加一个单词
         if isinstance(word, list):
-            user_doc_ref.update({"personal_vocabulary": firestore.ArrayUnion(word)})
+            self.cache["personal_vocabulary"]["words"].update(word)
+            self.cache["personal_vocabulary"]["to_add"].extend(word)
         else:
-            user_doc_ref.update({"personal_vocabulary": firestore.ArrayUnion([word])})
+            self.cache["personal_vocabulary"]["words"].add(word)
+            self.cache["personal_vocabulary"]["to_add"].append(word)
+
+        if (
+            len(self.cache["personal_vocabulary"]["to_add"])
+            + len(self.cache["personal_vocabulary"]["to_delete"])
+            >= CACHE_TRIGGER_SIZE
+            or time.time() - self.cache["personal_vocabulary"]["last_commit_time"]
+            >= MAX_TIME_INTERVAL
+        ):
+            self._commit_personal_vocabulary_to_db()
 
     def remove_words_from_personal_dictionary(self, word: Union[str, List[str]]):
         """
-        从个人词典中移除单词或多个单词。
-
-        参数：
-        word：要移除的单词，可以是一个字符串或字符串列表。
-
-        返回：
-        无返回值。
+        从缓存中的个人词库中移除单词。
         """
-        phone_number = self.cache["user_info"]["phone_number"]
-        # 获取用户文档的引用
-        user_doc_ref = self.db.collection("users").document(phone_number)
-        # 如果 word 是一个列表，那么使用 arrayRemove 方法从个人词典中移除多个单词
-        # 否则，移除一个单词
         if isinstance(word, list):
-            user_doc_ref.update({"personal_vocabulary": firestore.ArrayRemove(word)})
+            self.cache["personal_vocabulary"]["words"].difference_update(word)
+            self.cache["personal_vocabulary"]["to_delete"].extend(word)
         else:
-            user_doc_ref.update({"personal_vocabulary": firestore.ArrayRemove([word])})
+            self.cache["personal_vocabulary"]["words"].discard(word)
+            self.cache["personal_vocabulary"]["to_delete"].append(word)
+
+        if (
+            len(self.cache["personal_vocabulary"]["to_add"])
+            + len(self.cache["personal_vocabulary"]["to_delete"])
+            >= CACHE_TRIGGER_SIZE
+            or time.time() - self.cache["personal_vocabulary"]["last_commit_time"]
+            >= MAX_TIME_INTERVAL
+        ):
+            self._commit_personal_vocabulary_to_db()
 
     # endregion
 

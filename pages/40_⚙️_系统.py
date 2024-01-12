@@ -679,7 +679,7 @@ if menu == "支付管理":
                     remark=remark,
                 )
                 st.session_state.dbi.add_payment(payment)
-                st.toast(f"成功登记，订单号:{order_id}", icon="🎉"
+                st.toast(f"成功登记，订单号:{order_id}", icon="🎉")
 
     with tabs[items.index("支付管理")]:
         st.subheader("查询参数")
