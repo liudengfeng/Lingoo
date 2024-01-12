@@ -852,7 +852,7 @@ def view_test_word(container):
     )
     # 保存用户答案
     st.session_state.user_answer[idx] = user_answer_idx
-    logger.info(f"用户答案：{st.session_state.user_answer}")
+    # logger.info(f"用户答案：{st.session_state.user_answer}")
 
 
 # endregion
