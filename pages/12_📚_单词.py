@@ -141,9 +141,11 @@ def get_mini_dict():
     return data
 
 
-def generate_page_words(word_lib_name, num_words, key):
+def generate_page_words(word_lib_name, num_words, key, exclude_slash=False):
     # 获取选中的单词列表
     words = st.session_state.word_dict[word_lib_name]
+    if exclude_slash:
+        words = [word for word in words if "/" not in word]
     n = min(num_words, len(words))
     # 随机选择单词
     st.session_state[key] = random.sample(words, n)
@@ -452,7 +454,7 @@ def prepare_puzzle():
 def view_puzzle_word():
     ws = st.session_state.puzzle_view_word
     n = len(ws)
-    logger.info(f"单词长度：{len(ws)} {ws}")
+    # logger.info(f"单词长度：{len(ws)} {ws}")
     cols = st.columns(36)
     button_placeholders = [cols[i].empty() for i in range(n)]
     for i in range(n):
@@ -1075,7 +1077,7 @@ elif menu and menu.endswith("拼图游戏"):
         key="puzzle-refresh",
         help="✨ 点击按钮，将从词库中抽取单词，开始或重新开始单词拼图游戏。",
         on_click=generate_page_words,
-        args=(word_lib, num_word, "puzzle_words"),
+        args=(word_lib, num_word, "puzzle_words", True),
     )
     prev_btn = puzzle_cols[1].button(
         "上一[:leftwards_arrow_with_hook:]",
@@ -1363,7 +1365,7 @@ elif menu and menu.endswith("词义测试"):
         reset_test_words()
         st.session_state.user_answer = [None] * test_num
         st.session_state.word_tests = [None] * test_num
-        generate_page_words(word_lib, test_num, "words_for_test")
+        generate_page_words(word_lib, test_num, "words_for_test", True)
         st.rerun()
         # words = st.session_state.words_for_test
         # for word in words:
