@@ -1479,7 +1479,6 @@ elif menu and menu.endswith("词库管理"):
             for idx in deleted_rows:
                 word = base_lib_df.iloc[idx]["单词"]  # type: ignore
                 to_add.append(word)
-                st.session_state.operation_counter += 1
             st.session_state.dbi.add_words_to_personal_dictionary(to_add)
             logger.info(f"已添加到个人词库中：{to_add}。")
 
@@ -1493,7 +1492,6 @@ elif menu and menu.endswith("词库管理"):
             for idx in my_word_deleted_rows:
                 word = lib_df.iloc[idx]["单词"]  # type: ignore
                 to_del.append(word)
-                st.session_state.operation_counter += 1
             st.session_state.dbi.remove_words_from_personal_dictionary(to_del)
             logger.info(f"从个人词库中已经删除：{to_del}。")
 
