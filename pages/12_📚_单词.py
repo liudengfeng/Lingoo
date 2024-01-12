@@ -58,7 +58,24 @@ menu_emoji = [
     "🗂️",
 ]
 menu_opts = [e + " " + n for e, n in zip(menu_emoji, menu_names)]
-menu = st.sidebar.selectbox("菜单", menu_opts, help="在这里选择你想要进行的操作。")
+# 初始化 session_state
+if "current_page" not in st.session_state:
+    st.session_state["current_page"] = menu_opts[0]
+
+
+def on_menu_change():
+    st.session_state["current_page"] = st.session_state.word_dict_menu
+
+
+menu = st.sidebar.selectbox(
+    "菜单",
+    menu_opts,
+    key="word_dict_menu",
+    on_change=on_menu_change,
+    help="在这里选择你想要进行的操作。",
+)
+# 测试
+st.write(f"当前页面：{st.session_state.current_page}")
 st.sidebar.divider()
 
 # endregion
