@@ -282,3 +282,5 @@ if st.session_state.dbi.cache.get("is_logged_in", False):
 
 # 测试链接
 st.link_button(":bust_in_silhouette: 常见问题", "帮助#常见问题")
+
+st.markdown("[💁‍♀️ 常见问题](帮助#常见问题)", unsafe_allow_html=True)
