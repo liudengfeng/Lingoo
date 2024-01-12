@@ -231,8 +231,6 @@ class DbInterface:
         # 清理 to_add 和 to_delete 列表
         self.cache["personal_vocabulary"]["to_add"] = []
         self.cache["personal_vocabulary"]["to_delete"] = []
-        # TODO:注释掉下面这行代码
-        logger.info(f"个人词库已提交到数据库。{words_to_add} {words_to_delete}")
 
     def find_personal_dictionary(self):
         # 如果缓存中存在个人词库，直接返回
