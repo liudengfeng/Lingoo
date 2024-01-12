@@ -450,6 +450,7 @@ def prepare_puzzle():
 def view_puzzle_word():
     ws = st.session_state.puzzle_view_word
     n = len(ws)
+    logger.info(f"单词长度：{len(ws)}")
     cols = st.columns(36)
     button_placeholders = [cols[i].empty() for i in range(n)]
     for i in range(n):
