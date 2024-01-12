@@ -105,8 +105,8 @@ def count_non_none(lst):
 def is_answer_correct(user_answer, standard_answer):
     # 如果用户没有选择答案，直接返回 False
     if user_answer is None:
-        return False    
-    
+        return False
+
     # 创建一个字典，将选项序号映射到字母
     answer_dict = {0: "A", 1: "B", 2: "C", 3: "D"}
 
@@ -1435,6 +1435,7 @@ elif menu and menu.endswith("词义理解"):
     if (
         st.session_state.word_test_idx != -1
         and st.session_state.word_tests[st.session_state.word_test_idx]
+        and not sumbit_test_btn
     ):
         view_test_word(container)
 
