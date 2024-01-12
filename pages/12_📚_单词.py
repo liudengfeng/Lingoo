@@ -1399,8 +1399,6 @@ elif menu and menu.endswith("词义理解"):
             st.warning("您尚未完成测试。")
         container.empty()
         check_word_test_answer(container)
-    else:
-        view_test_word(container)
 
     if refresh_btn:
         reset_test_words()
@@ -1417,6 +1415,9 @@ elif menu and menu.endswith("词义理解"):
             # 确保不超限
             sleep_time = max(6 - elapsed_time, 0)  # 如果运行时间小于6秒，等待剩余的时间
             time.sleep(sleep_time)
+
+    if len(st.session_state.word_tests):
+        view_test_word(container)
 
     if add_btn:
         word = st.session_state.words_for_test[st.session_state.word_test_idx]
