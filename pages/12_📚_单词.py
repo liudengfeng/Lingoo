@@ -1406,7 +1406,7 @@ elif menu and menu.endswith("词义理解"):
         words = st.session_state.words_for_test
         for word in words:
             start_time = time.time()  # 记录开始时间
-            with st.spinner(f"AI🤖正在生成单词{word}理解测试题，请稍候..."):
+            with st.spinner(f"AI🤖正在生成单词{word}的理解测试题，请稍等..."):
                 st.session_state.word_tests[word] = generate_word_test(
                     st.session_state["gemini-pro-model"], word, level
                 )
