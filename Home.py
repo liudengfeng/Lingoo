@@ -279,3 +279,6 @@ if st.session_state.dbi.cache.get("is_logged_in", False):
         sidebar_status.success("已退出登录")
         time.sleep(1)
         st.rerun()
+
+# 测试链接
+st.link_button(":bust_in_silhouette: 常见问题", "帮助#常见问题")
