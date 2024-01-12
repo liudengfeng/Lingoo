@@ -74,8 +74,7 @@ menu = st.sidebar.selectbox(
     on_change=on_menu_change,
     help="在这里选择你想要进行的操作。",
 )
-# 测试
-st.write(f"当前页面：{st.session_state.current_page}")
+
 st.sidebar.divider()
 
 # endregion
