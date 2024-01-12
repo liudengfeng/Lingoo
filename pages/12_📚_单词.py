@@ -99,7 +99,7 @@ if "lib_last_update_time" not in st.session_state:
 
 
 def count_non_none(lst):
-    return len(list(filter(None, lst)))
+    return len(list(filter(lambda x: x is not None, lst)))
 
 
 def is_answer_correct(user_answer, standard_answer):
