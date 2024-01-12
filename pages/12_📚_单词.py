@@ -1409,8 +1409,11 @@ elif menu and menu.endswith("词义理解"):
         #     sleep_time = max(6 - elapsed_time, 0)  # 如果运行时间小于6秒，等待剩余的时间
         #     time.sleep(sleep_time)
 
-    if st.session_state.word_test_idx != -1 and st.session_state.word_tests.get(
-        st.session_state.words_for_test.get(st.session_state.word_test_idx)
+    if (
+        st.session_state.word_test_idx != -1
+        and st.session_state.word_tests[
+            st.session_state.words_for_test[st.session_state.word_test_idx]
+        ]
     ):
         view_test_word(container)
 
