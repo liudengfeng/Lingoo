@@ -1539,12 +1539,20 @@ elif menu and menu.endswith("词库管理"):
         )
         view_placeholder.dataframe(df, height=500)
 
-    with st.expander(":bulb: 如何给个人词库中添加一个或多个单词", expanded=False):
-        vfp = VIDEO_DIR / "个人词库逐词添加.mp4"
+    with st.expander(":bulb: 如何给个人词库添加一个或多个单词？", expanded=False):
+        vfp = VIDEO_DIR / "单词" / "个人词库逐词添加.mp4"
+        st.video(str(vfp))
+
+    with st.expander(":bulb: 如何把一个基础词库整体添加到个人词库？", expanded=False):
+        vfp = VIDEO_DIR / "单词" / "基础词库整体加入个人词库.mp4"
+        st.video(str(vfp))
+
+    with st.expander(":bulb: 如何从个人词库中删除一个或多个单词？", expanded=False):
+        vfp = VIDEO_DIR / "单词" / "个人词库逐词删除.mp4"
         st.video(str(vfp))
     
-    with st.expander(":bulb: 如何从个人词库中删除一个或多个单词", expanded=False):
-        vfp = VIDEO_DIR / "个人词库逐个删除.mp4"
+    with st.expander(":bulb: 如何把个人词库中的单词全部删除？", expanded=False):
+        vfp = VIDEO_DIR / "单词" / "删除个人词库.mp4"
         st.video(str(vfp))
 
     with st.expander(":bulb: 小提示", expanded=False):
