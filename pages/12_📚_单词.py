@@ -1444,8 +1444,8 @@ elif menu and menu.endswith("词义理解"):
         if count_non_none(st.session_state.user_answer) != count_non_none(
             st.session_state.word_tests
         ):
-            container.write(st.session_state.user_answer)
-            container.write(st.session_state.word_tests)
+            container.write(count_non_none(st.session_state.user_answer))
+            container.write(count_non_none(st.session_state.word_tests))
             container.warning("您尚未完成测试。")
         check_word_test_answer(container)
 
