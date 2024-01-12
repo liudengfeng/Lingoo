@@ -809,7 +809,7 @@ def on_word_test_radio_change(word):
     st.session_state.user_answer[word] = current
 
 
-def view_test_word():
+def view_test_word(container):
     idx = st.session_state.word_test_idx
     word = st.session_state.words_for_test[idx]
     test = st.session_state.word_tests[word]
@@ -1382,7 +1382,6 @@ elif menu and menu.endswith("词义理解"):
                 st.session_state.word_tests[word] = generate_word_test(
                     st.session_state["gemini-pro-model"], word, level
                 )
-        view_test_word(container)
 
     if next_test_btn:
         idx = st.session_state.word_test_idx
@@ -1392,12 +1391,13 @@ elif menu and menu.endswith("词义理解"):
                 st.session_state.word_tests[word] = generate_word_test(
                     st.session_state["gemini-pro-model"], word, level
                 )
-        view_test_word(container)
 
     if sumbit_test_btn:
         if len(st.session_state.user_answer) != len(st.session_state.word_tests):
             st.warning("您尚未完成测试。")
         check_word_test_answer()
+    else:
+        view_test_word(container)
 
     if refresh_btn:
         reset_test_words()
