@@ -838,8 +838,7 @@ def view_test_word(container):
     test = st.session_state.word_tests[idx]
     question = test["问题"]
     options = test["选项"]
-    user_answer = st.session_state.user_answer[idx]
-    user_answer_idx = options.index(user_answer) if user_answer else 0
+    user_answer_idx = st.session_state.user_answer[idx]
 
     container.markdown(question)
     container.radio(
