@@ -966,7 +966,7 @@ if menu and menu.endswith("闪卡记忆"):
     btn_cols = st.columns(8)
 
     refresh_btn = btn_cols[0].button(
-        "重置[:arrows_counterclockwise:]",
+        "刷新[:arrows_counterclockwise:]",
         key="flashcard-refresh",
         on_click=generate_page_words,
         args=(word_lib, num_word, "flashcard_words"),
@@ -1103,7 +1103,7 @@ elif menu and menu.endswith("拼图游戏"):
 
     puzzle_cols = st.columns(8)
     refresh_btn = puzzle_cols[0].button(
-        "重置[:arrows_counterclockwise:]",
+        "刷新[:arrows_counterclockwise:]",
         key="puzzle-refresh",
         help="✨ 点击按钮，将从词库中抽取单词，开始或重新开始单词拼图游戏。",
         on_click=generate_page_words,
@@ -1200,7 +1200,7 @@ elif menu and menu.endswith("看图猜词"):
 
     # 创建按钮
     refresh_btn = pic_word_test_btn_cols[0].button(
-        "重置[:arrows_counterclockwise:]",
+        "刷新[:arrows_counterclockwise:]",
         key="refresh-pic",
         help="✨ 点击按钮，将从题库中抽取测试题，开始或重新开始看图测词游戏。",
         on_click=pic_word_test_reset,
@@ -1328,7 +1328,7 @@ elif menu and menu.endswith("词义理解"):
     test_btns = st.columns(8)
 
     refresh_btn = test_btns[0].button(
-        "重置[:arrows_counterclockwise:]",
+        "刷新[:arrows_counterclockwise:]",
         key="test-word-refresh",
         help="✨ 点击按钮，将从词库中抽取单词，开始或重新开始单词理解测试。",
         on_click=generate_page_words,
