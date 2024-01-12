@@ -818,8 +818,8 @@ def view_test_word():
     user_answer = st.session_state.user_answer.get(word, options[0])
     user_answer_idx = options.index(user_answer)
 
-    st.markdown(question)
-    st.radio(
+    container.markdown(question)
+    container.radio(
         "选项",
         options,
         index=user_answer_idx,
@@ -1372,6 +1372,7 @@ elif menu and menu.endswith("词义理解"):
     )
 
     st.divider()
+    container = st.container()
 
     if prev_test_btn:
         idx = st.session_state.word_test_idx
@@ -1381,7 +1382,7 @@ elif menu and menu.endswith("词义理解"):
                 st.session_state.word_tests[word] = generate_word_test(
                     st.session_state["gemini-pro-model"], word, level
                 )
-        view_test_word()
+        view_test_word(container)
 
     if next_test_btn:
         idx = st.session_state.word_test_idx
@@ -1391,7 +1392,7 @@ elif menu and menu.endswith("词义理解"):
                 st.session_state.word_tests[word] = generate_word_test(
                     st.session_state["gemini-pro-model"], word, level
                 )
-        view_test_word()
+        view_test_word(container)
 
     if sumbit_test_btn:
         if len(st.session_state.user_answer) != len(st.session_state.word_tests):
