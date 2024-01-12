@@ -804,8 +804,12 @@ def check_word_test_answer():
     st.divider()
 
 
+def on_word_test_radio_change(word):
+    current = st.session_state["test_options"]
+    st.session_state.user_answer[word] = current
+
+
 def view_test_word():
-    n = len(st.session_state.words_for_test)
     idx = st.session_state.word_test_idx
     word = st.session_state.words_for_test[idx]
     test = st.session_state.word_tests[word]
@@ -815,22 +819,19 @@ def view_test_word():
     user_answer_idx = options.index(user_answer)
 
     st.markdown(question)
-    answer = st.radio(
+    st.radio(
         "选项",
         options,
-        # horizontal=True,
         index=user_answer_idx,
         label_visibility="collapsed",
         # key=f"test_options_{idx}",
-        # on_change=on_radio_change,
-        # args=(
-        #     word,
-        #     idx,
-        # ),
+        on_change=on_word_test_radio_change,
+        args=(word,),
         key="test_options",
     )
     # 保存用户答案
-    st.session_state.user_answer[word] = answer
+    st.session_state.user_answer[word] = user_answer_idx
+    logger.info(f"用户答案：{st.session_state.user_answer}")
 
 
 # endregion
