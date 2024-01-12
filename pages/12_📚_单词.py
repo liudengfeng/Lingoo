@@ -128,17 +128,18 @@ def load_word_dict():
         return json.load(f)
 
 
-@st.cache_resource(show_spinner="提取简版词典...", ttl=60 * 60 * 24)  # 缓存有效期为24小时
-def get_mini_dict():
+@st.cache_resource(show_spinner="提取简版词典单词信息...", ttl=60 * 60 * 24)  # 缓存有效期为24小时
+def get_mini_dict_doc(word):
     db = st.session_state.dbi.db
     collection = db.collection("mini_dict")
-
+    w = word.replace("/", " or ")
     # 从 Firestore 获取数据
-    docs = collection.get()
+    doc = collection.document(w).get()
 
-    data = {doc.id: doc.to_dict() for doc in docs}
-
-    return data
+    if doc.exists:
+        return doc.to_dict()
+    else:
+        return {}
 
 
 def generate_page_words(word_lib_name, num_words, key, exclude_slash=False):
@@ -171,8 +172,8 @@ def get_word_info(word):
 
 @st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词图片网址...")
 def select_word_image_urls(word: str):
-    # 从 session_state 中的 mini_dict 查找 image_urls
-    urls = st.session_state.mini_dict.get(word, {}).get("image_urls", [])
+    # 查找 image_urls
+    urls = get_mini_dict_doc(word).get("image_urls", [])
     model = load_vertex_model("gemini-pro-vision")
     if len(urls) == 0:
         images = []
@@ -355,9 +356,6 @@ def view_flash_word(container):
         None
     """
 
-    # if st.session_state.flashcard_idx == -1:
-    #     return
-    # st.write(st.session_state.flashcard_idx)
     word = st.session_state.flashcard_words[st.session_state.flashcard_idx]
     if word not in st.session_state.flashcard_word_info:
         st.session_state.flashcard_word_info[word] = get_word_info(word)
@@ -372,15 +370,14 @@ def view_flash_word(container):
     if st.session_state.flashcard_display_state == "中文":
         v_word = ""
 
-    s_word = word.replace("/", " or ")
     if st.session_state.flashcard_display_state != "英文":
         # t_word = word_info["zh-CN"].get("translation", "")
-        t_word = st.session_state.mini_dict[s_word].get("translation", "")
+        t_word = get_mini_dict_doc(word).get("translation", "")
 
     md = template.format(
         word=v_word,
         # cefr=word_info.get("level", ""),
-        cefr=st.session_state.mini_dict[s_word].get("level", ""),
+        cefr=get_mini_dict_doc(word).get("level", ""),
         us_written=word_info.get("us_written", ""),
         uk_written=word_info.get("uk_written", ""),
         translation=t_word,
@@ -389,7 +386,7 @@ def view_flash_word(container):
     container.divider()
     container.markdown(md)
 
-    display_word_images(s_word, container)
+    display_word_images(word, container)
     view_pos(container, word_info, word)
 
 
@@ -471,9 +468,7 @@ def view_puzzle_word():
 
 def display_puzzle_translation():
     word = st.session_state.puzzle_words[st.session_state.puzzle_idx]
-    t_word = st.session_state.mini_dict[word.replace("/", " or ")].get(
-        "translation", ""
-    )
+    t_word = get_mini_dict_doc(word).get("translation", "")
     msg = f"中译文：{t_word}"
     st.markdown(msg)
 
@@ -830,11 +825,10 @@ def gen_base_lib(word_lib):
     words = st.session_state.word_dict[word_lib]
     data = []
     for word in words:
-        w = word.replace("/", " or ")
-        info = st.session_state.mini_dict.get(w, {})
+        info = get_mini_dict_doc(word)
         data.append(
             {
-                "单词": w,
+                "单词": word,
                 "CEFR最低分级": info.get("level", "") if info else "",
                 "翻译": info.get("translation", "") if info else "",
             }
@@ -847,11 +841,10 @@ def get_my_word_lib():
     my_words = st.session_state.dbi.find_personal_dictionary()
     data = []
     for word in my_words:
-        w = word.replace("/", " or ")
-        info = st.session_state.mini_dict.get(w, {})
+        info = get_mini_dict_doc(word)
         data.append(
             {
-                "单词": w,
+                "单词": word,
                 "CEFR最低分级": info.get("level", "") if info else "",
                 "翻译": info.get("translation", "") if info else "",
             }
@@ -862,9 +855,6 @@ def get_my_word_lib():
 # endregion
 
 # region 加载数据
-
-if "mini_dict" not in st.session_state:
-    st.session_state["mini_dict"] = get_mini_dict()
 
 if "word_dict" not in st.session_state:
     # 注意要使用副本
@@ -1368,18 +1358,6 @@ elif menu and menu.endswith("词意测试"):
         st.session_state.word_tests = [None] * test_num
         generate_page_words(word_lib, test_num, "words_for_test", True)
         st.rerun()
-        # words = st.session_state.words_for_test
-        # for word in words:
-        #     start_time = time.time()  # 记录开始时间
-        #     with st.spinner(f"AI🤖正在生成单词{word}的理解测试题，请稍等..."):
-        #         st.session_state.word_tests[word] = generate_word_test(
-        #             st.session_state["gemini-pro-model"], word, level
-        #         )
-        #     end_time = time.time()  # 记录结束时间
-        #     elapsed_time = end_time - start_time  # 计算运行时间
-        #     # 确保不超限
-        #     sleep_time = max(6 - elapsed_time, 0)  # 如果运行时间小于6秒，等待剩余的时间
-        #     time.sleep(sleep_time)
 
     if (
         st.session_state.word_test_idx != -1
@@ -1411,9 +1389,7 @@ elif menu and menu.endswith("词意测试"):
 # region 个人词库
 elif menu and menu.endswith("词库管理"):
     # 基准词库不包含个人词库
-    if "个人词库" in st.session_state.word_dict:
-        st.session_state.word_dict.pop("个人词库")
-
+    add_personal_dictionary(False)
     word_lib = st.sidebar.selectbox(
         "词库",
         sorted(list(st.session_state.word_dict.keys())),
