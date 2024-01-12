@@ -98,6 +98,28 @@ if "lib_last_update_time" not in st.session_state:
 # region 通用函数
 
 
+def count_non_none(lst):
+    return len(list(filter(None, lst)))
+
+
+def is_answer_correct(user_answer, standard_answer):
+    # 如果用户没有选择答案，直接返回 False
+    if user_answer is None:
+        return False    
+    
+    # 创建一个字典，将选项序号映射到字母
+    answer_dict = {0: "A", 1: "B", 2: "C", 3: "D"}
+
+    # 获取用户的答案对应的字母
+    user_answer_letter = answer_dict.get(user_answer, "")
+
+    # 移除标准答案中的非字母字符
+    standard_answer = "".join(filter(str.isalpha, standard_answer))
+
+    # 比较用户的答案和标准答案
+    return user_answer_letter == standard_answer
+
+
 @st.cache_data(show_spinner="提取词典...", ttl=60 * 60 * 24)  # 缓存有效期为24小时
 def load_word_dict():
     with open(
@@ -739,18 +761,18 @@ if "word_test_idx" not in st.session_state:
 # 用于测试的单词
 if "words_for_test" not in st.session_state:
     st.session_state["words_for_test"] = []
-# 单词理解测试题，以单词为键，值为测试题、选项、答案、解释
+# 单词理解测试题列表，按自然序号顺序存储测试题、选项、答案、解释字典
 if "word_tests" not in st.session_state:
-    st.session_state["word_tests"] = {}
+    st.session_state["word_tests"] = []
 # 用户答案
 if "user_answer" not in st.session_state:
-    st.session_state["user_answer"] = {}
+    st.session_state["user_answer"] = []
 
 
 def reset_test_words():
     st.session_state.word_test_idx = -1
-    st.session_state.word_tests = {}
-    st.session_state.user_answer = {}
+    st.session_state.word_tests = []
+    st.session_state.user_answer = []
 
 
 def on_prev_test_btn_click():
@@ -762,20 +784,21 @@ def on_next_test_btn_click():
 
 
 def check_word_test_answer(container):
-    if len(st.session_state.user_answer) == 0:
+    if count_non_none(st.session_state.user_answer) == 0:
         container.warning("您尚未答题。")
         container.stop()
 
     score = 0
-    n = len(st.session_state.word_tests)
-    for word, test in st.session_state.word_tests.items():
+    n = count_non_none(st.session_state.word_tests)
+    for idx, test in enumerate(st.session_state.word_tests):
         question = test["问题"]
         options = test["选项"]
         answer = test["答案"]
         explanation = test["解释"]
 
-        user_answer = st.session_state.user_answer.get(word)
-        user_answer_idx = options.index(user_answer) if user_answer else None
+        word = st.session_state.words_for_test[idx]
+        # 存储的是 None 或者 0、1、2、3
+        user_answer_idx = st.session_state.user_answer[idx]
         container.divider()
         container.markdown(question)
         container.radio(
@@ -788,12 +811,12 @@ def check_word_test_answer(container):
             key=f"test-options-{word}",
         )
         msg = ""
-        # 用户答案是选项，而提供的标准答案是A、B、C、D
-        if user_answer.startswith(answer):
+        # 用户答案是选项序号，而提供的标准答案是A、B、C、D
+        if is_answer_correct(user_answer_idx, answer):
             score += 1
-            msg = f"正确答案：{answer} :white_check_mark: 用户：{user_answer}"
+            msg = f"正确答案：{answer} :white_check_mark: 用户：{user_answer_idx}"
         else:
-            msg = f"正确答案：{answer} :x: 用户：{user_answer}"
+            msg = f"正确答案：{answer} :x: 用户：{user_answer_idx}"
         container.markdown(msg)
         container.markdown(f"解释：{explanation}")
     percentage = score / n * 100
@@ -804,19 +827,19 @@ def check_word_test_answer(container):
     # container.divider()
 
 
-def on_word_test_radio_change(word):
+def on_word_test_radio_change(idx, options):
     current = st.session_state["test_options"]
-    st.session_state.user_answer[word] = current
+    # 转换为索引
+    st.session_state.user_answer[idx] = options.index(current)
 
 
 def view_test_word(container):
     idx = st.session_state.word_test_idx
-    word = st.session_state.words_for_test[idx]
-    test = st.session_state.word_tests[word]
+    test = st.session_state.word_tests[idx]
     question = test["问题"]
     options = test["选项"]
-    user_answer = st.session_state.user_answer.get(word, options[0])
-    user_answer_idx = options.index(user_answer)
+    user_answer = st.session_state.user_answer[idx]
+    user_answer_idx = options.index(user_answer) if user_answer else 0
 
     container.markdown(question)
     container.radio(
@@ -825,11 +848,11 @@ def view_test_word(container):
         index=user_answer_idx,
         label_visibility="collapsed",
         on_change=on_word_test_radio_change,
-        args=(word,),
+        args=(idx, options),
         key="test_options",
     )
     # 保存用户答案
-    st.session_state.user_answer[word] = user_answer
+    st.session_state.user_answer[idx] = user_answer_idx
     logger.info(f"用户答案：{st.session_state.user_answer}")
 
 
@@ -1376,7 +1399,7 @@ elif menu and menu.endswith("词义理解"):
         idx = st.session_state.word_test_idx
         if idx != -1:
             word = st.session_state.words_for_test[idx]
-            if word not in st.session_state.word_tests:
+            if not st.session_state.word_tests[idx]:
                 with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
                     st.session_state.word_tests[word] = generate_word_test(
                         st.session_state["gemini-pro-model"], word, level
@@ -1385,7 +1408,7 @@ elif menu and menu.endswith("词义理解"):
     if next_test_btn:
         idx = st.session_state.word_test_idx
         word = st.session_state.words_for_test[idx]
-        if word not in st.session_state.word_tests:
+        if not st.session_state.word_tests[idx]:
             with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
                 st.session_state.word_tests[word] = generate_word_test(
                     st.session_state["gemini-pro-model"], word, level
@@ -1393,6 +1416,8 @@ elif menu and menu.endswith("词义理解"):
 
     if refresh_btn:
         reset_test_words()
+        st.session_state.user_answer = [None] * test_num
+        st.session_state.word_tests = [None] * test_num
         generate_page_words(word_lib, test_num, "words_for_test")
         st.rerun()
         # words = st.session_state.words_for_test
@@ -1410,14 +1435,14 @@ elif menu and menu.endswith("词义理解"):
 
     if (
         st.session_state.word_test_idx != -1
-        and st.session_state.word_tests[
-            st.session_state.words_for_test[st.session_state.word_test_idx]
-        ]
+        and st.session_state.word_tests[st.session_state.word_test_idx]
     ):
         view_test_word(container)
 
     if sumbit_test_btn:
-        if len(st.session_state.user_answer) != len(st.session_state.word_tests):
+        if count_non_none(st.session_state.user_answer) != count_non_none(
+            st.session_state.word_tests
+        ):
             st.warning("您尚未完成测试。")
         container.empty()
         check_word_test_answer(container)
