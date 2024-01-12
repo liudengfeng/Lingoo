@@ -126,6 +126,8 @@ def load_word_dict():
         return json.load(f)
 
 
+# TODO:观察更改为资源
+# 读取需要耗用 20000次操作数
 @st.cache_data(show_spinner="提取简版词典...", ttl=60 * 60 * 24)  # 缓存有效期为24小时
 def get_mini_dict():
     db = st.session_state.dbi.db
