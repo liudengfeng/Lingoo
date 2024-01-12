@@ -34,6 +34,10 @@ with st.expander(":bulb: 忘记密码怎么办？", expanded=False):
     # st.video(str(vfp))
     pass
 
+with st.expander(":bulb: 如何调整布局让屏幕显示更美观？", expanded=False):
+    fp = VIDEO_DIR / "调整布局.mp4"
+    st.video(str(fp))
+
 # endregion
 
 # region 使用指南

@@ -447,14 +447,11 @@ def prepare_puzzle():
     random.shuffle(ws)
     st.session_state.puzzle_view_word = ws
     st.session_state.clicked_character = [False] * len(ws)
-    # st.session_state.puzzle_answer_value = ""
-    # st.session_state.puzzle_answer = ""
 
 
 def view_puzzle_word():
     ws = st.session_state.puzzle_view_word
     n = len(ws)
-    # logger.info(f"单词长度：{len(ws)} {ws}")
     cols = st.columns(36)
     button_placeholders = [cols[i].empty() for i in range(n)]
     for i in range(n):
