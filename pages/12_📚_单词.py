@@ -1400,8 +1400,8 @@ elif menu and menu.endswith("词义理解"):
         if idx != -1:
             word = st.session_state.words_for_test[idx]
             if not st.session_state.word_tests[idx]:
-                with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
-                    st.session_state.word_tests[word] = generate_word_test(
+                with st.spinner(f"AI🤖正在生成单词（{word}）理解测试题，请稍候..."):
+                    st.session_state.word_tests[idx] = generate_word_test(
                         st.session_state["gemini-pro-model"], word, level
                     )
 
@@ -1409,8 +1409,8 @@ elif menu and menu.endswith("词义理解"):
         idx = st.session_state.word_test_idx
         word = st.session_state.words_for_test[idx]
         if not st.session_state.word_tests[idx]:
-            with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
-                st.session_state.word_tests[word] = generate_word_test(
+            with st.spinner(f"AI🤖正在生成单词（{word}）理解测试题，请稍候..."):
+                st.session_state.word_tests[idx] = generate_word_test(
                     st.session_state["gemini-pro-model"], word, level
                 )
 
