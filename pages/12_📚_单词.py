@@ -1381,7 +1381,6 @@ elif menu and menu.endswith("词义理解"):
                     st.session_state.word_tests[word] = generate_word_test(
                         st.session_state["gemini-pro-model"], word, level
                     )
-        # view_test_word(container)
 
     if next_test_btn:
         idx = st.session_state.word_test_idx
@@ -1391,7 +1390,6 @@ elif menu and menu.endswith("词义理解"):
                 st.session_state.word_tests[word] = generate_word_test(
                     st.session_state["gemini-pro-model"], word, level
                 )
-        # view_test_word(container)
 
     if refresh_btn:
         reset_test_words()
