@@ -1395,7 +1395,7 @@ elif menu and menu.endswith("词义理解"):
     if refresh_btn:
         reset_test_words()
         generate_page_words(word_lib, test_num, "words_for_test")
-        # st.rerun()
+        st.rerun()
         # words = st.session_state.words_for_test
         # for word in words:
         #     start_time = time.time()  # 记录开始时间
