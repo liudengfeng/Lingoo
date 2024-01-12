@@ -815,7 +815,8 @@ def view_test_word():
     test = st.session_state.word_tests[word]
     question = test["问题"]
     options = test["选项"]
-    user_answer_idx = st.session_state.user_answer.get(word, 0)
+    user_answer = st.session_state.user_answer.get(word, options[0])
+    user_answer_idx = options.index(user_answer)
 
     st.markdown(question)
     st.radio(
@@ -823,13 +824,12 @@ def view_test_word():
         options,
         index=user_answer_idx,
         label_visibility="collapsed",
-        # key=f"test_options_{idx}",
         on_change=on_word_test_radio_change,
         args=(word,),
         key="test_options",
     )
     # 保存用户答案
-    st.session_state.user_answer[word] = user_answer_idx
+    st.session_state.user_answer[word] = user_answer
     logger.info(f"用户答案：{st.session_state.user_answer}")
 
 
