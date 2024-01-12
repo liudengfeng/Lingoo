@@ -49,7 +49,7 @@ sidebar_status = st.sidebar.empty()
 # 在页面加载时检查是否有需要强制退出的登录会话
 check_and_force_logout(sidebar_status)
 
-menu_names = ["闪卡记忆", "拼图游戏", "看图猜词", "词义理解", "词库管理"]
+menu_names = ["闪卡记忆", "拼图游戏", "看图猜词", "词义测试", "词库管理"]
 menu_emoji = [
     "📚",
     "🧩",
@@ -1293,9 +1293,9 @@ elif menu and menu.endswith("看图猜词"):
 
 # endregion
 
-# region 词义理解
+# region 词义测试
 
-elif menu and menu.endswith("词义理解"):
+elif menu and menu.endswith("词义测试"):
     # region 边栏
     level = st.sidebar.selectbox(
         "CEFR分级",
