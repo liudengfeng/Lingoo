@@ -761,10 +761,10 @@ def on_next_test_btn_click():
     st.session_state["word_test_idx"] += 1
 
 
-def check_word_test_answer():
+def check_word_test_answer(container):
     if len(st.session_state.user_answer) == 0:
-        st.warning("您尚未答题。")
-        st.stop()
+        container.warning("您尚未答题。")
+        container.stop()
 
     score = 0
     n = len(st.session_state.word_tests)
@@ -776,9 +776,9 @@ def check_word_test_answer():
 
         user_answer = st.session_state.user_answer.get(word, "")
         user_answer_idx = options.index(user_answer) if user_answer else None
-        st.divider()
-        st.markdown(question)
-        st.radio(
+        container.divider()
+        container.markdown(question)
+        container.radio(
             "选项",
             options,
             # horizontal=True,
@@ -794,14 +794,14 @@ def check_word_test_answer():
             msg = f"正确答案：{answer} :white_check_mark:"
         else:
             msg = f"正确答案：{answer} :x:"
-        st.markdown(msg)
-        st.markdown(f"解释：{explanation}")
+        container.markdown(msg)
+        container.markdown(f"解释：{explanation}")
     percentage = score / n * 100
     if percentage >= 75:
-        st.balloons()
-    st.divider()
-    st.markdown(f":red[得分：{percentage:.0f}%]")
-    st.divider()
+        container.balloons()
+    container.divider()
+    container.markdown(f":red[得分：{percentage:.0f}%]")
+    # container.divider()
 
 
 def on_word_test_radio_change(word):
@@ -1397,7 +1397,8 @@ elif menu and menu.endswith("词义理解"):
     if sumbit_test_btn:
         if len(st.session_state.user_answer) != len(st.session_state.word_tests):
             st.warning("您尚未完成测试。")
-        check_word_test_answer()
+        container.empty()
+        check_word_test_answer(container)
     else:
         view_test_word(container)
 
