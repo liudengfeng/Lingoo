@@ -814,9 +814,9 @@ def check_word_test_answer(container):
         # 用户答案是选项序号，而提供的标准答案是A、B、C、D
         if is_answer_correct(user_answer_idx, answer):
             score += 1
-            msg = f"正确答案：{answer} :white_check_mark: 用户：{user_answer_idx}"
+            msg = f"正确答案：{answer} :white_check_mark:"
         else:
-            msg = f"正确答案：{answer} :x: 用户：{user_answer_idx}"
+            msg = f"正确答案：{answer} :x:"
         container.markdown(msg)
         container.markdown(f"解释：{explanation}")
     percentage = score / n * 100
