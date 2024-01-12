@@ -815,8 +815,7 @@ def view_test_word():
     test = st.session_state.word_tests[word]
     question = test["问题"]
     options = test["选项"]
-    user_answer = st.session_state.user_answer.get(word, options[0])
-    user_answer_idx = options.index(user_answer)
+    user_answer_idx = st.session_state.user_answer.get(word, 0)
 
     st.markdown(question)
     st.radio(
