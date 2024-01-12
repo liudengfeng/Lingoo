@@ -774,7 +774,7 @@ def check_word_test_answer(container):
         answer = test["答案"]
         explanation = test["解释"]
 
-        user_answer = st.session_state.user_answer.get(word, "")
+        user_answer = st.session_state.user_answer.get(word)
         user_answer_idx = options.index(user_answer) if user_answer else None
         container.divider()
         container.markdown(question)
@@ -791,9 +791,9 @@ def check_word_test_answer(container):
         # 用户答案是选项，而提供的标准答案是A、B、C、D
         if user_answer.startswith(answer):
             score += 1
-            msg = f"正确答案：{answer} :white_check_mark:"
+            msg = f"正确答案：{answer} :white_check_mark: 用户：{user_answer}"
         else:
-            msg = f"正确答案：{answer} :x:"
+            msg = f"正确答案：{answer} :x: 用户：{user_answer}"
         container.markdown(msg)
         container.markdown(f"解释：{explanation}")
     percentage = score / n * 100
@@ -1331,8 +1331,6 @@ elif menu and menu.endswith("词义理解"):
         "刷新[:arrows_counterclockwise:]",
         key="test-word-refresh",
         help="✨ 点击按钮，将从词库中抽取单词，开始或重新开始单词理解测试。",
-        # on_click=generate_page_words,
-        # args=(word_lib, test_num, "words_for_test"),
     )
     prev_test_btn = test_btns[1].button(
         "上一[:leftwards_arrow_with_hook:]",
@@ -1374,50 +1372,53 @@ elif menu and menu.endswith("词义理解"):
     st.divider()
     container = st.container()
 
-    # if prev_test_btn:
-    #     idx = st.session_state.word_test_idx
-    #     word = st.session_state.words_for_test[idx]
-    #     if word not in st.session_state.word_tests:
-    #         with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
-    #             st.session_state.word_tests[word] = generate_word_test(
-    #                 st.session_state["gemini-pro-model"], word, level
-    #             )
-    #     view_test_word(container)
+    if prev_test_btn:
+        idx = st.session_state.word_test_idx
+        word = st.session_state.words_for_test[idx]
+        if word not in st.session_state.word_tests:
+            with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
+                st.session_state.word_tests[word] = generate_word_test(
+                    st.session_state["gemini-pro-model"], word, level
+                )
+        # view_test_word(container)
 
-    # if next_test_btn:
-    #     idx = st.session_state.word_test_idx
-    #     word = st.session_state.words_for_test[idx]
-    #     if word not in st.session_state.word_tests:
-    #         with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
-    #             st.session_state.word_tests[word] = generate_word_test(
-    #                 st.session_state["gemini-pro-model"], word, level
-    #             )
-    #     view_test_word(container)
+    if next_test_btn:
+        idx = st.session_state.word_test_idx
+        word = st.session_state.words_for_test[idx]
+        if word not in st.session_state.word_tests:
+            with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
+                st.session_state.word_tests[word] = generate_word_test(
+                    st.session_state["gemini-pro-model"], word, level
+                )
+        # view_test_word(container)
+
+    if refresh_btn:
+        reset_test_words()
+        generate_page_words(word_lib, test_num, "words_for_test")
+        # st.rerun()
+        # words = st.session_state.words_for_test
+        # for word in words:
+        #     start_time = time.time()  # 记录开始时间
+        #     with st.spinner(f"AI🤖正在生成单词{word}的理解测试题，请稍等..."):
+        #         st.session_state.word_tests[word] = generate_word_test(
+        #             st.session_state["gemini-pro-model"], word, level
+        #         )
+        #     end_time = time.time()  # 记录结束时间
+        #     elapsed_time = end_time - start_time  # 计算运行时间
+        #     # 确保不超限
+        #     sleep_time = max(6 - elapsed_time, 0)  # 如果运行时间小于6秒，等待剩余的时间
+        #     time.sleep(sleep_time)
+
+    if st.session_state.word_test_idx != -1 and st.session_state.word_tests.get(
+        st.session_state.words_for_test.get(st.session_state.word_test_idx)
+    ):
+        view_test_word(container)
 
     if sumbit_test_btn:
         if len(st.session_state.user_answer) != len(st.session_state.word_tests):
             st.warning("您尚未完成测试。")
         container.empty()
         check_word_test_answer(container)
-
-    if refresh_btn:
-        reset_test_words()
-        generate_page_words(word_lib, test_num, "words_for_test")
-        words = st.session_state.words_for_test
-        for word in words:
-            start_time = time.time()  # 记录开始时间
-            with st.spinner(f"AI🤖正在生成单词{word}的理解测试题，请稍等..."):
-                st.session_state.word_tests[word] = generate_word_test(
-                    st.session_state["gemini-pro-model"], word, level
-                )
-            end_time = time.time()  # 记录结束时间
-            elapsed_time = end_time - start_time  # 计算运行时间
-            # 确保不超限
-            sleep_time = max(6 - elapsed_time, 0)  # 如果运行时间小于6秒，等待剩余的时间
-            time.sleep(sleep_time)
-
-    if len(st.session_state.word_tests):
-        view_test_word(container)
 
     if add_btn:
         word = st.session_state.words_for_test[st.session_state.word_test_idx]
