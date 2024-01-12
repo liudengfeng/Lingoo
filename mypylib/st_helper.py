@@ -40,7 +40,7 @@ def check_and_force_logout(status):
     Returns:
         None
     """
-    if "session_id" in st.session_state.dbi.cache["user_info"]:
+    if "session_id" in st.session_state.dbi.cache.get("user_info", {}):
         dbi = st.session_state.dbi
         # 存在会话id，说明用户已经登录
         phone_number = dbi.cache["user_info"]["phone_number"]
