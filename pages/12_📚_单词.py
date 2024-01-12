@@ -1342,9 +1342,9 @@ elif menu and menu.endswith("词义理解"):
         if len(st.session_state.words_for_test) != 0
         else 1,
         st.empty(),
-        message=st.session_state.words_for_test[st.session_state.word_test_idx]
-        if st.session_state.word_test_idx != -1
-        else "",
+        # message=st.session_state.words_for_test[st.session_state.word_test_idx]
+        # if st.session_state.word_test_idx != -1
+        # else "",
     )
 
     test_btns = st.columns(8)
@@ -1399,7 +1399,7 @@ elif menu and menu.endswith("词义理解"):
         if idx != -1:
             word = st.session_state.words_for_test[idx]
             if not st.session_state.word_tests[idx]:
-                with st.spinner(f"AI🤖正在生成单词（{word}）理解测试题，请稍候..."):
+                with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
                     st.session_state.word_tests[idx] = generate_word_test(
                         st.session_state["gemini-pro-model"], word, level
                     )
@@ -1408,7 +1408,7 @@ elif menu and menu.endswith("词义理解"):
         idx = st.session_state.word_test_idx
         word = st.session_state.words_for_test[idx]
         if not st.session_state.word_tests[idx]:
-            with st.spinner(f"AI🤖正在生成单词（{word}）理解测试题，请稍候..."):
+            with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
                 st.session_state.word_tests[idx] = generate_word_test(
                     st.session_state["gemini-pro-model"], word, level
                 )
@@ -1444,8 +1444,6 @@ elif menu and menu.endswith("词义理解"):
         if count_non_none(st.session_state.user_answer) != count_non_none(
             st.session_state.word_tests
         ):
-            container.write(count_non_none(st.session_state.user_answer))
-            container.write(count_non_none(st.session_state.word_tests))
             container.warning("您尚未完成测试。")
         check_word_test_answer(container)
 
