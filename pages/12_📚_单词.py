@@ -1550,7 +1550,7 @@ elif menu and menu.endswith("词库管理"):
     with st.expander(":bulb: 如何从个人词库中删除一个或多个单词？", expanded=False):
         vfp = VIDEO_DIR / "单词" / "个人词库逐词删除.mp4"
         st.video(str(vfp))
-    
+
     with st.expander(":bulb: 如何把个人词库中的单词全部删除？", expanded=False):
         vfp = VIDEO_DIR / "单词" / "删除个人词库.mp4"
         st.video(str(vfp))
