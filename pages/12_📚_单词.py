@@ -1374,12 +1374,13 @@ elif menu and menu.endswith("词义理解"):
 
     if prev_test_btn:
         idx = st.session_state.word_test_idx
-        word = st.session_state.words_for_test[idx]
-        if word not in st.session_state.word_tests:
-            with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
-                st.session_state.word_tests[word] = generate_word_test(
-                    st.session_state["gemini-pro-model"], word, level
-                )
+        if idx != -1:
+            word = st.session_state.words_for_test[idx]
+            if word not in st.session_state.word_tests:
+                with st.spinner("AI🤖正在生成单词理解测试题，请稍候..."):
+                    st.session_state.word_tests[word] = generate_word_test(
+                        st.session_state["gemini-pro-model"], word, level
+                    )
         # view_test_word(container)
 
     if next_test_btn:
