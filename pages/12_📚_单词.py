@@ -1440,11 +1440,13 @@ elif menu and menu.endswith("词义理解"):
         view_test_word(container)
 
     if sumbit_test_btn:
+        container.empty()
         if count_non_none(st.session_state.user_answer) != count_non_none(
             st.session_state.word_tests
         ):
-            st.warning("您尚未完成测试。")
-        container.empty()
+            container.write(st.session_state.user_answer)
+            container.write(st.session_state.word_tests)
+            container.warning("您尚未完成测试。")
         check_word_test_answer(container)
 
     if add_btn:
