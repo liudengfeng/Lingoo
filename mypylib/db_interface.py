@@ -613,6 +613,30 @@ class DbInterface:
         # 如果文档存在，将其转换为字典，否则返回一个空字典
         return doc.to_dict() if doc.exists else {}
 
+    def word_has_image_urls(self, word: str) -> bool:
+        # 获取文档
+        doc = self.db.collection("mini_dict").document(word).get()
+
+        # 如果文档不存在，返回 False
+        if not doc.exists:
+            return False
+
+        # 将 DocumentSnapshot 对象转换为字典
+        doc_dict = doc.to_dict()
+
+        # 检查 image_urls 字段是否存在且不为空
+        return "image_urls" in doc_dict and bool(doc_dict["image_urls"])
+
+    def update_image_urls(self, word: str, urls: list):
+        # 将单词中的 "/" 字符替换为 " or "
+        word = word.replace("/", " or ")
+
+        # 更新或添加 image_urls 字段
+        self.db.collection("mini_dict").document(word).set(
+            {"image_urls": urls}, merge=True
+        )
+
+    # TODO：废弃 image_indices
     def get_image_indices(self, doc_name):
         # 获取 mini_dict 集合中的文档引用
         doc_ref = self.db.collection("mini_dict").document(doc_name)
@@ -626,15 +650,6 @@ class DbInterface:
             return doc.to_dict()["image_indices"]
         else:
             return []
-
-    def update_image_urls(self, word: str, urls: list):
-        # 将单词中的 "/" 字符替换为 " or "
-        word = word.replace("/", " or ")
-
-        # 更新或添加 image_urls 字段
-        self.db.collection("mini_dict").document(word).set(
-            {"image_urls": urls}, merge=True
-        )
 
     def update_image_indices(self, word: str, indices: list):
         # 将单词中的 "/" 字符替换为 " or "

@@ -1,23 +1,30 @@
 import logging
-from datetime import datetime
 import time
-from azure.storage.blob import BlobServiceClient
+from datetime import datetime, timedelta
+
 import pytz
 import streamlit as st
 import vertexai
+from azure.storage.blob import BlobServiceClient
 from google.cloud import firestore, translate
 from google.oauth2.service_account import Credentials
-from vertexai.preview.generative_models import GenerativeModel
+from vertexai.preview.generative_models import GenerativeModel, Image
 
 from .db_interface import DbInterface
+from .google_ai import select_best_images_for_word
 from .google_cloud_configuration import (
     LOCATION,
     PROJECT_ID,
     get_google_service_account_info,
     google_configure,
 )
+from .word_utils import get_word_image_urls, load_image_bytes_from_url
+
+logger = logging.getLogger("streamlit")
+
 
 TOEKN_HELP_INFO = "✨ 对于 Gemini 模型，一个令牌约相当于 4 个字符。100 个词元约为 60-80 个英语单词。"
+
 
 def setup_logger(logger, level="INFO"):
     # 设置日志的时间戳为 Asia/Shanghai 时区
@@ -28,6 +35,9 @@ def setup_logger(logger, level="INFO"):
     for handler in logger.handlers:
         handler.setFormatter(formatter)
         handler.setLevel(logging.getLevelName(level))
+
+
+setup_logger(logger)
 
 
 def check_and_force_logout(status):
@@ -213,3 +223,78 @@ def view_stream_response(responses, placeholder):
         # Add a blinking cursor to simulate typing
         placeholder.markdown(full_response + "▌")
     placeholder.markdown(full_response)
+
+
+# region 单词
+
+
+@st.cache_resource(show_spinner="提取简版词典单词信息...", ttl=60 * 60 * 24)  # 缓存有效期为24小时
+def get_mini_dict_doc(word):
+    db = st.session_state.dbi.db
+    collection = db.collection("mini_dict")
+    w = word.replace("/", " or ")
+    # 从 Firestore 获取数据
+    doc = collection.document(w).get()
+
+    if doc.exists:
+        return doc.to_dict()
+    else:
+        return {}
+
+
+@st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词图片网址...")
+def select_word_image_urls(word: str):
+    """
+    选择单词的图像URL列表。
+
+    参数：
+    - word：要选择图像URL的单词（字符串类型）
+
+    返回值：
+    - urls：选择的图像URL列表（列表类型）
+    """
+
+    # 查找 image_urls
+    urls = get_mini_dict_doc(word).get("image_urls", [])
+    model = load_vertex_model("gemini-pro-vision")
+    if len(urls) == 0:
+        images = []
+        full_urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
+        for i, url in enumerate(full_urls):
+            try:
+                image_bytes = load_image_bytes_from_url(url)
+                images.append(Image.from_bytes(image_bytes))
+            except Exception as e:
+                logger.error(f"加载单词{word}第{i+1}张图片时出错:{str(e)}")
+                continue
+
+        for _ in range(3):
+            # 生成 image_indices
+            image_indices = select_best_images_for_word(model, word, images)
+
+            # 检查 indices 是否为列表
+            if not isinstance(image_indices, list):
+                msg = f"{word} 序号必须是一个列表，但是得到的类型是 {type(image_indices)}"
+                logger.error(msg)
+                continue  # 如果检查不合格，跳过当前循环，重新获取
+
+            # 检查列表中的每个元素是否都是整数且小于 full_urls 的长度
+            if not all(
+                isinstance(i, int) and i < len(full_urls) for i in image_indices
+            ):
+                msg = f"{word} 序号列表中的每个元素都必须是整数且小于 full_urls 的长度，但是得到的类型是 {[type(i) for i in image_indices]} 或序号超过了 full_urls 的长度"
+                logger.error(msg)
+                continue  # 如果检查不合格，跳过当前循环，重新获取
+
+            break  # 如果所有检查都合格，跳出循环
+
+        else:  # 如果循环结束后还没有跳出，说明三次尝试都失败了
+            raise TypeError("三次尝试获取图像序号都失败了")
+
+        urls = [full_urls[i] for i in image_indices]
+        st.session_state.dbi.update_image_urls(word, urls)
+
+    return urls
+
+
+# endregion

@@ -224,9 +224,9 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown(
         """
-## `LinGoo`[英语速学]
+## `Gaietu`[英语速学]
 
-**LinGoo**的功能包括：
+**Gaietu**的功能包括：
 
 **:books: 记忆单词**：通过AI智能推荐和游戏化学习，让你轻松记住单词。
 
@@ -268,9 +268,9 @@ with log_cols[1]:
 
 st.markdown(
     """\
-欢迎来到`LinGoo` [英语速学] ，你的英语学习伙伴！
+欢迎来到`Gaietu` [英语速学] ，你的英语学习伙伴！
 
-**LinGoo**是一款功能强大的英语学习app，它使用最新AI技术和微软发音评估技术，可以帮助你快速提升英语水平。
+**Gaietu**是一款功能强大的英语学习app，它使用最新AI技术和微软发音评估技术，可以帮助你快速提升英语水平。
 
 LinGoo，让你学好英语，so easy！
 """,

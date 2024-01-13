@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import random
 import re
 import time
@@ -11,25 +10,24 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 import PIL.Image
-from vertexai.preview.generative_models import Image
 
 from mypylib.constants import CEFR_LEVEL_MAPS
-from mypylib.google_ai import generate_word_test, select_best_images_for_word
+from mypylib.google_ai import generate_word_test
 from mypylib.st_helper import (
     TOEKN_HELP_INFO,
     check_access,
     check_and_force_logout,
     configure_google_apis,
     format_token_count,
+    get_mini_dict_doc,
     load_vertex_model,
+    select_word_image_urls,
     setup_logger,
     update_and_display_progress,
 )
 from mypylib.word_utils import (
     audio_autoplay_elem,
     get_or_create_and_return_audio_data,
-    get_word_image_urls,
-    load_image_bytes_from_url,
     remove_trailing_punctuation,
 )
 
@@ -128,20 +126,6 @@ def load_word_dict():
         return json.load(f)
 
 
-@st.cache_resource(show_spinner="提取简版词典单词信息...", ttl=60 * 60 * 24)  # 缓存有效期为24小时
-def get_mini_dict_doc(word):
-    db = st.session_state.dbi.db
-    collection = db.collection("mini_dict")
-    w = word.replace("/", " or ")
-    # 从 Firestore 获取数据
-    doc = collection.document(w).get()
-
-    if doc.exists:
-        return doc.to_dict()
-    else:
-        return {}
-
-
 def generate_page_words(word_lib_name, num_words, key, exclude_slash=False):
     # 获取选中的单词列表
     words = st.session_state.word_dict[word_lib_name]
@@ -168,44 +152,6 @@ def add_personal_dictionary(include):
 @st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词信息...")
 def get_word_info(word):
     return st.session_state.dbi.find_word(word)
-
-
-@st.cache_data(ttl=timedelta(hours=24), max_entries=10000, show_spinner="获取单词图片网址...")
-def select_word_image_urls(word: str):
-    # 查找 image_urls
-    urls = get_mini_dict_doc(word).get("image_urls", [])
-    model = load_vertex_model("gemini-pro-vision")
-    if len(urls) == 0:
-        images = []
-        full_urls = get_word_image_urls(word, st.secrets["SERPER_KEY"])
-        for i, url in enumerate(full_urls):
-            try:
-                image_bytes = load_image_bytes_from_url(url)
-                images.append(Image.from_bytes(image_bytes))
-            except Exception as e:
-                logger.error(f"加载单词{word}第{i+1}张图片时出错:{str(e)}")
-                continue
-        try:
-            # 生成 image_indices
-            image_indices = select_best_images_for_word(model, word, images)
-        except:
-            image_indices = list(range(len(images)))[:4]
-
-        # 检查 indices 是否为列表
-        if not isinstance(image_indices, list):
-            msg = f"{word} 序号必须是一个列表，但是得到的类型是 {type(image_indices)}"
-            logger.error(msg)
-            raise TypeError(msg)
-        # 检查列表中的每个元素是否都是整数
-        if not all(isinstance(i, int) for i in image_indices):
-            msg = f"{word} 序号列表中的每个元素都必须是整数，但是得到的类型是 {[type(image_indices[i] for i in image_indices)]}"
-            logger.error(msg)
-            raise TypeError(msg)
-
-        urls = [full_urls[i] for i in image_indices]
-        st.session_state.dbi.update_image_urls(word, urls)
-
-    return urls
 
 
 def word_lib_format_func(word_lib_name):

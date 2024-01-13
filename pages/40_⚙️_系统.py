@@ -29,6 +29,7 @@ from mypylib.st_helper import (
     get_blob_service_client,
     google_translate,
     load_vertex_model,
+    select_word_image_urls,
     setup_logger,
     update_and_display_progress,
 )
@@ -475,7 +476,7 @@ def save_dataframe_changes_to_database(current_df):
 # region 单词图片辅助函数
 
 
-@st.spinner("使用 Gemini 挑选图片...")
+@st.spinner("使用 Gemini 准备单词关联照片...")
 def fetch_and_update_word_image_indices(word):
     container_name = "word-images"
     # connect_str = st.secrets["Microsoft"]["AZURE_STORAGE_CONNECTION_STRING"]
@@ -1008,8 +1009,7 @@ elif menu == "处理反馈":
 
 
 elif menu == "词典管理":
-    # dict_items = ["词典管理", "编辑微型词典", "下载图片", "挑选图片"]
-    dict_items = ["词典管理", "下载图片", "挑选图片"]
+    dict_items = ["词典管理", "下载图片", "单词关联照片"]
     dict_tabs = st.tabs(dict_items)
 
     MINI_DICT_COLUMN_CONFIG = {
@@ -1071,7 +1071,7 @@ elif menu == "词典管理":
     # region 下载图片
 
     with dict_tabs[dict_items.index("下载图片")]:
-        st.subheader("下载图片", divider="rainbow", anchor=False)
+        st.subheader("废弃：下载图片", divider="rainbow", anchor=False)
         st.text("使用 serper Google api 下载单词图片到 Azure Blob Storage")
         # 创建一个按钮，当用户点击这个按钮时，执行 process_images 函数
         if st.button("开始下载", key="process-images-btn", help="✨ 下载单词图片"):
@@ -1081,26 +1081,31 @@ elif menu == "词典管理":
 
     # region 单词图片
 
-    with dict_tabs[dict_items.index("挑选图片")]:
-        st.subheader("挑选图片", divider="rainbow", anchor=False)
+    with dict_tabs[dict_items.index("单词关联照片")]:
+        include = st.sidebar.checkbox("是否包含短语", key="include", value=True)
+        st.subheader("准备单词关联照片", divider="rainbow", anchor=False)
         st.text("使用 gemini 多模态检验图片是否能形象解释单词的含义")
         progress_pic_bar = st.progress(0)
+        wp = (
+            CURRENT_CWD / "resource" / "dictionary" / "word_lists_by_edition_grade.json"
+        )
         if st.button(
             "执行", key="pick-image-btn", help="✨ 使用 gemini 多模态检验图片是否能形象解释单词的含义"
         ):
-            mini_dict_dataframe = get_mini_dict_dataframe()
-            words = mini_dict_dataframe["word"].tolist()
+            words = get_unique_words(wp, include)
+            n = len(words)
             # 对列表进行随机洗牌
             random.shuffle(words)
             # to_do = st.session_state.dbi.find_docs_without_image_indices(words)
             # st.write(f"待处理的文档数量：{len(to_do)}")
             for i, word in enumerate(words):
                 start_time = time.time()  # 记录开始时间
-                update_and_display_progress(i + 1, len(words), progress_pic_bar, word)
-                if st.session_state.dbi.word_has_image_indices(word):
-                    logger.info(f"✅ 单词：{word} 已经有图片索引，跳过")
+                q = word.replace("/", " or ")
+                update_and_display_progress(i + 1, n, progress_pic_bar, word)
+                if st.session_state.dbi.word_has_image_urls(q):
+                    logger.info(f"✅ 单词：{word} 已经有图片Urls，跳过")
                     continue
-                fetch_and_update_word_image_indices(word)
+                select_word_image_urls(q)
                 end_time = time.time()  # 记录结束时间
                 elapsed_time = end_time - start_time  # 计算运行时间
                 # 确保不超限
